@@ -1,0 +1,228 @@
+package com.duc.objectlanguage.ui.collection
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import com.duc.objectlanguage.data.local.TokenManager
+import com.duc.objectlanguage.data.model.Collection
+import com.duc.objectlanguage.data.model.CollectionDetail
+import com.duc.objectlanguage.data.repository.CollectionRepository
+import kotlinx.coroutines.launch
+
+/**
+ * ViewModel for collection list and detail screens
+ * Manages collections CRUD and filtering
+ */
+class CollectionViewModel(application: Application) : AndroidViewModel(application) {
+    
+    private val tokenManager = TokenManager(application)
+    private val repo = CollectionRepository(tokenManager)
+    
+    // Collections list
+    private val _collections = MutableLiveData<List<Collection>>()
+    val collections: LiveData<List<Collection>> = _collections
+    
+    // Selected collection detail
+    private val _collectionDetail = MutableLiveData<CollectionDetail?>()
+    val collectionDetail: LiveData<CollectionDetail?> = _collectionDetail
+    
+    // Loading states
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+    
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> = _error
+    
+    // Success messages
+    private val _successMessage = MutableLiveData<String?>()
+    val successMessage: LiveData<String?> = _successMessage
+    
+    // Filter state
+    private val _filterQuery = MutableLiveData<String>("")
+    val filterQuery: LiveData<String> = _filterQuery
+    
+    private val _filteredCollections = MutableLiveData<List<Collection>>()
+    val filteredCollections: LiveData<List<Collection>> = _filteredCollections
+    
+    init {
+        loadCollections()
+    }
+    
+    /**
+     * Load all collections
+     */
+    fun loadCollections() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repo.getCollections()
+            
+            result.fold(
+                onSuccess = { collections ->
+                    _collections.value = collections
+                    applyFilter()
+                    _error.value = null
+                },
+                onFailure = { e ->
+                    _error.value = "Failed to load collections: ${e.message}"
+                }
+            )
+            
+            _isLoading.value = false
+        }
+    }
+    
+    /**
+     * Load collection detail by ID
+     */
+    fun loadCollectionDetail(collectionId: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repo.getCollectionDetail(collectionId)
+            
+            result.fold(
+                onSuccess = { detail ->
+                    _collectionDetail.value = detail
+                    _error.value = null
+                },
+                onFailure = { e ->
+                    _error.value = "Failed to load collection: ${e.message}"
+                }
+            )
+            
+            _isLoading.value = false
+        }
+    }
+    
+    /**
+     * Create new collection
+     */
+    fun createCollection(name: String, isPublic: Boolean) {
+        if (name.isBlank()) {
+            _error.value = "Collection name cannot be empty"
+            return
+        }
+        
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repo.createCollection(name, isPublic)
+            
+            result.fold(
+                onSuccess = {
+                    _successMessage.value = "Collection '$name' created!"
+                    loadCollections()
+                },
+                onFailure = { e ->
+                    _error.value = "Failed to create collection: ${e.message}"
+                }
+            )
+            
+            _isLoading.value = false
+        }
+    }
+    
+    /**
+     * Delete collection
+     */
+    fun deleteCollection(collectionId: Int, collectionName: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repo.deleteCollection(collectionId)
+            
+            result.fold(
+                onSuccess = {
+                    _successMessage.value = "Collection '$collectionName' deleted"
+                    loadCollections()
+                },
+                onFailure = { e ->
+                    _error.value = "Failed to delete collection: ${e.message}"
+                }
+            )
+            
+            _isLoading.value = false
+        }
+    }
+    
+    /**
+     * Add item to collection
+     */
+    fun addToCollection(collectionId: Int, translationId: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repo.addToCollection(collectionId, translationId)
+            
+            result.fold(
+                onSuccess = {
+                    _successMessage.value = "Added to collection"
+                    loadCollectionDetail(collectionId)
+                },
+                onFailure = { e ->
+                    _error.value = "Failed to add item: ${e.message}"
+                }
+            )
+            
+            _isLoading.value = false
+        }
+    }
+    
+    /**
+     * Remove item from collection
+     */
+    fun removeFromCollection(collectionId: Int, itemId: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repo.removeFromCollection(collectionId, itemId)
+            
+            result.fold(
+                onSuccess = {
+                    _successMessage.value = "Removed from collection"
+                    loadCollectionDetail(collectionId)
+                },
+                onFailure = { e ->
+                    _error.value = "Failed to remove item: ${e.message}"
+                }
+            )
+            
+            _isLoading.value = false
+        }
+    }
+    
+    /**
+     * Update filter query
+     */
+    fun setFilterQuery(query: String) {
+        _filterQuery.value = query
+        applyFilter()
+    }
+    
+    /**
+     * Apply filter to collections
+     */
+    private fun applyFilter() {
+        val query = _filterQuery.value?.lowercase() ?: ""
+        val all = _collections.value ?: emptyList()
+        
+        if (query.isEmpty()) {
+            _filteredCollections.value = all
+        } else {
+            _filteredCollections.value = all.filter { collection ->
+                collection.name.lowercase().contains(query)
+            }
+        }
+    }
+    
+    /**
+     * Clear error message
+     */
+    fun clearError() {
+        _error.value = null
+    }
+    
+    /**
+     * Clear success message
+     */
+    fun clearSuccessMessage() {
+        _successMessage.value = null
+    }
+}

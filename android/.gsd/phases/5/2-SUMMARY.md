@@ -1,0 +1,1 @@
+> Execute 2-PLAN.md: Done. Verified all core App components are well integrated into the navigation graph. The only `TODO` block left is an expected fallback marker for "ML Kit Object Detection" inside `ScanViewModel`, matching Phase 2 fallback logic. End-to-end routing is solid.

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/dashboardFragment"
+        android:icon="@android:drawable/ic_menu_today"
+        android:title="Trang chủ" />
+
+    <item
+        android:id="@+id/scanFragment"
+        android:icon="@android:drawable/ic_menu_camera"
+        android:title="Quét" />
+
+    <item
+        android:id="@+id/reviewFragment"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="Ôn tập" />
+
+    <item
+        android:id="@+id/historyFragment"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="Lịch sử" />
+
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:title="Tài khoản" />
+
+</menu>

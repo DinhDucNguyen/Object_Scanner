@@ -1,0 +1,86 @@
+package com.duc.objectlanguage.data.repository
+
+import com.duc.objectlanguage.data.api.RetrofitInstance
+import com.duc.objectlanguage.data.local.TokenManager
+import com.duc.objectlanguage.data.model.*
+import com.duc.objectlanguage.data.model.Collection
+
+/**
+ * Repository for collection operations with Result wrapper
+ * Requires TokenManager for authentication
+ */
+class CollectionRepository(private val tokenManager: TokenManager) {
+    
+    private val api get() = RetrofitInstance.collectionApi
+    
+    
+    /**
+     * Get all user collections
+     */
+    suspend fun getCollections(): Result<List<Collection>> = try {
+        val collections = api.getCollections()
+        Result.success(collections)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+    
+    /**
+     * Get collection detail with items
+     */
+    suspend fun getCollectionDetail(collectionId: Int): Result<CollectionDetail> = try {
+        val detail = api.getCollectionDetail(collectionId)
+        Result.success(detail)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+    
+    /**
+     * Create new collection
+     */
+    suspend fun createCollection(name: String, isPublic: Boolean): Result<Collection> = try {
+        val collection = api.createCollection(CreateCollectionRequest(name, isPublic))
+        Result.success(collection)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+    
+    /**
+     * Delete collection
+     */
+    suspend fun deleteCollection(collectionId: Int): Result<Unit> = try {
+        api.deleteCollection(collectionId)
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+    
+    /**
+     * Add item to collection
+     */
+    suspend fun addToCollection(collectionId: Int, translationId: Int): Result<Unit> = try {
+        api.addToCollection(collectionId, AddToCollectionRequest(translationId))
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+    
+    /**
+     * Remove item from collection
+     */
+    suspend fun removeFromCollection(collectionId: Int, itemId: Int): Result<Unit> = try {
+        api.removeFromCollection(collectionId, itemId)
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+    
+    /**
+     * Get collection analytics insights
+     */
+    suspend fun getCollectionInsights(collectionId: Int): Result<CollectionInsights> = try {
+        val insights = api.getCollectionInsights(collectionId)
+        Result.success(insights)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+}

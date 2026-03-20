@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Cho phép HTTP cleartext traffic với mọi địa chỉ IP nội bộ (192.168.x.x, 10.x.x.x, v.v.)
+    khi kết nối WiFi thay đổi, địa chỉ IP server cũng thay đổi theo.
+    Dùng base-config để không cần liệt kê từng IP cụ thể.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

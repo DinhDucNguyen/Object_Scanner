@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.duc.objectlanguage.ui.auth.LoginFragment"
+        android:label="Đăng nhập">
+        <action
+            android:id="@+id/action_login_to_register"
+            app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_login_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.duc.objectlanguage.ui.auth.RegisterFragment"
+        android:label="Đăng ký">
+        <action
+            android:id="@+id/action_register_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.duc.objectlanguage.ui.dashboard.DashboardFragment"
+        android:label="Tổng quan" />
+
+    <fragment
+        android:id="@+id/scanFragment"
+        android:name="com.duc.objectlanguage.ui.scan.ScanFragment"
+        android:label="Quét vật thể" />
+
+    <fragment
+        android:id="@+id/reviewFragment"
+        android:name="com.duc.objectlanguage.ui.review.ReviewFragment"
+        android:label="Ôn tập" />
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.duc.objectlanguage.ui.history.HistoryFragment"
+        android:label="Lịch sử" />
+
+    <!-- Wave 1: Multi-Modal Review Modes -->
+    <fragment
+        android:id="@+id/flashcardFragment"
+        android:name="com.duc.objectlanguage.ui.review.FlashcardFragment"
+        android:label="Flashcard Review" />
+
+    <fragment
+        android:id="@+id/quizFragment"
+        android:name="com.duc.objectlanguage.ui.review.QuizFragment"
+        android:label="Quiz Mode" />
+
+    <fragment
+        android:id="@+id/typingTestFragment"
+        android:name="com.duc.objectlanguage.ui.review.TypingTestFragment"
+        android:label="Typing Test" />
+
+    <fragment
+        android:id="@+id/listeningTestFragment"
+        android:name="com.duc.objectlanguage.ui.review.ListeningTestFragment"
+        android:label="Listening Test" />
+
+    <fragment
+        android:id="@+id/imageMatchingFragment"
+        android:name="com.duc.objectlanguage.ui.review.ImageMatchingFragment"
+        android:label="Image Matching" />
+
+    <!-- Wave 2: Pronunciation Practice -->
+    <fragment
+        android:id="@+id/pronunciationFragment"
+        android:name="com.duc.objectlanguage.ui.review.PronunciationFragment"
+        android:label="Pronunciation Practice" />
+
+    <!-- Wave 3: Visual Analytics -->
+    <fragment
+        android:id="@+id/analyticsFragment"
+        android:name="com.duc.objectlanguage.ui.analytics.AnalyticsFragment"
+        android:label="Analytics Dashboard" />
+
+    <!-- Wave 4: Collections & Insights -->
+    <fragment
+        android:id="@+id/collectionListFragment"
+        android:name="com.duc.objectlanguage.ui.collection.CollectionListFragment"
+        android:label="Collections">
+        <action
+            android:id="@+id/action_collectionList_to_collectionDetail"
+            app:destination="@id/collectionListFragment" />
+        <action
+            android:id="@+id/action_collectionList_to_collectionInsights"
+            app:destination="@id/collectionInsightsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/collectionInsightsFragment"
+        android:name="com.duc.objectlanguage.ui.collection.CollectionInsightsFragment"
+        android:label="Collection Insights">
+        <argument
+            android:name="collectionId"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+
+    <!-- Wave 5: Streaks & Notifications -->
+    <fragment
+        android:id="@+id/streakFragment"
+        android:name="com.duc.objectlanguage.ui.streak.StreakFragment"
+        android:label="Streak Dashboard" />
+
+    <fragment
+        android:id="@+id/notificationSettingsFragment"
+        android:name="com.duc.objectlanguage.ui.settings.NotificationSettingsFragment"
+        android:label="Notification Settings" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.duc.objectlanguage.ui.profile.ProfileFragment"
+        android:label="Tài khoản" />
+
+</navigation>

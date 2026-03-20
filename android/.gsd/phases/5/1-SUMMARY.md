@@ -1,0 +1,1 @@
+> Execute 1-PLAN.md: Done. Verified `MainActivity.kt` correctly toggles bottom navigation visibility depending on active Fragments, and accurately catches sessions early in `onCreate` via `tokenManager.isLoggedIn` to protect routes.

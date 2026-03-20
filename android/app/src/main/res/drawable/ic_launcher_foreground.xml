@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Camera lens circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,34 C43,34 34,43 34,54 C34,65 43,74 54,74 C65,74 74,65 74,54 C74,43 65,34 54,34 Z M54,68 C46.27,68 40,61.73 40,54 C40,46.27 46.27,40 54,40 C61.73,40 68,46.27 68,54 C68,61.73 61.73,68 54,68 Z" />
+
+    <!-- Inner lens -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,46 C49.58,46 46,49.58 46,54 C46,58.42 49.58,62 54,62 C58.42,62 62,58.42 62,54 C62,49.58 58.42,46 54,46 Z" />
+
+    <!-- Globe / Language icon -->
+    <path
+        android:fillColor="#CCFFFFFF"
+        android:pathData="M54,48 C50.69,48 48,50.69 48,54 C48,57.31 50.69,60 54,60 C57.31,60 60,57.31 60,54 C60,50.69 57.31,48 54,48 Z M48.5,54 L52,54 C52.04,52.31 52.34,50.73 52.85,49.45 C50.38,50.22 48.62,52.01 48.5,54 Z M54,59.5 C53.17,59.5 52.13,57.67 52.01,55 L55.99,55 C55.87,57.67 54.83,59.5 54,59.5 Z" />
+</vector>
