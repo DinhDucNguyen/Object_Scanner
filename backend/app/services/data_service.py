@@ -28,17 +28,16 @@ class DataService:
 
     def get_all_objects(self, db: Session, category_id: int = None):
         objects = self.obj_repo.get_all(db, category_id)
-        results = []
-        for obj in objects:
-            trans_count = len(self.trans_repo.get_by_object_id(db, obj.id))
-            results.append({
+        return [
+            {
                 "id": obj.id, "object_code": obj.object_code,
                 "category_id": obj.category_id,
                 "category_name": obj.category.name if obj.category else None,
                 "difficulty_level": obj.difficulty_level,
-                "translation_count": trans_count
-            })
-        return results
+                "translation_count": len(obj.translations)
+            }
+            for obj in objects
+        ]
 
     def get_stats(self, db: Session, user_id: int):
         return StatsResponse(

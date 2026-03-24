@@ -26,25 +26,25 @@ class LearningService:
             user_id=user_id, translation_id=translation_id, next_review_date=datetime.utcnow()
         )
         self.repo.create(db, progress)
+        db.commit()
         return {"message": "Đã thêm vào danh sách học", "id": progress.id}
 
     def get_due_reviews(self, db: Session, user_id: int):
         due = self.repo.get_due_reviews(db, user_id)
         results = []
         for p in due:
-            t = next((trans for trans in self.trans_repo.get_by_object_id(db, p.translation.object_id) 
-                      if trans.id == p.translation_id), None) if p.translation else None
-            if t:
-                lang = self.lang_repo.get_by_id(db, t.language_id)
-                obj = self.obj_repo.get_by_code(db, t.object.object_code) if t.object else None
-                results.append(ReviewCardResponse(
-                    progress_id=p.id, translation_id=p.translation_id,
-                    object_code=obj.object_code if obj else "",
-                    word_name=t.word_name, phonetic=t.phonetic,
-                    definition=t.definition, example_sentence=t.example_sentence,
-                    language_code=lang.code if lang else "", language_name=lang.name if lang else "",
-                    easiness_factor=float(p.easiness_factor), interval=p.interval, repetitions=p.repetitions
-                ))
+            t = p.translation
+            if not t:
+                continue
+            lang = self.lang_repo.get_by_id(db, t.language_id)
+            results.append(ReviewCardResponse(
+                progress_id=p.id, translation_id=p.translation_id,
+                object_code=t.object.object_code if t.object else "",
+                word_name=t.word_name, phonetic=t.phonetic,
+                definition=t.definition, example_sentence=t.example_sentence,
+                language_code=lang.code if lang else "", language_name=lang.name if lang else "",
+                easiness_factor=float(p.easiness_factor), interval=p.interval, repetitions=p.repetitions
+            ))
         return results
 
     def submit_review(self, db: Session, progress_id: int, request: ReviewRequest):
@@ -63,6 +63,7 @@ class LearningService:
         progress.last_reviewed_at = datetime.utcnow()
 
         self.repo.update(db, progress)
+        db.commit()
         return ReviewResult(
             success=True, new_interval=result["interval"],
             new_ef=result["easiness_factor"],

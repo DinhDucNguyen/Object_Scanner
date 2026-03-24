@@ -1,44 +1,34 @@
-# Python bytecode/cache
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 
 # Virtual environments
-.venv/
 venv/
+.venv/
 env/
-ENV/
 
-# Environment variables / secrets
+# Environment variables
 .env
-.env.*
-!.env.example
 
-# Test / coverage artifacts
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
+# Database files
+*.db
+*.sqlite3
 
-# Type checker / lint caches
-.mypy_cache/
-.pyre/
-.ruff_cache/
-
-# Build / packaging
-build/
-dist/
-*.egg-info/
-.eggs/
-
-# Logs / runtime
-*.log
-*.pid
-
-# IDE / editor
-.vscode/
+# IDE
 .idea/
+.vscode/
+*.swp
+*.swo
 
 # OS files
-.DS_Store
 Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# Distribution
+dist/
+build/
+*.egg-info/

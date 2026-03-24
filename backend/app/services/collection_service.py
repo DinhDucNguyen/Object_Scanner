@@ -12,6 +12,7 @@ from app.schemas.common import (
     CollectionCreate, CollectionResponse, CollectionItemAdd,
     CollectionDetailResponse, CollectionItemResponse, CollectionInsightsResponse
 )
+from app.core.constants import SM2_MASTERED_MIN_REPETITIONS, SM2_MASTERED_MIN_INTERVAL_DAYS, SM2_BASELINE_EASINESS_FACTOR
 
 
 class CollectionService:
@@ -23,20 +24,23 @@ class CollectionService:
         return [
             CollectionResponse(
                 id=c.id, name=c.name, is_public=c.is_public,
-                item_count=self.repo.count_items(db, c.id),
+                item_count=len(c.items),
                 created_at=c.created_at
             ) for c in collections
         ]
 
     def create_collection(self, db: Session, user_id: int, data: CollectionCreate):
         collection = UserCollection(user_id=user_id, name=data.name, is_public=data.is_public)
-        return self.repo.create_collection(db, collection)
+        result = self.repo.create_collection(db, collection)
+        db.commit()
+        return result
 
     def add_to_collection(self, db: Session, collection_id: int, data: CollectionItemAdd):
         existing = self.repo.get_item(db, collection_id, data.translation_id)
         if existing:
             return {"message": "Đã có trong bộ sưu tập"}
         self.repo.add_item(db, CollectionItem(collection_id=collection_id, translation_id=data.translation_id))
+        db.commit()
         return {"message": "Đã thêm vào bộ sưu tập"}
 
     def get_collection_detail(self, db: Session, collection_id: int, user_id: int):
@@ -45,26 +49,23 @@ class CollectionService:
         if not collection or collection.user_id != user_id:
             raise HTTPException(status_code=404, detail="Collection not found")
         
-        # Get all items with translations and object info
-        items = db.query(CollectionItem).filter(
-            CollectionItem.collection_id == collection_id
-        ).all()
-        
+        # Use relationships: item → translation → object → category
         item_responses = []
-        for item in items:
-            translation = db.query(Translation).filter(Translation.id == item.translation_id).first()
-            if translation:
-                obj = db.query(Object).filter(Object.id == translation.object_id).first()
-                category = db.query(Category).filter(Category.id == obj.category_id).first() if obj else None
-                
-                item_responses.append(CollectionItemResponse(
-                    id=item.id,
-                    translation_id=translation.id,
-                    object_name=obj.object_code if obj else "Unknown",
-                    translation=translation.word_name,
-                    category=category.name if category else "Uncategorized",
-                    image_url=None  # Add if you have media table
-                ))
+        for item in collection.items:
+            t = item.translation
+            if not t:
+                continue
+            obj = t.object
+            category = obj.category if obj else None
+            
+            item_responses.append(CollectionItemResponse(
+                id=item.id,
+                translation_id=t.id,
+                object_name=obj.object_code if obj else "Unknown",
+                translation=t.word_name,
+                category=category.name if category else "Uncategorized",
+                image_url=None
+            ))
         
         return CollectionDetailResponse(
             id=collection.id,
@@ -81,6 +82,7 @@ class CollectionService:
             raise HTTPException(status_code=404, detail="Collection not found")
         
         self.repo.delete_collection(db, collection_id)
+        db.commit()
 
     def remove_from_collection(self, db: Session, collection_id: int, item_id: int, user_id: int):
         """Remove item from collection"""
@@ -89,6 +91,7 @@ class CollectionService:
             raise HTTPException(status_code=404, detail="Collection not found")
         
         self.repo.remove_item(db, item_id)
+        db.commit()
 
     def get_collection_insights(self, db: Session, collection_id: int, user_id: int):
         """Get analytics for a collection"""
@@ -124,17 +127,17 @@ class CollectionService:
         total_items = len(translation_ids)
         reviewed_items = len(progress_list)
         
-        # Mastered = quality 4 or 5 with interval > 7 days
-        mastered_items = sum(1 for p in progress_list if p.quality in [4, 5] and p.interval > 7)
+        # Mastered = repetitions >= threshold with interval > minimum days (consistent with SM-2)
+        mastered_items = sum(1 for p in progress_list if p.repetitions >= SM2_MASTERED_MIN_REPETITIONS and p.interval > SM2_MASTERED_MIN_INTERVAL_DAYS)
         
-        # Average quality
-        avg_quality = sum(p.quality for p in progress_list) / len(progress_list) if progress_list else 0.0
+        # Average easiness factor (proxy for quality — 2.5 is baseline, higher = better)
+        avg_quality = sum(float(p.easiness_factor) for p in progress_list) / len(progress_list) if progress_list else 0.0
         
         # Total reviews (sum of repetitions)
         total_reviews = sum(p.repetitions for p in progress_list)
         
-        # Success rate (quality >= 3)
-        successful_reviews = sum(1 for p in progress_list if p.quality >= 3)
+        # Success rate (easiness_factor >= baseline means learner is performing well in SM-2)
+        successful_reviews = sum(1 for p in progress_list if float(p.easiness_factor) >= SM2_BASELINE_EASINESS_FACTOR)
         success_rate = successful_reviews / len(progress_list) if progress_list else 0.0
         
         # Last review date

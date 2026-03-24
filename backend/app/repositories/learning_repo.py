@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.models.learning_progress import LearningProgress
+from app.core.constants import SM2_MASTERED_MIN_REPETITIONS
 
 
 class LearningProgressRepository:
@@ -31,15 +32,14 @@ class LearningProgressRepository:
     def count_mastered(self, db: Session, user_id: int):
         return db.query(LearningProgress).filter(
             LearningProgress.user_id == user_id, 
-            LearningProgress.repetitions >= 3
+            LearningProgress.repetitions >= SM2_MASTERED_MIN_REPETITIONS
         ).count()
 
     def create(self, db: Session, progress: LearningProgress):
         db.add(progress)
-        db.commit()
-        db.refresh(progress)
+        db.flush()
         return progress
 
     def update(self, db: Session, progress: LearningProgress):
-        db.commit()
+        db.flush()
         return progress

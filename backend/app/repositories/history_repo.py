@@ -14,14 +14,12 @@ class HistoryRepository:
 
     def create_scan(self, db: Session, scan: ScanHistory):
         db.add(scan)
-        db.commit()
-        db.refresh(scan)
+        db.flush()
         return scan
 
     def create_feedback(self, db: Session, feedback: AIFeedbackReport):
         db.add(feedback)
-        db.commit()
-        db.refresh(feedback)
+        db.flush()
         return feedback
 
     def get_feedback(self, db: Session, is_resolved: bool = None):

@@ -32,6 +32,7 @@ class ScanService:
                 image_captured_url=request.image_captured_url,
                 device_model=request.device_model
             ))
+            db.commit()
             return ScanResponse(
                 source="internal_db", object_id=obj.id,
                 object_code=obj.object_code, category_name=obj.category.name if obj.category else None,
@@ -45,6 +46,7 @@ class ScanService:
             user_id=user_id, object_id=new_obj.id,
             confidence_score=request.confidence, device_model=request.device_model
         ))
+        db.commit()
         
         return ScanResponse(
             source="new_object", object_id=new_obj.id,
@@ -59,7 +61,7 @@ class ScanService:
         3. Nếu chưa → auto-save Object + Translations
         4. Trả ScanResponse
         """
-        user_id = user_id if user_id else 1  # Default to anonymous user
+        user_id = user_id or 1  # Default to anonymous user
 
         gemini_result = self.gemini.identify_object(image_bytes)
         if not gemini_result:

@@ -12,18 +12,17 @@ class HistoryFeedbackService:
 
     def get_history(self, db: Session, user_id: int, limit: int = 50):
         scans = self.hist_repo.get_recent_scans(db, user_id, limit)
-        results = []
-        for s in scans:
-            obj = self.obj_repo.get_by_code(db, s.object.object_code) if s.object else None
-            results.append({
+        return [
+            {
                 "id": s.id,
-                "object_code": obj.object_code if obj else None,
+                "object_code": s.object.object_code if s.object else None,
                 "confidence_score": s.confidence_score,
                 "device_model": s.device_model,
                 "scanned_at": s.scanned_at.isoformat() if s.scanned_at else None,
                 "image_captured_url": s.image_captured_url
-            })
-        return results
+            }
+            for s in scans
+        ]
 
     def submit_feedback(self, db: Session, user_id: int, data: FeedbackCreate):
         feedback = AIFeedbackReport(
@@ -31,7 +30,9 @@ class HistoryFeedbackService:
             error_type=data.error_type, correct_label=data.correct_label,
             user_note=data.user_note
         )
-        return self.hist_repo.create_feedback(db, feedback)
+        result = self.hist_repo.create_feedback(db, feedback)
+        db.commit()
+        return result
 
     def get_feedback(self, db: Session, is_resolved: bool = None):
         return self.hist_repo.get_feedback(db, is_resolved)

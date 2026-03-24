@@ -3,7 +3,7 @@ SM-2 Algorithm (Spaced Repetition)
 Tính toán interval, EF, repetitions cho ôn tập từ vựng
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 def calculate_sm2(quality: int, repetitions: int, easiness_factor: float, interval: int) -> dict:
@@ -32,7 +32,7 @@ def calculate_sm2(quality: int, repetitions: int, easiness_factor: float, interv
         else:
             new_interval = int(interval * new_ef)
 
-    next_review = datetime.utcnow() + timedelta(days=new_interval)
+    next_review = datetime.now(timezone.utc) + timedelta(days=new_interval)
 
     return {
         "repetitions": new_reps,

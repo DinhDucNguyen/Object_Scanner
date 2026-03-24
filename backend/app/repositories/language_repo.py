@@ -7,7 +7,7 @@ class LanguageRepository:
         return db.query(Language).filter(Language.id == language_id).first()
 
     def get_active(self, db: Session):
-        return db.query(Language).filter(Language.is_active == True).all()
+        return db.query(Language).filter(Language.is_active.is_(True)).all()
 
     def count_active(self, db: Session):
-        return db.query(Language).filter(Language.is_active == True).count()
+        return db.query(Language).filter(Language.is_active.is_(True)).count()

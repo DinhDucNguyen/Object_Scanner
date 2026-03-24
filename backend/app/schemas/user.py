@@ -1,5 +1,10 @@
-from pydantic import BaseModel
+import re
+from pydantic import BaseModel, field_validator
 from typing import Optional
+
+MIN_PASSWORD_LENGTH = 6
+USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,50}$")
+EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 
 class UserCreate(BaseModel):
@@ -8,6 +13,27 @@ class UserCreate(BaseModel):
     password: str
     full_name: Optional[str] = None
     student_id: Optional[str] = None
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        if not USERNAME_PATTERN.match(v):
+            raise ValueError("Username phải từ 3-50 ký tự, chỉ gồm chữ, số và underscore")
+        return v
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        if not EMAIL_PATTERN.match(v):
+            raise ValueError("Email không hợp lệ")
+        return v.lower()
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < MIN_PASSWORD_LENGTH:
+            raise ValueError(f"Mật khẩu phải có ít nhất {MIN_PASSWORD_LENGTH} ký tự")
+        return v
 
 
 class UserLogin(BaseModel):

@@ -17,7 +17,7 @@ class ScanHistory(Base):
     confidence_score = Column(Float, nullable=True)
     gps_latitude = Column(DECIMAL(10, 8), nullable=True)
     gps_longitude = Column(DECIMAL(11, 8), nullable=True)
-    device_model = Column(String(50), default="Google Pixel 6 Pro")
+    device_model = Column(String(50), nullable=True)
     scanned_at = Column(TIMESTAMP, default=datetime.utcnow)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)

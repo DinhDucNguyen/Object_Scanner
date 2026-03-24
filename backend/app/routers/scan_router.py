@@ -2,14 +2,19 @@ from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from PIL import Image
 import io
+import logging
 
 from app.db.session import get_db
 from app.services.scan_service import ScanService
 from app.services.gemini_service import GeminiService
 from app.services.tts_service import TTSService
 from app.schemas.common import ScanRequest, ScanResponse, TranslationResponse
+from app.dependencies.get_current_user import get_optional_user_id
+from app.utils.image import compress_image
+from app.core.constants import MAX_IMAGE_UPLOAD_BYTES
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["Scan"])
 scan_service = ScanService()
@@ -26,13 +31,13 @@ def test_endpoint():
 def scan_object(
     request: ScanRequest, 
     db: Session = Depends(get_db),
-    user_id: Optional[int] = None
+    user_id: Optional[int] = Depends(get_optional_user_id)
 ):
     """Scan bằng object_code (từ ML Kit/YOLOv8 on-device)."""
-    print(f"🔍 [SCAN] Received request: object_code={request.object_code}, confidence={request.confidence}")
+    logger.info("Scan request: object_code=%s, confidence=%s", request.object_code, request.confidence)
     request.user_id = user_id
     result = scan_service.process_scan(db, request)
-    print(f"✅ [SCAN] Response: source={result.source}, translations={len(result.translations)}")
+    logger.info("Scan response: source=%s, translations=%d", result.source, len(result.translations))
     return result
 
 
@@ -40,54 +45,19 @@ def scan_object(
 async def scan_image(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    user_id: Optional[int] = None
+    user_id: Optional[int] = Depends(get_optional_user_id)
 ):
     """Scan bằng ảnh — gọi Gemini Vision API để nhận diện."""
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(400, "File phải là ảnh (JPEG, PNG, ...)")
     
     image_bytes = await file.read()
-    if len(image_bytes) > 10 * 1024 * 1024:  # 10MB limit
+    if len(image_bytes) > MAX_IMAGE_UPLOAD_BYTES:
         raise HTTPException(400, "Ảnh quá lớn, tối đa 10MB")
     
-    # ✅ THÊM: Compress ảnh xuống 800x800 để Gemini xử lý nhanh hơn (5-10s → 3-5s)
-    compressed_bytes = compress_image(image_bytes, max_size=800)
+    compressed_bytes = compress_image(image_bytes)
     
-    return scan_service.process_scan_image(db, compressed_bytes, user_id or 1)
-
-
-def compress_image(image_bytes: bytes, max_size: int = 800) -> bytes:
-    """
-    Resize ảnh xuống max_size x max_size (giữ tỷ lệ), giảm dung lượng.
-    Giúp Gemini API xử lý nhanh hơn 2-3x.
-    """
-    try:
-        print(f"📸 Compressing image: {len(image_bytes)} bytes")
-        img = Image.open(io.BytesIO(image_bytes))
-        print(f"📸 Original size: {img.size}, mode: {img.mode}")
-        
-        # Convert RGBA -> RGB nếu cần
-        if img.mode in ('RGBA', 'LA', 'P'):
-            background = Image.new('RGB', img.size, (255, 255, 255))
-            if img.mode == 'P':
-                img = img.convert('RGBA')
-            background.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
-            img = background
-            print(f"📸 Converted to RGB")
-        
-        # Resize giữ tỷ lệ
-        img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
-        
-        # Compress với JPEG quality 85
-        output = io.BytesIO()
-        img.save(output, format='JPEG', quality=85, optimize=True)
-        compressed = output.getvalue()
-        print(f"✅ Compressed to: {len(compressed)} bytes, size: {img.size}")
-        return compressed
-    except Exception as e:
-        # Nếu lỗi thì trả ảnh gốc
-        print(f"⚠️ Image compression failed: {e}")
-        return image_bytes
+    return scan_service.process_scan_image(db, compressed_bytes, user_id)
 
 
 @router.get("/objects/{object_code}/translations", response_model=List[TranslationResponse])
@@ -124,3 +94,4 @@ def text_to_speech(
         media_type="audio/mpeg",
         headers={"Content-Disposition": f"inline; filename={word}.mp3"}
     )
+
