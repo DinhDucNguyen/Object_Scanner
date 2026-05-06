@@ -11,5 +11,5 @@ from app.models.learning_progress import LearningProgress
 from app.models.user_collection import UserCollection
 from app.models.collection_item import CollectionItem
 from app.models.scan_history import ScanHistory
-from app.models.ai_feedback_report import AIFeedbackReport
-from app.models.data_version import DataVersion
+from app.models.ai_feedback_report import AIPrediction
+from app.models.dictionary_lookup import DictionaryLookup

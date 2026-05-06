@@ -1,19 +1,16 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.db.session import Base
-from datetime import datetime
 
 
 class Category(Base):
-    __tablename__ = "categories"
+    __tablename__ = "DanhMuc"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(100), nullable=False)
-    parent_id = Column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True, index=True)
-    description = Column(Text, nullable=True)
-    icon_url = Column(String(255), nullable=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+    ten_danh_muc = Column(String(100), nullable=True)
+    danh_muc_cha = Column(Integer, ForeignKey("DanhMuc.id", ondelete="SET NULL"), nullable=True)
+    mo_ta = Column(Text, nullable=True)
+    thoi_gian_xoa = Column(DateTime, nullable=True)
 
     parent = relationship("Category", remote_side=[id])
     objects = relationship("Object", back_populates="category")

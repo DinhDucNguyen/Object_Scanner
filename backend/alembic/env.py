@@ -21,20 +21,23 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.config import settings
 from app.db.session import Base
-from app.models.user import User
-from app.models.profile import Profile
-from app.models.user_settings import UserSettings
-from app.models.language import Language
-from app.models.category import Category
-from app.models.object import Object
-from app.models.translation import Translation
-from app.models.learning_progress import LearningProgress
-from app.models.object_media import ObjectMedia
-from app.models.user_collection import UserCollection
-from app.models.collection_item import CollectionItem
-from app.models.scan_history import ScanHistory
-from app.models.ai_feedback_report import AIFeedbackReport
-from app.models.data_version import DataVersion
+from app.models.role import VaiTro  # noqa: F401
+from app.models.user_status import TrangThaiNguoiDung  # noqa: F401
+from app.models.user import User  # noqa: F401
+from app.models.profile import Profile  # noqa: F401
+from app.models.user_settings import UserSettings  # noqa: F401
+from app.models.language import Language  # noqa: F401
+from app.models.category import Category  # noqa: F401
+from app.models.object import Object  # noqa: F401
+from app.models.translation import Translation  # noqa: F401
+from app.models.example import ViDu  # noqa: F401
+from app.models.learning_progress import LearningProgress  # noqa: F401
+from app.models.object_media import ObjectMedia  # noqa: F401
+from app.models.user_collection import UserCollection  # noqa: F401
+from app.models.collection_item import CollectionItem  # noqa: F401
+from app.models.scan_history import ScanHistory  # noqa: F401
+from app.models.ai_feedback_report import AIPrediction  # noqa: F401
+from app.models.dictionary_lookup import DictionaryLookup  # noqa: F401
 
 target_metadata = Base.metadata
 

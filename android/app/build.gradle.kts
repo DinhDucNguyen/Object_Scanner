@@ -3,7 +3,6 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
 }
 
 android {
@@ -57,7 +56,6 @@ android {
 }
 
 dependencies {
-    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     // AndroidX Core
     implementation("androidx.core:core-ktx:1.12.0")
@@ -83,10 +81,6 @@ dependencies {
     implementation("com.google.mlkit:object-detection:17.0.1")
     implementation("com.google.mlkit:image-labeling:17.0.8")
 
-    // Room Database
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
 
     // Retrofit (for FastAPI backend)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -114,6 +108,9 @@ dependencies {
 
     // Konfetti (Wave 5 - Celebration Animations)
     implementation("nl.dionsegijn:konfetti-xml:2.0.4")
+
+    // UCrop - Image cropping
+    implementation("com.github.yalantis:ucrop:2.2.8")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

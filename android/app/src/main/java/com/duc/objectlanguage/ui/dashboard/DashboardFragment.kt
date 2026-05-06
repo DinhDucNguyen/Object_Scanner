@@ -35,7 +35,7 @@ class DashboardFragment : Fragment() {
         }
 
         val app = requireActivity().application as ObjectLanguageApp
-        binding.tvWelcome.text = "Xin chào, ${app.tokenManager.username ?: "bạn"}!"
+        binding.tvWelcome.text = app.tokenManager.username ?: "bạn"
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE

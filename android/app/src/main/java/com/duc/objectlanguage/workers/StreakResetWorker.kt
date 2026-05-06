@@ -3,6 +3,7 @@ package com.duc.objectlanguage.workers
 import android.content.Context
 import androidx.work.*
 import com.duc.objectlanguage.data.local.StreakDataStore
+import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
 
 /**
@@ -38,12 +39,10 @@ class StreakResetWorker(
     override suspend fun doWork(): Result {
         val streakDataStore = StreakDataStore(applicationContext)
         
-        // Trigger a check by reading current streak
-        // DataStore will handle streak validation internally
-        streakDataStore.currentStreak.collect { _ ->
-            // Just reading the value triggers validation
-        }
+        // Read current streak value once (triggers validation)
+        streakDataStore.currentStreak.first()
         
         return Result.success()
     }
 }
+

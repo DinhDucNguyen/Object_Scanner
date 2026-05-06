@@ -4,10 +4,9 @@ from datetime import datetime
 from app.repositories.learning_repo import LearningProgressRepository
 from app.repositories.translation_repo import TranslationRepository
 from app.repositories.language_repo import LanguageRepository
-from app.repositories.object_repo import ObjectRepository
 from app.models.learning_progress import LearningProgress
 from app.utils.sm2 import calculate_sm2
-from app.schemas.common import ReviewRequest, ReviewCardResponse, ReviewResult
+from app.schemas.common import ReviewRequest, ReviewCardResponse, ReviewResult, ViDuResponse
 
 
 class LearningService:
@@ -15,7 +14,6 @@ class LearningService:
         self.repo = LearningProgressRepository()
         self.trans_repo = TranslationRepository()
         self.lang_repo = LanguageRepository()
-        self.obj_repo = ObjectRepository()
 
     def add_to_learning(self, db: Session, translation_id: int, user_id: int):
         existing = self.repo.get_by_user_and_translation(db, user_id, translation_id)
@@ -23,7 +21,7 @@ class LearningService:
             return {"message": "Đã có trong danh sách học"}
 
         progress = LearningProgress(
-            user_id=user_id, translation_id=translation_id, next_review_date=datetime.utcnow()
+            user_id=user_id, ban_dich_id=translation_id, ngay_on_tiep=datetime.utcnow()
         )
         self.repo.create(db, progress)
         db.commit()
@@ -36,16 +34,30 @@ class LearningService:
             t = p.translation
             if not t:
                 continue
-            lang = self.lang_repo.get_by_id(db, t.language_id)
+            lang = self.lang_repo.get_by_id(db, t.ngon_ngu_id)
+            examples = [
+                ViDuResponse(id=e.id, cau_vi_du=e.cau_vi_du, dich_nghia=e.dich_nghia, nguon_du_lieu=e.nguon_du_lieu)
+                for e in (t.examples or [])
+            ]
             results.append(ReviewCardResponse(
-                progress_id=p.id, translation_id=p.translation_id,
-                object_code=t.object.object_code if t.object else "",
-                word_name=t.word_name, phonetic=t.phonetic,
-                definition=t.definition, example_sentence=t.example_sentence,
-                language_code=lang.code if lang else "", language_name=lang.name if lang else "",
-                easiness_factor=float(p.easiness_factor), interval=p.interval, repetitions=p.repetitions
+                progress_id=p.id, translation_id=p.ban_dich_id,
+                object_code=t.object.ma_doi_tuong if t.object else "",
+                word_name=t.tu_vung, phonetic=t.phien_am,
+                definition=t.dinh_nghia,
+                examples=examples,
+                language_code=lang.ma_ngon_ngu if lang else "",
+                language_name=lang.ten_ngon_ngu if lang else "",
+                easiness_factor=float(p.do_de_nho), interval=p.khoang_lap, repetitions=p.so_lan_lap
             ))
         return results
+
+    def get_analytics(self, db: Session, user_id: int) -> dict:
+        weekly = self.repo.get_weekly_review_counts(db, user_id)
+        mastery = self.repo.get_mastery_distribution(db, user_id)
+        return {
+            "weekly_reviews": [{"date": d, "count": c} for d, c in weekly],
+            "mastery": mastery,
+        }
 
     def submit_review(self, db: Session, progress_id: int, request: ReviewRequest):
         progress = self.repo.get_by_id(db, progress_id)
@@ -53,14 +65,14 @@ class LearningService:
             raise HTTPException(404, "Progress not found")
 
         result = calculate_sm2(
-            quality=request.quality, repetitions=progress.repetitions,
-            easiness_factor=float(progress.easiness_factor), interval=progress.interval
+            quality=request.quality, repetitions=progress.so_lan_lap,
+            easiness_factor=float(progress.do_de_nho), interval=progress.khoang_lap
         )
-        progress.repetitions = result["repetitions"]
-        progress.easiness_factor = result["easiness_factor"]
-        progress.interval = result["interval"]
-        progress.next_review_date = result["next_review_date"]
-        progress.last_reviewed_at = datetime.utcnow()
+        progress.so_lan_lap = result["repetitions"]
+        progress.do_de_nho = result["easiness_factor"]
+        progress.khoang_lap = result["interval"]
+        progress.ngay_on_tiep = result["next_review_date"]
+        progress.lan_on_cuoi = datetime.utcnow()
 
         self.repo.update(db, progress)
         db.commit()

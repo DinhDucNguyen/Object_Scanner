@@ -1,18 +1,15 @@
-from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 from app.db.session import Base
-from datetime import datetime
 
 
 class Language(Base):
-    __tablename__ = "languages"
+    __tablename__ = "NgonNgu"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    code = Column(String(10), unique=True, nullable=False)
-    name = Column(String(50), nullable=False)
-    flag_icon_url = Column(String(255), nullable=True)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+    ma_ngon_ngu = Column(String(10), unique=True, nullable=False)
+    ten_ngon_ngu = Column(String(50), nullable=False)
+    icon_co = Column(String(255), nullable=True)
+    dang_hoat_dong = Column(Boolean, default=True)
 
     translations = relationship("Translation", back_populates="language")

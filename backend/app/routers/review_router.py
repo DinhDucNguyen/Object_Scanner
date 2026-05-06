@@ -28,6 +28,14 @@ def get_due_reviews(
     return learning_service.get_due_reviews(db, user_id)
 
 
+@router.get("/analytics")
+def get_analytics(
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id)
+):
+    return learning_service.get_analytics(db, user_id)
+
+
 @router.post("/review/{progress_id}", response_model=ReviewResult)
 def submit_review(
     progress_id: int, 
@@ -35,5 +43,4 @@ def submit_review(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id)
 ):
-    # SM-2 update logic
     return learning_service.submit_review(db, progress_id, request)

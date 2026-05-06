@@ -9,35 +9,91 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingBottom="20dp">
 
-        <TextView
-            android:id="@+id/tvWelcome"
+        <!-- Gradient Welcome Header -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Xin chào!"
-            android:textColor="@color/text_primary"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="8dp">
 
-        <!-- Stats Cards -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_gradient_header"
+                android:orientation="horizontal"
+                android:padding="24dp"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/dashboard_greeting"
+                        android:textColor="@color/text_on_primary"
+                        android:textSize="16sp"
+                        android:alpha="0.9" />
+
+                    <TextView
+                        android:id="@+id/tvWelcome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bạn!"
+                        android:textColor="@color/text_on_primary"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/dashboard_subtitle"
+                        android:textColor="@color/text_on_primary"
+                        android:textSize="14sp"
+                        android:alpha="0.85"
+                        android:layout_marginTop="8dp" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:src="@android:drawable/sym_def_app_icon"
+                    android:background="@drawable/circle_bg"
+                    android:contentDescription="Avatar" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Stats Cards Row 1 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginBottom="12dp">
 
+            <!-- Scans Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="2dp"
-                app:strokeColor="@color/divider">
+                android:layout_marginEnd="6dp"
+                app:cardBackgroundColor="@color/card_scan_bg"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -45,25 +101,27 @@
                     android:padding="16dp"
                     android:gravity="center">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="📷" android:textSize="32sp" />
+                        android:text="📷" android:textSize="28sp"
+                        android:layout_marginBottom="8dp" />
                     <TextView android:id="@+id/tvTotalScans" android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:text="0"
-                        android:textColor="@color/primary" android:textSize="32sp" android:textStyle="bold" />
+                        android:textColor="@color/card_scan_icon" android:textSize="28sp" android:textStyle="bold" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Lượt quét" android:textColor="@color/text_secondary" android:textSize="14sp" android:textStyle="bold" />
+                        android:text="@string/dashboard_stat_scans" android:textColor="@color/text_secondary" android:textSize="13sp"
+                        android:layout_marginTop="4dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Learned Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="2dp"
-                app:strokeColor="@color/divider">
+                android:layout_marginStart="6dp"
+                app:cardBackgroundColor="@color/card_learned_bg"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -71,32 +129,37 @@
                     android:padding="16dp"
                     android:gravity="center">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="📚" android:textSize="32sp" />
+                        android:text="📚" android:textSize="28sp"
+                        android:layout_marginBottom="8dp" />
                     <TextView android:id="@+id/tvTotalLearned" android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:text="0"
-                        android:textColor="@color/success" android:textSize="32sp" android:textStyle="bold" />
+                        android:textColor="@color/card_learned_icon" android:textSize="28sp" android:textStyle="bold" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Đã học" android:textColor="@color/text_secondary" android:textSize="14sp" android:textStyle="bold" />
+                        android:text="@string/dashboard_stat_learned" android:textColor="@color/text_secondary" android:textSize="13sp"
+                        android:layout_marginTop="4dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
+        <!-- Stats Cards Row 2 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="32dp">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginBottom="24dp">
 
+            <!-- Due Today Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="2dp"
-                app:strokeColor="@color/divider">
+                android:layout_marginEnd="6dp"
+                app:cardBackgroundColor="@color/card_due_bg"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -104,25 +167,27 @@
                     android:padding="16dp"
                     android:gravity="center">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="⏰" android:textSize="32sp" />
+                        android:text="⏰" android:textSize="28sp"
+                        android:layout_marginBottom="8dp" />
                     <TextView android:id="@+id/tvDueToday" android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:text="0"
-                        android:textColor="@color/warning" android:textSize="32sp" android:textStyle="bold" />
+                        android:textColor="@color/card_due_icon" android:textSize="28sp" android:textStyle="bold" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Cần ôn" android:textColor="@color/text_secondary" android:textSize="14sp" android:textStyle="bold" />
+                        android:text="@string/dashboard_stat_due" android:textColor="@color/text_secondary" android:textSize="13sp"
+                        android:layout_marginTop="4dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Mastered Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="2dp"
-                app:strokeColor="@color/divider">
+                android:layout_marginStart="6dp"
+                app:cardBackgroundColor="@color/card_mastered_bg"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -130,56 +195,92 @@
                     android:padding="16dp"
                     android:gravity="center">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="⭐" android:textSize="32sp" />
+                        android:text="⭐" android:textSize="28sp"
+                        android:layout_marginBottom="8dp" />
                     <TextView android:id="@+id/tvMastered" android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:text="0"
-                        android:textColor="@color/secondary" android:textSize="32sp" android:textStyle="bold" />
+                        android:textColor="@color/card_mastered_icon" android:textSize="28sp" android:textStyle="bold" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Thành thạo" android:textColor="@color/text_secondary" android:textSize="14sp" android:textStyle="bold" />
+                        android:text="@string/dashboard_stat_mastered" android:textColor="@color/text_secondary" android:textSize="13sp"
+                        android:layout_marginTop="4dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- Mastery Progress -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Tiến độ thành thạo"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp"
-            android:layout_marginBottom="12dp" />
-
+        <!-- Start Review Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnStartReview"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:backgroundTint="@color/primary"
-            android:text="Bắt đầu ôn tập"
-            android:textSize="18sp"
+            android:layout_height="60dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="24dp"
+            android:text="@string/dashboard_btn_review"
+            android:textSize="17sp"
             android:textStyle="bold"
-            app:cornerRadius="16dp"
-            android:layout_marginBottom="24dp" />
+            android:textColor="@color/text_on_primary"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/ic_book"
+            app:iconGravity="textStart"
+            app:iconTint="@color/text_on_primary" />
 
-        <ProgressBar
-            android:id="@+id/progressMastery"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="16dp"
-            android:max="100"
-            android:progress="0"
-            android:progressTint="@color/primary"
-            android:progressBackgroundTint="@color/divider"
-            android:progressDrawable="@android:drawable/progress_horizontal" />
-
-        <TextView
-            android:id="@+id/tvProgressPct"
+        <!-- Mastery Progress Section -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="0%"
-            android:textColor="@color/primary"
-            android:textStyle="bold"
-            android:textAlignment="center"
-            android:layout_marginTop="8dp" />
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dashboard_progress_title"
+                android:textColor="@color/text_primary"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <ProgressBar
+                        android:id="@+id/progressMastery"
+                        style="@android:style/Widget.ProgressBar.Horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="12dp"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressTint="@color/primary"
+                        android:progressBackgroundTint="@color/surface_variant"
+                        android:progressDrawable="@drawable/progress_bar_gradient" />
+
+                    <TextView
+                        android:id="@+id/tvProgressPct"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0%"
+                        android:textColor="@color/primary"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textAlignment="center"
+                        android:layout_marginTop="12dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/progressBar"

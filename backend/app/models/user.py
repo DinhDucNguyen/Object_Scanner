@@ -1,39 +1,27 @@
-from sqlalchemy import (
-    Column, Integer, String, DateTime, Enum, TIMESTAMP
-)
+from sqlalchemy import Column, Integer, String, DateTime, TIMESTAMP, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.session import Base
 from datetime import datetime
-import enum
-
-
-class UserStatus(str, enum.Enum):
-    active = "active"
-    banned = "banned"
-    pending = "pending"
-
-
-class UserRole(str, enum.Enum):
-    admin = "admin"
-    user = "user"
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "NguoiDung"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(50), unique=True, nullable=False)
+    ten_dang_nhap = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
-    password_hash = Column(String(255), nullable=False)
-    status = Column(Enum(UserStatus), default=UserStatus.active)
-    role = Column(Enum(UserRole), default=UserRole.user)
-    last_login_at = Column(DateTime, nullable=True)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+    mat_khau_ma_hoa = Column(String(255), nullable=False)
+    vai_tro_id = Column(Integer, ForeignKey("VaiTro.id"), nullable=False)
+    trang_thai_id = Column(Integer, ForeignKey("TrangThaiNguoiDung.id"), nullable=False)
+    lan_dang_nhap_cuoi = Column(DateTime, nullable=True)
+    ngay_tao = Column(TIMESTAMP, default=datetime.utcnow)
+    ngay_cap_nhat = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+    thoi_gian_xoa = Column(DateTime, nullable=True)
 
+    vai_tro_obj = relationship("VaiTro", back_populates="users")
+    trang_thai_obj = relationship("TrangThaiNguoiDung", back_populates="users")
     profile = relationship("Profile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     settings = relationship("UserSettings", back_populates="user", uselist=False, cascade="all, delete-orphan")
     learning_progress = relationship("LearningProgress", back_populates="user", cascade="all, delete-orphan")
     collections = relationship("UserCollection", back_populates="user", cascade="all, delete-orphan")
     scan_histories = relationship("ScanHistory", back_populates="user", cascade="all, delete-orphan")
-    feedback_reports = relationship("AIFeedbackReport", back_populates="reporter", cascade="all, delete-orphan")

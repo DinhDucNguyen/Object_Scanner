@@ -42,7 +42,14 @@ class CollectionInsightsViewModel(application: Application) : AndroidViewModel(a
     // Selected collection ID
     private val _selectedCollectionId = MutableLiveData<Int?>()
     val selectedCollectionId: LiveData<Int?> = _selectedCollectionId
-    
+
+    // collectionId được truyền từ nav argument (ưu tiên hơn auto-select đầu tiên)
+    private var initialCollectionId: Int = 0
+
+    fun setInitialCollection(collectionId: Int) {
+        initialCollectionId = collectionId
+    }
+
     init {
         loadCollections()
     }
@@ -58,9 +65,12 @@ class CollectionInsightsViewModel(application: Application) : AndroidViewModel(a
             result.fold(
                 onSuccess = { collections ->
                     _collections.value = collections
-                    // Auto-select first collection if available
+                    // Ưu tiên initialCollectionId từ nav argument; fallback về collection đầu tiên
                     if (collections.isNotEmpty() && _selectedCollectionId.value == null) {
-                        selectCollection(collections[0].id)
+                        val targetId = if (initialCollectionId > 0 &&
+                            collections.any { it.id == initialCollectionId })
+                            initialCollectionId else collections[0].id
+                        selectCollection(targetId)
                     }
                     _error.value = null
                 },
@@ -119,78 +129,61 @@ class CollectionInsightsViewModel(application: Application) : AndroidViewModel(a
             (insights.masteredItems.toDouble() / insights.totalItems * 100).toInt()
         } else 0
         
-        // Suggestion 1: Review frequency
+        // Gợi ý 1: Tiến độ ôn tập
         when {
-            insights.reviewedItems == 0 -> {
-                suggestions.add("💡 Start reviewing items in this collection to build your vocabulary!")
-            }
-            progressPercent < 50 -> {
-                suggestions.add("📚 You've reviewed ${progressPercent}% of items. Keep going!")
-            }
-            progressPercent < 100 -> {
-                suggestions.add("🌟 Great progress! ${100 - progressPercent}% more to review.")
-            }
-            else -> {
-                suggestions.add("✅ All items reviewed! Focus on maintaining mastery.")
-            }
+            insights.reviewedItems == 0 ->
+                suggestions.add("💡 Hãy bắt đầu ôn tập để xây dựng vốn từ vựng của bạn!")
+            progressPercent < 50 ->
+                suggestions.add("📚 Bạn đã ôn ${progressPercent}% từ trong bộ sưu tập. Tiếp tục nào!")
+            progressPercent < 100 ->
+                suggestions.add("🌟 Tiến độ tốt! Còn ${100 - progressPercent}% nữa là xong.")
+            else ->
+                suggestions.add("✅ Đã ôn hết tất cả! Duy trì để không quên nhé.")
         }
-        
-        // Suggestion 2: Mastery level
+
+        // Gợi ý 2: Mức độ thành thạo
         when {
-            masteryPercent == 0 && insights.reviewedItems > 0 -> {
-                suggestions.add("🎯 Focus on improving quality scores to master these items.")
-            }
-            masteryPercent < 30 -> {
-                suggestions.add("📈 ${masteryPercent}% mastered. Review difficult items more frequently.")
-            }
-            masteryPercent < 70 -> {
-                suggestions.add("🔥 ${masteryPercent}% mastered! You're making excellent progress.")
-            }
-            masteryPercent >= 70 -> {
-                suggestions.add("🏆 Outstanding! ${masteryPercent}% of items mastered.")
-            }
+            masteryPercent == 0 && insights.reviewedItems > 0 ->
+                suggestions.add("🎯 Tập trung cải thiện điểm chất lượng để thành thạo các từ này.")
+            masteryPercent < 30 ->
+                suggestions.add("📈 ${masteryPercent}% thành thạo. Ôn lại các từ khó thường xuyên hơn.")
+            masteryPercent < 70 ->
+                suggestions.add("🔥 ${masteryPercent}% thành thạo! Bạn đang tiến bộ rất tốt.")
+            masteryPercent >= 70 ->
+                suggestions.add("🏆 Xuất sắc! ${masteryPercent}% từ đã thành thạo.")
         }
-        
-        // Suggestion 3: Success rate
+
+        // Gợi ý 3: Tỉ lệ thành công
         when {
-            insights.successRate < 0.5 -> {
-                suggestions.add("💪 Try using different review modes (Flashcards, Quiz, Typing) to improve retention.")
-            }
-            insights.successRate < 0.75 -> {
-                suggestions.add("📊 ${(insights.successRate * 100).toInt()}% success rate. Practice pronunciation for better memory.")
-            }
-            insights.successRate >= 0.75 -> {
-                suggestions.add("🌟 Excellent ${(insights.successRate * 100).toInt()}% success rate!")
-            }
+            insights.successRate < 0.5 ->
+                suggestions.add("💪 Thử dùng các chế độ ôn khác nhau (Flashcard, Quiz, Gõ từ) để nhớ lâu hơn.")
+            insights.successRate < 0.75 ->
+                suggestions.add("📊 Tỉ lệ đúng ${(insights.successRate * 100).toInt()}%. Luyện phát âm sẽ giúp nhớ từ tốt hơn.")
+            insights.successRate >= 0.75 ->
+                suggestions.add("🌟 Tuyệt vời! Tỉ lệ đúng ${(insights.successRate * 100).toInt()}%!")
         }
-        
-        // Suggestion 4: Review consistency
+
+        // Gợi ý 4: Tần suất ôn tập
         if (insights.lastReviewDate != null) {
             val daysSinceReview = calculateDaysSince(insights.lastReviewDate)
             when {
-                daysSinceReview == 0 -> {
-                    suggestions.add("✨ Reviewed today! Keep up the daily habit.")
-                }
-                daysSinceReview == 1 -> {
-                    suggestions.add("📅 Last reviewed yesterday. Review again to maintain progress.")
-                }
-                daysSinceReview in 2..7 -> {
-                    suggestions.add("⏰ Last reviewed ${daysSinceReview} days ago. Time for a refresh!")
-                }
-                daysSinceReview > 7 -> {
-                    suggestions.add("⚠️ No review in ${daysSinceReview} days. Items may need re-learning.")
-                }
+                daysSinceReview == 0 ->
+                    suggestions.add("✨ Đã ôn hôm nay! Duy trì thói quen hàng ngày nhé.")
+                daysSinceReview == 1 ->
+                    suggestions.add("📅 Ôn lần cuối hôm qua. Ôn lại hôm nay để giữ tiến độ.")
+                daysSinceReview in 2..7 ->
+                    suggestions.add("⏰ ${daysSinceReview} ngày chưa ôn. Đã đến lúc ôn lại rồi!")
+                daysSinceReview > 7 ->
+                    suggestions.add("⚠️ Đã ${daysSinceReview} ngày chưa ôn. Một số từ có thể cần học lại từ đầu.")
             }
         }
-        
-        // Suggestion 5: Collection size
+
+        // Gợi ý 5: Kích thước bộ sưu tập
         when {
-            insights.totalItems < 10 -> {
-                suggestions.add("➕ Small collection! Add more related items to build a stronger foundation.")
-            }
-            insights.totalItems > 50 -> {
-                suggestions.add("📦 Large collection! Consider splitting into smaller themed collections.")
-            }
+            insights.totalItems < 10 ->
+                suggestions.add("➕ Bộ sưu tập còn nhỏ! Thêm từ liên quan để tăng hiệu quả học.")
+            insights.totalItems > 50 ->
+                suggestions.add("📦 Bộ sưu tập lớn! Hãy cân nhắc chia thành các nhóm chủ đề nhỏ hơn.")
         }
         
         _suggestions.value = suggestions
@@ -199,10 +192,16 @@ class CollectionInsightsViewModel(application: Application) : AndroidViewModel(a
     /**
      * Calculate days since a date
      */
-    private fun calculateDaysSince(date: java.util.Date): Int {
-        val now = System.currentTimeMillis()
-        val diff = now - date.time
-        return (diff / (1000 * 60 * 60 * 24)).toInt()
+    private fun calculateDaysSince(dateStr: String): Int {
+        return try {
+            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
+            sdf.isLenient = true
+            val date = sdf.parse(dateStr) ?: return Int.MAX_VALUE
+            val diff = System.currentTimeMillis() - date.time
+            (diff / (1000 * 60 * 60 * 24)).toInt()
+        } catch (e: Exception) {
+            Int.MAX_VALUE
+        }
     }
     
     /**

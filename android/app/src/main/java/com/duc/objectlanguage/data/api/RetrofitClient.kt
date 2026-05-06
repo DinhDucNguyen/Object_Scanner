@@ -13,10 +13,12 @@ object RetrofitClient {
 
     private var tokenManager: TokenManager? = null
     private var _api: ApiService? = null
+    private var _collectionApi: CollectionApiService? = null
 
     fun init(tm: TokenManager) {
         tokenManager = tm
         _api = null // rebuild
+        _collectionApi = null
     }
 
     /**
@@ -25,6 +27,7 @@ object RetrofitClient {
      */
     fun rebuild() {
         _api = null
+        _collectionApi = null
     }
 
     val api: ApiService
@@ -102,5 +105,41 @@ object RetrofitClient {
                     .create(ApiService::class.java)
             }
             return _api!!
+        }
+
+    val collectionApi: CollectionApiService
+        get() {
+            if (_collectionApi == null) {
+                // Force api to initialize first (builds the Retrofit instance)
+                api
+                val baseUrl = ApiConfig.baseUrl
+                val logging = HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                }
+                val authInterceptor = Interceptor { chain ->
+                    val original = chain.request()
+                    val token = tokenManager?.accessToken
+                    val request = if (!token.isNullOrEmpty()) {
+                        original.newBuilder()
+                            .header("Authorization", "Bearer $token")
+                            .build()
+                    } else original
+                    chain.proceed(request)
+                }
+                val client = OkHttpClient.Builder()
+                    .addInterceptor(authInterceptor)
+                    .addInterceptor(logging)
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(30, TimeUnit.SECONDS)
+                    .build()
+                _collectionApi = Retrofit.Builder()
+                    .baseUrl(baseUrl)
+                    .client(client)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                    .create(CollectionApiService::class.java)
+            }
+            return _collectionApi!!
         }
 }

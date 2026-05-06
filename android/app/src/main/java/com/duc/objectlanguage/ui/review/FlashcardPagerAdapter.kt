@@ -61,8 +61,9 @@ class FlashcardPagerAdapter(
 
             binding.tvDefinition.text = card.definition ?: card.objectCode.replace("_", " ").replaceFirstChar { it.uppercase() }
 
-            binding.tvExample.text = card.exampleSentence ?: ""
-            binding.tvExample.visibility = if (card.exampleSentence.isNullOrEmpty()) View.GONE else View.VISIBLE
+            val firstExample = card.examples.firstOrNull()?.cauViDu
+            binding.tvExample.text = firstExample ?: ""
+            binding.tvExample.visibility = if (firstExample.isNullOrEmpty()) View.GONE else View.VISIBLE
 
             // SM-2 Stats
             binding.tvStats.text = "EF: %.2f | Interval: %d days | Rep: %d".format(

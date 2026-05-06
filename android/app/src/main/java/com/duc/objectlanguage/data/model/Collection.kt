@@ -1,67 +1,48 @@
 package com.duc.objectlanguage.data.model
 
-import java.util.Date
+import com.google.gson.annotations.SerializedName
 
-/**
- * User collection data model
- */
 data class Collection(
     val id: Int,
     val name: String,
-    val isPublic: Boolean,
-    val itemCount: Int,
-    val createdAt: Date
+    @SerializedName("is_public") val isPublic: Boolean,
+    @SerializedName("item_count") val itemCount: Int,
+    @SerializedName("created_at") val createdAt: String?
 )
 
-/**
- * Collection with detailed items
- */
 data class CollectionDetail(
     val id: Int,
     val name: String,
-    val isPublic: Boolean,
+    @SerializedName("is_public") val isPublic: Boolean,
     val items: List<CollectionItem>,
-    val createdAt: Date
+    @SerializedName("created_at") val createdAt: String?
 )
 
-/**
- * Item in a collection
- */
 data class CollectionItem(
-    val id: Int,
-    val translationId: Int,
-    val objectName: String,
+    @SerializedName("translation_id") val translationId: Int,
+    @SerializedName("object_name") val objectName: String,
     val translation: String,
     val category: String,
-    val imageUrl: String?
+    @SerializedName("image_url") val imageUrl: String?
 )
 
-/**
- * Collection analytics data
- */
 data class CollectionInsights(
-    val collectionId: Int,
-    val collectionName: String,
-    val totalItems: Int,
-    val reviewedItems: Int,
-    val masteredItems: Int,
-    val averageQuality: Double,
-    val totalReviews: Int,
-    val successRate: Double,
-    val lastReviewDate: Date?
+    @SerializedName("collection_id") val collectionId: Int,
+    @SerializedName("collection_name") val collectionName: String,
+    @SerializedName("total_items") val totalItems: Int,
+    @SerializedName("reviewed_items") val reviewedItems: Int,
+    @SerializedName("mastered_items") val masteredItems: Int,
+    @SerializedName("average_quality") val averageQuality: Double,
+    @SerializedName("total_reviews") val totalReviews: Int,
+    @SerializedName("success_rate") val successRate: Double,
+    @SerializedName("last_review_date") val lastReviewDate: String?
 )
 
-/**
- * Request to create collection
- */
 data class CreateCollectionRequest(
     val name: String,
-    val isPublic: Boolean = false
+    @SerializedName("is_public") val isPublic: Boolean = false
 )
 
-/**
- * Request to add item to collection
- */
 data class AddToCollectionRequest(
-    val translationId: Int
+    @SerializedName("translation_id") val translationId: Int
 )

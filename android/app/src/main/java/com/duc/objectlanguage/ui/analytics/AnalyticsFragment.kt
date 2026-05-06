@@ -1,230 +1,193 @@
 package com.duc.objectlanguage.ui.analytics
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
-import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.duc.objectlanguage.R
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.components.Description
+import com.duc.objectlanguage.data.model.AnalyticsResponse
+import com.duc.objectlanguage.databinding.FragmentAnalyticsBinding
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.formatter.PercentFormatter
-import com.github.mikephil.charting.utils.ColorTemplate
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AnalyticsFragment : Fragment() {
 
+    private var _binding: FragmentAnalyticsBinding? = null
+    private val binding get() = _binding!!
     private lateinit var viewModel: AnalyticsViewModel
-    private lateinit var cardProgress: CardView
-    private lateinit var lineChartProgress: LineChart
-    private lateinit var cardMastery: CardView
-    private lateinit var pieChartMastery: PieChart
-    private lateinit var cardActivity: CardView
-    private lateinit var barChartActivity: BarChart
-    private lateinit var cardStats: CardView
-    private lateinit var tvTotalWords: TextView
-    private lateinit var tvMasteredWords: TextView
-    private lateinit var tvReviewsToday: TextView
-    private lateinit var tvCurrentStreak: TextView
-    private lateinit var progressBar: ProgressBar
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_analytics, container, false)
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentAnalyticsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         viewModel = ViewModelProvider(this)[AnalyticsViewModel::class.java]
-
-        initViews(view)
-        setupCharts()
         setupObservers()
-
         viewModel.loadAnalytics()
     }
 
-    private fun initViews(view: View) {
-        cardProgress = view.findViewById(R.id.cardProgress)
-        lineChartProgress = view.findViewById(R.id.lineChartProgress)
-        cardMastery = view.findViewById(R.id.cardMastery)
-        pieChartMastery = view.findViewById(R.id.pieChartMastery)
-        cardActivity = view.findViewById(R.id.cardActivity)
-        barChartActivity = view.findViewById(R.id.barChartActivity)
-        cardStats = view.findViewById(R.id.cardStats)
-        tvTotalWords = view.findViewById(R.id.tvTotalWords)
-        tvMasteredWords = view.findViewById(R.id.tvMasteredWords)
-        tvReviewsToday = view.findViewById(R.id.tvReviewsToday)
-        tvCurrentStreak = view.findViewById(R.id.tvCurrentStreak)
-        progressBar = view.findViewById(R.id.progressBar)
-    }
-
-    private fun setupCharts() {
-        // Line Chart - Progress over time
-        lineChartProgress.apply {
-            description = Description().apply { text = "" }
-            setDrawGridBackground(false)
-            setTouchEnabled(true)
-            setPinchZoom(true)
-            xAxis.apply {
-                position = XAxis.XAxisPosition.BOTTOM
-                setDrawGridLines(false)
-            }
-            axisRight.isEnabled = false
-            legend.isEnabled = true
-        }
-
-        // Pie Chart - Mastery distribution
-        pieChartMastery.apply {
-            description = Description().apply { text = "" }
-            setUsePercentValues(true)
-            setDrawHoleEnabled(true)
-            setHoleColor(android.R.color.white)
-            setTransparentCircleRadius(58f)
-            setDrawEntryLabels(true)
-            legend.isEnabled = true
-        }
-
-        // Bar Chart - Daily activity
-        barChartActivity.apply {
-            description = Description().apply { text = "" }
-            setDrawGridBackground(false)
-            setTouchEnabled(true)
-            xAxis.apply {
-                position = XAxis.XAxisPosition.BOTTOM
-                setDrawGridLines(false)
-            }
-            axisRight.isEnabled = false
-            legend.isEnabled = false
-        }
-    }
-
     private fun setupObservers() {
-        viewModel.progressData.observe(viewLifecycleOwner) { data ->
-            updateLineChart(data)
-        }
-
-        viewModel.masteryData.observe(viewLifecycleOwner) { data ->
-            updatePieChart(data)
-        }
-
-        viewModel.activityData.observe(viewLifecycleOwner) { data ->
-            updateBarChart(data)
-        }
-
-        viewModel.statsData.observe(viewLifecycleOwner) { stats ->
-            tvTotalWords.text = "${stats.totalWords}"
-            tvMasteredWords.text = "${stats.masteredWords}"
-            tvReviewsToday.text = "${stats.reviewsToday}"
-            tvCurrentStreak.text = "${stats.currentStreak} days"
-        }
-
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
-            progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+        }
+
+        viewModel.stats.observe(viewLifecycleOwner) { stats ->
+            stats ?: return@observe
+            binding.tvTotalWords.text   = "${stats.totalLearned}"
+            binding.tvMasteredWords.text = "${stats.mastered}"
+            binding.tvReviewsToday.text  = "${stats.dueToday}"
+            binding.tvCurrentStreak.text = "${stats.totalScans}"
+        }
+
+        viewModel.analytics.observe(viewLifecycleOwner) { data ->
+            data ?: return@observe
+            setupLineChart(data)
+            setupPieChart(data)
+            setupBarChart(data)
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
-            error?.let {
-                showError(it)
-                viewModel.clearError()
+            error?.let { viewModel.clearError() }
+        }
+    }
+
+    // ── LineChart: ôn tập 7 ngày gần nhất ───────────────────────────────────
+    private fun setupLineChart(data: AnalyticsResponse) {
+        val dayLabels = getLast7DayLabels()           // ["yyyy-MM-dd", ...]
+        val weeklyMap = data.weeklyReviews.associateBy { it.date }
+
+        val entries = dayLabels.mapIndexed { idx, day ->
+            Entry(idx.toFloat(), weeklyMap[day]?.count?.toFloat() ?: 0f)
+        }
+
+        val dataSet = LineDataSet(entries, "Lượt ôn").apply {
+            color         = Color.parseColor("#6750A4")
+            setCircleColor(Color.parseColor("#6750A4"))
+            lineWidth     = 2f
+            circleRadius  = 4f
+            setDrawValues(false)
+            mode          = LineDataSet.Mode.CUBIC_BEZIER
+            fillAlpha     = 60
+            fillColor     = Color.parseColor("#6750A4")
+            setDrawFilled(true)
+        }
+
+        binding.lineChartProgress.apply {
+            this.data = LineData(dataSet)
+            xAxis.apply {
+                valueFormatter = IndexAxisValueFormatter(dayLabels.map { it.substring(5) }) // "MM-dd"
+                position       = XAxis.XAxisPosition.BOTTOM
+                granularity    = 1f
+                setDrawGridLines(false)
+                labelCount     = 7
             }
+            axisLeft.apply {
+                axisMinimum = 0f
+                granularity = 1f
+            }
+            axisRight.isEnabled    = false
+            description.isEnabled  = false
+            legend.isEnabled       = false
+            animateXY(800, 600)
+            invalidate()
         }
     }
 
-    private fun updateLineChart(data: List<ProgressDataPoint>) {
-        if (data.isEmpty()) {
-            lineChartProgress.clear()
-            return
-        }
+    // ── PieChart: phân bố mức độ thành thạo ─────────────────────────────────
+    private fun setupPieChart(data: AnalyticsResponse) {
+        val m = data.mastery
+        if (m.newCount + m.learning + m.mastered == 0) return
 
-        val entries = data.mapIndexed { index, point ->
-            Entry(index.toFloat(), point.wordsLearned.toFloat())
-        }
-
-        val dataSet = LineDataSet(entries, "Words Learned").apply {
-            color = resources.getColor(android.R.color.holo_blue_bright, null)
-            setCircleColor(resources.getColor(android.R.color.holo_blue_dark, null))
-            lineWidth = 2f
-            circleRadius = 4f
-            setDrawValues(true)
-            valueTextSize = 10f
-            mode = LineDataSet.Mode.CUBIC_BEZIER
-        }
-
-        lineChartProgress.data = LineData(dataSet)
-        lineChartProgress.xAxis.valueFormatter = IndexAxisValueFormatter(data.map { it.date })
-        lineChartProgress.invalidate()
-    }
-
-    private fun updatePieChart(data: MasteryDistribution) {
-        val entries = mutableListOf<PieEntry>()
-        
-        if (data.mastered > 0) entries.add(PieEntry(data.mastered.toFloat(), "Mastered"))
-        if (data.learning > 0) entries.add(PieEntry(data.learning.toFloat(), "Learning"))
-        if (data.newWords > 0) entries.add(PieEntry(data.newWords.toFloat(), "New"))
-        if (data.difficult > 0) entries.add(PieEntry(data.difficult.toFloat(), "Difficult"))
-
-        if (entries.isEmpty()) {
-            pieChartMastery.clear()
-            return
+        val entries = buildList {
+            if (m.newCount  > 0) add(PieEntry(m.newCount.toFloat(),  "Mới"))
+            if (m.learning  > 0) add(PieEntry(m.learning.toFloat(),  "Đang học"))
+            if (m.mastered  > 0) add(PieEntry(m.mastered.toFloat(),  "Thành thạo"))
         }
 
         val dataSet = PieDataSet(entries, "").apply {
             colors = listOf(
-                android.R.color.holo_green_light,
-                android.R.color.holo_blue_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light
-            ).map { resources.getColor(it, null) }
+                Color.parseColor("#90CAF9"),   // Mới       — xanh nhạt
+                Color.parseColor("#FFCC80"),   // Đang học  — cam nhạt
+                Color.parseColor("#A5D6A7"),   // Thành thạo — xanh lá nhạt
+            )
+            sliceSpace    = 2f
             valueTextSize = 12f
-            valueTextColor = android.R.color.black
+            valueTextColor = Color.DKGRAY
         }
 
-        pieChartMastery.data = PieData(dataSet).apply {
-            setValueFormatter(PercentFormatter(pieChartMastery))
+        binding.pieChartMastery.apply {
+            this.data = PieData(dataSet).also { it.setValueFormatter(
+                com.github.mikephil.charting.formatter.PercentFormatter(this)
+            ) }
+            setUsePercentValues(true)
+            description.isEnabled  = false
+            isDrawHoleEnabled      = true
+            holeRadius             = 38f
+            setHoleColor(Color.TRANSPARENT)
+            setCenterText("Từ vựng")
+            setCenterTextSize(13f)
+            legend.isEnabled       = true
+            animateY(900)
+            invalidate()
         }
-        pieChartMastery.invalidate()
     }
 
-    private fun updateBarChart(data: List<ActivityDay>) {
-        if (data.isEmpty()) {
-            barChartActivity.clear()
-            return
+    // ── BarChart: hoạt động mỗi ngày ────────────────────────────────────────
+    private fun setupBarChart(data: AnalyticsResponse) {
+        val dayLabels = getLast7DayLabels()
+        val weeklyMap = data.weeklyReviews.associateBy { it.date }
+
+        val entries = dayLabels.mapIndexed { idx, day ->
+            BarEntry(idx.toFloat(), weeklyMap[day]?.count?.toFloat() ?: 0f)
         }
 
-        val entries = data.mapIndexed { index, day ->
-            BarEntry(index.toFloat(), day.reviewCount.toFloat())
+        val dataSet = BarDataSet(entries, "Ôn tập mỗi ngày").apply {
+            color = Color.parseColor("#4DB6AC")
+            setDrawValues(false)
         }
 
-        val dataSet = BarDataSet(entries, "Reviews").apply {
-            color = resources.getColor(android.R.color.holo_blue_light, null)
-            valueTextSize = 10f
-            valueTextColor = android.R.color.black
+        binding.barChartActivity.apply {
+            this.data = BarData(dataSet).also { it.barWidth = 0.55f }
+            xAxis.apply {
+                valueFormatter = IndexAxisValueFormatter(dayLabels.map { it.substring(5) })
+                position       = XAxis.XAxisPosition.BOTTOM
+                granularity    = 1f
+                setDrawGridLines(false)
+            }
+            axisLeft.apply {
+                axisMinimum = 0f
+                granularity = 1f
+            }
+            axisRight.isEnabled   = false
+            description.isEnabled = false
+            legend.isEnabled      = false
+            animateY(700)
+            invalidate()
         }
-
-        barChartActivity.data = BarData(dataSet)
-        barChartActivity.xAxis.valueFormatter = IndexAxisValueFormatter(data.map { it.dayName })
-        barChartActivity.invalidate()
     }
 
-    private fun showError(message: String) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Error")
-            .setMessage(message)
-            .setPositiveButton("OK", null)
-            .show()
+    // ── Helper: danh sách 7 ngày gần nhất dạng "yyyy-MM-dd" ─────────────────
+    private fun getLast7DayLabels(): List<String> {
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        val cal = Calendar.getInstance()
+        return (6 downTo 0).map { daysAgo ->
+            cal.time = Date()
+            cal.add(Calendar.DAY_OF_YEAR, -daysAgo)
+            sdf.format(cal.time)
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

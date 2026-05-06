@@ -7,8 +7,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.databinding.ItemCollectionBinding
-import java.text.SimpleDateFormat
-import java.util.*
 
 /**
  * RecyclerView adapter for collection list
@@ -38,10 +36,8 @@ class CollectionAdapter(
         
         fun bind(collection: Collection) {
             binding.collectionName.text = collection.name
-            binding.itemCount.text = "${collection.itemCount} items"
-            
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            binding.createdDate.text = "Created ${dateFormat.format(collection.createdAt)}"
+            binding.itemCount.text = "${collection.itemCount} từ"
+            binding.createdDate.text = "Tạo: ${collection.createdAt?.take(10) ?: "--"}"
             
             // Click handlers
             binding.root.setOnClickListener {

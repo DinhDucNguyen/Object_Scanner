@@ -6,168 +6,102 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentStreakBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
-import com.duc.objectlanguage.workers.DailyReminderWorker
 import nl.dionsegijn.konfetti.core.Party
 import nl.dionsegijn.konfetti.core.Position
 import nl.dionsegijn.konfetti.core.emitter.Emitter
 import java.util.concurrent.TimeUnit
 
-/**
- * Fragment showing streak statistics and motivation
- */
 class StreakFragment : Fragment() {
-    
+
     private var _binding: FragmentStreakBinding? = null
     private val binding get() = _binding!!
-    
     private val viewModel: StreakViewModel by viewModels()
-    
+
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentStreakBinding.inflate(inflater, container, false)
         return binding.root
     }
-    
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeViewModel()
         setupButtons()
+        // Đồng bộ streak local → server mỗi khi mở màn hình
+        viewModel.syncToServer()
     }
-    
+
     private fun observeViewModel() {
-        // Streak data with motivation
         viewModel.streakData.observe(viewLifecycleOwner) { data ->
             updateUI(data)
         }
+        viewModel.celebrateMilestone.observe(viewLifecycleOwner) { milestone ->
+            if (milestone != null) {
+                celebrateMilestone(milestone)
+                viewModel.clearCelebration()
+            }
+        }
     }
-    
+
     private fun updateUI(data: StreakData) {
         binding.apply {
-            // Main streak display
+            // Số ngày chuỗi
             currentStreakText.text = data.currentStreak.toString()
-            currentStreakLabel.text = if (data.currentStreak == 1) "day" else "days"
-            
-            // Statistics
+            currentStreakLabel.text = getString(
+                if (data.currentStreak == 1) R.string.streak_days_singular
+                else R.string.streak_days_plural
+            )
+
+            // Thống kê
             longestStreakText.text = data.longestStreak.toString()
-            totalReviewsText.text = data.totalReviews.toString()
-            reviewsTodayText.text = data.reviewsToday.toString()
-            
-            // Motivation message
+            totalReviewsText.text  = data.totalReviews.toString()
+            reviewsTodayText.text  = data.reviewsToday.toString()
+
+            // Tin nhắn động lực — đã được format từ ViewModel
             motivationText.text = data.motivationMessage
-            
-            // Progress to next milestone
-            nextMilestoneText.text = "Next milestone: ${data.nextMilestone} days"
-            milestoneProgressBar.max = data.nextMilestone
+
+            // Mốc tiếp theo
+            nextMilestoneText.text = getString(R.string.streak_milestone_label, data.nextMilestone)
+            milestoneProgressBar.max      = data.nextMilestone
             milestoneProgressBar.progress = data.currentStreak
-            daysToMilestoneText.text = "${data.daysToMilestone} days to go"
-            
-            // Flame icon intensity based on streak
-            updateFlameIntensity(data.currentStreak)
-            
-            // Check if completed today
+            daysToMilestoneText.text = getString(R.string.streak_days_to_go, data.daysToMilestone)
+
+            // Flame icon theo cường độ chuỗi
+            flameIcon.text = when {
+                data.currentStreak == 0     -> "💤"
+                data.currentStreak in 1..2  -> "🔥"
+                data.currentStreak in 3..6  -> "🔥🔥"
+                data.currentStreak in 7..13 -> "🔥🔥🔥"
+                else                        -> "🔥🔥🔥🔥"
+            }
+
+            // Trạng thái hôm nay
             if (data.reviewsToday > 0) {
                 todayStatusIcon.text = "✅"
-                todayStatusText.text = "Completed today!"
+                todayStatusText.text = getString(R.string.streak_today_done)
             } else {
                 todayStatusIcon.text = "⏰"
-                todayStatusText.text = "Review pending"
+                todayStatusText.text = getString(R.string.streak_today_pending)
             }
         }
     }
-    
-    private fun updateFlameIntensity(streak: Int) {
-        binding.flameIcon.text = when {
-            streak == 0 -> "💤"
-            streak in 1..2 -> "🔥"
-            streak in 3..6 -> "🔥🔥"
-            streak in 7..13 -> "🔥🔥🔥"
-            streak >= 14 -> "🔥🔥🔥🔥"
-            else -> "🔥"
-        }
-    }
-    
+
     private fun setupButtons() {
-        // Setup notification button
-        binding.setupNotificationButton.setOnClickListener {
-            showTimePickerDialog()
-        }
-        
-        // Reset streak button (for testing/debugging)
-        binding.resetStreakButton.setOnClickListener {
-            showResetConfirmation()
-        }
-        
-        // Milestone info button
-        binding.milestoneInfoButton.setOnClickListener {
-            showMilestoneInfo()
-        }
+        binding.milestoneInfoButton.setOnClickListener { showMilestoneInfo() }
     }
-    
-    private fun showTimePickerDialog() {
-        val picker = MaterialTimePicker.Builder()
-            .setTimeFormat(TimeFormat.CLOCK_24H)
-            .setHour(19)
-            .setMinute(0)
-            .setTitleText("Select reminder time")
-            .build()
-        
-        picker.addOnPositiveButtonClickListener {
-            val hour = picker.hour
-            val minute = picker.minute
-            
-            // Schedule daily reminder
-            DailyReminderWorker.scheduleDailyReminder(requireContext(), hour, minute)
-            
-            binding.notificationStatusText.text = "✅ Daily reminder set for ${String.format("%02d:%02d", hour, minute)}"
-        }
-        
-        picker.show(parentFragmentManager, "time_picker")
-    }
-    
-    private fun showResetConfirmation() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Reset Streak?")
-            .setMessage("This will reset all your streak data. This action cannot be undone.")
-            .setPositiveButton("Reset") { _, _ ->
-                viewModel.resetStreak()
-                binding.motivationText.text = "Streak reset. Start fresh!"
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-    
+
     private fun showMilestoneInfo() {
-        val milestones = """
-            🎯 Milestone Rewards:
-            
-            3 days   - Beginner Badge
-            7 days   - Week Warrior
-            14 days  - Two Week Champion
-            30 days  - Monthly Master
-            50 days  - Consistency King
-            100 days - Century Club
-            365 days - Year Legend
-            
-            Keep your daily streak to unlock achievements!
-        """.trimIndent()
-        
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Streak Milestones")
-            .setMessage(milestones)
-            .setPositiveButton("Got it!", null)
+            .setTitle(getString(R.string.streak_milestone_title))
+            .setMessage(getString(R.string.streak_milestone_content))
+            .setPositiveButton(getString(R.string.streak_milestone_btn_ok), null)
             .show()
     }
-    
-    /**
-     * Show confetti animation for milestone
-     */
+
     fun celebrateMilestone(milestone: Int) {
         val party = Party(
             speed = 0f,
@@ -178,16 +112,15 @@ class StreakFragment : Fragment() {
             emitter = Emitter(duration = 3, TimeUnit.SECONDS).max(100),
             position = Position.Relative(0.5, 0.3)
         )
-        
         binding.konfettiView.start(party)
-        
+
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("🎉 Milestone Achieved!")
-            .setMessage("Congratulations! You've reached a ${milestone}-day streak!\n\nYour dedication is inspiring. Keep it up!")
-            .setPositiveButton("Awesome!", null)
+            .setTitle(getString(R.string.streak_celebrate_title))
+            .setMessage(getString(R.string.streak_celebrate_msg, milestone))
+            .setPositiveButton(getString(R.string.streak_celebrate_btn), null)
             .show()
     }
-    
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

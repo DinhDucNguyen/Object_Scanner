@@ -1,3 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Object Language</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_scan">Quét</string>
+    <string name="nav_dictionary">Từ điển</string>
+    <string name="nav_review">Ôn tập</string>
+    <string name="nav_profile">Tài khoản</string>
+
+    <!-- Toolbar / Screen titles -->
+    <string name="title_dashboard">Tổng quan</string>
+    <string name="title_register">Đăng ký</string>
+    <string name="title_scan">Quét vật thể</string>
+    <string name="title_review">Ôn tập</string>
+    <string name="title_dictionary">Từ điển</string>
+    <string name="title_profile">Tài khoản</string>
+    <string name="title_history">Lịch sử</string>
+    <string name="title_streak">Chuỗi ngày học</string>
+    <string name="title_analytics">Thống kê</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_greeting">👋 Xin chào,</string>
+    <string name="dashboard_subtitle">Hãy tiếp tục học hôm nay 🚀</string>
+    <string name="dashboard_stat_scans">Lượt quét</string>
+    <string name="dashboard_stat_learned">Đã học</string>
+    <string name="dashboard_stat_due">Cần ôn</string>
+    <string name="dashboard_stat_mastered">Thành thạo</string>
+    <string name="dashboard_btn_review">🎯 Bắt đầu ôn tập</string>
+    <string name="dashboard_progress_title">📈 Tiến độ thành thạo</string>
+
+    <!-- Scan -->
+    <string name="scan_overlay">📷 Hướng camera vào vật thể\nvà nhấn nút chụp</string>
+    <string name="scan_analyzing">🔍 Đang nhận diện…\n(5–10 giây)</string>
+    <string name="scan_btn_play">🔊 Phát</string>
+    <string name="scan_btn_learn">📚 Học</string>
+    <string name="scan_btn_retake">📷 Chụp lại</string>
+    <string name="scan_cd_gallery">Chọn từ thư viện</string>
+    <string name="scan_cd_capture">Chụp</string>
+    <string name="scan_pending">⏳ Đang chờ admin kiểm duyệt</string>
+
+    <!-- Review -->
+    <string name="review_finished">🎉 Hoàn thành!\nKhông còn từ nào cần ôn.</string>
+    <string name="review_btn_reveal">Xem đáp án</string>
+    <string name="review_btn_wrong">❌ Sai</string>
+    <string name="review_btn_correct">✅ Đúng</string>
+
+    <!-- History -->
+    <string name="history_empty">Chưa có lịch sử quét</string>
+
+    <!-- Streak -->
+    <string name="streak_days_singular">ngày</string>
+    <string name="streak_days_plural">ngày</string>
+    <string name="streak_current_label">Chuỗi ngày hiện tại</string>
+    <string name="streak_stat_best">Tốt nhất</string>
+    <string name="streak_stat_total">Tổng</string>
+    <string name="streak_stat_today">Hôm nay</string>
+    <string name="streak_stats_title">📊 Thống kê của bạn</string>
+    <string name="streak_today_done">✅ Đã ôn tập hôm nay!</string>
+    <string name="streak_today_pending">⏰ Chưa ôn tập hôm nay</string>
+    <string name="streak_milestone_label">Mốc tiếp theo: %d ngày</string>
+    <string name="streak_days_to_go">Còn %d ngày nữa</string>
+    <string name="streak_milestone_reached">Đã đạt mốc!</string>
+
+    <!-- Streak motivation messages -->
+    <string name="streak_msg_start">🌟 Bắt đầu hành trình học của bạn hôm nay!</string>
+    <string name="streak_msg_dont_break">🔥 Đừng để mất chuỗi %d ngày của bạn!</string>
+    <string name="streak_msg_great_start">✨ Khởi đầu tốt! Quay lại vào ngày mai nhé!</string>
+    <string name="streak_msg_keep_going">💪 Tiếp tục nào! Xây dựng thói quen hàng ngày.</string>
+    <string name="streak_msg_momentum">🚀 %d ngày liên tiếp! Bạn đang có đà tốt.</string>
+    <string name="streak_msg_one_week">⭐ Một tuần rồi! Bạn đang rực cháy!</string>
+    <string name="streak_msg_two_weeks">🔥 Hai tuần! Không ai cản bạn được!</string>
+    <string name="streak_msg_champion">🏆 %d ngày! Bạn là nhà vô địch học tập!</string>
+    <string name="streak_msg_legend">👑 %d ngày! Sự cống hiến huyền thoại!</string>
+    <string name="streak_msg_default">Hãy học mỗi ngày!</string>
+
+    <!-- Streak milestone dialog -->
+    <string name="streak_milestone_title">🎯 Các Mốc Thành Tích</string>
+    <string name="streak_milestone_content">3 ngày   — Huy hiệu Mới bắt đầu\n7 ngày   — Chiến binh tuần lễ\n14 ngày  — Nhà vô địch 2 tuần\n30 ngày  — Bậc thầy tháng\n50 ngày  — Vua kiên trì\n100 ngày — Câu lạc bộ thế kỷ\n365 ngày — Huyền thoại năm\n\nDuy trì chuỗi hàng ngày để mở khóa thành tích!</string>
+    <string name="streak_milestone_btn_ok">Hiểu rồi!</string>
+    <string name="streak_celebrate_title">🎉 Đạt mốc thành tích!</string>
+    <string name="streak_celebrate_msg">Chúc mừng! Bạn đã đạt chuỗi %d ngày!\n\nSự kiên trì của bạn thật đáng ngưỡng mộ. Tiếp tục phát huy!</string>
+    <string name="streak_celebrate_btn">Tuyệt vời!</string>
+
+    <!-- Collection -->
+    <string name="title_collections">Bộ sưu tập</string>
+    <string name="title_collection_detail">Chi tiết bộ sưu tập</string>
+    <string name="title_collection_insights">Thống kê bộ sưu tập</string>
+    <string name="collection_search_hint">Tìm kiếm bộ sưu tập…</string>
+    <string name="collection_empty_title">Chưa có bộ sưu tập</string>
+    <string name="collection_empty_subtitle">Tạo bộ sưu tập đầu tiên\nđể sắp xếp từ vựng của bạn</string>
+    <string name="collection_btn_insights">Thống kê</string>
+    <string name="collection_btn_delete">Xoá</string>
+    <string name="collection_btn_review">Ôn tập bộ sưu tập</string>
+    <string name="collection_cd_add">Thêm bộ sưu tập</string>
+    <string name="collection_dialog_create_title">Tạo bộ sưu tập</string>
+    <string name="collection_dialog_name_hint">Tên bộ sưu tập</string>
+    <string name="collection_dialog_name_subtitle">Nhập tên cho bộ sưu tập mới</string>
+    <string name="collection_dialog_delete_title">Xoá bộ sưu tập</string>
+    <string name="collection_dialog_delete_msg">Bạn có chắc muốn xoá \'%s\'?</string>
+    <string name="collection_add_to_title">Thêm vào bộ sưu tập</string>
+    <string name="collection_no_collections">Chưa có bộ sưu tập nào. Tạo trong mục Tài khoản nhé!</string>
+    <string name="collection_empty_words">Bộ sưu tập trống, thêm từ trước nhé!</string>
+    <string name="collection_created">Đã tạo \'%s\'!</string>
+    <string name="collection_deleted">Đã xoá \'%s\'</string>
+    <string name="collection_name_empty">Tên bộ sưu tập không được để trống</string>
+    <string name="collection_added">Đã thêm vào bộ sưu tập</string>
+    <string name="collection_removed">Đã xoá khỏi bộ sưu tập</string>
+    <string name="collection_added_to">Đã thêm vào \"%s\"</string>
+    <string name="profile_menu_collection">📚 Bộ sưu tập</string>
+
+    <!-- Collection Insights -->
+    <string name="ci_select_collection">Chọn bộ sưu tập</string>
+    <string name="ci_stats_title">📊 Thống kê</string>
+    <string name="ci_analytics_title">📈 Biểu đồ</string>
+    <string name="ci_suggestions_title">💡 Gợi ý thông minh</string>
+    <string name="ci_total_items">Tổng từ</string>
+    <string name="ci_reviewed">Đã ôn</string>
+    <string name="ci_mastered">Thành thạo</string>
+    <string name="ci_success_rate">Tỉ lệ đúng</string>
+    <string name="ci_avg_quality">Trung bình</string>
+    <string name="ci_total_reviews">Tổng lượt ôn</string>
+    <string name="ci_progress_chart">Tiến độ ôn tập</string>
+    <string name="ci_mastery_chart">Phân bố thành thạo</string>
+    <string name="ci_mastered_label">Thành thạo</string>
+    <string name="ci_reviewing_label">Đang học</string>
+    <string name="ci_not_started_label">Chưa ôn</string>
+
+    <!-- Common buttons -->
+    <string name="btn_create">Tạo</string>
+    <string name="btn_cancel">Huỷ</string>
+    <string name="btn_delete">Xoá</string>
+
+    <!-- Profile -->
+    <string name="profile_section_language">Ngôn ngữ</string>
+    <string name="profile_display_lang_label">Ngôn ngữ hiển thị</string>
+    <string name="profile_display_lang_vi">Tiếng Việt</string>
+    <string name="profile_display_lang_en">English</string>
+    <string name="profile_section_features">Tính năng học tập</string>
+    <string name="profile_menu_history">📜 Lịch sử quét</string>
+    <string name="profile_menu_analytics">📊 Thống kê học tập</string>
+    <string name="profile_menu_streak">🔥 Chuỗi ngày học</string>
+    <string name="profile_btn_logout">Đăng xuất</string>
+    <string name="profile_badge">Học viên xuất sắc</string>
+
+    <!-- Common -->
+    <string name="arrow">➔</string>
+    <string name="content_description_avatar">Avatar</string>
 </resources>

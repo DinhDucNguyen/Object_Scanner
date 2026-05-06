@@ -7,12 +7,23 @@ from datetime import datetime
 
 class ObjectResponse(BaseModel):
     id: int
-    category_id: Optional[int]
+    category_id: Optional[int] = None
     object_code: str
     difficulty_level: int
-    is_deleted: bool
+    deleted: bool
     category_name: Optional[str] = None
     translation_count: int = 0
+
+# ====== Example ======
+
+class ViDuResponse(BaseModel):
+    id: int
+    cau_vi_du: Optional[str] = None
+    dich_nghia: Optional[str] = None
+    nguon_du_lieu: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 # ====== Translation ======
 
@@ -23,9 +34,12 @@ class TranslationResponse(BaseModel):
     language_code: Optional[str] = None
     language_name: Optional[str] = None
     word_name: str
-    phonetic: Optional[str]
-    definition: Optional[str]
-    example_sentence: Optional[str]
+    phonetic: Optional[str] = None
+    part_of_speech: Optional[str] = None
+    definition: Optional[str] = None
+    examples: List[ViDuResponse] = []
+    audio_url: Optional[str] = None
+    data_source: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -36,10 +50,7 @@ class ScanRequest(BaseModel):
     object_code: str
     confidence: float = 0.0
     user_id: int = 1
-    image_captured_url: Optional[str] = None
-    gps_latitude: Optional[float] = None
-    gps_longitude: Optional[float] = None
-    device_model: str = "Google Pixel 6 Pro"
+    image_url: Optional[str] = None
 
 
 class ScanResponse(BaseModel):
@@ -60,9 +71,9 @@ class ReviewCardResponse(BaseModel):
     translation_id: int
     object_code: str
     word_name: str
-    phonetic: Optional[str]
-    definition: Optional[str]
-    example_sentence: Optional[str]
+    phonetic: Optional[str] = None
+    definition: Optional[str] = None
+    examples: List[ViDuResponse] = []
     language_code: str
     language_name: str
     easiness_factor: float
@@ -96,7 +107,6 @@ class CollectionItemAdd(BaseModel):
 
 
 class CollectionItemResponse(BaseModel):
-    id: int
     translation_id: int
     object_name: str
     translation: str
@@ -133,22 +143,24 @@ class CollectionInsightsResponse(BaseModel):
         from_attributes = True
 
 
-# ====== Feedback ======
+# ====== AI Prediction ======
 
-class FeedbackCreate(BaseModel):
+class AIPredictionCreate(BaseModel):
     scan_id: int
-    error_type: str
-    correct_label: Optional[str] = None
-    user_note: Optional[str] = None
+    source_ai: str  # 'yolo' or 'gemini'
+    predicted_label: Optional[str] = None
+    confidence: Optional[float] = None
+    description: Optional[str] = None
 
-class FeedbackResponse(BaseModel):
+class AIPredictionResponse(BaseModel):
     id: int
     scan_id: int
-    error_type: Optional[str]
-    correct_label: Optional[str]
-    user_note: Optional[str]
-    is_resolved: bool
-    created_at: Optional[datetime]
+    source_ai: str
+    predicted_label: Optional[str] = None
+    confidence: Optional[float] = None
+    description: Optional[str] = None
+    ket_qua_dung: bool
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -170,7 +182,7 @@ class LanguageResponse(BaseModel):
     id: int
     code: str
     name: str
-    flag_icon_url: Optional[str]
+    flag_icon_url: Optional[str] = None
     is_active: bool
 
     class Config:
@@ -181,9 +193,8 @@ class LanguageResponse(BaseModel):
 class CategoryResponse(BaseModel):
     id: int
     name: str
-    parent_id: Optional[int]
-    description: Optional[str]
-    icon_url: Optional[str]
+    parent_id: Optional[int] = None
+    description: Optional[str] = None
 
     class Config:
         from_attributes = True

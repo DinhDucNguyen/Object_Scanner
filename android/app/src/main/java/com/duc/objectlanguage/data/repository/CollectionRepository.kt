@@ -1,6 +1,6 @@
 package com.duc.objectlanguage.data.repository
 
-import com.duc.objectlanguage.data.api.RetrofitInstance
+import com.duc.objectlanguage.data.api.RetrofitClient
 import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.*
 import com.duc.objectlanguage.data.model.Collection
@@ -11,7 +11,7 @@ import com.duc.objectlanguage.data.model.Collection
  */
 class CollectionRepository(private val tokenManager: TokenManager) {
     
-    private val api get() = RetrofitInstance.collectionApi
+    private val api get() = RetrofitClient.collectionApi
     
     
     /**
@@ -65,10 +65,10 @@ class CollectionRepository(private val tokenManager: TokenManager) {
     }
     
     /**
-     * Remove item from collection
+     * Remove item from collection using composite PK (collectionId + translationId)
      */
-    suspend fun removeFromCollection(collectionId: Int, itemId: Int): Result<Unit> = try {
-        api.removeFromCollection(collectionId, itemId)
+    suspend fun removeFromCollection(collectionId: Int, translationId: Int): Result<Unit> = try {
+        api.removeFromCollection(collectionId, translationId)
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)

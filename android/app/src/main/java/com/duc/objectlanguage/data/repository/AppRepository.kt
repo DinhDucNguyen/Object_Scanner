@@ -110,10 +110,11 @@ class AppRepository(private val tokenManager: TokenManager) {
     suspend fun addToLearning(translationId: Int): Result<String> {
         return try {
             val response = api.addToLearning(translationId)
+            response.body()?.close()
             if (response.isSuccessful) Result.success("Đã thêm vào danh sách học!")
-            else Result.failure(Exception("Thêm thất bại"))
+            else Result.failure(Exception("Lỗi ${response.code()}: ${response.message()}"))
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Không kết nối được server: ${e.message}"))
         }
     }
 
@@ -163,22 +164,101 @@ class AppRepository(private val tokenManager: TokenManager) {
         }
     }
 
-    // ====== ANALYTICS ======
-    suspend fun getProgressHistory(): Result<List<ProgressHistoryItem>> {
+    // ====== DICTIONARY / TRANSLATE ======
+
+    suspend fun lookupWord(word: String, fromLang: String = "en", toLang: String = "en"): Result<DictionaryResponse> {
         return try {
-            val response = api.getProgressHistory()
-            if (response.isSuccessful) Result.success(response.body() ?: emptyList())
-            else Result.failure(Exception("Lỗi tải tiến độ"))
+            val response = api.lookupWord(word, fromLang, toLang)
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception(response.errorBody()?.string() ?: "Không tìm thấy từ"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Lỗi tra từ: ${e.message}"))
+        }
+    }
+
+    suspend fun translate(text: String, fromLang: String, toLang: String): Result<TranslateResponse> {
+        return try {
+            val response = api.translate(TranslateRequest(text, fromLang, toLang))
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception(response.errorBody()?.string() ?: "Lỗi dịch"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Lỗi dịch: ${e.message}"))
+        }
+    }
+
+    // ====== USER PROFILE / SETTINGS ======
+
+    suspend fun getProfile(): Result<ProfileData> {
+        return try {
+            val response = api.getProfile()
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception("Lỗi tải profile"))
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun getReviewHistory(): Result<List<ReviewHistoryItem>> {
+    suspend fun getUserSettings(): Result<UserSettingsResponse> {
         return try {
-            val response = api.getReviewHistory()
-            if (response.isSuccessful) Result.success(response.body() ?: emptyList())
-            else Result.failure(Exception("Lỗi tải lịch sử ôn tập"))
+            val response = api.getSettings()
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception("Lỗi tải cài đặt"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateUserSettings(nativeLangId: Int?, targetLangId: Int?): Result<UserSettingsResponse> {
+        return try {
+            val response = api.updateSettings(UserSettingsUpdate(nativeLangId, targetLangId))
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception("Cập nhật thất bại"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // ====== ANALYTICS ======
+
+    suspend fun getAnalytics(): Result<AnalyticsResponse> {
+        return try {
+            val response = api.getAnalytics()
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception("Lỗi tải analytics"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // ====== STREAK ======
+
+    suspend fun getStreak(): Result<StreakResponse> {
+        return try {
+            val response = api.getStreak()
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception("Lỗi tải streak"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Gọi sau mỗi lần submit review — server tự tính streak theo ngày */
+    suspend fun recordStreak(): Result<StreakResponse> {
+        return try {
+            val response = api.recordStreak()
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception("Lỗi ghi streak"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Đồng bộ streak local lên server khi có mạng */
+    suspend fun syncStreak(req: StreakSyncRequest): Result<StreakResponse> {
+        return try {
+            val response = api.syncStreak(req)
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception("Lỗi đồng bộ streak"))
         } catch (e: Exception) {
             Result.failure(e)
         }

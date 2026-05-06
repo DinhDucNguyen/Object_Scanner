@@ -4,7 +4,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "mysql+pymysql://root:@localhost:3306/language_learning_db"
+    DATABASE_URL: str = "mysql+pymysql://root:@localhost:3307/HeThongHocNgonNgu"
     
     # App
     APP_NAME: str = "Object Language API"

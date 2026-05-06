@@ -3,27 +3,27 @@
 
     <item
         android:id="@+id/dashboardFragment"
-        android:icon="@android:drawable/ic_menu_today"
-        android:title="Trang chủ" />
+        android:icon="@drawable/ic_home"
+        android:title="@string/nav_home" />
 
     <item
         android:id="@+id/scanFragment"
-        android:icon="@android:drawable/ic_menu_camera"
-        android:title="Quét" />
+        android:icon="@drawable/ic_camera"
+        android:title="@string/nav_scan" />
+
+    <item
+        android:id="@+id/dictionaryFragment"
+        android:icon="@drawable/ic_dictionary"
+        android:title="@string/nav_dictionary" />
 
     <item
         android:id="@+id/reviewFragment"
-        android:icon="@android:drawable/ic_menu_edit"
-        android:title="Ôn tập" />
-
-    <item
-        android:id="@+id/historyFragment"
-        android:icon="@android:drawable/ic_menu_recent_history"
-        android:title="Lịch sử" />
+        android:icon="@drawable/ic_book"
+        android:title="@string/nav_review" />
 
     <item
         android:id="@+id/profileFragment"
-        android:icon="@android:drawable/ic_menu_manage"
-        android:title="Tài khoản" />
+        android:icon="@drawable/ic_person"
+        android:title="@string/nav_profile" />
 
 </menu>

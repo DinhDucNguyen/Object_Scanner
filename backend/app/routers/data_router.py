@@ -32,8 +32,3 @@ def get_stats(
     user_id: int = Depends(get_current_user_id)
 ):
     return data_service.get_stats(db, user_id)
-
-
-@router.get("/data-versions")
-def get_data_versions(db: Session = Depends(get_db)):
-    return data_service.get_data_versions(db)

@@ -1,6 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, BigInteger, String, Float, ForeignKey,
-    DECIMAL, TIMESTAMP
+    Column, Integer, String, Float, ForeignKey, TIMESTAMP
 )
 from sqlalchemy.orm import relationship
 from app.db.session import Base
@@ -8,20 +7,15 @@ from datetime import datetime
 
 
 class ScanHistory(Base):
-    __tablename__ = "scan_history"
+    __tablename__ = "LichSuQuet"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    object_id = Column(Integer, ForeignKey("objects.id", ondelete="SET NULL"), nullable=True)
-    image_captured_url = Column(String(255), nullable=True)
-    confidence_score = Column(Float, nullable=True)
-    gps_latitude = Column(DECIMAL(10, 8), nullable=True)
-    gps_longitude = Column(DECIMAL(11, 8), nullable=True)
-    device_model = Column(String(50), nullable=True)
-    scanned_at = Column(TIMESTAMP, default=datetime.utcnow)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("NguoiDung.id", ondelete="CASCADE"), nullable=True)
+    doi_tuong_id = Column(Integer, ForeignKey("DoiTuong.id", ondelete="SET NULL"), nullable=True)
+    url_anh = Column(String(255), nullable=True)
+    do_tin_cay = Column(Float, nullable=True)
+    thoi_gian = Column(TIMESTAMP, default=datetime.utcnow)
 
     user = relationship("User", back_populates="scan_histories")
     object = relationship("Object", back_populates="scan_histories")
-    feedback = relationship("AIFeedbackReport", back_populates="scan", uselist=False)
+    predictions = relationship("AIPrediction", back_populates="scan", cascade="all, delete-orphan")

@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.duc.objectlanguage.ui.auth.LoginFragment"
-        android:label="Đăng nhập">
+        android:label="@string/app_name">
         <action
             android:id="@+id/action_login_to_register"
             app:destination="@id/registerFragment" />
@@ -22,7 +22,7 @@
     <fragment
         android:id="@+id/registerFragment"
         android:name="com.duc.objectlanguage.ui.auth.RegisterFragment"
-        android:label="Đăng ký">
+        android:label="@string/title_register">
         <action
             android:id="@+id/action_register_to_dashboard"
             app:destination="@id/dashboardFragment"
@@ -33,22 +33,22 @@
     <fragment
         android:id="@+id/dashboardFragment"
         android:name="com.duc.objectlanguage.ui.dashboard.DashboardFragment"
-        android:label="Tổng quan" />
+        android:label="@string/title_dashboard" />
 
     <fragment
         android:id="@+id/scanFragment"
         android:name="com.duc.objectlanguage.ui.scan.ScanFragment"
-        android:label="Quét vật thể" />
+        android:label="@string/title_scan" />
 
     <fragment
         android:id="@+id/reviewFragment"
         android:name="com.duc.objectlanguage.ui.review.ReviewFragment"
-        android:label="Ôn tập" />
+        android:label="@string/title_review" />
 
     <fragment
         android:id="@+id/historyFragment"
         android:name="com.duc.objectlanguage.ui.history.HistoryFragment"
-        android:label="Lịch sử" />
+        android:label="@string/title_history" />
 
     <!-- Wave 1: Multi-Modal Review Modes -->
     <fragment
@@ -92,19 +92,29 @@
     <fragment
         android:id="@+id/collectionListFragment"
         android:name="com.duc.objectlanguage.ui.collection.CollectionListFragment"
-        android:label="Collections">
+        android:label="@string/title_collections">
         <action
             android:id="@+id/action_collectionList_to_collectionDetail"
-            app:destination="@id/collectionListFragment" />
+            app:destination="@id/collectionDetailFragment" />
         <action
             android:id="@+id/action_collectionList_to_collectionInsights"
             app:destination="@id/collectionInsightsFragment" />
     </fragment>
 
     <fragment
+        android:id="@+id/collectionDetailFragment"
+        android:name="com.duc.objectlanguage.ui.collection.CollectionDetailFragment"
+        android:label="@string/title_collection_detail">
+        <argument
+            android:name="collectionId"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+
+    <fragment
         android:id="@+id/collectionInsightsFragment"
         android:name="com.duc.objectlanguage.ui.collection.CollectionInsightsFragment"
-        android:label="Collection Insights">
+        android:label="@string/title_collection_insights">
         <argument
             android:name="collectionId"
             app:argType="integer"
@@ -115,16 +125,17 @@
     <fragment
         android:id="@+id/streakFragment"
         android:name="com.duc.objectlanguage.ui.streak.StreakFragment"
-        android:label="Streak Dashboard" />
+        android:label="@string/title_streak" />
 
-    <fragment
-        android:id="@+id/notificationSettingsFragment"
-        android:name="com.duc.objectlanguage.ui.settings.NotificationSettingsFragment"
-        android:label="Notification Settings" />
 
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.duc.objectlanguage.ui.profile.ProfileFragment"
-        android:label="Tài khoản" />
+        android:label="@string/title_profile" />
+
+    <fragment
+        android:id="@+id/dictionaryFragment"
+        android:name="com.duc.objectlanguage.ui.dictionary.DictionaryFragment"
+        android:label="@string/title_dictionary" />
 
 </navigation>

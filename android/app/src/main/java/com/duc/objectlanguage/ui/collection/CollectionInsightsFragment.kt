@@ -37,6 +37,9 @@ class CollectionInsightsFragment : Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Đọc collectionId được truyền từ CollectionListFragment
+        val initialCollectionId = arguments?.getInt("collectionId", 0) ?: 0
+        if (initialCollectionId > 0) viewModel.setInitialCollection(initialCollectionId)
         setupCollectionSpinner()
         observeViewModel()
     }
@@ -51,18 +54,22 @@ class CollectionInsightsFragment : Fragment() {
             )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             binding.collectionSpinner.adapter = adapter
-            
+
+            // Scroll Spinner đến đúng collection đang được chọn
+            val selectedId = viewModel.selectedCollectionId.value
+            if (selectedId != null) {
+                val pos = collections.indexOfFirst { it.id == selectedId }
+                if (pos >= 0) binding.collectionSpinner.setSelection(pos, false)
+            }
+
             binding.collectionSpinner.setOnItemSelectedListener(
                 object : android.widget.AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(
                         parent: android.widget.AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
+                        view: View?, position: Int, id: Long
                     ) {
                         viewModel.selectCollection(collections[position].id)
                     }
-                    
                     override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
                 }
             )

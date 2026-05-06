@@ -21,14 +21,14 @@ class GeminiService:
             for model_name in self.models_to_try:
                 try:
                     self.model = genai.GenerativeModel(model_name)
-                    print(f"✅ Using {model_name}")
+                    print(f"[OK] Using {model_name}")
                     break
                 except Exception as e:
-                    print(f"⚠️ {model_name} not available: {e}")
+                    print(f"[WARN] {model_name} not available: {e}")
                     continue
-            
+
             if not self.model:
-                print("❌ No Gemini model available!")
+                print("[ERROR] No Gemini model available!")
         else:
             self.model = None
 
@@ -37,10 +37,10 @@ class GeminiService:
         Gọi Gemini Vision API để nhận diện vật thể từ ảnh.
         """
         if not self.model:
-            print("⚠️ Gemini model not initialized!")
+            print("[WARN] Gemini model not initialized!")
             return {"_error": "model_not_initialized", "_message": "Gemini model not initialized"}
 
-        print(f"🔍 Calling Gemini API with image size: {len(image_bytes)} bytes")
+        print(f"[INFO] Calling Gemini API with image size: {len(image_bytes)} bytes")
 
         prompt = """Analyze this image and identify the main object. Return a JSON object with this exact format:
 {
@@ -50,23 +50,25 @@ class GeminiService:
         {
             "lang_code": "en",
             "word_name": "English name",
-            "phonetic": "IPA phonetic transcription",
-            "definition": "Vietnamese definition (nghĩa tiếng Việt)",
+            "phonetic": "/IPA transcription/",
+            "part_of_speech": "n",
+            "definition": "từ tiếng Việt: giải thích ngắn gọn bằng tiếng Việt",
             "example_sentences": [
-                "Example sentence 1 in English",
-                "Example sentence 2 in English", 
-                "Example sentence 3 in English"
+                "Example sentence 1 using the word.",
+                "Example sentence 2 using the word.",
+                "Example sentence 3 using the word."
             ]
         }
     ]
 }
 
 Rules:
-- object_code should be lowercase English, use underscores for spaces (e.g., "water_bottle")
-- phonetic must be IPA format (e.g., /ˈteɪ.bəl/)
-- definition must be in Vietnamese
-- Provide exactly 3 example sentences in English
-- Return ONLY valid JSON, no markdown or extra text"""
+- object_code: lowercase English, underscores for spaces (e.g., "water_bottle")
+- phonetic: IPA format with slashes (e.g., /ˈæp.əl/)
+- part_of_speech: use abbreviations ONLY — n (noun), v (verb), adj (adjective), adv (adverb), prep (preposition), conj (conjunction), pron (pronoun), interj (interjection)
+- definition: format MUST be "Vietnamese word: brief Vietnamese explanation" (e.g., "máy tính xách tay: thiết bị điện tử cầm tay dùng để làm việc")
+- example_sentences: EXACTLY 3 sentences in English, simple and suitable for language learners
+- Return ONLY valid JSON, no markdown, no extra text"""
 
         try:
             response = None
@@ -79,10 +81,10 @@ Rules:
                         {"mime_type": "image/jpeg", "data": image_bytes}
                     ])
                     if model_name != "gemini-2.5-flash":
-                        print(f"✅ Fallback model succeeded: {model_name}")
+                        print(f"[OK] Fallback model succeeded: {model_name}")
                     break
                 except ResourceExhausted as e:
-                    print(f"⚠️ Model quota exhausted: {model_name}")
+                    print(f"[WARN] Model quota exhausted: {model_name}")
                     last_quota_error = e
                     continue
 
@@ -98,10 +100,10 @@ Rules:
                 text = text.rsplit("```", 1)[0].strip()
 
             if not text:
-                print("❌ Gemini returned empty text response")
+                print("[ERROR] Gemini returned empty text response")
                 return {"_error": "empty_response", "_message": "Gemini returned empty response"}
 
-            print(f"✅ Gemini response: {text[:200]}...")  # Log first 200 chars
+            print(f"[OK] Gemini response: {text[:200]}...")
 
             # Trích JSON block chắc chắn hơn (lấy từ { đầu tiên tới } cuối cùng)
             json_str = text
@@ -113,7 +115,7 @@ Rules:
             try:
                 result = json.loads(json_str)
                 result = self._sanitize_result(result)
-                print(f"✅ Parsed object_code: {result.get('object_code', 'N/A')}")
+                print(f"[OK] Parsed object_code: {result.get('object_code', 'N/A')}")
                 return result
             except Exception:
                 # Fallback parse khi model trả text gần-JSON nhưng sai format.
@@ -136,13 +138,13 @@ Rules:
                     }]
                 }
                 fallback = self._sanitize_result(fallback)
-                print(f"⚠️ Fallback parsed object_code: {fallback.get('object_code', 'N/A')}")
+                print(f"[WARN] Fallback parsed object_code: {fallback.get('object_code', 'N/A')}")
                 return fallback
         except ResourceExhausted as e:
-            print(f"❌ Gemini quota exceeded: {e}")
+            print(f"[ERROR] Gemini quota exceeded: {e}")
             return {"_error": "quota_exceeded", "_message": str(e)}
         except Exception as e:
-            print(f"❌ Gemini API error: {e}")
+            print(f"[ERROR] Gemini API error: {e}")
             import traceback
             traceback.print_exc()
             return {"_error": "api_error", "_message": str(e)}
@@ -172,6 +174,48 @@ Rules:
         result["object_code"] = object_code
         result["translations"] = translations
         return result
+
+    def translate_text(self, text: str, from_lang: str = "en", to_lang: str = "vi") -> dict | None:
+        if not self.model:
+            return None
+        lang_names = {
+            "vi": "Vietnamese", "en": "English",
+            "ja": "Japanese", "ko": "Korean",
+            "zh": "Chinese", "fr": "French"
+        }
+        from_name = lang_names.get(from_lang, from_lang.upper())
+        to_name = lang_names.get(to_lang, to_lang.upper())
+        is_single = len(text.strip().split()) == 1
+
+        prompt = f"""Translate from {from_name} to {to_name}.
+Return ONLY valid JSON:
+{{
+  "translation": "translated text",
+  "phonetic": {"'IPA phonetic of the translation'" if is_single else "null"},
+  "definitions": {"['brief definition 1', 'brief definition 2']" if is_single else "[]"}
+}}
+Text: {text}"""
+
+        try:
+            response = self.model.generate_content(prompt)
+            raw = (response.text or "").strip()
+            if raw.startswith("```"):
+                raw = raw.split("\n", 1)[1] if "\n" in raw else raw
+                raw = raw.rsplit("```", 1)[0].strip()
+            first, last = raw.find("{"), raw.rfind("}")
+            if first != -1 and last != -1:
+                raw = raw[first:last + 1]
+            result = json.loads(raw)
+            return {
+                "translation": result.get("translation", ""),
+                "phonetic": result.get("phonetic"),
+                "definitions": result.get("definitions", [])
+            }
+        except ResourceExhausted:
+            return {"_error": "quota_exceeded"}
+        except Exception as e:
+            print(f"[ERROR] Gemini translate error: {e}")
+            return None
 
     def get_example_sentences(self, word: str, lang_code: str = "en", count: int = 3) -> list:
         """

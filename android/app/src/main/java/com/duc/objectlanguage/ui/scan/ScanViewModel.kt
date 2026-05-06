@@ -1,6 +1,8 @@
 package com.duc.objectlanguage.ui.scan
 
 import android.app.Application
+import android.app.AlertDialog
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.util.Log
@@ -11,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.model.ScanResponse
 import com.duc.objectlanguage.data.model.TranslationResponse
+import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
@@ -21,6 +24,7 @@ import java.io.File
 class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repo = (application as ObjectLanguageApp).repository
+    private val collectionRepo = CollectionRepository((application as ObjectLanguageApp).tokenManager)
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
@@ -71,11 +75,12 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                         result.fold(
                             onSuccess = {
                                 if (it.translations.isNotEmpty()) {
-                                    // Tìm thấy trong DB! Không cần Gemini
-                                    Log.d("ScanViewModel", "✅ Found in DB: ${it.objectCode}")
+                                    Log.d("ScanViewModel", "Found in DB: ${it.objectCode}")
                                     _scanResult.value = it
                                     val t = it.translations[0]
-                                    loadExamples(t.wordName, t.languageCode ?: "en")
+                                    val stored = t.examples.mapNotNull { e -> e.cauViDu }
+                                    if (stored.isNotEmpty()) _examples.value = stored
+                                    else loadExamplesFromGemini(t.wordName, t.languageCode ?: "en")
                                     _isLoading.value = false
                                     return@launch
                                 } else {
@@ -119,10 +124,11 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     }
 
                     _scanResult.value = it
-                    // Auto-load examples cho từ đầu tiên
                     if (it.translations.isNotEmpty()) {
                         val t = it.translations[0]
-                        loadExamples(t.wordName, t.languageCode ?: "en")
+                        val stored = t.examples.mapNotNull { e -> e.cauViDu }
+                        if (stored.isNotEmpty()) _examples.value = stored
+                        else loadExamplesFromGemini(t.wordName, t.languageCode ?: "en")
                     } else {
                         Log.w("ScanViewModel", "No translations found!")
                     }
@@ -198,7 +204,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadExamples(word: String, lang: String) {
+    fun loadExamplesFromGemini(word: String, lang: String) {
         viewModelScope.launch {
             _examples.value = repo.getExamples(word, lang)
         }
@@ -247,6 +253,29 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearAddedMsg() { _addedMsg.value = null }
+
+    fun showAddToCollectionDialog(translationId: Int, context: Context) {
+        viewModelScope.launch {
+            val result = collectionRepo.getCollections()
+            val collections = result.getOrNull()
+            if (collections.isNullOrEmpty()) {
+                _addedMsg.value = "Chưa có bộ sưu tập nào. Tạo bộ sưu tập trong mục Tài khoản nhé!"
+                return@launch
+            }
+            val labels = collections.map { it.name }.toTypedArray()
+            AlertDialog.Builder(context)
+                .setTitle("Thêm vào bộ sưu tập")
+                .setItems(labels) { _, which ->
+                    val collectionId = collections[which].id
+                    viewModelScope.launch {
+                        val r = collectionRepo.addToCollection(collectionId, translationId)
+                        _addedMsg.value = if (r.isSuccess) "Đã thêm vào \"${collections[which].name}\"" else "Lỗi: ${r.exceptionOrNull()?.message}"
+                    }
+                }
+                .setNegativeButton("Huỷ", null)
+                .show()
+        }
+    }
 
     override fun onCleared() {
         super.onCleared()

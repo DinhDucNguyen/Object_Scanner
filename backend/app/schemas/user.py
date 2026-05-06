@@ -12,7 +12,6 @@ class UserCreate(BaseModel):
     email: str
     password: str
     full_name: Optional[str] = None
-    student_id: Optional[str] = None
 
     @field_validator("username")
     @classmethod
@@ -54,11 +53,9 @@ class UserResponse(BaseModel):
 
 class ProfileResponse(BaseModel):
     user_id: int
-    full_name: Optional[str]
-    avatar_url: Optional[str]
-    bio: Optional[str]
-    student_id: Optional[str]
-    university: Optional[str]
+    full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -66,20 +63,18 @@ class ProfileResponse(BaseModel):
 
 class UserSettingsResponse(BaseModel):
     user_id: int
-    native_lang_code: str
-    target_lang_code: str
-    theme: str
-    ai_precision_threshold: float
+    native_lang_id: int
+    target_lang_id: int
+    native_lang_code: Optional[str] = None
+    target_lang_code: Optional[str] = None
 
     class Config:
         from_attributes = True
 
 
 class UserSettingsUpdate(BaseModel):
-    native_lang_code: Optional[str] = None
-    target_lang_code: Optional[str] = None
-    theme: Optional[str] = None
-    ai_precision_threshold: Optional[float] = None
+    native_lang_id: Optional[int] = None
+    target_lang_id: Optional[int] = None
 
 
 class TokenResponse(BaseModel):
@@ -91,4 +86,3 @@ class TokenResponse(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str
-

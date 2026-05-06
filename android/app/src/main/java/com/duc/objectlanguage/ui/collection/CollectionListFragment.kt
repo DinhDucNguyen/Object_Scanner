@@ -48,14 +48,15 @@ class CollectionListFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = CollectionAdapter(
             onCollectionClick = { collection ->
+                // Navigate to detail (word list)
                 val bundle = Bundle().apply { putInt("collectionId", collection.id) }
-                findNavController().navigate(R.id.action_collectionList_to_collectionInsights, bundle)
+                findNavController().navigate(R.id.action_collectionList_to_collectionDetail, bundle)
             },
             onDeleteClick = { collection ->
                 showDeleteConfirmation(collection.id, collection.name)
             },
             onInsightsClick = { collection ->
-                // Navigate to insights with collection ID
+                // Navigate to insights/analytics
                 val bundle = Bundle().apply { putInt("collectionId", collection.id) }
                 findNavController().navigate(R.id.action_collectionList_to_collectionInsights, bundle)
             }
@@ -119,24 +120,24 @@ class CollectionListFragment : Fragment() {
         val nameInput = dialogView.findViewById<TextInputEditText>(R.id.collectionNameInput)
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Create Collection")
+            .setTitle(R.string.collection_dialog_create_title)
             .setView(dialogView)
-            .setPositiveButton("Create") { _, _ ->
+            .setPositiveButton(R.string.btn_create) { _, _ ->
                 val name = nameInput.text?.toString() ?: ""
                 viewModel.createCollection(name, isPublic = false)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
-    
+
     private fun showDeleteConfirmation(collectionId: Int, collectionName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Delete Collection")
-            .setMessage("Are you sure you want to delete '$collectionName'?")
-            .setPositiveButton("Delete") { _, _ ->
+            .setTitle(R.string.collection_dialog_delete_title)
+            .setMessage(getString(R.string.collection_dialog_delete_msg, collectionName))
+            .setPositiveButton(R.string.btn_delete) { _, _ ->
                 viewModel.deleteCollection(collectionId, collectionName)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.btn_cancel, null)
             .show()
     }
     

@@ -44,7 +44,7 @@ interface ApiService {
 
     // ====== LEARNING ======
     @POST("api/learning/add")
-    suspend fun addToLearning(@Query("translation_id") id: Int): Response<Map<String, Any>>
+    suspend fun addToLearning(@Query("translation_id") id: Int): Response<ResponseBody>
 
     // ====== REVIEW ======
     @GET("api/review")
@@ -64,10 +64,38 @@ interface ApiService {
     @GET("api/history")
     suspend fun getHistory(@Query("limit") limit: Int = 50): Response<List<HistoryItem>>
 
-    // ====== ANALYTICS ======
-    @GET("api/analytics/progress")
-    suspend fun getProgressHistory(): Response<List<ProgressHistoryItem>>
+    // ====== DICTIONARY / TRANSLATE ======
+    @GET("api/dictionary/lookup")
+    suspend fun lookupWord(
+        @Query("word") word: String,
+        @Query("from_lang") fromLang: String = "en",
+        @Query("to_lang") toLang: String = "en"
+    ): Response<DictionaryResponse>
 
-    @GET("api/analytics/reviews")
-    suspend fun getReviewHistory(): Response<List<ReviewHistoryItem>>
+    @POST("api/dictionary/translate")
+    suspend fun translate(@Body req: TranslateRequest): Response<TranslateResponse>
+
+    // ====== USER PROFILE / SETTINGS ======
+    @GET("api/auth/profile")
+    suspend fun getProfile(): Response<ProfileData>
+
+    @GET("api/auth/settings")
+    suspend fun getSettings(): Response<UserSettingsResponse>
+
+    @PUT("api/auth/settings")
+    suspend fun updateSettings(@Body req: UserSettingsUpdate): Response<UserSettingsResponse>
+
+    // ====== ANALYTICS ======
+    @GET("api/analytics")
+    suspend fun getAnalytics(): Response<AnalyticsResponse>
+
+    // ====== STREAK ======
+    @GET("api/streak")
+    suspend fun getStreak(): Response<StreakResponse>
+
+    @POST("api/streak/record")
+    suspend fun recordStreak(): Response<StreakResponse>
+
+    @POST("api/streak/sync")
+    suspend fun syncStreak(@Body req: StreakSyncRequest): Response<StreakResponse>
 }

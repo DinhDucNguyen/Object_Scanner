@@ -94,4 +94,3 @@ def text_to_speech(
         media_type="audio/mpeg",
         headers={"Content-Disposition": f"inline; filename={word}.mp3"}
     )
-

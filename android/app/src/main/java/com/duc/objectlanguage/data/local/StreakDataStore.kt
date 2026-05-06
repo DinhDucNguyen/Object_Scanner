@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.*
@@ -109,13 +110,10 @@ class StreakDataStore(private val context: Context) {
      * Check if user reviewed today
      */
     suspend fun hasReviewedToday(): Boolean {
-        var result = false
-        context.dataStore.data.collect { prefs ->
-            val lastReviewDate = prefs[LAST_REVIEW_DATE] ?: 0L
-            val today = getTodayStartTimestamp()
-            result = lastReviewDate >= today
-        }
-        return result
+        val prefs = context.dataStore.data.first()
+        val lastReviewDate = prefs[LAST_REVIEW_DATE] ?: 0L
+        val today = getTodayStartTimestamp()
+        return lastReviewDate >= today
     }
     
     /**
@@ -134,6 +132,20 @@ class StreakDataStore(private val context: Context) {
         }
     }
     
+    /**
+     * Ghi đè dữ liệu local nếu giá trị mới cao hơn (dùng khi đồng bộ từ server về)
+     */
+    suspend fun overrideIfHigher(newStreak: Int, newLongest: Int, newTotal: Int) {
+        context.dataStore.edit { prefs ->
+            val cur = prefs[CURRENT_STREAK] ?: 0
+            val lng = prefs[LONGEST_STREAK] ?: 0
+            val tot = prefs[TOTAL_REVIEWS]  ?: 0
+            if (newStreak  > cur) prefs[CURRENT_STREAK] = newStreak
+            if (newLongest > lng) prefs[LONGEST_STREAK] = newLongest
+            if (newTotal   > tot) prefs[TOTAL_REVIEWS]  = newTotal
+        }
+    }
+
     /**
      * Reset all streak data (for testing)
      */

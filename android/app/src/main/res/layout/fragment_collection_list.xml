@@ -27,7 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
-                android:hint="Search collections..."
+                android:hint="@string/collection_search_hint"
                 android:textColorHint="@color/text_secondary"
                 android:textColor="@color/text_primary"
                 android:drawableStart="@android:drawable/ic_menu_search"
@@ -67,7 +67,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No Collections Yet"
+                android:text="@string/collection_empty_title"
                 android:textColor="@color/text_primary"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -76,7 +76,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Create your first collection\nto organize your vocabulary"
+                android:text="@string/collection_empty_subtitle"
                 android:textAlignment="center"
                 android:textColor="@color/text_secondary" />
 
@@ -102,7 +102,7 @@
         app:backgroundTint="@color/primary"
         app:tint="@color/text_on_primary"
         app:elevation="0dp"
-        android:contentDescription="Add Collection"
+        android:contentDescription="@string/collection_cd_add"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

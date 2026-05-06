@@ -27,10 +27,10 @@ interface CollectionApiService {
         @Body request: AddToCollectionRequest
     )
     
-    @DELETE("api/collections/{collectionId}/items/{itemId}")
+    @DELETE("api/collections/{collectionId}/items/{translationId}")
     suspend fun removeFromCollection(
         @Path("collectionId") collectionId: Int,
-        @Path("itemId") itemId: Int
+        @Path("translationId") translationId: Int
     )
     
     @GET("api/collections/{id}/insights")

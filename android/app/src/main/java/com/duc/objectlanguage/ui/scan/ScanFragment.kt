@@ -1,11 +1,14 @@
 package com.duc.objectlanguage.ui.scan
 
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,7 +23,9 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.duc.objectlanguage.databinding.FragmentScanBinding
+import com.yalantis.ucrop.UCrop
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -34,11 +39,60 @@ class ScanFragment : Fragment() {
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
 
-    private val requestPermission = registerForActivityResult(
+    private val requestCameraPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) startCamera()
         else Toast.makeText(requireContext(), "Cần quyền camera", Toast.LENGTH_LONG).show()
+    }
+
+    private val requestGalleryPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) openGallery()
+        else Toast.makeText(requireContext(), "Cần quyền truy cập ảnh", Toast.LENGTH_LONG).show()
+    }
+
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri ?: return@registerForActivityResult
+        try {
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            val imageBytes = inputStream?.readBytes()
+            inputStream?.close()
+            if (imageBytes == null || imageBytes.isEmpty()) {
+                Toast.makeText(requireContext(), "Không đọc được ảnh", Toast.LENGTH_SHORT).show()
+                return@registerForActivityResult
+            }
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            if (bitmap == null) {
+                Toast.makeText(requireContext(), "Ảnh không hợp lệ", Toast.LENGTH_SHORT).show()
+                return@registerForActivityResult
+            }
+            showPreviewDialog(imageBytes, bitmap)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Lỗi đọc ảnh: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e("ScanFragment", "Gallery read error", e)
+        }
+    }
+
+    private val cropLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val croppedUri = UCrop.getOutput(result.data!!) ?: return@registerForActivityResult
+            try {
+                val stream = requireContext().contentResolver.openInputStream(croppedUri)
+                val croppedBytes = stream?.readBytes()
+                stream?.close()
+                if (croppedBytes != null) {
+                    viewModel.scanImage(croppedBytes)
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Lỗi đọc ảnh đã crop: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -55,7 +109,7 @@ class ScanFragment : Fragment() {
             == PackageManager.PERMISSION_GRANTED) {
             startCamera()
         } else {
-            requestPermission.launch(Manifest.permission.CAMERA)
+            requestCameraPermission.launch(Manifest.permission.CAMERA)
         }
 
         // ===== Observers =====
@@ -82,36 +136,40 @@ class ScanFragment : Fragment() {
                 binding.resultCard.visibility = View.VISIBLE
                 binding.cameraOverlay.visibility = View.GONE
                 binding.btnCapture.visibility = View.GONE
+                binding.btnGallery.visibility = View.GONE
                 binding.tvObjectName.text = result.objectCode.replaceFirstChar { it.uppercase() }
                 binding.tvCategory.text = result.categoryName ?: "Nhận diện bằng AI"
 
-                // Hiển thị translations
-                val sb = StringBuilder()
-                result.translations.forEach { t ->
-                    val flag = getFlagEmoji(t.languageCode ?: "")
-                    sb.appendLine("$flag ${t.languageName}: ${t.wordName}")
-                    if (!t.phonetic.isNullOrEmpty()) sb.appendLine("   🔤 ${t.phonetic}")
-                    if (!t.definition.isNullOrEmpty()) sb.appendLine("   📖 ${t.definition}")
-                    sb.appendLine()
-                }
-                binding.tvTranslations.text = sb.toString().trimEnd()
+                // Chỉ hiển thị bản dịch tiếng Anh
+                val enTrans = result.translations.firstOrNull { it.languageCode == "en" }
+                    ?: result.translations.firstOrNull()
+                if (enTrans != null) {
+                    val sb = StringBuilder()
+                    val pos = if (!enTrans.partOfSpeech.isNullOrEmpty()) " (${enTrans.partOfSpeech})" else ""
+                    sb.appendLine("🇺🇸  ${enTrans.wordName}$pos")
+                    if (!enTrans.phonetic.isNullOrEmpty()) sb.appendLine("🔤  ${enTrans.phonetic}")
+                    if (!enTrans.definition.isNullOrEmpty()) sb.appendLine("📖  ${enTrans.definition}")
+                    binding.tvTranslations.text = sb.toString().trimEnd()
 
-                // Buttons cho từng translation
-                if (result.translations.isNotEmpty()) {
-                    val first = result.translations[0]
                     binding.btnPlayAudio.visibility = View.VISIBLE
                     binding.btnPlayAudio.setOnClickListener {
-                        viewModel.playAudio(first.wordName, first.languageCode ?: "en")
+                        viewModel.playAudio(enTrans.wordName, "en")
                     }
                     binding.btnAddLearn.visibility = View.VISIBLE
                     binding.btnAddLearn.setOnClickListener {
-                        viewModel.addToLearning(first.id)
+                        viewModel.addToLearning(enTrans.id)
+                    }
+
+                    binding.btnAddToCollection.visibility = View.VISIBLE
+                    binding.btnAddToCollection.setOnClickListener {
+                        viewModel.showAddToCollectionDialog(enTrans.id, requireContext())
                     }
                 }
             } else {
                 binding.resultCard.visibility = View.GONE
                 binding.cameraOverlay.visibility = View.VISIBLE
                 binding.btnCapture.visibility = View.VISIBLE
+                binding.btnGallery.visibility = View.VISIBLE
             }
         }
 
@@ -141,6 +199,10 @@ class ScanFragment : Fragment() {
 
         binding.btnCapture.setOnClickListener {
             captureImage()
+        }
+
+        binding.btnGallery.setOnClickListener {
+            openGalleryWithPermission()
         }
 
         binding.btnRetake.setOnClickListener {
@@ -269,10 +331,7 @@ class ScanFragment : Fragment() {
             }
             .setNeutralButton("✂️ Crop lại") { dialog, _ ->
                 dialog.dismiss()
-                // TODO: Mở crop activity (cần thêm UCrop library)
-                // Tạm thời fallback về quét luôn
-                Toast.makeText(requireContext(), "Tính năng crop đang phát triển. Quét ảnh gốc...", Toast.LENGTH_SHORT).show()
-                viewModel.scanImage(imageBytes)
+                launchCrop(imageBytes)
             }
             .setNegativeButton("🔄 Chụp lại") { dialog, _ ->
                 dialog.dismiss()
@@ -282,33 +341,49 @@ class ScanFragment : Fragment() {
             .show()
     }
 
-    /**
-     * ✅ HÀM BỔ SUNG: Compress ảnh trước khi gửi API (giảm thời gian upload)
-     */
-    private fun compressImage(imageBytes: ByteArray, quality: Int = 85): ByteArray {
-        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-        val stream = ByteArrayOutputStream()
-        
-        // Resize xuống max 800x800 nếu ảnh quá lớn
-        val maxSize = 800
-        val ratio = maxSize.toFloat() / maxOf(bitmap.width, bitmap.height)
-        val newWidth = (bitmap.width * ratio).toInt()
-        val newHeight = (bitmap.height * ratio).toInt()
-        val resized = if (ratio < 1.0f) {
-            Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
-        } else bitmap
-        
-        resized.compress(Bitmap.CompressFormat.JPEG, quality, stream)
-        return stream.toByteArray()
+    private fun openGalleryWithPermission() {
+        // Android 11+ (API 30): GetContent() uses system picker — no runtime permission needed
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            openGallery()
+            return
+        }
+        // Android < 11: needs READ_EXTERNAL_STORAGE
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+            == PackageManager.PERMISSION_GRANTED) {
+            openGallery()
+        } else {
+            requestGalleryPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+    }
+
+    private fun openGallery() {
+        pickImageLauncher.launch("image/*")
+    }
+
+    private fun launchCrop(imageBytes: ByteArray) {
+        try {
+            val srcFile = File.createTempFile("crop_src_", ".jpg", requireContext().cacheDir)
+            srcFile.writeBytes(imageBytes)
+            val dstFile = File.createTempFile("crop_dst_", ".jpg", requireContext().cacheDir)
+            val options = UCrop.Options().apply {
+                setFreeStyleCropEnabled(true)   // kéo tự do 4 cạnh
+                setHideBottomControls(false)
+                setShowCropGrid(true)
+            }
+            val intent = UCrop.of(Uri.fromFile(srcFile), Uri.fromFile(dstFile))
+                .withMaxResultSize(1024, 1024)
+                .withOptions(options)
+                .getIntent(requireContext())
+            cropLauncher.launch(intent)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Không mở được crop: ${e.message}", Toast.LENGTH_SHORT).show()
+            viewModel.scanImage(imageBytes)
+        }
     }
 
     private fun getFlagEmoji(langCode: String): String = when (langCode) {
         "vi" -> "🇻🇳"
         "en" -> "🇺🇸"
-        "ja" -> "🇯🇵"
-        "ko" -> "🇰🇷"
-        "zh" -> "🇨🇳"
-        "fr" -> "🇫🇷"
         else -> "🌐"
     }
 

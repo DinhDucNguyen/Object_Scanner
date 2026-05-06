@@ -23,12 +23,26 @@ data class UserResponse(
     val role: String
 )
 
+// ====== SETTINGS ======
+
+data class UserSettingsResponse(
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("native_lang_id") val nativeLangId: Int,
+    @SerializedName("target_lang_id") val targetLangId: Int,
+    @SerializedName("native_lang_code") val nativeLangCode: String?,
+    @SerializedName("target_lang_code") val targetLangCode: String?
+)
+
+data class UserSettingsUpdate(
+    @SerializedName("native_lang_id") val nativeLangId: Int?,
+    @SerializedName("target_lang_id") val targetLangId: Int?
+)
+
 // ====== SCAN ======
 
 data class ScanRequest(
     @SerializedName("object_code") val objectCode: String,
-    val confidence: Float = 0f,
-    @SerializedName("device_model") val deviceModel: String = android.os.Build.MODEL
+    val confidence: Float = 0f
 )
 
 data class ScanResponse(
@@ -40,6 +54,13 @@ data class ScanResponse(
     val translations: List<TranslationResponse>
 )
 
+data class ViDuResponse(
+    val id: Int,
+    @SerializedName("cau_vi_du") val cauViDu: String?,
+    @SerializedName("dich_nghia") val dichNghia: String?,
+    @SerializedName("nguon_du_lieu") val nguonDuLieu: String?
+)
+
 data class TranslationResponse(
     val id: Int,
     @SerializedName("object_id") val objectId: Int,
@@ -48,8 +69,11 @@ data class TranslationResponse(
     @SerializedName("language_name") val languageName: String?,
     @SerializedName("word_name") val wordName: String,
     val phonetic: String?,
+    @SerializedName("part_of_speech") val partOfSpeech: String?,
     val definition: String?,
-    @SerializedName("example_sentence") val exampleSentence: String?
+    val examples: List<ViDuResponse> = emptyList(),
+    @SerializedName("audio_url") val audioUrl: String?,
+    @SerializedName("data_source") val dataSource: String?
 )
 
 data class ExamplesResponse(
@@ -69,7 +93,7 @@ data class ReviewCardResponse(
     @SerializedName("word_name") val wordName: String,
     val phonetic: String?,
     val definition: String?,
-    @SerializedName("example_sentence") val exampleSentence: String?,
+    val examples: List<ViDuResponse> = emptyList(),
     @SerializedName("language_code") val languageCode: String,
     @SerializedName("language_name") val languageName: String,
     @SerializedName("easiness_factor") val easinessFactor: Float,
@@ -103,8 +127,8 @@ data class HistoryItem(
     val id: Int,
     @SerializedName("object_code") val objectCode: String?,
     @SerializedName("confidence_score") val confidenceScore: Float?,
-    @SerializedName("scan_date") val scanDate: String?,
-    @SerializedName("device_model") val deviceModel: String?
+    @SerializedName("scanned_at") val scanDate: String?,
+    @SerializedName("image_url") val imageUrl: String?
 )
 
 data class ProgressHistoryItem(
@@ -118,4 +142,80 @@ data class ProgressHistoryItem(
 data class ReviewHistoryItem(
     val id: Int,
     @SerializedName("reviewed_at") val reviewedAt: Long
+)
+
+// ====== DICTIONARY ======
+
+data class DictionaryResponse(
+    val word: String,
+    val phonetic: String?,
+    @SerializedName("audio_url") val audioUrl: String?,
+    val meanings: List<DictionaryMeaning>,
+    val source: String
+)
+
+data class DictionaryMeaning(
+    @SerializedName("part_of_speech") val partOfSpeech: String,
+    val definition: String,
+    val example: String?
+)
+
+// ====== TRANSLATE ======
+
+data class TranslateRequest(
+    val text: String,
+    @SerializedName("from_lang") val fromLang: String = "en",
+    @SerializedName("to_lang") val toLang: String = "vi"
+)
+
+data class TranslateResponse(
+    val original: String,
+    val translation: String,
+    val phonetic: String?,
+    val definitions: List<String> = emptyList(),
+    @SerializedName("from_lang") val fromLang: String,
+    @SerializedName("to_lang") val toLang: String
+)
+
+// ====== PROFILE ======
+
+data class ProfileData(
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("full_name") val fullName: String?,
+    @SerializedName("avatar_url") val avatarUrl: String?,
+    val bio: String?
+)
+
+// ====== STREAK ======
+
+data class StreakResponse(
+    @SerializedName("streak_hien_tai") val streakHienTai: Int,
+    @SerializedName("streak_dai_nhat") val streakDaiNhat: Int,
+    @SerializedName("tong_luot_on")    val tongLuotOn: Int,
+    @SerializedName("ngay_on_cuoi")    val ngayOnCuoi: String?
+)
+
+// ====== ANALYTICS ======
+
+data class DailyReview(
+    @SerializedName("date") val date: String,
+    @SerializedName("count") val count: Int
+)
+
+data class MasteryDist(
+    @SerializedName("new") val newCount: Int,
+    @SerializedName("learning") val learning: Int,
+    @SerializedName("mastered") val mastered: Int
+)
+
+data class AnalyticsResponse(
+    @SerializedName("weekly_reviews") val weeklyReviews: List<DailyReview>,
+    @SerializedName("mastery") val mastery: MasteryDist
+)
+
+data class StreakSyncRequest(
+    @SerializedName("streak_hien_tai") val streakHienTai: Int,
+    @SerializedName("streak_dai_nhat") val streakDaiNhat: Int,
+    @SerializedName("tong_luot_on")    val tongLuotOn: Int,
+    @SerializedName("ngay_on_cuoi")    val ngayOnCuoi: String?   // "yyyy-MM-dd"
 )

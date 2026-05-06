@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.data.model.CollectionDetail
@@ -65,7 +66,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
                     _error.value = null
                 },
                 onFailure = { e ->
-                    _error.value = "Failed to load collections: ${e.message}"
+                    _error.value = e.message
                 }
             )
             
@@ -87,7 +88,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
                     _error.value = null
                 },
                 onFailure = { e ->
-                    _error.value = "Failed to load collection: ${e.message}"
+                    _error.value = "Lỗi tải chi tiết: ${e.message}"
                 }
             )
             
@@ -100,7 +101,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
      */
     fun createCollection(name: String, isPublic: Boolean) {
         if (name.isBlank()) {
-            _error.value = "Collection name cannot be empty"
+            _error.value = getApplication<Application>().getString(R.string.collection_name_empty)
             return
         }
         
@@ -110,11 +111,11 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
             
             result.fold(
                 onSuccess = {
-                    _successMessage.value = "Collection '$name' created!"
+                    _successMessage.value = getApplication<Application>().getString(R.string.collection_created, name)
                     loadCollections()
                 },
                 onFailure = { e ->
-                    _error.value = "Failed to create collection: ${e.message}"
+                    _error.value = "Lỗi tạo bộ sưu tập: ${e.message}"
                 }
             )
             
@@ -132,11 +133,11 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
             
             result.fold(
                 onSuccess = {
-                    _successMessage.value = "Collection '$collectionName' deleted"
+                    _successMessage.value = getApplication<Application>().getString(R.string.collection_deleted, collectionName)
                     loadCollections()
                 },
                 onFailure = { e ->
-                    _error.value = "Failed to delete collection: ${e.message}"
+                    _error.value = "Lỗi xoá bộ sưu tập: ${e.message}"
                 }
             )
             
@@ -154,11 +155,11 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
             
             result.fold(
                 onSuccess = {
-                    _successMessage.value = "Added to collection"
+                    _successMessage.value = getApplication<Application>().getString(R.string.collection_added)
                     loadCollectionDetail(collectionId)
                 },
                 onFailure = { e ->
-                    _error.value = "Failed to add item: ${e.message}"
+                    _error.value = "Lỗi thêm từ: ${e.message}"
                 }
             )
             
@@ -169,18 +170,18 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
     /**
      * Remove item from collection
      */
-    fun removeFromCollection(collectionId: Int, itemId: Int) {
+    fun removeFromCollection(collectionId: Int, translationId: Int) {
         viewModelScope.launch {
             _isLoading.value = true
-            val result = repo.removeFromCollection(collectionId, itemId)
+            val result = repo.removeFromCollection(collectionId, translationId)
             
             result.fold(
                 onSuccess = {
-                    _successMessage.value = "Removed from collection"
+                    _successMessage.value = getApplication<Application>().getString(R.string.collection_removed)
                     loadCollectionDetail(collectionId)
                 },
                 onFailure = { e ->
-                    _error.value = "Failed to remove item: ${e.message}"
+                    _error.value = "Lỗi xoá từ: ${e.message}"
                 }
             )
             

@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, BigInteger, String, Boolean, ForeignKey,
+    Column, Integer, String, Float, ForeignKey,
     TIMESTAMP, Enum, Text
 )
 from sqlalchemy.orm import relationship
@@ -8,24 +8,38 @@ from datetime import datetime
 import enum
 
 
-class ErrorType(str, enum.Enum):
-    wrong_object = "wrong_object"
-    wrong_translation = "wrong_translation"
-    bad_image = "bad_image"
+class NguonAI(str, enum.Enum):
+    yolo = "yolo"
+    gemini = "gemini"
 
 
-class AIFeedbackReport(Base):
-    __tablename__ = "ai_feedback_reports"
+class TrangThaiDuyet(str, enum.Enum):
+    cho_duyet = "cho_duyet"  # Chờ admin kiểm duyệt
+    da_duyet  = "da_duyet"   # Đã duyệt → đã insert vào bảng chính
+    tu_choi   = "tu_choi"    # Bị từ chối
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    scan_id = Column(BigInteger, ForeignKey("scan_history.id", ondelete="CASCADE"), nullable=False)
-    reported_by = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    error_type = Column(Enum(ErrorType), nullable=True)
-    correct_label = Column(String(100), nullable=True)
-    user_note = Column(Text, nullable=True)
-    is_resolved = Column(Boolean, default=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    scan = relationship("ScanHistory", back_populates="feedback")
-    reporter = relationship("User", back_populates="feedback_reports")
+class AIPrediction(Base):
+    __tablename__ = "DuDoanAI"
+
+    id          = Column(Integer, primary_key=True, autoincrement=True)
+    scan_id     = Column(Integer, ForeignKey("LichSuQuet.id", ondelete="CASCADE"), nullable=False)
+    nguon_ai    = Column(Enum(NguonAI), nullable=False)
+    nhan_du_doan = Column(String(255), nullable=True)
+    do_tin_cay  = Column(Float, nullable=True)
+
+    # Payload từ vựng Gemini (JSON string).
+    # Format: {"object_code": "...", "category": "...", "translations": [...]}
+    # Chỉ chuyển sang BanDich/ViDu sau khi admin duyệt.
+    mo_ta       = Column(Text, nullable=True)
+
+    # Thay thế ket_qua_dung (Boolean) bằng trang_thai (Enum) rõ nghĩa hơn.
+    trang_thai  = Column(
+        Enum(TrangThaiDuyet),
+        default=TrangThaiDuyet.cho_duyet,
+        nullable=False,
+        index=True,
+    )
+    thoi_gian   = Column(TIMESTAMP, default=datetime.utcnow)
+
+    scan = relationship("ScanHistory", back_populates="predictions")

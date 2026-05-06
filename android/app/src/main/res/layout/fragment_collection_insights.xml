@@ -29,7 +29,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Select Collection"
+                    android:text="@string/ci_select_collection"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
@@ -48,7 +48,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="📊 Statistics"
+            android:text="@string/ci_stats_title"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="12dp" />
@@ -87,7 +87,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Items"
+                        android:text="@string/ci_total_items"
                         android:textSize="12sp" />
 
                 </LinearLayout>
@@ -121,7 +121,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Reviewed"
+                        android:text="@string/ci_reviewed"
                         android:textSize="12sp" />
 
                 </LinearLayout>
@@ -155,7 +155,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Mastered"
+                        android:text="@string/ci_mastered"
                         android:textSize="12sp" />
 
                 </LinearLayout>
@@ -189,7 +189,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Success Rate"
+                        android:text="@string/ci_success_rate"
                         android:textSize="12sp" />
 
                 </LinearLayout>

@@ -59,15 +59,15 @@ def delete_collection(
     return {"message": "Collection deleted successfully"}
 
 
-@router.delete("/{collection_id}/items/{item_id}")
+@router.delete("/{collection_id}/items/{translation_id}")
 def remove_from_collection(
     collection_id: int,
-    item_id: int,
+    translation_id: int,
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id)
 ):
-    """Remove item from collection"""
-    collection_service.remove_from_collection(db, collection_id, item_id, user_id)
+    """Remove item from collection using composite PK (collection_id + translation_id)"""
+    collection_service.remove_from_collection(db, collection_id, translation_id, user_id)
     return {"message": "Item removed from collection"}
 
 
@@ -79,4 +79,3 @@ def get_collection_insights(
 ):
     """Get analytics and insights for a collection"""
     return collection_service.get_collection_insights(db, collection_id, user_id)
-

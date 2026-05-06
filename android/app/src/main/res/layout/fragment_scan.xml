@@ -21,7 +21,7 @@
         android:id="@+id/cameraOverlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="📷 Hướng camera vào vật thể\nvà nhấn nút chụp"
+        android:text="@string/scan_overlay"
         android:textColor="@color/text_on_primary"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -57,20 +57,36 @@
             android:id="@+id/tvLoadingMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔍 Gemini đang phân tích...\n(5-10 giây)"
+            android:text="@string/scan_analyzing"
             android:textColor="@color/text_on_primary"
             android:textSize="14sp"
             android:textAlignment="center"
             android:layout_marginTop="16dp" />
     </LinearLayout>
 
-    <!-- Capture Button -->
+    <!-- Gallery Button (bottom-left) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnGallery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="42dp"
+        android:layout_marginStart="64dp"
+        android:contentDescription="@string/scan_cd_gallery"
+        android:src="@android:drawable/ic_menu_gallery"
+        app:backgroundTint="@color/surface"
+        app:tint="@color/primary"
+        app:fabSize="mini"
+        app:elevation="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Capture Button (centered) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnCapture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:contentDescription="Chụp"
+        android:contentDescription="@string/scan_cd_capture"
         android:src="@android:drawable/ic_menu_camera"
         app:backgroundTint="@color/primary"
         app:tint="@color/text_on_primary"
@@ -142,7 +158,7 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="56dp"
-                    android:text="🔊 Phát"
+                    android:text="@string/scan_btn_play"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     app:cornerRadius="12dp"
@@ -155,7 +171,7 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="56dp"
-                    android:text="📚 Học"
+                    android:text="@string/scan_btn_learn"
                     android:textColor="@color/primary"
                     android:textSize="14sp"
                     android:textStyle="bold"
@@ -164,6 +180,21 @@
                     app:strokeWidth="2dp"
                     app:cornerRadius="12dp"
                     android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAddToCollection"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="56dp"
+                    android:text="📚"
+                    android:textSize="22sp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    app:strokeColor="@color/divider"
+                    app:strokeWidth="2dp"
+                    app:cornerRadius="12dp"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
             <!-- Examples -->
@@ -182,7 +213,7 @@
                 android:id="@+id/btnRetake"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:text="📷 Chụp lại"
+                android:text="@string/scan_btn_retake"
                 android:textColor="@color/text_on_primary"
                 android:textSize="18sp"
                 android:textStyle="bold"
