@@ -5,16 +5,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.databinding.ItemCollectionBinding
 
-/**
- * RecyclerView adapter for collection list
- */
 class CollectionAdapter(
     private val onCollectionClick: (Collection) -> Unit,
-    private val onDeleteClick: (Collection) -> Unit,
-    private val onInsightsClick: (Collection) -> Unit
+    private val onDeleteClick: (Collection) -> Unit
 ) : ListAdapter<Collection, CollectionAdapter.ViewHolder>(CollectionDiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -35,22 +32,16 @@ class CollectionAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
         
         fun bind(collection: Collection) {
+            val ctx = binding.root.context
             binding.collectionName.text = collection.name
-            binding.itemCount.text = "${collection.itemCount} từ"
-            binding.createdDate.text = "Tạo: ${collection.createdAt?.take(10) ?: "--"}"
-            
-            // Click handlers
-            binding.root.setOnClickListener {
-                onCollectionClick(collection)
-            }
-            
-            binding.deleteButton.setOnClickListener {
-                onDeleteClick(collection)
-            }
-            
-            binding.insightsButton.setOnClickListener {
-                onInsightsClick(collection)
-            }
+            binding.itemCount.text = ctx.getString(R.string.collection_item_count, collection.itemCount)
+            binding.createdDate.text = ctx.getString(
+                R.string.collection_created_date,
+                collection.createdAt?.take(10) ?: "--"
+            )
+
+            binding.root.setOnClickListener { onCollectionClick(collection) }
+            binding.deleteButton.setOnClickListener { onDeleteClick(collection) }
         }
     }
     

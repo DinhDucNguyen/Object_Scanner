@@ -90,6 +90,8 @@
     <string name="collection_search_hint">Tìm kiếm bộ sưu tập…</string>
     <string name="collection_empty_title">Chưa có bộ sưu tập</string>
     <string name="collection_empty_subtitle">Tạo bộ sưu tập đầu tiên\nđể sắp xếp từ vựng của bạn</string>
+    <string name="collection_item_count">%d từ</string>
+    <string name="collection_created_date">Tạo: %s</string>
     <string name="collection_btn_insights">Thống kê</string>
     <string name="collection_btn_delete">Xoá</string>
     <string name="collection_btn_review">Ôn tập bộ sưu tập</string>
@@ -108,7 +110,7 @@
     <string name="collection_added">Đã thêm vào bộ sưu tập</string>
     <string name="collection_removed">Đã xoá khỏi bộ sưu tập</string>
     <string name="collection_added_to">Đã thêm vào \"%s\"</string>
-    <string name="profile_menu_collection">📚 Bộ sưu tập</string>
+    <string name="profile_menu_collection">Bộ sưu tập</string>
 
     <!-- Collection Insights -->
     <string name="ci_select_collection">Chọn bộ sưu tập</string>
@@ -138,9 +140,9 @@
     <string name="profile_display_lang_vi">Tiếng Việt</string>
     <string name="profile_display_lang_en">English</string>
     <string name="profile_section_features">Tính năng học tập</string>
-    <string name="profile_menu_history">📜 Lịch sử quét</string>
-    <string name="profile_menu_analytics">📊 Thống kê học tập</string>
-    <string name="profile_menu_streak">🔥 Chuỗi ngày học</string>
+    <string name="profile_menu_history">Lịch sử quét</string>
+    <string name="profile_menu_analytics">Thống kê học tập</string>
+    <string name="profile_menu_streak">Chuỗi ngày học</string>
     <string name="profile_btn_logout">Đăng xuất</string>
     <string name="profile_badge">Học viên xuất sắc</string>
 

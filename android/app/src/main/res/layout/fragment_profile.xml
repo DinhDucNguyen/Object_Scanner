@@ -264,7 +264,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="📚" android:textSize="22sp" android:layout_marginEnd="14dp" />
                 <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                    android:text="Bộ sưu tập" android:textColor="@color/text_primary"
+                    android:text="@string/profile_menu_collection" android:textColor="@color/text_primary"
                     android:textSize="16sp" android:textStyle="bold" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="➔" android:textColor="@color/text_secondary" android:textSize="16sp" />

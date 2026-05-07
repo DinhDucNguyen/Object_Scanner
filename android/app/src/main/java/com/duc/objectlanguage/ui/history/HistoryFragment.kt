@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.duc.objectlanguage.databinding.FragmentHistoryBinding
 
@@ -23,7 +24,15 @@ class HistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter = HistoryAdapter()
+        val adapter = HistoryAdapter { item ->
+            val objectCode = item.objectCode ?: return@HistoryAdapter
+            val bundle = android.os.Bundle().apply {
+                putString("objectCode", objectCode)
+                putString("imageUrl", item.imageUrl)
+                putString("scanDate", item.scanDate)
+            }
+            findNavController().navigate(com.duc.objectlanguage.R.id.action_history_to_historyDetail, bundle)
+        }
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
 

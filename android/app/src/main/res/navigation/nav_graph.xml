@@ -48,7 +48,30 @@
     <fragment
         android:id="@+id/historyFragment"
         android:name="com.duc.objectlanguage.ui.history.HistoryFragment"
-        android:label="@string/title_history" />
+        android:label="@string/title_history">
+        <action
+            android:id="@+id/action_history_to_historyDetail"
+            app:destination="@id/historyDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/historyDetailFragment"
+        android:name="com.duc.objectlanguage.ui.history.HistoryDetailFragment"
+        android:label="Chi tiết lịch sử">
+        <argument
+            android:name="objectCode"
+            app:argType="string" />
+        <argument
+            android:name="imageUrl"
+            app:argType="string"
+            android:defaultValue="@null"
+            app:nullable="true" />
+        <argument
+            android:name="scanDate"
+            app:argType="string"
+            android:defaultValue="@null"
+            app:nullable="true" />
+    </fragment>
 
     <!-- Wave 1: Multi-Modal Review Modes -->
     <fragment

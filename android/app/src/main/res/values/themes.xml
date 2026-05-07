@@ -8,6 +8,7 @@
         <item name="colorSecondary">@color/secondary</item>
         <item name="colorOnSecondary">@color/text_on_primary</item>
         <item name="android:colorBackground">@color/background</item>
+        <item name="android:windowBackground">@color/background</item>
         <item name="colorSurface">@color/surface</item>
         <item name="android:statusBarColor">@color/primary_dark</item>
         <item name="android:windowLightStatusBar">false</item>

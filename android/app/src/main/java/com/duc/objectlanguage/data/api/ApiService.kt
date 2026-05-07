@@ -65,6 +65,9 @@ interface ApiService {
     @GET("api/history")
     suspend fun getHistory(@Query("limit") limit: Int = 50): Response<List<HistoryItem>>
 
+    @GET("api/objects/{code}/translations")
+    suspend fun getTranslations(@Path("code") code: String): Response<List<TranslationResponse>>
+
     // ====== DICTIONARY / TRANSLATE ======
     @GET("api/dictionary/lookup")
     suspend fun lookupWord(

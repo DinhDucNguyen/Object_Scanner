@@ -164,6 +164,16 @@ class AppRepository(private val tokenManager: TokenManager) {
         }
     }
 
+    suspend fun getTranslationsByCode(objectCode: String): Result<List<TranslationResponse>> {
+        return try {
+            val response = api.getTranslations(objectCode)
+            if (response.isSuccessful) Result.success(response.body() ?: emptyList())
+            else Result.failure(Exception("Không tìm thấy từ vựng"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     // ====== DICTIONARY / TRANSLATE ======
 
     suspend fun lookupWord(word: String, fromLang: String = "en", toLang: String = "en"): Result<DictionaryResponse> {

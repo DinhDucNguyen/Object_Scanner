@@ -48,17 +48,11 @@ class CollectionListFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = CollectionAdapter(
             onCollectionClick = { collection ->
-                // Navigate to detail (word list)
                 val bundle = Bundle().apply { putInt("collectionId", collection.id) }
                 findNavController().navigate(R.id.action_collectionList_to_collectionDetail, bundle)
             },
             onDeleteClick = { collection ->
                 showDeleteConfirmation(collection.id, collection.name)
-            },
-            onInsightsClick = { collection ->
-                // Navigate to insights/analytics
-                val bundle = Bundle().apply { putInt("collectionId", collection.id) }
-                findNavController().navigate(R.id.action_collectionList_to_collectionInsights, bundle)
             }
         )
         

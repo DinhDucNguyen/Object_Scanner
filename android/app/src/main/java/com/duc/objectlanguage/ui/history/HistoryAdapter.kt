@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.duc.objectlanguage.data.model.HistoryItem
 import com.duc.objectlanguage.databinding.ItemHistoryBinding
 
-class HistoryAdapter : ListAdapter<HistoryItem, HistoryAdapter.VH>(DIFF) {
+class HistoryAdapter(
+    private val onItemClick: (HistoryItem) -> Unit
+) : ListAdapter<HistoryItem, HistoryAdapter.VH>(DIFF) {
 
     class VH(val binding: ItemHistoryBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -22,6 +24,7 @@ class HistoryAdapter : ListAdapter<HistoryItem, HistoryAdapter.VH>(DIFF) {
         holder.binding.tvObjectCode.text = item.objectCode?.replaceFirstChar { it.uppercase() } ?: "---"
         holder.binding.tvDate.text = item.scanDate ?: ""
         holder.binding.tvConfidence.text = item.confidenceScore?.let { "${(it * 100).toInt()}%" } ?: ""
+        holder.binding.root.setOnClickListener { onItemClick(item) }
     }
 
     companion object {

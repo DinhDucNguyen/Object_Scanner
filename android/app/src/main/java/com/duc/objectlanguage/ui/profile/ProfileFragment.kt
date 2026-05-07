@@ -5,9 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
-import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.ObjectLanguageApp
@@ -39,10 +37,7 @@ class ProfileFragment : Fragment() {
 
     // ── Cập nhật trạng thái 2 nút VI / EN ────────────────────────────────────
     private fun updateLangButtons() {
-        val currentLocales = AppCompatDelegate.getApplicationLocales()
-        val effectiveLang  = if (!currentLocales.isEmpty) currentLocales[0]?.language ?: "vi"
-                             else LocaleHelper.getSavedLocale(requireContext())
-        val isVI = effectiveLang == "vi"
+        val isVI = LocaleHelper.getSavedLocale(requireContext()) == "vi"
         val active   = ContextCompat.getColorStateList(requireContext(), R.color.primary)
         val inactive = ContextCompat.getColorStateList(requireContext(), R.color.surface_variant)
 
@@ -80,12 +75,10 @@ class ProfileFragment : Fragment() {
     // ── Đổi ngôn ngữ hiển thị ────────────────────────────────────────────────
     private fun setDisplayLanguage(lang: String) {
         if (LocaleHelper.getSavedLocale(requireContext()) == lang) return
-        // Lưu lựa chọn vào SharedPreferences (để applyLocale() khi app khởi động lại)
         LocaleHelper.setLocale(requireContext(), lang)
         val msg = if (lang == "en") "Language: English" else "Ngôn ngữ: Tiếng Việt"
         Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-        // AppCompatDelegate 1.6+ tự update Application resources + recreate Activity
-        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(lang))
+        requireActivity().recreate()
     }
 
     override fun onDestroyView() {
