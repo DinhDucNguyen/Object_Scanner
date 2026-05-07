@@ -45,7 +45,6 @@ def scan_object(
 async def scan_image(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    user_id: Optional[int] = Depends(get_optional_user_id)
 ):
     """Scan bằng ảnh — gọi Gemini Vision API để nhận diện."""
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -57,7 +56,7 @@ async def scan_image(
     
     compressed_bytes = compress_image(image_bytes)
     
-    return scan_service.process_scan_image(db, compressed_bytes, user_id)
+    return scan_service.process_scan_image(db, compressed_bytes)
 
 
 @router.get("/objects/{object_code}/translations", response_model=List[TranslationResponse])

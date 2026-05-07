@@ -6,6 +6,7 @@ from app.repositories.object_repo import ObjectRepository
 from app.models.scan_history import ScanHistory
 from app.models.ai_feedback_report import AIPrediction
 from app.schemas.common import AIPredictionCreate, LichSuQuetResponse
+from app.utils.cloudinary_helper import upload_image
 
 UPLOAD_DIR = "uploads/scans"
 
@@ -69,12 +70,15 @@ class HistoryFeedbackService:
 
         image_url: str | None = None
         if image_bytes:
-            os.makedirs(UPLOAD_DIR, exist_ok=True)
-            filename = f"{uuid.uuid4().hex}.jpg"
-            filepath = os.path.join(UPLOAD_DIR, filename)
-            with open(filepath, "wb") as f:
-                f.write(image_bytes)
-            image_url = f"{base_url}/uploads/scans/{filename}"
+            image_url = upload_image(image_bytes)
+            if image_url is None:
+                # Fallback: lưu local nếu Cloudinary chưa cấu hình
+                os.makedirs(UPLOAD_DIR, exist_ok=True)
+                filename = f"{uuid.uuid4().hex}.jpg"
+                filepath = os.path.join(UPLOAD_DIR, filename)
+                with open(filepath, "wb") as f:
+                    f.write(image_bytes)
+                image_url = f"{base_url}/uploads/scans/{filename}"
 
         scan = ScanHistory(
             user_id=user_id,

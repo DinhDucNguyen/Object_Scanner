@@ -112,6 +112,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     else -> {
                         _scanResult.value = it
                         loadExamples(it)
+                        viewModelScope.launch { repo.saveLichSuQue(it.objectCode, 1.0f, imageBytes) }
                     }
                 }
             },

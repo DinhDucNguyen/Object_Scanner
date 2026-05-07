@@ -3,12 +3,9 @@ from app.models.object import Object
 from app.models.translation import Translation, NguonDuLieu
 from app.models.example import ViDu
 from app.models.language import Language
-from app.models.scan_history import ScanHistory
-from app.models.ai_feedback_report import AIPrediction, NguonAI
 from app.repositories.object_repo import ObjectRepository
 from app.repositories.translation_repo import TranslationRepository
 from app.repositories.language_repo import LanguageRepository
-from app.repositories.history_repo import HistoryRepository
 from app.services.gemini_service import GeminiService
 from app.schemas.common import ScanRequest, ScanResponse, TranslationResponse, ViDuResponse
 
@@ -18,21 +15,13 @@ class ScanService:
         self.obj_repo = ObjectRepository()
         self.trans_repo = TranslationRepository()
         self.lang_repo = LanguageRepository()
-        self.hist_repo = HistoryRepository()
         self.gemini = GeminiService()
 
     def process_scan(self, db: Session, request: ScanRequest) -> ScanResponse:
         obj = self.obj_repo.get_by_code(db, request.object_code)
-        user_id = request.user_id if request.user_id else 1
 
         if obj:
             translations = self.trans_repo.get_by_object_id(db, obj.id)
-            self.hist_repo.create_scan(db, ScanHistory(
-                user_id=user_id, doi_tuong_id=obj.id,
-                do_tin_cay=request.confidence,
-                url_anh=request.image_url
-            ))
-            db.commit()
             return ScanResponse(
                 source="internal_db", object_id=obj.id,
                 object_code=obj.ma_doi_tuong,
@@ -42,19 +31,13 @@ class ScanService:
             )
 
         new_obj = self.obj_repo.create(db, Object(ma_doi_tuong=request.object_code.lower(), muc_do_kho=1))
-        self.hist_repo.create_scan(db, ScanHistory(
-            user_id=user_id, doi_tuong_id=new_obj.id,
-            do_tin_cay=request.confidence
-        ))
         db.commit()
         return ScanResponse(
             source="new_object", object_id=new_obj.id,
             object_code=new_obj.ma_doi_tuong, difficulty_level=1, translations=[]
         )
 
-    def process_scan_image(self, db: Session, image_bytes: bytes, user_id: int | None) -> ScanResponse:
-        user_id = user_id or 1
-
+    def process_scan_image(self, db: Session, image_bytes: bytes) -> ScanResponse:
         gemini_result = self.gemini.identify_object(image_bytes)
         if not gemini_result:
             return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", difficulty_level=1, translations=[])
@@ -97,19 +80,6 @@ class ScanService:
                 for sentence in t_data.get("example_sentences", [])[:3]:
                     db.add(ViDu(ban_dich_id=trans.id, cau_vi_du=sentence, nguon_du_lieu="gemini"))
                 translations.append(trans)
-
-        scan = ScanHistory(user_id=user_id, doi_tuong_id=obj.id, do_tin_cay=1.0)
-        self.hist_repo.create_scan(db, scan)
-        db.flush()
-
-        if source == "gemini_api":
-            db.add(AIPrediction(
-                scan_id=scan.id,
-                nguon_ai=NguonAI.gemini,
-                nhan_du_doan=object_code,
-                do_tin_cay=gemini_result.get("confidence", 1.0),
-                mo_ta=gemini_result.get("category"),
-            ))
 
         db.commit()
         return ScanResponse(
