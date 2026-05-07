@@ -230,6 +230,31 @@ class AppRepository(private val tokenManager: TokenManager) {
         }
     }
 
+    // ====== LICH SU QUET ======
+
+    suspend fun saveLichSuQue(
+        objectCode: String,
+        confidence: Float,
+        imageBytes: ByteArray?,
+    ): Result<LichSuQuetResponse> {
+        return try {
+            val codePart = objectCode.toRequestBody("text/plain".toMediaTypeOrNull())
+            val confidencePart = confidence.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val imagePart = imageBytes?.let {
+                val body = it.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                MultipartBody.Part.createFormData("image", "scan.jpg", body)
+            }
+            val response = api.saveLichSuQue(codePart, confidencePart, imagePart)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Lưu lịch sử thất bại: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Lỗi lưu lịch sử: ${e.message}"))
+        }
+    }
+
     // ====== STREAK ======
 
     suspend fun getStreak(): Result<StreakResponse> {

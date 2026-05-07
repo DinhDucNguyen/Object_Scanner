@@ -1,7 +1,13 @@
+import uuid
+import os
 from sqlalchemy.orm import Session
 from app.repositories.history_repo import HistoryRepository
+from app.repositories.object_repo import ObjectRepository
+from app.models.scan_history import ScanHistory
 from app.models.ai_feedback_report import AIPrediction
-from app.schemas.common import AIPredictionCreate
+from app.schemas.common import AIPredictionCreate, LichSuQuetResponse
+
+UPLOAD_DIR = "uploads/scans"
 
 
 class HistoryFeedbackService:
@@ -48,3 +54,39 @@ class HistoryFeedbackService:
             }
             for p in predictions
         ]
+
+    def save_with_image(
+        self,
+        db: Session,
+        user_id: int,
+        object_code: str,
+        confidence: float,
+        image_bytes: bytes | None,
+        base_url: str,
+    ) -> LichSuQuetResponse:
+        obj_repo = ObjectRepository()
+        obj = obj_repo.get_by_code(db, object_code)
+
+        image_url: str | None = None
+        if image_bytes:
+            os.makedirs(UPLOAD_DIR, exist_ok=True)
+            filename = f"{uuid.uuid4().hex}.jpg"
+            filepath = os.path.join(UPLOAD_DIR, filename)
+            with open(filepath, "wb") as f:
+                f.write(image_bytes)
+            image_url = f"{base_url}/uploads/scans/{filename}"
+
+        scan = ScanHistory(
+            user_id=user_id,
+            doi_tuong_id=obj.id if obj else None,
+            do_tin_cay=confidence,
+            url_anh=image_url,
+        )
+        saved = self.hist_repo.create_scan(db, scan)
+        db.commit()
+
+        return LichSuQuetResponse(
+            id=saved.id,
+            message="Đã lưu lịch sử quét",
+            image_url=image_url,
+        )

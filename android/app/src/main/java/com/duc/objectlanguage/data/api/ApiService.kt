@@ -2,6 +2,7 @@ package com.duc.objectlanguage.data.api
 
 import com.duc.objectlanguage.data.model.*
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -88,6 +89,16 @@ interface ApiService {
     // ====== ANALYTICS ======
     @GET("api/analytics")
     suspend fun getAnalytics(): Response<AnalyticsResponse>
+
+    // ====== LICH SU QUET ======
+
+    @Multipart
+    @POST("api/lich-su-quet")
+    suspend fun saveLichSuQue(
+        @Part("object_code") objectCode: RequestBody,
+        @Part("confidence") confidence: RequestBody,
+        @Part image: MultipartBody.Part?,
+    ): Response<LichSuQuetResponse>
 
     // ====== STREAK ======
     @GET("api/streak")

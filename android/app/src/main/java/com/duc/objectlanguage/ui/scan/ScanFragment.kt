@@ -38,6 +38,8 @@ class ScanFragment : Fragment() {
 
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
+    private var detectorHelper: ObjectDetectorHelper? = null
+    private var latestDetection: DetectionResult? = null
 
     private val requestCameraPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -87,7 +89,8 @@ class ScanFragment : Fragment() {
                 val croppedBytes = stream?.readBytes()
                 stream?.close()
                 if (croppedBytes != null) {
-                    viewModel.scanImage(croppedBytes)
+                    val croppedBitmap = BitmapFactory.decodeByteArray(croppedBytes, 0, croppedBytes.size)
+                    showPreviewDialog(croppedBytes, croppedBitmap)
                 }
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Lỗi đọc ảnh đã crop: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -223,6 +226,12 @@ class ScanFragment : Fragment() {
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
 
+            detectorHelper = ObjectDetectorHelper(requireContext()) { event ->
+                if (event is DetectionEvent.Failure) {
+                    android.util.Log.e("ObjectDetector", "YOLO load failed: ${event.message}")
+                }
+            }
+
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
@@ -256,7 +265,7 @@ class ScanFragment : Fragment() {
                         
                         Log.d("ScanFragment", "Captured: ${rotatedBitmap.width}x${rotatedBitmap.height}, Rotation: $rotation°, Size: ${jpegBytes.size} bytes")
                         
-                        // Hiển thị preview
+                        // Hiển thị preview — YOLO chạy sau khi user nhấn "Quét ngay"
                         showPreviewDialog(jpegBytes, rotatedBitmap)
                     } catch (e: Exception) {
                         image.close()
@@ -326,8 +335,9 @@ class ScanFragment : Fragment() {
             .setView(imageView)
             .setPositiveButton("✅ Quét ngay") { dialog, _ ->
                 dialog.dismiss()
-                // Gọi API chỉ khi user confirm
-                viewModel.scanImage(imageBytes)
+                val bitmap = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                val yoloResult = detectorHelper?.detectBitmap(bitmap)
+                viewModel.scanWithDetection(yoloResult, imageBytes)
             }
             .setNeutralButton("✂️ Crop lại") { dialog, _ ->
                 dialog.dismiss()
@@ -377,7 +387,7 @@ class ScanFragment : Fragment() {
             cropLauncher.launch(intent)
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "Không mở được crop: ${e.message}", Toast.LENGTH_SHORT).show()
-            viewModel.scanImage(imageBytes)
+            viewModel.scanWithDetection(null, imageBytes)
         }
     }
 
@@ -389,6 +399,7 @@ class ScanFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        detectorHelper?.close()
         cameraExecutor.shutdown()
         _binding = null
     }

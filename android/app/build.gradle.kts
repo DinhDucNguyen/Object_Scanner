@@ -53,6 +53,10 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    androidResources {
+        noCompress.add("tflite")
+    }
+
 }
 
 dependencies {
@@ -67,22 +71,21 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
 
+    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
     // Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
 
-    // CameraX
     implementation("androidx.camera:camera-core:1.3.1")
     implementation("androidx.camera:camera-camera2:1.3.1")
     implementation("androidx.camera:camera-lifecycle:1.3.1")
     implementation("androidx.camera:camera-view:1.3.1")
 
-    // ML Kit - Object Detection & Labeling
     implementation("com.google.mlkit:object-detection:17.0.1")
     implementation("com.google.mlkit:image-labeling:17.0.8")
 
 
-    // Retrofit (for FastAPI backend)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")

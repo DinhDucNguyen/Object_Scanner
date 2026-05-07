@@ -219,3 +219,11 @@ data class StreakSyncRequest(
     @SerializedName("tong_luot_on")    val tongLuotOn: Int,
     @SerializedName("ngay_on_cuoi")    val ngayOnCuoi: String?   // "yyyy-MM-dd"
 )
+
+// ====== LICH SU QUET (TFLite → save history + image) ======
+
+data class LichSuQuetResponse(
+    val id: Int,
+    val message: String,
+    @SerializedName("image_url") val imageUrl: String?,
+)

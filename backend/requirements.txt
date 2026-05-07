@@ -14,3 +14,4 @@ google-generativeai>=0.8.0  # DEPRECATED: Will migrate to google-genai package
 gTTS>=2.5.0
 python-multipart>=0.0.9
 Pillow>=10.0.0  # Image processing for compression
+aiofiles>=23.0.0  # Required for FastAPI StaticFiles

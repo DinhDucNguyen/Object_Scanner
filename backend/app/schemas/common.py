@@ -165,6 +165,13 @@ class AIPredictionResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# ====== Lich Su Quet ======
+
+class LichSuQuetResponse(BaseModel):
+    id: int
+    message: str
+    image_url: Optional[str] = None
+
 # ====== Stats ======
 
 class StatsResponse(BaseModel):

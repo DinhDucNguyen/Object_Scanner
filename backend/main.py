@@ -1,5 +1,7 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.routers import auth_router, scan_router, review_router, collection_router, history_router, data_router, dictionary_router
 from app.routers import admin_router
@@ -30,6 +32,9 @@ app.include_router(data_router.router)
 app.include_router(dictionary_router.router)
 app.include_router(admin_router.router, prefix="/api")
 app.include_router(streak_router.router)
+
+os.makedirs("uploads/scans", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/")
 def read_root():

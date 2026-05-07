@@ -43,103 +43,89 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     private var mediaPlayer: MediaPlayer? = null
 
-    fun scanImage(imageBytes: ByteArray) {
+    fun scanWithDetection(yoloResult: DetectionResult?, imageBytes: ByteArray) {
         if (_isLoading.value == true) return
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            
-            Log.d("ScanViewModel", "Starting scan with image size: ${imageBytes.size} bytes")
-            
-            // ✅ IMPLEMENTATION: ML Kit Object Detection (Local first - ưu tiên DB)
+
+            // 1. YOLO — nếu đủ confidence
+            if (yoloResult != null && yoloResult.confidence >= 0.5f) {
+                val objectCode = normalizeObjectCode(yoloResult.label)
+                Log.d("ScanViewModel", "YOLOv10: ${yoloResult.label} (${yoloResult.confidence})")
+                val yoloScan = repo.scanByCode(objectCode, yoloResult.confidence)
+                yoloScan.onFailure { Log.w("ScanViewModel", "YOLO scanByCode error: ${it.message}") }
+                val dbResult = yoloScan.getOrNull()
+                Log.d("ScanViewModel", "YOLO DB result: source=${dbResult?.source} translations=${dbResult?.translations?.size}")
+                if (dbResult != null && dbResult.translations.isNotEmpty()) {
+                    _scanResult.value = dbResult
+                    loadExamples(dbResult)
+                    launch { repo.saveLichSuQue(objectCode, yoloResult.confidence, imageBytes) }
+                    _isLoading.value = false
+                    return@launch
+                }
+                // YOLO detect được nhưng DB rỗng → skip ML Kit, xuống Gemini ngay
+                Log.d("ScanViewModel", "YOLO DB miss → Gemini")
+                runGemini(imageBytes)
+                return@launch
+            }
+
+            // 2. ML Kit — chỉ chạy khi YOLO không detect được
             try {
                 val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                val inputImage = InputImage.fromBitmap(bitmap, 0)
-                val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
-                
-                Log.d("ScanViewModel", "Running ML Kit image labeling...")
-                val labels = labeler.process(inputImage).await()
-                
-                // Lấy label có confidence cao nhất
-                if (labels.isNotEmpty()) {
-                    val topLabel = labels.maxByOrNull { it.confidence } ?: labels[0]
+                val labels = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
+                    .process(InputImage.fromBitmap(bitmap, 0)).await()
+                val topLabel = labels.maxByOrNull { it.confidence }
+                if (topLabel != null && topLabel.confidence > 0.6f) {
                     val objectCode = normalizeObjectCode(topLabel.text)
-                    val confidence = topLabel.confidence
-                    
-                    Log.d("ScanViewModel", "ML Kit detected: ${topLabel.text} (${confidence}), normalized: $objectCode")
-                    
-                    // Nếu confidence > 0.6 → Gọi /api/scan với object_code (check DB trước)
-                    if (confidence > 0.6f) {
-                        Log.d("ScanViewModel", "High confidence! Calling /api/scan with object_code")
-                        val result = repo.scanByCode(objectCode, confidence)
-                        result.fold(
-                            onSuccess = {
-                                if (it.translations.isNotEmpty()) {
-                                    Log.d("ScanViewModel", "Found in DB: ${it.objectCode}")
-                                    _scanResult.value = it
-                                    val t = it.translations[0]
-                                    val stored = t.examples.mapNotNull { e -> e.cauViDu }
-                                    if (stored.isNotEmpty()) _examples.value = stored
-                                    else loadExamplesFromGemini(t.wordName, t.languageCode ?: "en")
-                                    _isLoading.value = false
-                                    return@launch
-                                } else {
-                                    Log.d("ScanViewModel", "Object code not in DB, fallback to Gemini")
-                                }
-                            },
-                            onFailure = {
-                                Log.w("ScanViewModel", "API scan by code failed: ${it.message}")
-                            }
-                        )
-                    } else {
-                        Log.d("ScanViewModel", "Low confidence ($confidence), skip ML Kit result")
+                    Log.d("ScanViewModel", "ML Kit: ${topLabel.text} (${topLabel.confidence})")
+                    val mlScan = repo.scanByCode(objectCode, topLabel.confidence)
+                    mlScan.onFailure { Log.w("ScanViewModel", "ML Kit scanByCode error: ${it.message}") }
+                    val dbResult = mlScan.getOrNull()
+                    Log.d("ScanViewModel", "ML Kit DB result: source=${dbResult?.source} translations=${dbResult?.translations?.size}")
+                    if (dbResult != null && dbResult.translations.isNotEmpty()) {
+                        _scanResult.value = dbResult
+                        loadExamples(dbResult)
+                        launch { repo.saveLichSuQue(objectCode, topLabel.confidence, imageBytes) }
+                        _isLoading.value = false
+                        return@launch
                     }
-                } else {
-                    Log.d("ScanViewModel", "ML Kit returned no labels")
                 }
             } catch (e: Exception) {
                 Log.e("ScanViewModel", "ML Kit failed: ${e.message}", e)
             }
-            
-            // Fallback: Gọi Gemini API (khi ML Kit fail hoặc không tìm thấy trong DB)
-            Log.d("ScanViewModel", "Fallback to Gemini API...")
-            val compressedBytes = compressImageIfNeeded(imageBytes)
-            Log.d("ScanViewModel", "Compressed to: ${compressedBytes.size} bytes")
-            
-            val result = repo.scanByImage(compressedBytes)
-            result.fold(
-                onSuccess = {
-                    Log.d("ScanViewModel", "Scan success: objectCode=${it.objectCode}, source=${it.source}, translations=${it.translations.size}")
 
-                    if (it.source == "gemini_quota_exceeded") {
-                        _scanResult.value = null
-                        _error.value = "Gemini đã hết quota. Vui lòng thử lại sau khoảng 1 phút hoặc đổi API key/billing."
-                        return@fold
-                    }
-
-                    if (it.source == "gemini_failed" || it.objectCode == "unknown") {
-                        _scanResult.value = null
-                        _error.value = "Gemini chưa nhận diện được vật thể. Hãy chụp rõ hơn và thử lại."
-                        return@fold
-                    }
-
-                    _scanResult.value = it
-                    if (it.translations.isNotEmpty()) {
-                        val t = it.translations[0]
-                        val stored = t.examples.mapNotNull { e -> e.cauViDu }
-                        if (stored.isNotEmpty()) _examples.value = stored
-                        else loadExamplesFromGemini(t.wordName, t.languageCode ?: "en")
-                    } else {
-                        Log.w("ScanViewModel", "No translations found!")
-                    }
-                },
-                onFailure = {
-                    Log.e("ScanViewModel", "Scan failed: ${it.message}", it)
-                    _error.value = it.message
-                }
-            )
-            _isLoading.value = false
+            // 3. Gemini — fallback cuối cùng
+            runGemini(imageBytes)
         }
+    }
+
+    private suspend fun runGemini(imageBytes: ByteArray) {
+        Log.d("ScanViewModel", "Fallback to Gemini...")
+        repo.scanByImage(compressImageIfNeeded(imageBytes)).fold(
+            onSuccess = {
+                when {
+                    it.source == "gemini_quota_exceeded" ->
+                        _error.value = "Gemini đã hết quota. Vui lòng thử lại sau."
+                    it.source == "gemini_failed" || it.objectCode == "unknown" ->
+                        _error.value = "Không nhận diện được vật thể. Hãy chụp rõ hơn."
+                    else -> {
+                        _scanResult.value = it
+                        loadExamples(it)
+                    }
+                }
+            },
+            onFailure = { _error.value = it.message }
+        )
+        _isLoading.value = false
+    }
+
+    private fun loadExamples(result: com.duc.objectlanguage.data.model.ScanResponse) {
+        if (result.translations.isEmpty()) return
+        val t = result.translations[0]
+        val stored = t.examples.mapNotNull { it.cauViDu }
+        if (stored.isNotEmpty()) _examples.value = stored
+        else loadExamplesFromGemini(t.wordName, t.languageCode ?: "en")
     }
     
     /**
