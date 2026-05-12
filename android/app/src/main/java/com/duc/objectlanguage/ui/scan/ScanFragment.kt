@@ -158,10 +158,6 @@ class ScanFragment : Fragment() {
                     binding.btnPlayAudio.setOnClickListener {
                         viewModel.playAudio(enTrans.wordName, "en")
                     }
-                    binding.btnAddLearn.visibility = View.VISIBLE
-                    binding.btnAddLearn.setOnClickListener {
-                        viewModel.addToLearning(enTrans.id)
-                    }
 
                     binding.btnAddToCollection.visibility = View.VISIBLE
                     binding.btnAddToCollection.setOnClickListener {

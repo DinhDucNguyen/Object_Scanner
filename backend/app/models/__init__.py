@@ -1,10 +1,13 @@
 # Import all models so SQLAlchemy relationships are registered
+from app.models.role import VaiTro
+from app.models.user_status import TrangThaiNguoiDung
 from app.models.user import User
 from app.models.profile import Profile
 from app.models.user_settings import UserSettings
 from app.models.language import Language
 from app.models.category import Category
 from app.models.object import Object
+from app.models.example import ViDu
 from app.models.translation import Translation
 from app.models.object_media import ObjectMedia
 from app.models.learning_progress import LearningProgress

@@ -44,16 +44,33 @@ class DataService:
 
     def get_all_objects(self, db: Session, category_id: int = None):
         objects = self.obj_repo.get_all(db, category_id)
-        return [
-            {
-                "id": obj.id, "object_code": obj.ma_doi_tuong,
+        result = []
+        for obj in objects:
+            primary_translation = next(
+                (t for t in obj.translations if getattr(t, "thoi_gian_xoa", None) is None),
+                None,
+            )
+            primary_image = next(
+                (m for m in obj.media if getattr(m, "thoi_gian_xoa", None) is None and m.doi_tuong_chinh),
+                None,
+            ) or next(
+                (m for m in obj.media if getattr(m, "thoi_gian_xoa", None) is None),
+                None,
+            )
+            result.append({
+                "id": obj.id,
+                "object_code": obj.ma_doi_tuong,
                 "category_id": obj.danh_muc_id,
                 "category_name": obj.category.ten_danh_muc if obj.category else None,
                 "difficulty_level": obj.muc_do_kho,
-                "translation_count": len(obj.translations)
-            }
-            for obj in objects
-        ]
+                "translation_count": len(obj.translations),
+                "word_name": primary_translation.tu_vung if primary_translation else obj.ma_doi_tuong,
+                "phonetic": primary_translation.phien_am if primary_translation else None,
+                "definition": primary_translation.dinh_nghia if primary_translation else None,
+                "translation_id": primary_translation.id if primary_translation else None,
+                "image_url": primary_image.url if primary_image else None,
+            })
+        return result
 
     def get_stats(self, db: Session, user_id: int):
         return StatsResponse(

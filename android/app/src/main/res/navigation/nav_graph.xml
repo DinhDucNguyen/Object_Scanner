@@ -41,6 +41,27 @@
         android:label="@string/title_scan" />
 
     <fragment
+        android:id="@+id/exploreFragment"
+        android:name="com.duc.objectlanguage.ui.explore.ExploreFragment"
+        android:label="@string/title_explore">
+        <action
+            android:id="@+id/action_explore_to_categoryDetail"
+            app:destination="@id/categoryDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/categoryDetailFragment"
+        android:name="com.duc.objectlanguage.ui.explore.CategoryDetailFragment"
+        android:label="@string/title_explore_detail">
+        <argument
+            android:name="categoryId"
+            app:argType="integer" />
+        <argument
+            android:name="categoryName"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
         android:id="@+id/reviewFragment"
         android:name="com.duc.objectlanguage.ui.review.ReviewFragment"
         android:label="@string/title_review" />
@@ -59,8 +80,16 @@
         android:name="com.duc.objectlanguage.ui.history.HistoryDetailFragment"
         android:label="Chi tiết lịch sử">
         <argument
+            android:name="scanId"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
             android:name="objectCode"
             app:argType="string" />
+        <argument
+            android:name="translationId"
+            app:argType="integer"
+            android:defaultValue="0" />
         <argument
             android:name="imageUrl"
             app:argType="string"
@@ -159,6 +188,12 @@
     <fragment
         android:id="@+id/dictionaryFragment"
         android:name="com.duc.objectlanguage.ui.dictionary.DictionaryFragment"
-        android:label="@string/title_dictionary" />
+        android:label="@string/title_dictionary">
+        <argument
+            android:name="initialText"
+            app:argType="string"
+            android:defaultValue="@null"
+            app:nullable="true" />
+    </fragment>
 
 </navigation>

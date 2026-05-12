@@ -48,6 +48,18 @@
 
     <!-- History -->
     <string name="history_empty">No scan history yet</string>
+    <string name="history_image">Scan history image</string>
+    <string name="history_search_hint">Search scanned objects</string>
+    <string name="history_filter_all">All</string>
+    <string name="history_filter_today">Today</string>
+    <string name="history_filter_week">This week</string>
+    <string name="history_filter_month">This month</string>
+    <string name="history_filter_from_date">From date</string>
+    <string name="history_filter_to_date">To date</string>
+    <string name="history_filter_clear_dates">Clear dates</string>
+    <string name="history_delete_title">Delete history</string>
+    <string name="history_delete_message">Delete this scan from history?</string>
+    <string name="history_btn_save">Save to learning list</string>
 
     <!-- Streak -->
     <string name="streak_days_singular">day</string>

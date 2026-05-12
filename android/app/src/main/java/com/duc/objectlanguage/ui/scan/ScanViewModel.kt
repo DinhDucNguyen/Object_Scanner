@@ -60,7 +60,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                 if (dbResult != null && dbResult.translations.isNotEmpty()) {
                     _scanResult.value = dbResult
                     loadExamples(dbResult)
-                    launch { repo.saveLichSuQue(objectCode, yoloResult.confidence, imageBytes) }
+                    saveScanAndQueueReview(objectCode, yoloResult.confidence, imageBytes)
                     _isLoading.value = false
                     return@launch
                 }
@@ -86,7 +86,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     if (dbResult != null && dbResult.translations.isNotEmpty()) {
                         _scanResult.value = dbResult
                         loadExamples(dbResult)
-                        launch { repo.saveLichSuQue(objectCode, topLabel.confidence, imageBytes) }
+                        saveScanAndQueueReview(objectCode, topLabel.confidence, imageBytes)
                         _isLoading.value = false
                         return@launch
                     }
@@ -112,13 +112,27 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     else -> {
                         _scanResult.value = it
                         loadExamples(it)
-                        viewModelScope.launch { repo.saveLichSuQue(it.objectCode, 1.0f, imageBytes) }
+                        saveScanAndQueueReview(it.objectCode, 1.0f, imageBytes)
                     }
                 }
             },
             onFailure = { _error.value = it.message }
         )
         _isLoading.value = false
+    }
+
+    private fun saveScanAndQueueReview(objectCode: String, confidence: Float, imageBytes: ByteArray) {
+        viewModelScope.launch {
+            val result = repo.saveLichSuQue(objectCode, confidence, imageBytes)
+            result.fold(
+                onSuccess = { response ->
+                    if (response.learningAdded) {
+                        _addedMsg.value = "Da them vao on tap hom nay"
+                    }
+                },
+                onFailure = { Log.w("ScanViewModel", "Save scan/learning failed: ${it.message}") }
+            )
+        }
     }
 
     private fun loadExamples(result: com.duc.objectlanguage.data.model.ScanResponse) {

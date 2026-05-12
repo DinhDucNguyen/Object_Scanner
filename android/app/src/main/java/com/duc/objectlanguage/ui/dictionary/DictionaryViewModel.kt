@@ -26,6 +26,9 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
+    private val _message = MutableLiveData<String?>()
+    val message: LiveData<String?> = _message
+
     private val _fromLang = MutableLiveData("en")
     val fromLang: LiveData<String> = _fromLang
 
@@ -34,6 +37,7 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
 
     private var translateJob: Job? = null
     private var mediaPlayer: MediaPlayer? = null
+    private var lastRequestKey: String? = null
 
     fun loadDefaultLangs() {
         // App chỉ hỗ trợ EN ⇌ VI
@@ -55,12 +59,16 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
         }
         translateJob?.cancel()
         translateJob = viewModelScope.launch(Dispatchers.IO) {
-            delay(500)
-            _isLoading.postValue(true)
-            _error.postValue(null)
             val from = _fromLang.value ?: "en"
             val to = _toLang.value ?: "vi"
-            val response = repo.translate(text.trim(), from, to)
+            val normalized = text.trim()
+            val requestKey = "${from}:${to}:${normalized.lowercase()}"
+            delay(800)
+            if (requestKey == lastRequestKey && _result.value != null) return@launch
+            lastRequestKey = requestKey
+            _isLoading.postValue(true)
+            _error.postValue(null)
+            val response = repo.translate(normalized, from, to)
             if (response.isSuccess) {
                 _result.postValue(response.getOrNull())
             } else {
@@ -68,6 +76,22 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
                 _error.postValue(response.exceptionOrNull()?.message ?: "Lỗi dịch")
             }
             _isLoading.postValue(false)
+        }
+    }
+
+    fun saveCurrentWord() {
+        val translationId = _result.value?.translationId
+        if (translationId == null || translationId <= 0) {
+            _error.value = "Tu nay chua the luu"
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = repo.addToLearning(translationId)
+            if (response.isSuccess) {
+                _message.postValue(response.getOrNull() ?: "Da luu tu vung")
+            } else {
+                _error.postValue(response.exceptionOrNull()?.message ?: "Loi luu tu vung")
+            }
         }
     }
 
@@ -101,6 +125,7 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun clearError() { _error.value = null }
+    fun clearMessage() { _message.value = null }
 
     override fun onCleared() {
         super.onCleared()

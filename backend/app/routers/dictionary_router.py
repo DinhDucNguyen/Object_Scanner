@@ -1,12 +1,18 @@
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 import httpx
 import logging
+from sqlalchemy.orm import Session
+
+from app.db.session import get_db
+from app.dependencies.get_current_user import get_optional_user_id
+from app.services.dictionary_service import DictionaryService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/dictionary", tags=["Dictionary"])
+dictionary_service = DictionaryService()
 
 
 class DictionaryMeaning(BaseModel):
@@ -36,28 +42,43 @@ class TranslateResponse(BaseModel):
     definitions: List[str] = []
     from_lang: str
     to_lang: str
+    source: str = "gemini"
+    is_physical_object: bool = False
+    object_id: Optional[int] = None
+    object_code: Optional[str] = None
+    translation_id: Optional[int] = None
+    can_save: bool = False
+    pending_review: bool = False
 
 
 @router.post("/translate", response_model=TranslateResponse)
-async def translate(req: TranslateRequest):
-    """Translate text between languages using Gemini."""
-    from app.services.gemini_service import GeminiService
+def translate(
+    req: TranslateRequest,
+    db: Session = Depends(get_db),
+    user_id: Optional[int] = Depends(get_optional_user_id),
+):
+    """DB-first dictionary lookup, then Gemini fallback with physical-object moderation."""
     if not req.text.strip():
         raise HTTPException(400, "Text cannot be empty")
-    gemini = GeminiService()
-    result = gemini.translate_text(req.text.strip(), req.from_lang, req.to_lang)
+
+    result = dictionary_service.translate_or_lookup(
+        db,
+        req.text.strip(),
+        req.from_lang,
+        req.to_lang,
+        user_id,
+    )
     if result is None:
         raise HTTPException(503, "Translation service unavailable")
     if result.get("_error") == "quota_exceeded":
-        raise HTTPException(429, "Gemini quota exceeded. Please try again later.")
-    return TranslateResponse(
-        original=req.text,
-        translation=result.get("translation", ""),
-        phonetic=result.get("phonetic"),
-        definitions=result.get("definitions", []),
-        from_lang=req.from_lang,
-        to_lang=req.to_lang,
-    )
+        return TranslateResponse(
+            original=req.text.strip(),
+            translation="AI tạm hết quota, vui lòng thử lại sau.",
+            from_lang=req.from_lang,
+            to_lang=req.to_lang,
+            source="gemini_unavailable",
+        )
+    return TranslateResponse(**result)
 
 
 @router.get("/lookup", response_model=DictionaryResponse)

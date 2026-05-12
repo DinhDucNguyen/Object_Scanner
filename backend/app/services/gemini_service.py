@@ -217,6 +217,78 @@ Text: {text}"""
             print(f"[ERROR] Gemini translate error: {e}")
             return None
 
+    def analyze_dictionary_text(self, text: str, from_lang: str = "en", to_lang: str = "vi") -> dict | None:
+        if not self.model:
+            return None
+
+        lang_names = {
+            "vi": "Vietnamese", "en": "English",
+            "ja": "Japanese", "ko": "Korean",
+            "zh": "Chinese", "fr": "French"
+        }
+        from_name = lang_names.get(from_lang, from_lang.upper())
+        to_name = lang_names.get(to_lang, to_lang.upper())
+
+        prompt = f"""You are powering a language-learning dictionary.
+Analyze this input and return ONLY valid JSON:
+{{
+  "original": "normalized original text",
+  "translation": "translation in {to_name}",
+  "phonetic": "IPA for the original single word, or null",
+  "definitions": ["brief learner-friendly definition 1", "brief definition 2"],
+  "is_physical_object": true,
+  "object_code": "lowercase_english_object_name_with_underscores_or_null",
+  "category": "category name or null",
+  "image_url_suggestion": null,
+  "translations": [
+    {{
+      "lang_code": "{from_lang}",
+      "word_name": "display word",
+      "phonetic": "IPA or null",
+      "part_of_speech": "n | v | adj | adv | prep | conj | pron | interj",
+      "definition": "short {to_name} meaning/definition",
+      "example_sentences": ["simple sentence 1", "simple sentence 2", "simple sentence 3"]
+    }}
+  ]
+}}
+
+Rules:
+- is_physical_object is true only for concrete visible physical objects that can be photographed as a single main object.
+- For verbs, adjectives, abstract nouns, people names, places, and full sentences, is_physical_object must be false and object_code must be null.
+- If is_physical_object is true, object_code must be English lowercase with underscores.
+- Return exactly JSON, no markdown.
+
+Source language: {from_name}
+Target language: {to_name}
+Input: {text}"""
+
+        try:
+            response = self.model.generate_content(prompt)
+            raw = (response.text or "").strip()
+            if raw.startswith("```"):
+                raw = raw.split("\n", 1)[1] if "\n" in raw else raw
+                raw = raw.rsplit("```", 1)[0].strip()
+            first, last = raw.find("{"), raw.rfind("}")
+            if first != -1 and last != -1 and last > first:
+                raw = raw[first:last + 1]
+            result = json.loads(raw)
+            if not isinstance(result, dict):
+                return None
+
+            result["object_code"] = self._normalize_object_code(result.get("object_code") or "")
+            if result["object_code"] == "unknown":
+                result["object_code"] = None
+            translations = result.get("translations")
+            result["translations"] = translations if isinstance(translations, list) else []
+            result["definitions"] = result.get("definitions") if isinstance(result.get("definitions"), list) else []
+            result["is_physical_object"] = bool(result.get("is_physical_object"))
+            return result
+        except ResourceExhausted:
+            return {"_error": "quota_exceeded"}
+        except Exception as e:
+            print(f"[ERROR] Gemini dictionary analysis error: {e}")
+            return None
+
     def get_example_sentences(self, word: str, lang_code: str = "en", count: int = 3) -> list:
         """
         Sinh câu ví dụ cho một từ vựng.

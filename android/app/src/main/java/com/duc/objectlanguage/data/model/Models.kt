@@ -126,9 +126,30 @@ data class StatsResponse(
 data class HistoryItem(
     val id: Int,
     @SerializedName("object_code") val objectCode: String?,
+    @SerializedName("object_name") val objectName: String?,
+    @SerializedName("word_name") val wordName: String?,
+    val phonetic: String?,
+    val definition: String?,
+    @SerializedName("translation_id") val translationId: Int?,
+    @SerializedName("category_name") val categoryName: String?,
     @SerializedName("confidence_score") val confidenceScore: Float?,
     @SerializedName("scanned_at") val scanDate: String?,
     @SerializedName("image_url") val imageUrl: String?
+)
+
+data class HistoryDetail(
+    val id: Int,
+    @SerializedName("object_code") val objectCode: String?,
+    @SerializedName("object_name") val objectName: String?,
+    @SerializedName("word_name") val wordName: String?,
+    val phonetic: String?,
+    val definition: String?,
+    @SerializedName("translation_id") val translationId: Int?,
+    @SerializedName("category_name") val categoryName: String?,
+    @SerializedName("confidence_score") val confidenceScore: Float?,
+    @SerializedName("scanned_at") val scanDate: String?,
+    @SerializedName("image_url") val imageUrl: String?,
+    val translations: List<TranslationResponse> = emptyList()
 )
 
 data class ProgressHistoryItem(
@@ -174,7 +195,37 @@ data class TranslateResponse(
     val phonetic: String?,
     val definitions: List<String> = emptyList(),
     @SerializedName("from_lang") val fromLang: String,
-    @SerializedName("to_lang") val toLang: String
+    @SerializedName("to_lang") val toLang: String,
+    val source: String? = null,
+    @SerializedName("is_physical_object") val isPhysicalObject: Boolean = false,
+    @SerializedName("object_id") val objectId: Int? = null,
+    @SerializedName("object_code") val objectCode: String? = null,
+    @SerializedName("translation_id") val translationId: Int? = null,
+    @SerializedName("can_save") val canSave: Boolean = false,
+    @SerializedName("pending_review") val pendingReview: Boolean = false
+)
+
+// ====== EXPLORE / CATEGORY ======
+
+data class CategoryData(
+    val id: Int,
+    val name: String,
+    @SerializedName("parent_id") val parentId: Int?,
+    val description: String?
+)
+
+data class ObjectData(
+    val id: Int,
+    @SerializedName("object_code") val objectCode: String,
+    @SerializedName("category_id") val categoryId: Int?,
+    @SerializedName("category_name") val categoryName: String?,
+    @SerializedName("difficulty_level") val difficultyLevel: Int,
+    @SerializedName("translation_count") val translationCount: Int,
+    @SerializedName("word_name") val wordName: String?,
+    val phonetic: String?,
+    val definition: String?,
+    @SerializedName("translation_id") val translationId: Int?,
+    @SerializedName("image_url") val imageUrl: String?
 )
 
 // ====== PROFILE ======
@@ -226,4 +277,7 @@ data class LichSuQuetResponse(
     val id: Int,
     val message: String,
     @SerializedName("image_url") val imageUrl: String?,
+    @SerializedName("learning_added") val learningAdded: Boolean = false,
+    @SerializedName("learning_status") val learningStatus: String? = null,
+    @SerializedName("translation_id") val translationId: Int? = null
 )

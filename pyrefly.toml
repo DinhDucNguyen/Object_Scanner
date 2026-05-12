@@ -1,0 +1,4 @@
+project-includes = ["backend/**/*.py"]
+search-path = ["backend"]
+fallback-python-interpreter-name = "python"
+disable-type-errors-in-ide = true

@@ -35,6 +35,9 @@ class ReviewFragment : Fragment() {
 
         viewModel.cards.observe(viewLifecycleOwner) { updateCard() }
         viewModel.currentIndex.observe(viewLifecycleOwner) { updateCard() }
+        viewModel.finishedMessage.observe(viewLifecycleOwner) { message ->
+            binding.tvFinished.text = message
+        }
 
         viewModel.finished.observe(viewLifecycleOwner) { done ->
             if (done) {
@@ -70,6 +73,10 @@ class ReviewFragment : Fragment() {
         binding.btnGood.setOnClickListener  { submitAnswer(4) }
         binding.btnEasy.setOnClickListener  { submitAnswer(5) }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
         viewModel.loadCards()
     }
 

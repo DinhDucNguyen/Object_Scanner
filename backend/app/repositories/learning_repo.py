@@ -1,8 +1,9 @@
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import timedelta
 from app.models.learning_progress import LearningProgress
 from app.core.constants import SM2_MASTERED_MIN_REPETITIONS
+from app.utils.timezone import now_vietnam
 
 
 class LearningProgressRepository:
@@ -15,7 +16,7 @@ class LearningProgressRepository:
     def get_due_reviews(self, db: Session, user_id: int):
         return db.query(LearningProgress).filter(
             LearningProgress.user_id == user_id,
-            LearningProgress.ngay_on_tiep <= datetime.utcnow()
+            LearningProgress.ngay_on_tiep <= now_vietnam()
         ).all()
 
     def get_by_id(self, db: Session, progress_id: int):
@@ -27,7 +28,7 @@ class LearningProgressRepository:
     def count_due_today(self, db: Session, user_id: int):
         return db.query(LearningProgress).filter(
             LearningProgress.user_id == user_id,
-            LearningProgress.ngay_on_tiep <= datetime.utcnow()
+            LearningProgress.ngay_on_tiep <= now_vietnam()
         ).count()
 
     def count_mastered(self, db: Session, user_id: int):
@@ -37,7 +38,7 @@ class LearningProgressRepository:
         ).count()
 
     def get_weekly_review_counts(self, db: Session, user_id: int) -> list:
-        seven_days_ago = datetime.utcnow() - timedelta(days=6)
+        seven_days_ago = now_vietnam() - timedelta(days=6)
         results = (
             db.query(
                 func.date(LearningProgress.lan_on_cuoi).label("review_date"),

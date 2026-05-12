@@ -171,6 +171,9 @@ class LichSuQuetResponse(BaseModel):
     id: int
     message: str
     image_url: Optional[str] = None
+    learning_added: bool = False
+    learning_status: Optional[str] = None
+    translation_id: Optional[int] = None
 
 # ====== Stats ======
 

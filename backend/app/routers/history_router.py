@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
+from datetime import date
 from typing import Optional
 from sqlalchemy.orm import Session
 
@@ -13,11 +14,42 @@ history_service = HistoryFeedbackService()
 
 @router.get("/history")
 def get_history(
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    keyword: Optional[str] = Query(None),
+    period: Optional[str] = Query("all"),
+    from_date: Optional[date] = Query(None),
+    to_date: Optional[date] = Query(None),
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id)
 ):
-    return history_service.get_history(db, user_id, limit)
+    return history_service.get_history(
+        db, user_id, limit, offset, keyword, period, from_date, to_date
+    )
+
+
+@router.get("/history/{scan_id}")
+def get_history_detail(
+    scan_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    detail = history_service.get_history_detail(db, user_id, scan_id)
+    if detail is None:
+        raise HTTPException(404, "History item not found")
+    return detail
+
+
+@router.delete("/history/{scan_id}")
+def delete_history(
+    scan_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    deleted = history_service.delete_history(db, user_id, scan_id)
+    if not deleted:
+        raise HTTPException(404, "History item not found")
+    return {"message": "Da xoa lich su quet"}
 
 
 @router.get("/predictions/{scan_id}")

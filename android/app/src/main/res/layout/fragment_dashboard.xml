@@ -225,6 +225,22 @@
             app:iconGravity="textStart"
             app:iconTint="@color/text_on_primary" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExploreTopics"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="24dp"
+            android:text="Kham pha chu de"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:cornerRadius="18dp"
+            app:icon="@drawable/ic_explore"
+            app:iconGravity="textStart"
+            app:strokeColor="@color/primary" />
+
         <!-- Mastery Progress Section -->
         <LinearLayout
             android:layout_width="match_parent"

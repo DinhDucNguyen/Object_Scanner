@@ -34,6 +34,10 @@ class DashboardFragment : Fragment() {
             }
         }
 
+        binding.btnExploreTopics.setOnClickListener {
+            findNavController().navigate(com.duc.objectlanguage.R.id.exploreFragment)
+        }
+
         val app = requireActivity().application as ObjectLanguageApp
         binding.tvWelcome.text = app.tokenManager.username ?: "bạn"
 

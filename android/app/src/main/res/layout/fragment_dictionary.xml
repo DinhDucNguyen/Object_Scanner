@@ -258,6 +258,16 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSaveWord"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="Luu vao danh sach hoc"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        app:cornerRadius="18dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

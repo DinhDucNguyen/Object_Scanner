@@ -19,7 +19,10 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.models.ai_feedback_report import AIPrediction, TrangThaiDuyet
+from app.models.collection_item import CollectionItem
+from app.models.learning_progress import LearningProgress
 from app.models.object import Object
+from app.models.object_media import ObjectMedia
 from app.models.translation import Translation, NguonDuLieu
 from app.models.example import ViDu
 from app.models.language import Language
@@ -113,6 +116,7 @@ class AdminService:
             return ApproveResponse(success=False, message="mo_ta không phải JSON hợp lệ", prediction_id=prediction_id)
 
         object_code = raw.get("object_code", p.nhan_du_doan or "unknown").lower()
+        image_url_suggestion = raw.get("image_url_suggestion")
         translations_raw = raw.get("translations", [])
         if not translations_raw:
             return ApproveResponse(success=False, message="Không có translations trong payload", prediction_id=prediction_id)
@@ -165,6 +169,11 @@ class AdminService:
 
         if existing:
             translation = existing
+            translation.tu_vung = word_name or translation.tu_vung
+            translation.phien_am = phonetic or translation.phien_am
+            translation.loai_tu = part_of_speech or translation.loai_tu
+            translation.dinh_nghia = definition or translation.dinh_nghia
+            translation.da_xac_nhan = True
             examples_created = 0
         else:
             translation = Translation(
@@ -188,6 +197,19 @@ class AdminService:
                     examples_created += 1
 
         # Đánh dấu đã duyệt
+        if image_url_suggestion:
+            media_exists = db.query(ObjectMedia).filter(
+                ObjectMedia.doi_tuong_id == obj.id,
+                ObjectMedia.url == image_url_suggestion,
+                ObjectMedia.thoi_gian_xoa.is_(None),
+            ).first()
+            if not media_exists:
+                db.add(ObjectMedia(
+                    doi_tuong_id=obj.id,
+                    url=image_url_suggestion,
+                    doi_tuong_chinh=True,
+                ))
+
         p.trang_thai = TrangThaiDuyet.da_duyet
         db.commit()
 
@@ -216,7 +238,45 @@ class AdminService:
                 prediction_id=prediction_id,
             )
 
+        deleted_translations = 0
+        deleted_object = False
+        if p.mo_ta:
+            try:
+                raw = json.loads(p.mo_ta)
+            except Exception:
+                raw = {}
+
+            for translation_id in raw.get("temp_translation_ids") or []:
+                translation = db.query(Translation).filter(Translation.id == translation_id).first()
+                if translation and not translation.da_xac_nhan:
+                    db.query(CollectionItem).filter(CollectionItem.ban_dich_id == translation.id).delete(synchronize_session=False)
+                    db.query(LearningProgress).filter(LearningProgress.ban_dich_id == translation.id).delete(synchronize_session=False)
+                    db.delete(translation)
+                    deleted_translations += 1
+
+            temp_object_id = raw.get("temp_object_id")
+            if temp_object_id:
+                obj = db.query(Object).filter(Object.id == temp_object_id).first()
+                if obj:
+                    approved_count = db.query(Translation).filter(
+                        Translation.doi_tuong_id == obj.id,
+                        Translation.da_xac_nhan.is_(True),
+                    ).count()
+                    other_predictions = db.query(AIPrediction).filter(
+                        AIPrediction.id != p.id,
+                        AIPrediction.nhan_du_doan == obj.ma_doi_tuong,
+                    ).count()
+                    if approved_count == 0 and other_predictions == 0:
+                        db.delete(obj)
+                        deleted_object = True
+
         p.trang_thai = TrangThaiDuyet.tu_choi
         db.commit()
 
-        return RejectResponse(success=True, message=f"Đã từ chối prediction #{prediction_id}", prediction_id=prediction_id)
+        details = []
+        if deleted_translations:
+            details.append(f"xoa {deleted_translations} ban dich tam")
+        if deleted_object:
+            details.append("xoa doi tuong tam")
+        suffix = f" ({', '.join(details)})" if details else ""
+        return RejectResponse(success=True, message=f"Da tu choi prediction #{prediction_id}{suffix}", prediction_id=prediction_id)

@@ -61,9 +61,29 @@ interface ApiService {
     @GET("api/stats")
     suspend fun getStats(): Response<StatsResponse>
 
+    // ====== EXPLORE ======
+    @GET("api/categories")
+    suspend fun getCategories(): Response<List<CategoryData>>
+
+    @GET("api/objects")
+    suspend fun getObjectsByCategory(@Query("category_id") categoryId: Int): Response<List<ObjectData>>
+
     // ====== HISTORY ======
     @GET("api/history")
-    suspend fun getHistory(@Query("limit") limit: Int = 50): Response<List<HistoryItem>>
+    suspend fun getHistory(
+        @Query("limit") limit: Int = 50,
+        @Query("offset") offset: Int = 0,
+        @Query("keyword") keyword: String? = null,
+        @Query("period") period: String? = "all",
+        @Query("from_date") fromDate: String? = null,
+        @Query("to_date") toDate: String? = null
+    ): Response<List<HistoryItem>>
+
+    @GET("api/history/{scanId}")
+    suspend fun getHistoryDetail(@Path("scanId") scanId: Int): Response<HistoryDetail>
+
+    @DELETE("api/history/{scanId}")
+    suspend fun deleteHistory(@Path("scanId") scanId: Int): Response<ResponseBody>
 
     @GET("api/objects/{code}/translations")
     suspend fun getTranslations(@Path("code") code: String): Response<List<TranslationResponse>>

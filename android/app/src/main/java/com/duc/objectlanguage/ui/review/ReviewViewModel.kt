@@ -28,6 +28,9 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     private val _finished = MutableLiveData(false)
     val finished: LiveData<Boolean> = _finished
 
+    private val _finishedMessage = MutableLiveData<String>()
+    val finishedMessage: LiveData<String> = _finishedMessage
+
     fun loadCards() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -37,7 +40,15 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             result.fold(
                 onSuccess = {
                     _cards.value = it
-                    if (it.isEmpty()) _finished.value = true
+                    if (it.isEmpty()) {
+                        val stats = repo.getStats().getOrNull()
+                        _finishedMessage.value = when {
+                            stats == null -> "Khong con tu nao can on."
+                            stats.totalLearned == 0 -> "Chua co tu nao trong danh sach on tap.\nHay quet mot vat the de bat dau."
+                            else -> "Hom nay da on xong.\nKhong con tu nao can on."
+                        }
+                        _finished.value = true
+                    }
                 },
                 onFailure = { _message.value = it.message }
             )
@@ -60,6 +71,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
                     if (nextIdx < cardList.size) {
                         _currentIndex.value = nextIdx
                     } else {
+                        _finishedMessage.value = "Hoan thanh!\nKhong con tu nao can on."
                         _finished.value = true
                     }
                 },

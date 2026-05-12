@@ -152,11 +152,40 @@ class AppRepository(private val tokenManager: TokenManager) {
         }
     }
 
+    // ====== EXPLORE ======
+
+    suspend fun getCategories(): Result<List<CategoryData>> {
+        return try {
+            val response = api.getCategories()
+            if (response.isSuccessful) Result.success(response.body() ?: emptyList())
+            else Result.failure(Exception("Loi tai chu de: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Loi tai chu de: ${e.message}"))
+        }
+    }
+
+    suspend fun getObjectsByCategory(categoryId: Int): Result<List<ObjectData>> {
+        return try {
+            val response = api.getObjectsByCategory(categoryId)
+            if (response.isSuccessful) Result.success(response.body() ?: emptyList())
+            else Result.failure(Exception("Loi tai tu vung: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Loi tai tu vung: ${e.message}"))
+        }
+    }
+
     // ====== HISTORY ======
 
-    suspend fun getHistory(limit: Int = 50): Result<List<HistoryItem>> {
+    suspend fun getHistory(
+        limit: Int = 50,
+        offset: Int = 0,
+        keyword: String? = null,
+        period: String? = "all",
+        fromDate: String? = null,
+        toDate: String? = null
+    ): Result<List<HistoryItem>> {
         return try {
-            val response = api.getHistory(limit)
+            val response = api.getHistory(limit, offset, keyword, period, fromDate, toDate)
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
             else Result.failure(Exception("Lỗi tải lịch sử"))
         } catch (e: Exception) {
@@ -169,6 +198,27 @@ class AppRepository(private val tokenManager: TokenManager) {
             val response = api.getTranslations(objectCode)
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
             else Result.failure(Exception("Không tìm thấy từ vựng"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getHistoryDetail(scanId: Int): Result<HistoryDetail> {
+        return try {
+            val response = api.getHistoryDetail(scanId)
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception("Khong tim thay lich su"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteHistory(scanId: Int): Result<String> {
+        return try {
+            val response = api.deleteHistory(scanId)
+            response.body()?.close()
+            if (response.isSuccessful) Result.success("Da xoa lich su quet")
+            else Result.failure(Exception("Xoa lich su that bai"))
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -48,6 +48,18 @@
 
     <!-- History -->
     <string name="history_empty">Chưa có lịch sử quét</string>
+    <string name="history_image">Ảnh lịch sử quét</string>
+    <string name="history_search_hint">Tìm vật thể đã quét</string>
+    <string name="history_filter_all">Tất cả</string>
+    <string name="history_filter_today">Hôm nay</string>
+    <string name="history_filter_week">Tuần này</string>
+    <string name="history_filter_month">Tháng này</string>
+    <string name="history_filter_from_date">Từ ngày</string>
+    <string name="history_filter_to_date">Đến ngày</string>
+    <string name="history_filter_clear_dates">Bỏ lọc ngày</string>
+    <string name="history_delete_title">Xóa lịch sử</string>
+    <string name="history_delete_message">Bạn có chắc muốn xóa lần quét này?</string>
+    <string name="history_btn_save">Lưu vào danh sách học</string>
 
     <!-- Streak -->
     <string name="streak_days_singular">ngày</string>
@@ -149,4 +161,7 @@
     <!-- Common -->
     <string name="arrow">➔</string>
     <string name="content_description_avatar">Avatar</string>
+    <string name="nav_explore">Kham pha</string>
+    <string name="title_explore">Kham pha</string>
+    <string name="title_explore_detail">Tu vung chu de</string>
 </resources>

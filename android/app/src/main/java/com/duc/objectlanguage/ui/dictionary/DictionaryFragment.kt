@@ -35,6 +35,10 @@ class DictionaryFragment : Fragment() {
         viewModel.loadDefaultLangs()
         setupListeners()
         setupObservers()
+        arguments?.getString("initialText")?.takeIf { it.isNotBlank() }?.let {
+            binding.etInput.setText(it)
+            binding.etInput.setSelection(binding.etInput.text?.length ?: 0)
+        }
     }
 
     private fun applyDisplayLanguage() {
@@ -67,6 +71,10 @@ class DictionaryFragment : Fragment() {
         binding.btnSwapLang.setOnClickListener {
             val currentText = binding.etInput.text?.toString() ?: ""
             viewModel.swapLanguages(currentText)
+        }
+
+        binding.btnSaveWord.setOnClickListener {
+            viewModel.saveCurrentWord()
         }
 
         // Audio playback reserved for future TTS integration
@@ -131,8 +139,14 @@ class DictionaryFragment : Fragment() {
 
                 // Audio button (only available for single words via TTS)
                 binding.btnPlayAudio.visibility = View.GONE
+                binding.btnSaveWord.visibility = if (result.canSave && result.translationId != null) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             } else if (viewModel.isLoading.value != true) {
                 binding.cardResult.visibility = View.GONE
+                binding.btnSaveWord.visibility = View.GONE
                 if (binding.etInput.text.isNullOrEmpty()) {
                     binding.groupEmptyState.visibility = View.VISIBLE
                 }
@@ -143,6 +157,13 @@ class DictionaryFragment : Fragment() {
             if (err != null) {
                 Toast.makeText(requireContext(), err, Toast.LENGTH_SHORT).show()
                 viewModel.clearError()
+            }
+        }
+
+        viewModel.message.observe(viewLifecycleOwner) { message ->
+            if (message != null) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                viewModel.clearMessage()
             }
         }
     }
