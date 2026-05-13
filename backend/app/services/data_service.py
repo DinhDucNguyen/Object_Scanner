@@ -7,6 +7,7 @@ from app.repositories.learning_repo import LearningProgressRepository
 from app.repositories.history_repo import HistoryRepository
 from app.models.category import Category
 from app.schemas.common import StatsResponse
+from app.services.object_media_service import pick_primary_object_image
 
 
 class DataService:
@@ -50,13 +51,6 @@ class DataService:
                 (t for t in obj.translations if getattr(t, "thoi_gian_xoa", None) is None),
                 None,
             )
-            primary_image = next(
-                (m for m in obj.media if getattr(m, "thoi_gian_xoa", None) is None and m.doi_tuong_chinh),
-                None,
-            ) or next(
-                (m for m in obj.media if getattr(m, "thoi_gian_xoa", None) is None),
-                None,
-            )
             result.append({
                 "id": obj.id,
                 "object_code": obj.ma_doi_tuong,
@@ -68,7 +62,7 @@ class DataService:
                 "phonetic": primary_translation.phien_am if primary_translation else None,
                 "definition": primary_translation.dinh_nghia if primary_translation else None,
                 "translation_id": primary_translation.id if primary_translation else None,
-                "image_url": primary_image.url if primary_image else None,
+                "image_url": pick_primary_object_image(obj),
             })
         return result
 

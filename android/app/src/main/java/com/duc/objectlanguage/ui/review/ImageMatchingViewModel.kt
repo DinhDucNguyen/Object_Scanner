@@ -77,8 +77,14 @@ class ImageMatchingViewModel(application: Application) : AndroidViewModel(applic
                         return@fold
                     }
 
-                    allReviewCards = cards
-                    totalRounds = (cards.size + 2) / 3 // 3 pairs per round
+                    allReviewCards = cards.filter { !it.imageUrl.isNullOrBlank() }
+                    if (allReviewCards.isEmpty()) {
+                        _error.value = "No reviewed words have standard images yet!"
+                        _finished.value = true
+                        _isLoading.value = false
+                        return@fold
+                    }
+                    totalRounds = (allReviewCards.size + 2) / 3 // 3 pairs per round
 
                     // Start first round
                     _currentRound.value = 1

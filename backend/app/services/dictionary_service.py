@@ -14,11 +14,13 @@ from app.models.object import Object
 from app.models.scan_history import ScanHistory
 from app.models.translation import Translation, NguonDuLieu
 from app.services.gemini_service import GeminiService
+from app.services.tts_service import TTSService
 
 
 class DictionaryService:
     def __init__(self):
         self.gemini = GeminiService()
+        self.tts = TTSService()
         self._cache: dict[tuple[str, str, str], tuple[datetime, dict]] = {}
         self._cache_ttl = timedelta(minutes=10)
         self._gemini_blocked_until: datetime | None = None
@@ -194,13 +196,15 @@ class DictionaryService:
             Translation.ngon_ngu_id == lang.id,
         ).first()
         if not trans:
+            word_name = first_translation.get("word_name") or original
             trans = Translation(
                 doi_tuong_id=obj.id,
                 ngon_ngu_id=lang.id,
-                tu_vung=first_translation.get("word_name") or original,
+                tu_vung=word_name,
                 phien_am=first_translation.get("phonetic") or ai_result.get("phonetic"),
                 loai_tu=first_translation.get("part_of_speech") or "n",
                 dinh_nghia=first_translation.get("definition") or ai_result.get("translation"),
+                am_thanh_url=self.tts.get_audio_url(word_name, lang_code),
                 nguon_du_lieu=NguonDuLieu.gemini,
                 da_xac_nhan=False,
             )
@@ -211,6 +215,8 @@ class DictionaryService:
                 if sentence and sentence.strip():
                     db.add(ViDu(ban_dich_id=trans.id, cau_vi_du=sentence.strip(), nguon_du_lieu="gemini"))
         else:
+            if not trans.am_thanh_url:
+                trans.am_thanh_url = self.tts.get_audio_url(trans.tu_vung or original, lang_code)
             trans.da_xac_nhan = trans.da_xac_nhan or False
 
         scan = ScanHistory(

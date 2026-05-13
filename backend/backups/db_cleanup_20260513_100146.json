@@ -1,0 +1,21 @@
+{
+  "metadata": [
+    {
+      "dry_run": false,
+      "created_at": "2026-05-13T10:01:46.615448"
+    }
+  ],
+  "deleted": [
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 25,
+        "danh_muc_id": 2,
+        "ma_doi_tuong": "voter_card",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    }
+  ]
+}

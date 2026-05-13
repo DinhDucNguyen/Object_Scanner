@@ -79,6 +79,7 @@ class ReviewCardResponse(BaseModel):
     easiness_factor: float
     interval: int
     repetitions: int
+    image_url: Optional[str] = None
 
 class ReviewResult(BaseModel):
     success: bool

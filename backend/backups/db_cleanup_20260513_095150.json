@@ -1,0 +1,1589 @@
+{
+  "metadata": [
+    {
+      "dry_run": false,
+      "created_at": "2026-05-13T09:51:50.242804"
+    }
+  ],
+  "deleted": [
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 34,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "flower",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 30,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "food",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 28,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "hair",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 24,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "paper",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 6,
+        "danh_muc_id": 2,
+        "ma_doi_tuong": "pen",
+        "muc_do_kho": 1,
+        "tao_boi": 1,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 17,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "skin",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 45,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "sky",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 21,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "strap",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 19,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "stuffed_toy",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 23,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "woman",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 4,
+        "user_id": 1,
+        "tu_tra": "welco",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T01:54:45"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 5,
+        "user_id": 1,
+        "tu_tra": "welcome",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T01:54:52"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 6,
+        "user_id": 1,
+        "tu_tra": "welcom",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T01:55:02"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 7,
+        "user_id": 1,
+        "tu_tra": "Goo",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T01:55:09"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 8,
+        "user_id": 1,
+        "tu_tra": "Good morning",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T01:55:13"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 9,
+        "user_id": 1,
+        "tu_tra": "Good morning",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T01:56:21"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 10,
+        "user_id": 1,
+        "tu_tra": "Good morning",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T01:58:34"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 11,
+        "user_id": 1,
+        "tu_tra": "Chào các",
+        "ngon_ngu_tra_id": 1,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:37:28"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 12,
+        "user_id": 1,
+        "tu_tra": "Chào các banb",
+        "ngon_ngu_tra_id": 1,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:37:43"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 13,
+        "user_id": 1,
+        "tu_tra": "Chào các bạn",
+        "ngon_ngu_tra_id": 1,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:37:52"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 14,
+        "user_id": 1,
+        "tu_tra": "Chào các bạn",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:38:11"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 15,
+        "user_id": 1,
+        "tu_tra": "Hell",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:38:18"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 16,
+        "user_id": 1,
+        "tu_tra": "Hello",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:38:22"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 17,
+        "user_id": 1,
+        "tu_tra": "Gô",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:38:38"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 18,
+        "user_id": 1,
+        "tu_tra": "Good mỏ",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:38:58"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 19,
+        "user_id": 1,
+        "tu_tra": "Good morinig",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:39:05"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 20,
+        "user_id": 1,
+        "tu_tra": "Good morin",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:39:11"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 21,
+        "user_id": 1,
+        "tu_tra": "Good mor",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:39:30"
+      }
+    },
+    {
+      "table": "TraTuDien",
+      "row": {
+        "id": 22,
+        "user_id": 1,
+        "tu_tra": "Good morning",
+        "ngon_ngu_tra_id": 2,
+        "doi_tuong_id": null,
+        "nguon_du_lieu": "gemini",
+        "lan_tra_cuoi": "2026-05-12T14:39:34"
+      }
+    },
+    {
+      "table": "ViDu",
+      "row": {
+        "id": 178,
+        "ban_dich_id": 76,
+        "cau_vi_du": "Con mèo đang ngủ.",
+        "dich_nghia": null,
+        "nguon_du_lieu": "gemini"
+      }
+    },
+    {
+      "table": "ViDu",
+      "row": {
+        "id": 179,
+        "ban_dich_id": 76,
+        "cau_vi_du": "Mèo là thú cưng rất phổ biến.",
+        "dich_nghia": null,
+        "nguon_du_lieu": "gemini"
+      }
+    },
+    {
+      "table": "ViDu",
+      "row": {
+        "id": 180,
+        "ban_dich_id": 76,
+        "cau_vi_du": "Tôi có một con mèo đen.",
+        "dich_nghia": null,
+        "nguon_du_lieu": "gemini"
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 76,
+        "doi_tuong_id": 48,
+        "ngon_ngu_id": 1,
+        "tu_vung": "Mèo",
+        "phien_am": "/mɛw/",
+        "loai_tu": "n",
+        "dinh_nghia": "cat",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-12T14:47:37",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "ViDu",
+      "row": {
+        "id": 181,
+        "ban_dich_id": 77,
+        "cau_vi_du": "Con mèo đang ngủ trên ghế sofa.",
+        "dich_nghia": null,
+        "nguon_du_lieu": "gemini"
+      }
+    },
+    {
+      "table": "ViDu",
+      "row": {
+        "id": 182,
+        "ban_dich_id": 77,
+        "cau_vi_du": "Tôi thích vuốt ve bộ lông mềm mại của mèo.",
+        "dich_nghia": null,
+        "nguon_du_lieu": "gemini"
+      }
+    },
+    {
+      "table": "ViDu",
+      "row": {
+        "id": 183,
+        "ban_dich_id": 77,
+        "cau_vi_du": "Mèo thường rất nhanh nhẹn và khéo léo khi săn chuột.",
+        "dich_nghia": null,
+        "nguon_du_lieu": "gemini"
+      }
+    },
+    {
+      "table": "DuDoanAI",
+      "row": {
+        "id": 23,
+        "scan_id": 87,
+        "nguon_ai": "gemini",
+        "nhan_du_doan": "cat",
+        "do_tin_cay": 1.0,
+        "mo_ta": "{\"original\": \"Mèo\", \"translation\": \"Cat\", \"phonetic\": \"/mɛw/\", \"definitions\": [\"A small, furry domesticated animal often kept as a pet.\", \"A carnivorous mammal, typically having a purring call and retractile claws.\"], \"is_physical_object\": true, \"object_code\": \"cat\", \"category\": \"Animal\", \"image_url_suggestion\": null, \"translations\": [{\"lang_code\": \"vi\", \"word_name\": \"Mèo\", \"phonetic\": \"/mɛw/\", \"part_of_speech\": \"n\", \"definition\": \"cat\", \"example_sentences\": [\"Con mèo đang ngủ.\", \"Mèo là thú cưng rất phổ biến.\", \"Tôi có một con mèo đen.\"]}], \"temp_object_id\": 48, \"temp_translation_ids\": [76], \"source\": \"dictionary_lookup\"}",
+        "trang_thai": "cho_duyet",
+        "thoi_gian": "2026-05-12T14:47:37"
+      }
+    },
+    {
+      "table": "DuDoanAI",
+      "row": {
+        "id": 24,
+        "scan_id": 88,
+        "nguon_ai": "gemini",
+        "nhan_du_doan": "cat",
+        "do_tin_cay": 1.0,
+        "mo_ta": "{\"original\": \"Mèo\", \"translation\": \"mèo\", \"phonetic\": null, \"definitions\": [\"Động vật có vú bốn chân, thuộc họ mèo, thường được nuôi làm thú cưng.\", \"Loài động vật săn mồi nhỏ, có lông mềm, thường sống chung với con người.\"], \"is_physical_object\": true, \"object_code\": \"cat\", \"category\": \"animal\", \"image_url_suggestion\": null, \"translations\": [{\"lang_code\": \"en\", \"word_name\": \"cat\", \"phonetic\": \"[kæt]\", \"part_of_speech\": \"n\", \"definition\": \"Một loài động vật có vú nhỏ, lông mềm, thường được nuôi làm thú cưng trong nhà hoặc sống hoang dã, nổi tiếng với sự độc lập và khả năng săn bắt động vật gặm nhấm.\", \"example_sentences\": [\"Con mèo đang ngủ trên ghế sofa.\", \"Tôi thích vuốt ve bộ lông mềm mại của mèo.\", \"Mèo thường rất nhanh nhẹn và khéo léo khi săn chuột.\"]}], \"temp_object_id\": 48, \"temp_translation_ids\": [77], \"source\": \"dictionary_lookup\"}",
+        "trang_thai": "cho_duyet",
+        "thoi_gian": "2026-05-12T14:48:11"
+      }
+    },
+    {
+      "table": "LichSuQuet",
+      "row": {
+        "id": 88,
+        "user_id": 1,
+        "doi_tuong_id": 48,
+        "url_anh": null,
+        "do_tin_cay": 1.0,
+        "thoi_gian": "2026-05-12T14:48:11"
+      }
+    },
+    {
+      "table": "LichSuQuet",
+      "row": {
+        "id": 87,
+        "user_id": 1,
+        "doi_tuong_id": 48,
+        "url_anh": null,
+        "do_tin_cay": 1.0,
+        "thoi_gian": "2026-05-12T14:47:37"
+      }
+    }
+  ],
+  "updated_before": [
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 61,
+        "doi_tuong_id": 1,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Laptop",
+        "phien_am": "/ˈlæp.tɒp/",
+        "loai_tu": "n",
+        "dinh_nghia": "máy tính xách tay: một máy tính cá nhân nhỏ gọn, có thể mang đi, tích hợp màn hình, bàn phím và chuột",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T04:25:08",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 71,
+        "doi_tuong_id": 3,
+        "ngon_ngu_id": 2,
+        "tu_vung": "keyboard",
+        "phien_am": "/ˈkiːbɔːrd/",
+        "loai_tu": "n",
+        "dinh_nghia": "Thiết bị nhập liệu có các phím chữ và số để điều khiển máy tính hoặc nhạc cụ.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-11T14:39:33",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 75,
+        "doi_tuong_id": 5,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Book",
+        "phien_am": "/bʊk/",
+        "loai_tu": "n",
+        "dinh_nghia": "sách: một tập hợp các trang giấy có chữ hoặc hình ảnh, được đóng lại và dùng để đọc.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-12T14:36:13",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 68,
+        "doi_tuong_id": 20,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Teddy bear",
+        "phien_am": "/ˈtɛd.i ˌbɛər/",
+        "loai_tu": "n",
+        "dinh_nghia": "gấu bông: một loại đồ chơi nhồi bông có hình dạng con gấu",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T14:35:06",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 72,
+        "doi_tuong_id": 44,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Apple",
+        "phien_am": "/ˈæp.əl/",
+        "loai_tu": "n",
+        "dinh_nghia": "táo: một loại trái cây tròn, thường có màu đỏ, xanh lá cây hoặc vàng, có vị ngọt hoặc chua.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-12T02:12:39",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 77,
+        "doi_tuong_id": 48,
+        "ngon_ngu_id": 2,
+        "tu_vung": "cat",
+        "phien_am": "[kæt]",
+        "loai_tu": "n",
+        "dinh_nghia": "Một loài động vật có vú nhỏ, lông mềm, thường được nuôi làm thú cưng trong nhà hoặc sống hoang dã, nổi tiếng với sự độc lập và khả năng săn bắt động vật gặm nhấm.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-12T14:48:11",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 27,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "baby",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 56,
+        "doi_tuong_id": 27,
+        "ngon_ngu_id": 2,
+        "tu_vung": "baby",
+        "phien_am": "/ˈbeɪ.bi/",
+        "loai_tu": "n",
+        "dinh_nghia": "em bé: một người rất trẻ, đặc biệt là trẻ sơ sinh hoặc trẻ nhỏ.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T03:30:25",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 39,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "boy",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 67,
+        "doi_tuong_id": 39,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Boy",
+        "phien_am": "/bɔɪ/",
+        "loai_tu": "n",
+        "dinh_nghia": "con trai: một đứa trẻ là nam giới",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T14:34:59",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 18,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "child",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 57,
+        "doi_tuong_id": 18,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Child",
+        "phien_am": "/tʃaɪld/",
+        "loai_tu": "n",
+        "dinh_nghia": "trẻ em: một người rất trẻ, đặc biệt là trước tuổi dậy thì.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T03:46:57",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 38,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "man",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 66,
+        "doi_tuong_id": 38,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Man",
+        "phien_am": "/mæn/",
+        "loai_tu": "n",
+        "dinh_nghia": "người đàn ông: một người nam đã trưởng thành",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T05:16:07",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 32,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "young_man",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 60,
+        "doi_tuong_id": 32,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Young man",
+        "phien_am": "/ˈjʌŋ mæn/",
+        "loai_tu": "n",
+        "dinh_nghia": "người đàn ông trẻ: một người nam giới chưa đạt đến tuổi trưởng thành hoặc mới bước vào giai đoạn trưởng thành.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T03:56:57",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 36,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "bouquet",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 64,
+        "doi_tuong_id": 36,
+        "ngon_ngu_id": 2,
+        "tu_vung": "bouquet",
+        "phien_am": "/buːˈkeɪ/",
+        "loai_tu": "n",
+        "dinh_nghia": "bó hoa: một bó hoa được sắp xếp đẹp mắt, thường dùng làm quà tặng hoặc trang trí.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T04:32:05",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 37,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "flower_bouquet",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 65,
+        "doi_tuong_id": 37,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Flower bouquet",
+        "phien_am": "/ˈflaʊ.ər buːˈkeɪ/",
+        "loai_tu": "n",
+        "dinh_nghia": "bó hoa: một bó gồm nhiều bông hoa được sắp xếp và gói lại để làm quà tặng hoặc trang trí",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T04:47:37",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 35,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "graduation_bouquet",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 63,
+        "doi_tuong_id": 35,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Graduation Bouquet",
+        "phien_am": "/ˌɡrædʒ.uˈeɪ.ʃən buˈkeɪ/",
+        "loai_tu": "n",
+        "dinh_nghia": "bó hoa tốt nghiệp: một bó hoa được tặng để chúc mừng người tốt nghiệp, thường có các yếu tố liên quan đến lễ tốt nghiệp.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T04:31:09",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 42,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "certificate_of_merit",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 70,
+        "doi_tuong_id": 42,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Certificate of Merit",
+        "phien_am": "/ˈsɜːrtɪfɪkət əv ˈmɛrɪt/",
+        "loai_tu": "n",
+        "dinh_nghia": "giấy khen: một tài liệu chính thức công nhận thành tích hoặc đóng góp xuất sắc của một người hoặc một tổ chức.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-11T14:01:49",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 33,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "framed_certificate",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 62,
+        "doi_tuong_id": 33,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Framed Certificate",
+        "phien_am": "/freɪmd sərˈtɪfɪkət/",
+        "loai_tu": "n",
+        "dinh_nghia": "giấy khen được đóng khung: một tài liệu chính thức được in và đóng khung, công nhận thành tích, thành tựu hoặc sự cống hiến của một cá nhân hoặc tổ chức.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T04:30:32",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 25,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "voter_card",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 55,
+        "doi_tuong_id": 25,
+        "ngon_ngu_id": 2,
+        "tu_vung": "voter card",
+        "phien_am": "/ˈvoʊtər kɑːrd/",
+        "loai_tu": "n",
+        "dinh_nghia": "thẻ cử tri: một loại giấy tờ xác nhận quyền bỏ phiếu của công dân trong các cuộc bầu cử.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T03:18:21",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 29,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "earbud",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 58,
+        "doi_tuong_id": 29,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Earbud",
+        "phien_am": "/ˈɪərˌbʌd/",
+        "loai_tu": "n",
+        "dinh_nghia": "tai nghe nhét tai: thiết bị âm thanh nhỏ gọn đeo trong tai để nghe nhạc hoặc thực hiện cuộc gọi",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T03:47:39",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 31,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "lime_drink",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 59,
+        "doi_tuong_id": 31,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Lime drink",
+        "phien_am": "/ˈlaɪm drɪŋk/",
+        "loai_tu": "n",
+        "dinh_nghia": "thức uống chanh: đồ uống có hương vị chanh, thường được phục vụ lạnh với một lát chanh.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T03:52:13",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 47,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "tumbler",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 74,
+        "doi_tuong_id": 47,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Tumbler",
+        "phien_am": "/ˈtʌm.blər/",
+        "loai_tu": "n",
+        "dinh_nghia": "cốc giữ nhiệt: một loại cốc có thành đôi thường được dùng để giữ đồ uống nóng hoặc lạnh.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-12T14:20:53",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 46,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "village",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 73,
+        "doi_tuong_id": 46,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Village",
+        "phien_am": "/ˈvɪl.ɪdʒ/",
+        "loai_tu": "n",
+        "dinh_nghia": "làng: một nhóm nhà ở và các tòa nhà khác, thường nhỏ hơn thị trấn và thường nằm ở vùng nông thôn",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-12T02:21:26",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 22,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "watch",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 69,
+        "doi_tuong_id": 22,
+        "ngon_ngu_id": 2,
+        "tu_vung": "watch",
+        "phien_am": "/wɒtʃ/",
+        "loai_tu": "n",
+        "dinh_nghia": "đồng hồ đeo tay: một thiết bị dùng để hiển thị thời gian, thường được đeo trên cổ tay.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": false,
+        "ngay_tao": "2026-05-07T14:35:31",
+        "thoi_gian_xoa": null
+      }
+    }
+  ],
+  "updated_after": [
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 61,
+        "doi_tuong_id": 1,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Laptop",
+        "phien_am": "/ˈlæp.tɒp/",
+        "loai_tu": "n",
+        "dinh_nghia": "máy tính xách tay: một máy tính cá nhân nhỏ gọn, có thể mang đi, tích hợp màn hình, bàn phím và chuột",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "thu_cong",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T04:25:08",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 71,
+        "doi_tuong_id": 3,
+        "ngon_ngu_id": 2,
+        "tu_vung": "keyboard",
+        "phien_am": "/ˈkiːbɔːrd/",
+        "loai_tu": "n",
+        "dinh_nghia": "Thiết bị nhập liệu có các phím chữ và số để điều khiển máy tính hoặc nhạc cụ.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "thu_cong",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-11T14:39:33",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 75,
+        "doi_tuong_id": 5,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Book",
+        "phien_am": "/bʊk/",
+        "loai_tu": "n",
+        "dinh_nghia": "sách: một tập hợp các trang giấy có chữ hoặc hình ảnh, được đóng lại và dùng để đọc.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "thu_cong",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-12T14:36:13",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 68,
+        "doi_tuong_id": 20,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Teddy bear",
+        "phien_am": "/ˈtɛd.i ˌbɛər/",
+        "loai_tu": "n",
+        "dinh_nghia": "gấu bông: một loại đồ chơi nhồi bông có hình dạng con gấu",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "thu_cong",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T14:35:06",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 72,
+        "doi_tuong_id": 44,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Apple",
+        "phien_am": "/ˈæp.əl/",
+        "loai_tu": "n",
+        "dinh_nghia": "táo: một loại trái cây tròn, thường có màu đỏ, xanh lá cây hoặc vàng, có vị ngọt hoặc chua.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "thu_cong",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-12T02:12:39",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 77,
+        "doi_tuong_id": 48,
+        "ngon_ngu_id": 2,
+        "tu_vung": "cat",
+        "phien_am": "[kæt]",
+        "loai_tu": "n",
+        "dinh_nghia": "Một loài động vật có vú nhỏ, lông mềm, thường được nuôi làm thú cưng trong nhà hoặc sống hoang dã, nổi tiếng với sự độc lập và khả năng săn bắt động vật gặm nhấm.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "thu_cong",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-12T14:48:11",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 27,
+        "danh_muc_id": 13,
+        "ma_doi_tuong": "baby",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 56,
+        "doi_tuong_id": 27,
+        "ngon_ngu_id": 2,
+        "tu_vung": "baby",
+        "phien_am": "/ˈbeɪ.bi/",
+        "loai_tu": "n",
+        "dinh_nghia": "em bé: một người rất trẻ, đặc biệt là trẻ sơ sinh hoặc trẻ nhỏ.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T03:30:25",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 39,
+        "danh_muc_id": 13,
+        "ma_doi_tuong": "boy",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 67,
+        "doi_tuong_id": 39,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Boy",
+        "phien_am": "/bɔɪ/",
+        "loai_tu": "n",
+        "dinh_nghia": "con trai: một đứa trẻ là nam giới",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T14:34:59",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 18,
+        "danh_muc_id": 13,
+        "ma_doi_tuong": "child",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 57,
+        "doi_tuong_id": 18,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Child",
+        "phien_am": "/tʃaɪld/",
+        "loai_tu": "n",
+        "dinh_nghia": "trẻ em: một người rất trẻ, đặc biệt là trước tuổi dậy thì.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T03:46:57",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 38,
+        "danh_muc_id": 13,
+        "ma_doi_tuong": "man",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 66,
+        "doi_tuong_id": 38,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Man",
+        "phien_am": "/mæn/",
+        "loai_tu": "n",
+        "dinh_nghia": "người đàn ông: một người nam đã trưởng thành",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T05:16:07",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 32,
+        "danh_muc_id": 13,
+        "ma_doi_tuong": "young_man",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 60,
+        "doi_tuong_id": 32,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Young man",
+        "phien_am": "/ˈjʌŋ mæn/",
+        "loai_tu": "n",
+        "dinh_nghia": "người đàn ông trẻ: một người nam giới chưa đạt đến tuổi trưởng thành hoặc mới bước vào giai đoạn trưởng thành.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T03:56:57",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 36,
+        "danh_muc_id": 8,
+        "ma_doi_tuong": "bouquet",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 64,
+        "doi_tuong_id": 36,
+        "ngon_ngu_id": 2,
+        "tu_vung": "bouquet",
+        "phien_am": "/buːˈkeɪ/",
+        "loai_tu": "n",
+        "dinh_nghia": "bó hoa: một bó hoa được sắp xếp đẹp mắt, thường dùng làm quà tặng hoặc trang trí.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T04:32:05",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 37,
+        "danh_muc_id": 8,
+        "ma_doi_tuong": "flower_bouquet",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 65,
+        "doi_tuong_id": 37,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Flower bouquet",
+        "phien_am": "/ˈflaʊ.ər buːˈkeɪ/",
+        "loai_tu": "n",
+        "dinh_nghia": "bó hoa: một bó gồm nhiều bông hoa được sắp xếp và gói lại để làm quà tặng hoặc trang trí",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T04:47:37",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 35,
+        "danh_muc_id": 8,
+        "ma_doi_tuong": "graduation_bouquet",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 63,
+        "doi_tuong_id": 35,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Graduation Bouquet",
+        "phien_am": "/ˌɡrædʒ.uˈeɪ.ʃən buˈkeɪ/",
+        "loai_tu": "n",
+        "dinh_nghia": "bó hoa tốt nghiệp: một bó hoa được tặng để chúc mừng người tốt nghiệp, thường có các yếu tố liên quan đến lễ tốt nghiệp.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T04:31:09",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 42,
+        "danh_muc_id": 2,
+        "ma_doi_tuong": "certificate_of_merit",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 70,
+        "doi_tuong_id": 42,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Certificate of Merit",
+        "phien_am": "/ˈsɜːrtɪfɪkət əv ˈmɛrɪt/",
+        "loai_tu": "n",
+        "dinh_nghia": "giấy khen: một tài liệu chính thức công nhận thành tích hoặc đóng góp xuất sắc của một người hoặc một tổ chức.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-11T14:01:49",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 33,
+        "danh_muc_id": 2,
+        "ma_doi_tuong": "framed_certificate",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 62,
+        "doi_tuong_id": 33,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Framed Certificate",
+        "phien_am": "/freɪmd sərˈtɪfɪkət/",
+        "loai_tu": "n",
+        "dinh_nghia": "giấy khen được đóng khung: một tài liệu chính thức được in và đóng khung, công nhận thành tích, thành tựu hoặc sự cống hiến của một cá nhân hoặc tổ chức.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T04:30:32",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 25,
+        "danh_muc_id": 2,
+        "ma_doi_tuong": "voter_card",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 55,
+        "doi_tuong_id": 25,
+        "ngon_ngu_id": 2,
+        "tu_vung": "voter card",
+        "phien_am": "/ˈvoʊtər kɑːrd/",
+        "loai_tu": "n",
+        "dinh_nghia": "thẻ cử tri: một loại giấy tờ xác nhận quyền bỏ phiếu của công dân trong các cuộc bầu cử.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T03:18:21",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 29,
+        "danh_muc_id": 1,
+        "ma_doi_tuong": "earbud",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 58,
+        "doi_tuong_id": 29,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Earbud",
+        "phien_am": "/ˈɪərˌbʌd/",
+        "loai_tu": "n",
+        "dinh_nghia": "tai nghe nhét tai: thiết bị âm thanh nhỏ gọn đeo trong tai để nghe nhạc hoặc thực hiện cuộc gọi",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T03:47:39",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 31,
+        "danh_muc_id": 5,
+        "ma_doi_tuong": "lime_drink",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 59,
+        "doi_tuong_id": 31,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Lime drink",
+        "phien_am": "/ˈlaɪm drɪŋk/",
+        "loai_tu": "n",
+        "dinh_nghia": "thức uống chanh: đồ uống có hương vị chanh, thường được phục vụ lạnh với một lát chanh.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T03:52:13",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 47,
+        "danh_muc_id": 3,
+        "ma_doi_tuong": "tumbler",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 74,
+        "doi_tuong_id": 47,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Tumbler",
+        "phien_am": "/ˈtʌm.blər/",
+        "loai_tu": "n",
+        "dinh_nghia": "cốc giữ nhiệt: một loại cốc có thành đôi thường được dùng để giữ đồ uống nóng hoặc lạnh.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-12T14:20:53",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 46,
+        "danh_muc_id": 18,
+        "ma_doi_tuong": "village",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 73,
+        "doi_tuong_id": 46,
+        "ngon_ngu_id": 2,
+        "tu_vung": "Village",
+        "phien_am": "/ˈvɪl.ɪdʒ/",
+        "loai_tu": "n",
+        "dinh_nghia": "làng: một nhóm nhà ở và các tòa nhà khác, thường nhỏ hơn thị trấn và thường nằm ở vùng nông thôn",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-12T02:21:26",
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 22,
+        "danh_muc_id": 8,
+        "ma_doi_tuong": "watch",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BanDich",
+      "row": {
+        "id": 69,
+        "doi_tuong_id": 22,
+        "ngon_ngu_id": 2,
+        "tu_vung": "watch",
+        "phien_am": "/wɒtʃ/",
+        "loai_tu": "n",
+        "dinh_nghia": "đồng hồ đeo tay: một thiết bị dùng để hiển thị thời gian, thường được đeo trên cổ tay.",
+        "am_thanh_url": null,
+        "nguon_du_lieu": "gemini",
+        "da_xac_nhan": true,
+        "ngay_tao": "2026-05-07T14:35:31",
+        "thoi_gian_xoa": null
+      }
+    }
+  ],
+  "created": [
+    {
+      "table": "DanhMuc",
+      "row": {
+        "id": 18,
+        "ten_danh_muc": "Địa điểm",
+        "danh_muc_cha": null,
+        "mo_ta": "Địa danh và nơi chốn thường gặp",
+        "thoi_gian_xoa": null
+      }
+    }
+  ]
+}

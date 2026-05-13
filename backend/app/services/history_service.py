@@ -167,7 +167,6 @@ class HistoryFeedbackService:
     def _scan_to_history_item(self, db: Session, scan: ScanHistory) -> dict:
         obj = scan.object
         translation = self._pick_review_translation(db, obj.id) if obj else None
-        primary_image = self._pick_object_image(obj) if obj else None
         object_code = obj.ma_doi_tuong if obj else None
         word_name = translation.tu_vung if translation else object_code
 
@@ -182,23 +181,8 @@ class HistoryFeedbackService:
             "category_name": obj.category.ten_danh_muc if obj and obj.category else None,
             "confidence_score": scan.do_tin_cay,
             "scanned_at": scan.thoi_gian.isoformat() if scan.thoi_gian else None,
-            "image_url": scan.url_anh or primary_image,
+            "image_url": scan.url_anh,
         }
-
-    def _pick_object_image(self, obj) -> str | None:
-        if not obj:
-            return None
-        primary = next(
-            (
-                m for m in (obj.media or [])
-                if getattr(m, "thoi_gian_xoa", None) is None and m.doi_tuong_chinh
-            ),
-            None,
-        ) or next(
-            (m for m in (obj.media or []) if getattr(m, "thoi_gian_xoa", None) is None),
-            None,
-        )
-        return primary.url if primary else None
 
     def _translation_to_dict(self, translation: Translation) -> dict:
         lang = translation.language

@@ -26,6 +26,7 @@ from app.models.object_media import ObjectMedia
 from app.models.translation import Translation, NguonDuLieu
 from app.models.example import ViDu
 from app.models.language import Language
+from app.services.tts_service import TTSService
 from app.schemas.admin import (
     ApproveRequest, ApproveResponse,
     RejectResponse,
@@ -35,6 +36,8 @@ from app.schemas.admin import (
 
 
 class AdminService:
+    def __init__(self):
+        self.tts = TTSService()
 
     # ------------------------------------------------------------------
     # Truy vấn
@@ -134,6 +137,7 @@ class AdminService:
             else t_data.get("example_sentences", [])
         )
         lang_code = t_data.get("lang_code", "en")
+        audio_url = self.tts.get_audio_url(word_name, lang_code)
 
         # Upsert DoiTuong
         obj = db.query(Object).filter(
@@ -173,6 +177,7 @@ class AdminService:
             translation.phien_am = phonetic or translation.phien_am
             translation.loai_tu = part_of_speech or translation.loai_tu
             translation.dinh_nghia = definition or translation.dinh_nghia
+            translation.am_thanh_url = translation.am_thanh_url or audio_url
             translation.da_xac_nhan = True
             examples_created = 0
         else:
@@ -183,6 +188,7 @@ class AdminService:
                 phien_am=phonetic,
                 loai_tu=part_of_speech,
                 dinh_nghia=definition,
+                am_thanh_url=audio_url,
                 nguon_du_lieu=NguonDuLieu.gemini,
                 da_xac_nhan=True,
             )

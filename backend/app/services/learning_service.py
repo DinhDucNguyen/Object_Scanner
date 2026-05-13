@@ -6,6 +6,7 @@ from app.repositories.language_repo import LanguageRepository
 from app.repositories.learning_repo import LearningProgressRepository
 from app.repositories.translation_repo import TranslationRepository
 from app.schemas.common import ReviewCardResponse, ReviewRequest, ReviewResult, ViDuResponse
+from app.services.object_media_service import pick_primary_object_image
 from app.utils.sm2 import calculate_sm2
 from app.utils.timezone import now_vietnam
 
@@ -69,6 +70,7 @@ class LearningService:
                     easiness_factor=float(p.do_de_nho),
                     interval=p.khoang_lap,
                     repetitions=p.so_lan_lap,
+                    image_url=pick_primary_object_image(t.object),
                 )
             )
         return results

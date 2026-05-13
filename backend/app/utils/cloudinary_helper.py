@@ -31,3 +31,4 @@ def upload_image(image_bytes: bytes, folder: str = "object_scanner/scans") -> st
         return result.get("secure_url")
     except Exception:
         return None
+

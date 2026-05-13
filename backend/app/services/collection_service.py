@@ -8,6 +8,7 @@ from app.schemas.common import (
     CollectionCreate, CollectionResponse, CollectionItemAdd,
     CollectionDetailResponse, CollectionItemResponse, CollectionInsightsResponse
 )
+from app.services.object_media_service import pick_primary_object_image
 from app.core.constants import SM2_MASTERED_MIN_REPETITIONS, SM2_MASTERED_MIN_INTERVAL_DAYS, SM2_BASELINE_EASINESS_FACTOR
 
 
@@ -59,7 +60,7 @@ class CollectionService:
                 object_name=obj.ma_doi_tuong if obj else "Unknown",
                 translation=t.tu_vung,
                 category=category.ten_danh_muc if category else "Uncategorized",
-                image_url=None
+                image_url=pick_primary_object_image(obj)
             ))
 
         return CollectionDetailResponse(

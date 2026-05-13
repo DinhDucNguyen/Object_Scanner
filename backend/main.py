@@ -34,6 +34,8 @@ app.include_router(admin_router.router, prefix="/api")
 app.include_router(streak_router.router)
 
 os.makedirs("uploads/scans", exist_ok=True)
+os.makedirs("uploads/objects", exist_ok=True)
+os.makedirs("uploads/tts", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/")

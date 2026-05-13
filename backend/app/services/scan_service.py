@@ -7,6 +7,7 @@ from app.repositories.object_repo import ObjectRepository
 from app.repositories.translation_repo import TranslationRepository
 from app.repositories.language_repo import LanguageRepository
 from app.services.gemini_service import GeminiService
+from app.services.tts_service import TTSService
 from app.schemas.common import ScanRequest, ScanResponse, TranslationResponse, ViDuResponse
 
 
@@ -16,6 +17,7 @@ class ScanService:
         self.trans_repo = TranslationRepository()
         self.lang_repo = LanguageRepository()
         self.gemini = GeminiService()
+        self.tts = TTSService()
 
     def process_scan(self, db: Session, request: ScanRequest) -> ScanResponse:
         obj = self.obj_repo.get_by_code(db, request.object_code)
@@ -66,13 +68,15 @@ class ScanService:
             translations = []
             for t_data in gemini_result.get("translations", []):
                 lang = self._ensure_language(db, t_data.get("lang_code", "en"))
+                word_name = t_data.get("word_name", object_code)
                 trans = Translation(
                     doi_tuong_id=obj.id,
                     ngon_ngu_id=lang.id,
-                    tu_vung=t_data.get("word_name", object_code),
+                    tu_vung=word_name,
                     phien_am=t_data.get("phonetic"),
                     loai_tu=t_data.get("part_of_speech"),
                     dinh_nghia=t_data.get("definition"),
+                    am_thanh_url=self.tts.get_audio_url(word_name, lang.ma_ngon_ngu),
                     nguon_du_lieu=NguonDuLieu.gemini,
                 )
                 db.add(trans)
@@ -122,6 +126,6 @@ class ScanService:
             part_of_speech=t.loai_tu,
             definition=t.dinh_nghia,
             examples=examples,
-            audio_url=t.am_thanh_url,
+            audio_url=t.am_thanh_url or self.tts.get_audio_url(t.tu_vung, lang.ma_ngon_ngu if lang else "en"),
             data_source=t.nguon_du_lieu.value if isinstance(t.nguon_du_lieu, NguonDuLieu) else (str(t.nguon_du_lieu) if t.nguon_du_lieu else None)
         )
