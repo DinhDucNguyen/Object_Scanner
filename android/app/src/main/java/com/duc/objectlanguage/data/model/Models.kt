@@ -8,6 +8,19 @@ data class LoginRequest(val username: String, val password: String)
 data class RegisterRequest(val username: String, val email: String, val password: String)
 data class RefreshRequest(@SerializedName("refresh_token") val refreshToken: String)
 
+data class ForgotPasswordRequest(val email: String)
+data class VerifyOtpRequest(val email: String, @SerializedName("otp_code") val otpCode: String)
+data class ResetPasswordRequest(
+    val email: String,
+    @SerializedName("otp_code") val otpCode: String,
+    @SerializedName("new_password") val newPassword: String
+)
+data class ChangePasswordRequest(
+    @SerializedName("current_password") val currentPassword: String,
+    @SerializedName("new_password") val newPassword: String
+)
+data class MessageResponse(val message: String)
+
 data class TokenResponse(
     @SerializedName("access_token") val accessToken: String,
     @SerializedName("refresh_token") val refreshToken: String,
@@ -27,15 +40,11 @@ data class UserResponse(
 
 data class UserSettingsResponse(
     @SerializedName("user_id") val userId: Int,
-    @SerializedName("native_lang_id") val nativeLangId: Int,
-    @SerializedName("target_lang_id") val targetLangId: Int,
-    @SerializedName("native_lang_code") val nativeLangCode: String?,
-    @SerializedName("target_lang_code") val targetLangCode: String?
+    @SerializedName("display_language") val displayLanguage: String = "vi"
 )
 
 data class UserSettingsUpdate(
-    @SerializedName("native_lang_id") val nativeLangId: Int?,
-    @SerializedName("target_lang_id") val targetLangId: Int?
+    @SerializedName("display_language") val displayLanguage: String?
 )
 
 // ====== SCAN ======
@@ -118,7 +127,10 @@ data class StatsResponse(
     @SerializedName("total_learned") val totalLearned: Int,
     @SerializedName("due_today") val dueToday: Int,
     val mastered: Int,
-    @SerializedName("total_scans") val totalScans: Int
+    @SerializedName("total_scans") val totalScans: Int,
+    @SerializedName("current_streak") val currentStreak: Int = 0,
+    @SerializedName("longest_streak") val longestStreak: Int = 0,
+    @SerializedName("total_reviews") val totalReviews: Int = 0
 )
 
 // ====== HISTORY ======
@@ -235,6 +247,15 @@ data class ProfileData(
     @SerializedName("full_name") val fullName: String?,
     @SerializedName("avatar_url") val avatarUrl: String?,
     val bio: String?
+)
+
+data class ProfileUpdateRequest(
+    @SerializedName("full_name") val fullName: String? = null,
+    val bio: String? = null
+)
+
+data class AvatarUploadResponse(
+    @SerializedName("avatar_url") val avatarUrl: String
 )
 
 // ====== STREAK ======

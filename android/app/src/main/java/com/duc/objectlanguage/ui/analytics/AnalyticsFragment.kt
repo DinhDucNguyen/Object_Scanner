@@ -45,7 +45,7 @@ class AnalyticsFragment : Fragment() {
             binding.tvTotalWords.text   = "${stats.totalLearned}"
             binding.tvMasteredWords.text = "${stats.mastered}"
             binding.tvReviewsToday.text  = "${stats.dueToday}"
-            binding.tvCurrentStreak.text = "${stats.totalScans}"
+            binding.tvCurrentStreak.text = "${stats.currentStreak}"
         }
 
         viewModel.analytics.observe(viewLifecycleOwner) { data ->

@@ -1,7 +1,9 @@
+# pyrefly: ignore [missing-import]
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, TIMESTAMP, DateTime
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import relationship
 from app.db.session import Base
-from datetime import datetime
+from app.utils.timezone import now_vietnam
 
 
 class UserCollection(Base):
@@ -11,7 +13,7 @@ class UserCollection(Base):
     user_id = Column(Integer, ForeignKey("NguoiDung.id", ondelete="CASCADE"), nullable=False)
     ten_bo_suu_tap = Column(String(100), nullable=False)
     cong_khai = Column(Boolean, default=False)
-    ngay_tao = Column(TIMESTAMP, default=datetime.utcnow)
+    ngay_tao = Column(TIMESTAMP, default=now_vietnam)
     thoi_gian_xoa = Column(DateTime, nullable=True)
 
     user = relationship("User", back_populates="collections")

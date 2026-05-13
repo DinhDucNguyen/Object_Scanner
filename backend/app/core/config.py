@@ -26,6 +26,13 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: Optional[str] = None
     CLOUDINARY_API_SECRET: Optional[str] = None
 
+    # SMTP Email
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_FROM: str = "no-reply@objectscanner.app"
+
     @field_validator("DEBUG", mode="before")
     @classmethod
     def parse_debug_mode(cls, value):

@@ -110,7 +110,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="22dp"
-            android:text="Dong"
+            android:text="@string/btn_close"
             android:textStyle="bold"
             app:cornerRadius="16dp" />
     </LinearLayout>

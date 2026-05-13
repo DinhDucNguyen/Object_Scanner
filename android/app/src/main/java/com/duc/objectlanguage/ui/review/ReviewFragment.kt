@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentReviewBinding
 import com.duc.objectlanguage.ui.streak.StreakViewModel
 
@@ -95,7 +96,7 @@ class ReviewFragment : Fragment() {
         // Front: từ tiếng Anh + phiên âm
         binding.tvQuestion.text = card.wordName
         binding.tvProgress.text = "${idx + 1} / ${cards.size}"
-        binding.tvLangHint.text = "🇺🇸 English"
+        binding.tvLangHint.text = getString(R.string.review_lang_hint)
 
         if (!card.phonetic.isNullOrEmpty()) {
             binding.tvPhonetic.text = card.phonetic

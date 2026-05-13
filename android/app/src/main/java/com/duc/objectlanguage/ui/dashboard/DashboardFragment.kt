@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentDashboardBinding
 
 class DashboardFragment : Fragment() {
@@ -39,7 +40,7 @@ class DashboardFragment : Fragment() {
         }
 
         val app = requireActivity().application as ObjectLanguageApp
-        binding.tvWelcome.text = app.tokenManager.username ?: "bạn"
+        binding.tvWelcome.text = app.tokenManager.username ?: getString(R.string.dashboard_default_user)
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
@@ -56,7 +57,7 @@ class DashboardFragment : Fragment() {
                 val mastered = stats.mastered
                 val pct = if (total > 0) (mastered * 100 / total) else 0
                 binding.progressMastery.progress = pct
-                binding.tvProgressPct.text = "$pct%"
+                binding.tvProgressPct.text = getString(R.string.dashboard_progress_short, pct)
             }
         }
 

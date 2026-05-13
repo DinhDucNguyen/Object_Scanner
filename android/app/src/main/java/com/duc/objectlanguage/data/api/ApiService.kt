@@ -19,6 +19,18 @@ interface ApiService {
     @POST("api/auth/refresh")
     suspend fun refreshToken(@Body req: RefreshRequest): Response<TokenResponse>
 
+    @POST("api/auth/forgot-password")
+    suspend fun forgotPassword(@Body req: ForgotPasswordRequest): Response<MessageResponse>
+
+    @POST("api/auth/verify-otp")
+    suspend fun verifyOtp(@Body req: VerifyOtpRequest): Response<MessageResponse>
+
+    @POST("api/auth/reset-password")
+    suspend fun resetPassword(@Body req: ResetPasswordRequest): Response<MessageResponse>
+
+    @PUT("api/auth/change-password")
+    suspend fun changePassword(@Body req: ChangePasswordRequest): Response<MessageResponse>
+
     // ====== SCAN ======
     @POST("api/scan")
     suspend fun scanByCode(@Body req: ScanRequest): Response<ScanResponse>
@@ -102,6 +114,13 @@ interface ApiService {
     // ====== USER PROFILE / SETTINGS ======
     @GET("api/auth/profile")
     suspend fun getProfile(): Response<ProfileData>
+
+    @PUT("api/auth/profile")
+    suspend fun updateProfile(@Body req: ProfileUpdateRequest): Response<ProfileData>
+
+    @Multipart
+    @POST("api/auth/profile/avatar")
+    suspend fun uploadAvatar(@Part image: MultipartBody.Part): Response<AvatarUploadResponse>
 
     @GET("api/auth/settings")
     suspend fun getSettings(): Response<UserSettingsResponse>

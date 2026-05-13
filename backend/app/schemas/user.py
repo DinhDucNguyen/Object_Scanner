@@ -3,6 +3,10 @@ from pydantic import BaseModel, field_validator
 from typing import Optional
 
 MIN_PASSWORD_LENGTH = 6
+CHANGE_PASSWORD_MIN_LENGTH = 9
+LOWERCASE_PATTERN = re.compile(r"[a-z]")
+UPPERCASE_PATTERN = re.compile(r"[A-Z]")
+DIGIT_PATTERN = re.compile(r"\d")
 USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,50}$")
 EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
@@ -63,18 +67,24 @@ class ProfileResponse(BaseModel):
 
 class UserSettingsResponse(BaseModel):
     user_id: int
-    native_lang_id: int
-    target_lang_id: int
-    native_lang_code: Optional[str] = None
-    target_lang_code: Optional[str] = None
+    display_language: str = "vi"
 
     class Config:
         from_attributes = True
 
 
 class UserSettingsUpdate(BaseModel):
-    native_lang_id: Optional[int] = None
-    target_lang_id: Optional[int] = None
+    display_language: Optional[str] = None
+
+    @field_validator("display_language")
+    @classmethod
+    def validate_display_language(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        normalized = value.strip().lower()
+        if normalized not in {"vi", "en"}:
+            raise ValueError("display_language chỉ hỗ trợ 'vi' hoặc 'en'")
+        return normalized
 
 
 class TokenResponse(BaseModel):
@@ -86,3 +96,63 @@ class TokenResponse(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        if not EMAIL_PATTERN.match(v):
+            raise ValueError("Email không hợp lệ")
+        return v.lower()
+
+
+class VerifyOtpRequest(BaseModel):
+    email: str
+    otp_code: str
+
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    otp_code: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        if len(v) < MIN_PASSWORD_LENGTH:
+            raise ValueError(f"Mật khẩu phải có ít nhất {MIN_PASSWORD_LENGTH} ký tự")
+        return v
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        if len(v) < CHANGE_PASSWORD_MIN_LENGTH:
+            raise ValueError("Mật khẩu mới phải dài hơn 8 ký tự")
+        if not LOWERCASE_PATTERN.search(v):
+            raise ValueError("Mật khẩu mới phải có ít nhất 1 chữ thường")
+        if not UPPERCASE_PATTERN.search(v):
+            raise ValueError("Mật khẩu mới phải có ít nhất 1 chữ viết hoa")
+        if not DIGIT_PATTERN.search(v):
+            raise ValueError("Mật khẩu mới phải có ít nhất 1 chữ số")
+        return v
+
+
+class ProfileUpdateRequest(BaseModel):
+    full_name: Optional[str] = None
+    bio: Optional[str] = None
+
+
+class AvatarUploadResponse(BaseModel):
+    avatar_url: str
+
+
+class MessageResponse(BaseModel):
+    message: str

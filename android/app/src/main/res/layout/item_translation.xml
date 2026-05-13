@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="Tiếng Việt"
+                android:text="@string/profile_display_lang_vi"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -44,7 +44,7 @@
                 android:id="@+id/tvVerified"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="✅ Đã xác minh"
+                android:text="@string/translation_verified"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -106,7 +106,7 @@
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:layout_marginTop="8dp"
-            android:text="📚 Thêm vào danh sách học"
+            android:text="@string/translation_add_to_learn"
             android:textSize="12sp"
             app:cornerRadius="18dp" />
 

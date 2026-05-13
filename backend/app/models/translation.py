@@ -1,9 +1,11 @@
+# pyrefly: ignore [missing-import]
 from sqlalchemy import (
     Column, Integer, String, Text, Boolean, ForeignKey, UniqueConstraint, TIMESTAMP, Enum, DateTime
 )
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import relationship
 from app.db.session import Base
-from datetime import datetime
+from app.utils.timezone import now_vietnam
 import enum
 
 
@@ -25,7 +27,7 @@ class Translation(Base):
     am_thanh_url = Column(String(255), nullable=True)
     nguon_du_lieu = Column(Enum(NguonDuLieu), default=NguonDuLieu.thu_cong)
     da_xac_nhan = Column(Boolean, default=False)
-    ngay_tao = Column(TIMESTAMP, default=datetime.utcnow)
+    ngay_tao = Column(TIMESTAMP, default=now_vietnam)
     thoi_gian_xoa = Column(DateTime, nullable=True)
 
     __table_args__ = (

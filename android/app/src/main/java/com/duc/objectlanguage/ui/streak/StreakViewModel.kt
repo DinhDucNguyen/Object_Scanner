@@ -9,19 +9,18 @@ import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.StreakDataStore
+import com.duc.objectlanguage.data.model.StreakResponse
 import com.duc.objectlanguage.data.model.StreakSyncRequest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 class StreakViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val ctx          = application.applicationContext
-    private val streakStore  = StreakDataStore(application)
-    private val repository   = (application as ObjectLanguageApp).repository
+    private val ctx = application.applicationContext
+    private val streakStore = StreakDataStore(application)
+    private val repository = (application as ObjectLanguageApp).repository
 
-    // ── UI data: combine từ local DataStore ──────────────────────────────────
     val streakData: LiveData<StreakData> = combine(
         streakStore.currentStreak,
         streakStore.longestStreak,
@@ -29,82 +28,75 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
         streakStore.reviewsToday,
     ) { current, longest, total, today ->
         StreakData(
-            currentStreak     = current,
-            longestStreak     = longest,
-            totalReviews      = total,
-            reviewsToday      = today,
+            currentStreak = current,
+            longestStreak = longest,
+            totalReviews = total,
+            reviewsToday = today,
             motivationMessage = buildMotivationMessage(current, today),
-            nextMilestone     = getNextMilestone(current),
-            daysToMilestone   = getDaysToMilestone(current),
+            nextMilestone = getNextMilestone(current),
+            daysToMilestone = getDaysToMilestone(current),
         )
     }.asLiveData()
 
-    // ── Milestone celebration event ──────────────────────────────────────────
     private val _celebrateMilestone = MutableLiveData<Int?>()
     val celebrateMilestone: LiveData<Int?> = _celebrateMilestone
 
-    fun clearCelebration() { _celebrateMilestone.value = null }
+    fun clearCelebration() {
+        _celebrateMilestone.value = null
+    }
 
-    // ── recordReview: local + server ─────────────────────────────────────────
     fun recordReview() {
         viewModelScope.launch {
             val previousStreak = streakStore.currentStreak.first()
 
-            // 1. Cập nhật local DataStore trước (offline-first)
-            streakStore.recordReview()
-            val newStreak = streakStore.currentStreak.first()
-
-            // 2. Kiểm tra milestone
-            checkMilestones(previousStreak, newStreak)
-
-            // 3. Gọi server để đồng bộ (fire-and-forget, lỗi mạng không sao)
-            repository.recordStreak()
+            repository.recordStreak().fold(
+                onSuccess = { remote ->
+                    applyServerStreak(remote)
+                    checkMilestones(previousStreak, remote.streakHienTai)
+                },
+                onFailure = {
+                    streakStore.recordReview()
+                    val newStreak = streakStore.currentStreak.first()
+                    checkMilestones(previousStreak, newStreak)
+                }
+            )
         }
     }
 
-    /** Gọi khi mở StreakFragment hoặc sau khi có mạng trở lại */
     fun syncToServer() {
         viewModelScope.launch {
-            val current  = streakStore.currentStreak.first()
-            val longest  = streakStore.longestStreak.first()
-            val total    = streakStore.totalReviews.first()
-            val today    = LocalDate.now().toString()   // "yyyy-MM-dd"
+            val current = streakStore.currentStreak.first()
+            val longest = streakStore.longestStreak.first()
+            val total = streakStore.totalReviews.first()
+            val lastDate = streakStore.getLastReviewDateString()
 
-            repository.syncStreak(StreakSyncRequest(current, longest, total, today))
+            repository.syncStreak(StreakSyncRequest(current, longest, total, lastDate))
+                .onSuccess { remote -> applyServerStreak(remote) }
         }
     }
 
-    /** Tải streak từ server về (dùng khi login lần đầu / đổi thiết bị) */
     fun loadFromServer() {
         viewModelScope.launch {
             repository.getStreak().onSuccess { remote ->
-                // Nếu server có streak lớn hơn local → cập nhật local
-                val localStreak  = streakStore.currentStreak.first()
-                val localLongest = streakStore.longestStreak.first()
-                val localTotal   = streakStore.totalReviews.first()
-
-                if (remote.streakHienTai > localStreak ||
-                    remote.streakDaiNhat > localLongest ||
-                    remote.tongLuotOn    > localTotal) {
-                    // Ghi server data vào local (qua sync ngược)
-                    // Đơn giản: chỉ override nếu server cao hơn
-                    streakStore.overrideIfHigher(
-                        remote.streakHienTai,
-                        remote.streakDaiNhat,
-                        remote.tongLuotOn
-                    )
-                }
+                applyServerStreak(remote)
             }
         }
     }
 
-    // ── Private helpers ──────────────────────────────────────────────────────
+    private suspend fun applyServerStreak(remote: StreakResponse) {
+        streakStore.replaceWithServer(
+            remote.streakHienTai,
+            remote.streakDaiNhat,
+            remote.tongLuotOn,
+            remote.ngayOnCuoi
+        )
+    }
 
     private suspend fun checkMilestones(previousStreak: Int, newStreak: Int) {
-        val milestones    = listOf(3, 7, 14, 30, 50, 100, 365)
+        val milestones = listOf(3, 7, 14, 30, 50, 100, 365)
         val lastMilestone = streakStore.lastMilestone.first()
-        val achieved = milestones.firstOrNull { m ->
-            newStreak >= m && previousStreak < m && m > lastMilestone
+        val achieved = milestones.firstOrNull { milestone ->
+            newStreak >= milestone && previousStreak < milestone && milestone > lastMilestone
         }
         if (achieved != null) {
             streakStore.updateMilestone(achieved)
@@ -115,15 +107,15 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
     private fun buildMotivationMessage(streak: Int, reviewsToday: Int): String {
         return when {
             reviewsToday == 0 && streak == 0 -> ctx.getString(R.string.streak_msg_start)
-            reviewsToday == 0 && streak > 0  -> ctx.getString(R.string.streak_msg_dont_break, streak)
-            reviewsToday > 0  && streak == 0 -> ctx.getString(R.string.streak_msg_great_start)
-            streak == 1                      -> ctx.getString(R.string.streak_msg_keep_going)
-            streak in 2..6                   -> ctx.getString(R.string.streak_msg_momentum, streak)
-            streak in 7..13                  -> ctx.getString(R.string.streak_msg_one_week)
-            streak in 14..29                 -> ctx.getString(R.string.streak_msg_two_weeks)
-            streak in 30..99                 -> ctx.getString(R.string.streak_msg_champion, streak)
-            streak >= 100                    -> ctx.getString(R.string.streak_msg_legend, streak)
-            else                             -> ctx.getString(R.string.streak_msg_default)
+            reviewsToday == 0 && streak > 0 -> ctx.getString(R.string.streak_msg_dont_break, streak)
+            reviewsToday > 0 && streak == 0 -> ctx.getString(R.string.streak_msg_great_start)
+            streak == 1 -> ctx.getString(R.string.streak_msg_keep_going)
+            streak in 2..6 -> ctx.getString(R.string.streak_msg_momentum, streak)
+            streak in 7..13 -> ctx.getString(R.string.streak_msg_one_week)
+            streak in 14..29 -> ctx.getString(R.string.streak_msg_two_weeks)
+            streak in 30..99 -> ctx.getString(R.string.streak_msg_champion, streak)
+            streak >= 100 -> ctx.getString(R.string.streak_msg_legend, streak)
+            else -> ctx.getString(R.string.streak_msg_default)
         }
     }
 

@@ -186,6 +186,9 @@ class StatsResponse(BaseModel):
     due_today: int
     mastered: int
     total_scans: int
+    current_streak: int = 0
+    longest_streak: int = 0
+    total_reviews: int = 0
 
 # ====== Language ======
 

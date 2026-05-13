@@ -22,6 +22,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentScanBinding
 import com.yalantis.ucrop.UCrop
 import java.io.ByteArrayOutputStream
@@ -45,14 +46,14 @@ class ScanFragment : Fragment() {
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) startCamera()
-        else Toast.makeText(requireContext(), "Cần quyền camera", Toast.LENGTH_LONG).show()
+        else Toast.makeText(requireContext(), getString(R.string.scan_error_camera_permission), Toast.LENGTH_LONG).show()
     }
 
     private val requestGalleryPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) openGallery()
-        else Toast.makeText(requireContext(), "Cần quyền truy cập ảnh", Toast.LENGTH_LONG).show()
+        else Toast.makeText(requireContext(), getString(R.string.scan_error_gallery_permission), Toast.LENGTH_LONG).show()
     }
 
     private val pickImageLauncher = registerForActivityResult(
@@ -64,17 +65,17 @@ class ScanFragment : Fragment() {
             val imageBytes = inputStream?.readBytes()
             inputStream?.close()
             if (imageBytes == null || imageBytes.isEmpty()) {
-                Toast.makeText(requireContext(), "Không đọc được ảnh", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.scan_error_read_image), Toast.LENGTH_SHORT).show()
                 return@registerForActivityResult
             }
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             if (bitmap == null) {
-                Toast.makeText(requireContext(), "Ảnh không hợp lệ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.scan_error_invalid_image), Toast.LENGTH_SHORT).show()
                 return@registerForActivityResult
             }
             showPreviewDialog(imageBytes, bitmap)
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Lỗi đọc ảnh: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), getString(R.string.scan_error_read_image_detail, e.message), Toast.LENGTH_LONG).show()
             Log.e("ScanFragment", "Gallery read error", e)
         }
     }
@@ -93,7 +94,7 @@ class ScanFragment : Fragment() {
                     showPreviewDialog(croppedBytes, croppedBitmap)
                 }
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Lỗi đọc ảnh đã crop: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.scan_error_read_cropped_image, e.message), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -126,32 +127,37 @@ class ScanFragment : Fragment() {
             if (result != null) {
                 if (result.source == "gemini_quota_exceeded") {
                     viewModel.clearResult()
-                    Toast.makeText(requireContext(), "Gemini đã hết quota, vui lòng thử lại sau.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), getString(R.string.scan_error_gemini_quota), Toast.LENGTH_LONG).show()
                     return@observe
                 }
 
                 if (result.source == "gemini_failed" || result.objectCode == "unknown") {
                     viewModel.clearResult()
-                    Toast.makeText(requireContext(), "Không nhận diện được vật thể, vui lòng chụp rõ hơn.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), getString(R.string.scan_error_not_recognized), Toast.LENGTH_LONG).show()
                     return@observe
                 }
 
                 binding.resultCard.visibility = View.VISIBLE
                 binding.cameraOverlay.visibility = View.GONE
+                binding.scanFrame.visibility = View.GONE
+                binding.cameraControls.visibility = View.GONE
                 binding.btnCapture.visibility = View.GONE
                 binding.btnGallery.visibility = View.GONE
                 binding.tvObjectName.text = result.objectCode.replaceFirstChar { it.uppercase() }
-                binding.tvCategory.text = result.categoryName ?: "Nhận diện bằng AI"
+                binding.tvCategory.text = result.categoryName ?: getString(R.string.scan_category_ai)
 
                 // Chỉ hiển thị bản dịch tiếng Anh
                 val enTrans = result.translations.firstOrNull { it.languageCode == "en" }
                     ?: result.translations.firstOrNull()
                 if (enTrans != null) {
                     val sb = StringBuilder()
-                    val pos = if (!enTrans.partOfSpeech.isNullOrEmpty()) " (${enTrans.partOfSpeech})" else ""
-                    sb.appendLine("🇺🇸  ${enTrans.wordName}$pos")
-                    if (!enTrans.phonetic.isNullOrEmpty()) sb.appendLine("🔤  ${enTrans.phonetic}")
-                    if (!enTrans.definition.isNullOrEmpty()) sb.appendLine("📖  ${enTrans.definition}")
+                    if (!enTrans.partOfSpeech.isNullOrEmpty()) {
+                        sb.appendLine(getString(R.string.scan_translation_word, enTrans.wordName, enTrans.partOfSpeech))
+                    } else {
+                        sb.appendLine(enTrans.wordName)
+                    }
+                    if (!enTrans.phonetic.isNullOrEmpty()) sb.appendLine(enTrans.phonetic)
+                    if (!enTrans.definition.isNullOrEmpty()) sb.appendLine(enTrans.definition)
                     binding.tvTranslations.text = sb.toString().trimEnd()
 
                     binding.btnPlayAudio.visibility = View.VISIBLE
@@ -167,6 +173,8 @@ class ScanFragment : Fragment() {
             } else {
                 binding.resultCard.visibility = View.GONE
                 binding.cameraOverlay.visibility = View.VISIBLE
+                binding.scanFrame.visibility = View.VISIBLE
+                binding.cameraControls.visibility = View.VISIBLE
                 binding.btnCapture.visibility = View.VISIBLE
                 binding.btnGallery.visibility = View.VISIBLE
             }
@@ -175,7 +183,8 @@ class ScanFragment : Fragment() {
         viewModel.examples.observe(viewLifecycleOwner) { sentences ->
             if (sentences.isNotEmpty()) {
                 binding.tvExamples.visibility = View.VISIBLE
-                binding.tvExamples.text = "📝 Ví dụ:\n" + sentences.mapIndexed { i, s -> "${i + 1}. $s" }.joinToString("\n")
+                binding.tvExamples.text = getString(R.string.scan_examples_title) +
+                    "\n" + sentences.mapIndexed { i, s -> "${i + 1}. $s" }.joinToString("\n")
             } else {
                 binding.tvExamples.visibility = View.GONE
             }
@@ -235,7 +244,7 @@ class ScanFragment : Fragment() {
                     preview, imageCapture
                 )
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Lỗi camera: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), getString(R.string.scan_error_camera_detail, e.message), Toast.LENGTH_LONG).show()
             }
         }, ContextCompat.getMainExecutor(requireContext()))
     }
@@ -248,7 +257,7 @@ class ScanFragment : Fragment() {
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
                     try {
-                        // ✅ FIX: Convert ImageProxy sang Bitmap (handle rotation)
+                        // Convert ImageProxy to Bitmap and keep the captured orientation.
                         val bitmap = imageProxyToBitmap(image)
                         val rotation = image.imageInfo.rotationDegrees
                         image.close()
@@ -261,26 +270,23 @@ class ScanFragment : Fragment() {
                         
                         Log.d("ScanFragment", "Captured: ${rotatedBitmap.width}x${rotatedBitmap.height}, Rotation: $rotation°, Size: ${jpegBytes.size} bytes")
                         
-                        // Hiển thị preview — YOLO chạy sau khi user nhấn "Quét ngay"
+                        // YOLO runs after the user confirms the preview.
                         showPreviewDialog(jpegBytes, rotatedBitmap)
                     } catch (e: Exception) {
                         image.close()
-                        Toast.makeText(requireContext(), "Lỗi xử lý ảnh: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), getString(R.string.scan_error_process_image, e.message), Toast.LENGTH_LONG).show()
                         Log.e("ScanFragment", "Image processing error", e)
                     }
                 }
 
                 override fun onError(e: ImageCaptureException) {
-                    Toast.makeText(requireContext(), "Lỗi chụp: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), getString(R.string.scan_error_capture, e.message), Toast.LENGTH_LONG).show()
                     Log.e("ScanFragment", "Capture error", e)
                 }
             }
         )
     }
 
-    /**
-     * ✅ HÀM MỚI: Convert ImageProxy (YUV) sang Bitmap
-     */
     private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
         val planeProxy = image.planes[0]
         val buffer: ByteBuffer = planeProxy.buffer
@@ -289,9 +295,6 @@ class ScanFragment : Fragment() {
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
     }
 
-    /**
-     * ✅ HÀM MỚI: Rotate bitmap theo EXIF orientation
-     */
     private fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
         if (degrees == 0f) return bitmap
         
@@ -300,19 +303,12 @@ class ScanFragment : Fragment() {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
-    /**
-     * ✅ HÀM MỚI: Convert Bitmap sang JPEG bytes
-     */
     private fun bitmapToJpegBytes(bitmap: Bitmap, quality: Int = 90): ByteArray {
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream)
         return stream.toByteArray()
     }
 
-    /**
-     * ✅ HÀM MỚI: Hiển thị preview ảnh và dialog xác nhận
-     * User có thể: Quét ngay, Crop lại, hoặc Chụp lại
-     */
     private fun showPreviewDialog(imageBytes: ByteArray, previewBitmap: Bitmap? = null) {
         // Dùng bitmap đã có hoặc decode từ bytes
         val bitmap = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
@@ -327,21 +323,21 @@ class ScanFragment : Fragment() {
 
         // Tạo dialog
         AlertDialog.Builder(requireContext())
-            .setTitle("📸 Vật thể có rõ ràng không?")
+            .setTitle(getString(R.string.scan_preview_title))
             .setView(imageView)
-            .setPositiveButton("✅ Quét ngay") { dialog, _ ->
+            .setPositiveButton(getString(R.string.scan_preview_scan_now)) { dialog, _ ->
                 dialog.dismiss()
-                val bitmap = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                val yoloResult = detectorHelper?.detectBitmap(bitmap)
+                val confirmedBitmap = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                val yoloResult = detectorHelper?.detectBitmap(confirmedBitmap)
                 viewModel.scanWithDetection(yoloResult, imageBytes)
             }
-            .setNeutralButton("✂️ Crop lại") { dialog, _ ->
+            .setNeutralButton(getString(R.string.scan_preview_crop_again)) { dialog, _ ->
                 dialog.dismiss()
                 launchCrop(imageBytes)
             }
-            .setNegativeButton("🔄 Chụp lại") { dialog, _ ->
+            .setNegativeButton(getString(R.string.scan_preview_retake)) { dialog, _ ->
                 dialog.dismiss()
-                // Không làm gì, user quay lại camera
+                // The user returns to the camera preview.
             }
             .setCancelable(true)
             .show()
@@ -382,15 +378,9 @@ class ScanFragment : Fragment() {
                 .getIntent(requireContext())
             cropLauncher.launch(intent)
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Không mở được crop: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.scan_error_open_crop, e.message), Toast.LENGTH_SHORT).show()
             viewModel.scanWithDetection(null, imageBytes)
         }
-    }
-
-    private fun getFlagEmoji(langCode: String): String = when (langCode) {
-        "vi" -> "🇻🇳"
-        "en" -> "🇺🇸"
-        else -> "🌐"
     }
 
     override fun onDestroyView() {

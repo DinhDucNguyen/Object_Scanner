@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentRegisterBinding
+import com.duc.objectlanguage.utils.LocaleHelper
 import kotlinx.coroutines.launch
 
 class RegisterFragment : Fragment() {
@@ -48,6 +49,7 @@ class RegisterFragment : Fragment() {
 
                 result.fold(
                     onSuccess = {
+                        repo.updateUserSettings(LocaleHelper.getSavedLocale(requireContext()))
                         val navController = findNavController()
                         val graph = navController.navInflater.inflate(R.navigation.nav_graph)
                         graph.setStartDestination(R.id.dashboardFragment)

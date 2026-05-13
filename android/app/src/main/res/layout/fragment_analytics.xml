@@ -16,7 +16,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="📊 Learning Analytics"
+            android:text="@string/title_analytics"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
@@ -53,7 +53,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Words"
+                        android:text="@string/analytics_total_words"
                         android:textSize="12sp"
                         android:textColor="@android:color/darker_gray" />
 
@@ -91,7 +91,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Mastered"
+                        android:text="@string/analytics_mastered"
                         android:textSize="12sp"
                         android:textColor="@android:color/darker_gray" />
 
@@ -141,7 +141,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Reviews Today"
+                        android:text="@string/analytics_reviews_today"
                         android:textSize="12sp"
                         android:textColor="@android:color/darker_gray" />
 
@@ -179,7 +179,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Current Streak 🔥"
+                        android:text="@string/analytics_current_streak"
                         android:textSize="12sp"
                         android:textColor="@android:color/darker_gray" />
 
@@ -217,7 +217,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📈 Learning Progress (Last 7 Days)"
+                    android:text="@string/analytics_progress_7_days"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"
@@ -250,7 +250,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🎯 Mastery Distribution"
+                    android:text="@string/analytics_mastery_distribution"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"
@@ -283,7 +283,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📅 Daily Activity"
+                    android:text="@string/analytics_daily_activity"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"

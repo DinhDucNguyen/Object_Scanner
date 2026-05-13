@@ -2,7 +2,9 @@ import json
 import re
 # TODO: Migrate to google.genai package (google-generativeai is deprecated)
 # See: https://github.com/google-gemini/deprecated-generative-ai-python
+# pyrefly: ignore [missing-import]
 import google.generativeai as genai
+# pyrefly: ignore [missing-import]
 from google.api_core.exceptions import ResourceExhausted
 from app.core.config import settings
 

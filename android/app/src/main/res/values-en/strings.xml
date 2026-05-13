@@ -1,50 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Object Language</string>
+    <string name="app_name">LengoLens</string>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_scan">Scan</string>
     <string name="nav_dictionary">Dictionary</string>
     <string name="nav_review">Review</string>
     <string name="nav_profile">Profile</string>
+    <string name="nav_explore">Explore</string>
 
-    <!-- Toolbar / Screen titles -->
-    <string name="title_dashboard">Dashboard</string>
+    <!-- Toolbar / screen titles -->
+    <string name="title_dashboard">Home</string>
     <string name="title_register">Register</string>
     <string name="title_scan">Scan Object</string>
     <string name="title_review">Review</string>
     <string name="title_dictionary">Dictionary</string>
     <string name="title_profile">Profile</string>
     <string name="title_history">History</string>
+    <string name="title_history_detail">History Detail</string>
     <string name="title_streak">Daily Streak</string>
     <string name="title_analytics">Analytics</string>
+    <string name="title_flashcard">Flashcards</string>
+    <string name="title_quiz">Quiz Mode</string>
+    <string name="title_typing">Typing Test</string>
+    <string name="title_listening">Listening Test</string>
+    <string name="title_image_matching">Image Matching</string>
+    <string name="title_pronunciation">Pronunciation Practice</string>
+    <string name="title_explore">Explore</string>
+    <string name="title_explore_detail">Topic Vocabulary</string>
+    <string name="title_collections">Collections</string>
+    <string name="title_collection_detail">Collection Detail</string>
+    <string name="title_collection_insights">Collection Insights</string>
+
+    <!-- Auth -->
+    <string name="login_title">LengoLens</string>
+    <string name="login_subtitle">Learn vocabulary through object recognition</string>
+    <string name="login_button">Log in</string>
+    <string name="login_register_link">No account yet? Register now</string>
+    <string name="register_title">Create account</string>
+    <string name="register_button">Register</string>
+    <string name="register_login_link">Already have an account? Log in</string>
+    <string name="auth_username_hint">Username</string>
+    <string name="auth_email_hint">Email</string>
+    <string name="auth_password_hint">Password</string>
+    <string name="auth_logo">Logo</string>
 
     <!-- Dashboard -->
-    <string name="dashboard_greeting">👋 Hello,</string>
-    <string name="dashboard_subtitle">Keep learning today 🚀</string>
+    <string name="dashboard_greeting">Hello,</string>
+    <string name="dashboard_default_user">there</string>
+    <string name="dashboard_subtitle">Ready to learn a few new words today?</string>
+    <string name="dashboard_plan_title">Today plan</string>
+    <string name="dashboard_plan_subtitle">Review due words first, then explore a fresh topic.</string>
+    <string name="dashboard_stats_title">Learning snapshot</string>
     <string name="dashboard_stat_scans">Scans</string>
     <string name="dashboard_stat_learned">Learned</string>
-    <string name="dashboard_stat_due">Due Today</string>
+    <string name="dashboard_stat_due">Due</string>
     <string name="dashboard_stat_mastered">Mastered</string>
-    <string name="dashboard_btn_review">🎯 Start Review</string>
-    <string name="dashboard_progress_title">📈 Mastery Progress</string>
+    <string name="dashboard_btn_review">Start review</string>
+    <string name="dashboard_btn_explore">Explore topics</string>
+    <string name="dashboard_progress_title">Mastery progress</string>
+    <string name="dashboard_progress_percent">%d%% mastered</string>
+    <string name="dashboard_progress_short">%d%%</string>
+    <string name="dashboard_progress_caption">mastered</string>
+    <string name="dashboard_action_title">Next actions</string>
 
     <!-- Scan -->
-    <string name="scan_overlay">📷 Point camera at an object\nand press the capture button</string>
-    <string name="scan_analyzing">🔍 Recognizing…\n(5–10 seconds)</string>
-    <string name="scan_btn_play">🔊 Play</string>
-    <string name="scan_btn_learn">📚 Learn</string>
-    <string name="scan_btn_retake">📷 Retake</string>
+    <string name="scan_overlay">Place an object in frame, then capture</string>
+    <string name="scan_analyzing">Recognizing...\nPlease wait a moment</string>
+    <string name="scan_btn_play">Play audio</string>
+    <string name="scan_btn_learn">Save</string>
+    <string name="scan_btn_retake">Scan again</string>
     <string name="scan_cd_gallery">Choose from gallery</string>
-    <string name="scan_cd_capture">Capture</string>
-    <string name="scan_pending">⏳ Pending admin review</string>
+    <string name="scan_cd_capture">Capture image</string>
+    <string name="scan_pending">Pending admin review</string>
+    <string name="scan_category_ai">Recognized by AI</string>
+    <string name="scan_result_label">Recognition result</string>
+    <string name="scan_translation_label">Vocabulary</string>
+    <string name="scan_error_camera_permission">Camera permission is required to scan objects</string>
+    <string name="scan_error_gallery_permission">Photo access permission is required</string>
+    <string name="scan_error_read_image">Could not read the image</string>
+    <string name="scan_error_invalid_image">Invalid image</string>
+    <string name="scan_error_read_image_detail">Image read error: %s</string>
+    <string name="scan_error_read_cropped_image">Cropped image read error: %s</string>
+    <string name="scan_error_gemini_quota">Gemini quota has been exceeded. Please try again later.</string>
+    <string name="scan_error_not_recognized">Could not recognize the object. Please take a clearer photo.</string>
+    <string name="scan_error_camera_detail">Camera error: %s</string>
+    <string name="scan_error_process_image">Image processing error: %s</string>
+    <string name="scan_error_capture">Capture error: %s</string>
+    <string name="scan_error_open_crop">Could not open crop tool: %s</string>
+    <string name="scan_preview_title">Is the object clear?</string>
+    <string name="scan_preview_scan_now">Scan now</string>
+    <string name="scan_preview_crop_again">Crop again</string>
+    <string name="scan_preview_retake">Retake</string>
+    <string name="scan_translation_word">%1$s (%2$s)</string>
+    <string name="scan_examples_title">Examples:</string>
+
+    <!-- Dictionary -->
+    <string name="dictionary_title">Dictionary</string>
+    <string name="dictionary_subtitle">Translate quickly and save words to learn</string>
+    <string name="dictionary_input_label">Source text</string>
+    <string name="dictionary_result_label">Translation result</string>
+    <string name="dictionary_input_hint">Enter text to translate...</string>
+    <string name="dictionary_loading">Translating...</string>
+    <string name="dictionary_empty_prompt">Enter text to get started</string>
+    <string name="dictionary_save_word">Save to learning list</string>
+    <string name="dictionary_swap_format">%1$s &lt;-&gt; %2$s</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Explore</string>
+    <string name="explore_subtitle">Learn vocabulary by topic</string>
+    <string name="explore_empty_title">No topics yet</string>
+    <string name="explore_empty_subtitle">Add categories in the system</string>
+    <string name="category_detail_hint">Tap a word to view details</string>
+    <string name="category_detail_empty">No vocabulary yet</string>
 
     <!-- Review -->
-    <string name="review_finished">🎉 All done!\nNo more words to review.</string>
-    <string name="review_btn_reveal">Show Answer</string>
-    <string name="review_btn_wrong">❌ Wrong</string>
-    <string name="review_btn_correct">✅ Correct</string>
+    <string name="review_finished">All done!\nNo more words to review.</string>
+    <string name="review_no_words_none">No words left to review.</string>
+    <string name="review_no_words_start">No words in your review list yet.\nScan an object to get started.</string>
+    <string name="review_finished_today">All done for today!\nNo more words to review.</string>
+    <string name="review_msg_good">✓ Great job!</string>
+    <string name="review_msg_again">Will review again soon</string>
+    <string name="review_error_format">Error: %s</string>
+    <string name="scan_added_to_review">Added to today\'s review</string>
+    <string name="review_session_title">Review session</string>
+    <string name="review_answer_label">Meaning and example</string>
+    <string name="review_btn_reveal">Show answer</string>
+    <string name="review_btn_wrong">Wrong</string>
+    <string name="review_btn_correct">Correct</string>
+    <string name="review_lang_hint">English</string>
+    <string name="review_quality_again">Again</string>
+    <string name="review_quality_hard">Hard</string>
+    <string name="review_quality_good">Good</string>
+    <string name="review_quality_easy">Easy</string>
+    <string name="flashcard_progress_empty">Progress: 0/0</string>
+    <string name="flashcard_instructions">Swipe left: do not know | Tap to flip | Swipe right: know it\nSwipe up: difficult</string>
+    <string name="flashcard_language_english">English</string>
+    <string name="flashcard_tap_to_translate">(Tap to see translation)</string>
+    <string name="label_definition">Definition</string>
+    <string name="label_example">Example</string>
+    <string name="translation_verified">Verified</string>
+    <string name="translation_add_to_learn">Add to learning list</string>
+    <string name="quiz_translate_prompt">Translate this word:</string>
+    <string name="quiz_choose_answer">Choose the correct answer:</string>
+    <string name="quiz_submit">Submit answer</string>
+    <string name="typing_instruction">Type the English translation:</string>
+    <string name="typing_answer_hint">Type your answer here...</string>
+    <string name="hint_first_letter">First letter</string>
+    <string name="hint_word_length">Word length</string>
+    <string name="action_skip">Skip</string>
+    <string name="action_check_answer">Check answer</string>
+    <string name="listening_instruction">Listen and type what you hear:</string>
+    <string name="listening_play_audio">Play audio</string>
+    <string name="listening_play_slow">Play slow</string>
+    <string name="listening_repeat_count">Played: 0 times</string>
+    <string name="listening_answer_hint">Type what you heard...</string>
+    <string name="image_matching_instruction">Match images with words</string>
+    <string name="pronunciation_instruction">Practice pronunciation</string>
+    <string name="pronunciation_listen_model">Listen to model</string>
+    <string name="pronunciation_record_cd">Record pronunciation</string>
+    <string name="pronunciation_record_status">Tap microphone to practice</string>
+    <string name="pronunciation_next_word">Next word</string>
 
     <!-- History -->
     <string name="history_empty">No scan history yet</string>
@@ -60,88 +177,155 @@
     <string name="history_delete_title">Delete history</string>
     <string name="history_delete_message">Delete this scan from history?</string>
     <string name="history_btn_save">Save to learning list</string>
+    <string name="history_scanned_image">Scanned image</string>
+    <string name="history_empty_vocab">No vocabulary data</string>
 
     <!-- Streak -->
     <string name="streak_days_singular">day</string>
     <string name="streak_days_plural">days</string>
-    <string name="streak_current_label">Current Streak</string>
+    <string name="streak_current_label">Current streak</string>
     <string name="streak_stat_best">Best</string>
     <string name="streak_stat_total">Total</string>
     <string name="streak_stat_today">Today</string>
-    <string name="streak_stats_title">📊 Your Statistics</string>
-    <string name="streak_today_done">✅ Completed today!</string>
-    <string name="streak_today_pending">⏰ Review pending</string>
+    <string name="streak_stats_title">Your statistics</string>
+    <string name="streak_today_done">Completed today!</string>
+    <string name="streak_today_pending">Review pending today</string>
     <string name="streak_milestone_label">Next milestone: %d days</string>
     <string name="streak_days_to_go">%d days to go</string>
     <string name="streak_milestone_reached">Milestone reached!</string>
-
-    <!-- Streak motivation messages -->
-    <string name="streak_msg_start">🌟 Start your learning journey today!</string>
-    <string name="streak_msg_dont_break">🔥 Don\'t break your %d-day streak!</string>
-    <string name="streak_msg_great_start">✨ Great start! Come back tomorrow!</string>
-    <string name="streak_msg_keep_going">💪 Keep going! Build your daily habit.</string>
-    <string name="streak_msg_momentum">🚀 %d days strong! You\'re building momentum.</string>
-    <string name="streak_msg_one_week">⭐ One week streak! You\'re on fire!</string>
-    <string name="streak_msg_two_weeks">🔥 Two weeks! You\'re unstoppable!</string>
-    <string name="streak_msg_champion">🏆 %d days! You\'re a learning champion!</string>
-    <string name="streak_msg_legend">👑 %d days! Legendary dedication!</string>
+    <string name="streak_msg_start">Start your learning journey today!</string>
+    <string name="streak_msg_dont_break">Do not break your %d-day streak!</string>
+    <string name="streak_msg_great_start">Great start! Come back tomorrow!</string>
+    <string name="streak_msg_keep_going">Keep going! Build your daily habit.</string>
+    <string name="streak_msg_momentum">%d days strong! You are building momentum.</string>
+    <string name="streak_msg_one_week">One week streak! Nice work!</string>
+    <string name="streak_msg_two_weeks">Two weeks! Keep the rhythm going!</string>
+    <string name="streak_msg_champion">%d days! You are a consistent learner!</string>
+    <string name="streak_msg_legend">%d days! That is something to be proud of!</string>
     <string name="streak_msg_default">Keep learning every day!</string>
+    <string name="streak_milestone_title">Streak milestones</string>
+    <string name="streak_milestone_content">3 days - Beginner\n7 days - Week Warrior\n14 days - Two Week Champion\n30 days - Monthly Master\n50 days - Consistency King\n100 days - Century Club\n365 days - Year Legend\n\nKeep your daily streak to unlock achievements!</string>
+    <string name="streak_milestone_btn_ok">Got it</string>
+    <string name="streak_celebrate_title">Milestone achieved!</string>
+    <string name="streak_celebrate_msg">Congratulations! You reached a %d-day streak!\n\nYour dedication is inspiring. Keep it up!</string>
+    <string name="streak_celebrate_btn">Awesome</string>
 
-    <!-- Streak milestone dialog -->
-    <string name="streak_milestone_title">🎯 Streak Milestones</string>
-    <string name="streak_milestone_content">3 days   — Beginner Badge\n7 days   — Week Warrior\n14 days  — Two Week Champion\n30 days  — Monthly Master\n50 days  — Consistency King\n100 days — Century Club\n365 days — Year Legend\n\nKeep your daily streak to unlock achievements!</string>
-    <string name="streak_milestone_btn_ok">Got it!</string>
-    <string name="streak_celebrate_title">🎉 Milestone Achieved!</string>
-    <string name="streak_celebrate_msg">Congratulations! You\'ve reached a %d-day streak!\n\nYour dedication is inspiring. Keep it up!</string>
-    <string name="streak_celebrate_btn">Awesome!</string>
-
-    <!-- Collection -->
-    <string name="title_collections">Collections</string>
-    <string name="title_collection_detail">Collection Detail</string>
-    <string name="title_collection_insights">Collection Insights</string>
-    <string name="collection_search_hint">Search collections…</string>
-    <string name="collection_empty_title">No Collections Yet</string>
+    <!-- Collections -->
+    <string name="collection_search_hint">Search collections...</string>
+    <string name="collection_empty_title">No collections yet</string>
     <string name="collection_empty_subtitle">Create your first collection\nto organize your vocabulary</string>
     <string name="collection_item_count">%d words</string>
     <string name="collection_created_date">Created: %s</string>
     <string name="collection_btn_insights">Insights</string>
     <string name="collection_btn_delete">Delete</string>
-    <string name="collection_btn_review">Review Collection</string>
-    <string name="collection_cd_add">Add Collection</string>
-    <string name="collection_dialog_create_title">Create Collection</string>
-    <string name="collection_dialog_name_hint">Collection Name</string>
+    <string name="collection_btn_review">Review collection</string>
+    <string name="collection_btn_review_short">Review</string>
+    <string name="collection_default_title">Collection</string>
+    <string name="collection_empty_title_detail">This collection is empty</string>
+    <string name="collection_cd_add">Add collection</string>
+    <string name="collection_dialog_create_title">Create collection</string>
+    <string name="collection_dialog_name_hint">Collection name</string>
     <string name="collection_dialog_name_subtitle">Enter a name for your new collection</string>
-    <string name="collection_dialog_delete_title">Delete Collection</string>
-    <string name="collection_dialog_delete_msg">Are you sure you want to delete \'%s\'?</string>
-    <string name="collection_add_to_title">Add to Collection</string>
+    <string name="collection_dialog_delete_title">Delete collection</string>
+    <string name="collection_dialog_delete_msg">Are you sure you want to delete \"%s\"?</string>
+    <string name="collection_add_to_title">Add to collection</string>
     <string name="collection_no_collections">No collections yet. Create one in Profile!</string>
-    <string name="collection_empty_words">Collection is empty, add words first!</string>
-    <string name="collection_created">\'%s\' created!</string>
-    <string name="collection_deleted">\'%s\' deleted</string>
+    <string name="collection_empty_words">Collection is empty. Add words first!</string>
+    <string name="collection_created">Created \"%s\"!</string>
+    <string name="collection_deleted">Deleted \"%s\"</string>
     <string name="collection_name_empty">Collection name cannot be empty</string>
     <string name="collection_added">Added to collection</string>
     <string name="collection_removed">Removed from collection</string>
     <string name="collection_added_to">Added to \"%s\"</string>
-    <string name="profile_menu_collection">Collections</string>
 
-    <!-- Common buttons -->
-    <string name="btn_create">Create</string>
-    <string name="btn_cancel">Cancel</string>
-    <string name="btn_delete">Delete</string>
+    <!-- Collection insights -->
+    <string name="ci_select_collection">Select collection</string>
+    <string name="ci_stats_title">Statistics</string>
+    <string name="ci_analytics_title">Charts</string>
+    <string name="ci_suggestions_title">Smart suggestions</string>
+    <string name="ci_suggestion_placeholder">Learning suggestion</string>
+    <string name="ci_total_items">Total words</string>
+    <string name="ci_reviewed">Reviewed</string>
+    <string name="ci_mastered">Mastered</string>
+    <string name="ci_success_rate">Success rate</string>
+    <string name="ci_avg_quality">Average</string>
+    <string name="ci_total_reviews">Total reviews</string>
+    <string name="ci_progress_chart">Review progress</string>
+    <string name="ci_mastery_chart">Mastery breakdown</string>
+    <string name="ci_mastered_label">Mastered</string>
+    <string name="ci_reviewing_label">Learning</string>
+    <string name="ci_not_started_label">Not started</string>
+
+    <!-- Analytics -->
+    <string name="analytics_total_words">Total Words</string>
+    <string name="analytics_mastered">Mastered</string>
+    <string name="analytics_reviews_today">Reviews Today</string>
+    <string name="analytics_current_streak">Current Streak</string>
+    <string name="analytics_progress_7_days">Learning Progress (Last 7 Days)</string>
+    <string name="analytics_mastery_distribution">Mastery Distribution</string>
+    <string name="analytics_daily_activity">Daily Activity</string>
+
+    <!-- Notifications -->
+    <string name="notification_settings_title">Notification Settings</string>
+    <string name="notification_daily_reminder">Daily Reminder</string>
+    <string name="notification_daily_reminder_desc">Get reminded to review every day</string>
+    <string name="notification_reminder_time">Reminder Time</string>
+    <string name="notification_change_time">Change</string>
+    <string name="notification_streak_alert">Streak Alert</string>
+    <string name="notification_streak_alert_desc">Get notified if you are about to lose your streak</string>
+    <string name="notification_milestones">Milestone Celebrations</string>
+    <string name="notification_milestones_desc">Get notified when you reach streak milestones</string>
+    <string name="notification_status_default">Configure your notification preferences above</string>
+    <string name="notification_tip">Enable notifications to keep your learning rhythm and daily streak.</string>
 
     <!-- Profile -->
     <string name="profile_section_language">Language</string>
     <string name="profile_display_lang_label">Display language</string>
     <string name="profile_display_lang_vi">Tiếng Việt</string>
     <string name="profile_display_lang_en">English</string>
-    <string name="profile_section_features">Learning Features</string>
-    <string name="profile_menu_history">Scan History</string>
-    <string name="profile_menu_analytics">Learning Analytics</string>
-    <string name="profile_menu_streak">Daily Streak</string>
-    <string name="profile_btn_logout">Log Out</string>
-    <string name="profile_badge">Top Learner</string>
+    <string name="profile_section_features">Learning features</string>
+    <string name="profile_menu_history">Scan history</string>
+    <string name="profile_menu_analytics">Learning analytics</string>
+    <string name="profile_menu_streak">Daily streak</string>
+    <string name="profile_menu_collection">Collections</string>
+    <string name="profile_btn_logout">Log out</string>
+    <string name="profile_bio_placeholder">Tap to add a bio...</string>
+    <string name="profile_bio_dialog_title">About you</string>
+    <string name="profile_bio_hint">Write a few lines about yourself...</string>
+    <string name="profile_menu_change_password">Change password</string>
+    <string name="profile_menu_notifications">Notification settings</string>
+    <string name="profile_change_password_title">Change password</string>
+    <string name="profile_change_password_subtitle">Update your password to keep your learning account protected.</string>
+    <string name="profile_change_password_save">Update</string>
+    <string name="profile_current_password_hint">Current password</string>
+    <string name="profile_new_password_hint">New password</string>
+    <string name="profile_password_rules_title">New password needs</string>
+    <string name="profile_password_rules">More than 8 characters&#10;Lowercase and uppercase letters&#10;At least 1 number</string>
+    <string name="profile_badge">Active learner</string>
+    <string name="profile_account_title">Learning account</string>
+    <string name="profile_language_changed_vi">Đã chuyển sang tiếng Việt</string>
+    <string name="profile_language_changed_en">Switched to English</string>
+    <string name="profile_language_save_failed">Could not save language to your account. The app changed it on this device only.</string>
+    <string name="profile_menu_content_description">Profile menu</string>
+    <string name="profile_bio_updated">Bio updated</string>
+    <string name="profile_avatar_updated">Avatar updated</string>
+    <string name="profile_error_format">Error: %s</string>
+    <string name="profile_avatar_upload_error_format">Upload error: %s</string>
+    <string name="profile_password_required">Please fill in all fields</string>
+    <string name="profile_current_password_required">Please enter your current password</string>
+    <string name="profile_new_password_required">Please enter a new password</string>
+    <string name="profile_password_min_length">New password must be longer than 8 characters</string>
+    <string name="profile_password_lowercase_required">New password needs at least 1 lowercase letter</string>
+    <string name="profile_password_uppercase_required">New password needs at least 1 uppercase letter</string>
+    <string name="profile_password_digit_required">New password needs at least 1 number</string>
+    <string name="profile_avatar_pick_error">Could not read the selected image</string>
 
     <!-- Common -->
-    <string name="arrow">➔</string>
+    <string name="btn_create">Create</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_close">Close</string>
+    <string name="arrow">›</string>
     <string name="content_description_avatar">Avatar</string>
 </resources>

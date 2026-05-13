@@ -39,7 +39,7 @@
                 android:id="@+id/tvLanguageFront"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="English"
+                android:text="@string/flashcard_language_english"
                 android:textSize="18sp"
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginTop="8dp" />
@@ -47,7 +47,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="(Tap to see translation)"
+                android:text="@string/flashcard_tap_to_translate"
                 android:textSize="14sp"
                 android:textColor="@android:color/darker_gray"
                 android:textStyle="italic"
@@ -104,7 +104,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📖 Definition"
+                android:text="@string/label_definition"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black" />
@@ -122,7 +122,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📝 Example"
+                android:text="@string/label_example"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"

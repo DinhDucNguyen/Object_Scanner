@@ -95,6 +95,7 @@ object RetrofitClient {
                     .authenticator(authenticator)
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
                     .build()
 
                 _api = Retrofit.Builder()

@@ -1,12 +1,15 @@
 package com.duc.objectlanguage.ui.review
 
 import android.app.Application
+import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.ReviewCardResponse
+import com.duc.objectlanguage.utils.LocaleHelper
 import kotlinx.coroutines.launch
 
 class ReviewViewModel(application: Application) : AndroidViewModel(application) {
@@ -38,14 +41,14 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             _currentIndex.value = 0
             val result = repo.getDueReviews()
             result.fold(
-                onSuccess = {
-                    _cards.value = it
-                    if (it.isEmpty()) {
+                onSuccess = { cards ->
+                    _cards.value = cards
+                    if (cards.isEmpty()) {
                         val stats = repo.getStats().getOrNull()
                         _finishedMessage.value = when {
-                            stats == null -> "Khong con tu nao can on."
-                            stats.totalLearned == 0 -> "Chua co tu nao trong danh sach on tap.\nHay quet mot vat the de bat dau."
-                            else -> "Hom nay da on xong.\nKhong con tu nao can on."
+                            stats == null -> localizedString(R.string.review_no_words_none)
+                            stats.totalLearned == 0 -> localizedString(R.string.review_no_words_start)
+                            else -> localizedString(R.string.review_finished_today)
                         }
                         _finished.value = true
                     }
@@ -66,19 +69,32 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             val result = repo.submitReview(card.progressId, quality)
             result.fold(
                 onSuccess = {
-                    _message.value = if (quality >= 3) "✓ Tốt lắm!" else "Sẽ ôn lại sớm"
+                    _message.value = if (quality >= 3) {
+                        localizedString(R.string.review_msg_good)
+                    } else {
+                        localizedString(R.string.review_msg_again)
+                    }
                     val nextIdx = idx + 1
                     if (nextIdx < cardList.size) {
                         _currentIndex.value = nextIdx
                     } else {
-                        _finishedMessage.value = "Hoan thanh!\nKhong con tu nao can on."
+                        _finishedMessage.value = localizedString(R.string.review_finished)
                         _finished.value = true
                     }
                 },
-                onFailure = { _message.value = "Lỗi: ${it.message}" }
+                onFailure = {
+                    _message.value = localizedString(R.string.review_error_format, it.message.orEmpty())
+                }
             )
         }
     }
 
-    fun clearMessage() { _message.value = null }
+    fun clearMessage() {
+        _message.value = null
+    }
+
+    private fun localizedString(@StringRes resId: Int, vararg args: Any): String {
+        val context = LocaleHelper.applyLocale(getApplication<Application>())
+        return if (args.isEmpty()) context.getString(resId) else context.getString(resId, *args)
+    }
 }

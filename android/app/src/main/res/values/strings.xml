@@ -1,50 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Object Language</string>
+    <string name="app_name">LengoLens</string>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom navigation -->
     <string name="nav_home">Trang chủ</string>
     <string name="nav_scan">Quét</string>
-    <string name="nav_dictionary">Từ điển</string>
+    <string name="nav_dictionary">Tra từ</string>
     <string name="nav_review">Ôn tập</string>
-    <string name="nav_profile">Tài khoản</string>
+    <string name="nav_profile">Cá nhân</string>
+    <string name="nav_explore">Khám phá</string>
 
-    <!-- Toolbar / Screen titles -->
-    <string name="title_dashboard">Tổng quan</string>
+    <!-- Toolbar / screen titles -->
+    <string name="title_dashboard">Trang chủ</string>
     <string name="title_register">Đăng ký</string>
     <string name="title_scan">Quét vật thể</string>
     <string name="title_review">Ôn tập</string>
-    <string name="title_dictionary">Từ điển</string>
-    <string name="title_profile">Tài khoản</string>
+    <string name="title_dictionary">Tra từ</string>
+    <string name="title_profile">Cá nhân</string>
     <string name="title_history">Lịch sử</string>
-    <string name="title_streak">Chuỗi ngày học</string>
+    <string name="title_history_detail">Chi tiết lịch sử</string>
+    <string name="title_streak">Chuỗi học</string>
     <string name="title_analytics">Thống kê</string>
+    <string name="title_flashcard">Flashcard</string>
+    <string name="title_quiz">Trắc nghiệm</string>
+    <string name="title_typing">Luyện gõ</string>
+    <string name="title_listening">Luyện nghe</string>
+    <string name="title_image_matching">Ghép ảnh</string>
+    <string name="title_pronunciation">Luyện phát âm</string>
+    <string name="title_explore">Khám phá</string>
+    <string name="title_explore_detail">Từ vựng chủ đề</string>
+    <string name="title_collections">Bộ sưu tập</string>
+    <string name="title_collection_detail">Chi tiết bộ sưu tập</string>
+    <string name="title_collection_insights">Thống kê bộ sưu tập</string>
+
+    <!-- Auth -->
+    <string name="login_title">LengoLens</string>
+    <string name="login_subtitle">Scan vật thể, học tiếng Anh</string>
+    <string name="login_button">Đăng nhập</string>
+    <string name="login_register_link">Chưa có tài khoản? Đăng ký ngay</string>
+    <string name="register_title">Tạo tài khoản</string>
+    <string name="register_button">Đăng ký</string>
+    <string name="register_login_link">Đã có tài khoản? Đăng nhập</string>
+    <string name="auth_username_hint">Tên đăng nhập</string>
+    <string name="auth_email_hint">Email</string>
+    <string name="auth_password_hint">Mật khẩu</string>
+    <string name="auth_logo">Logo</string>
+    <string name="forgot_password_title">Quên mật khẩu</string>
+    <string name="forgot_password_subtitle">Nhập email để nhận mã OTP</string>
+    <string name="forgot_password_button">Gửi mã OTP</string>
+    <string name="forgot_password_link">Quên mật khẩu?</string>
+    <string name="verify_otp_title">Xác nhận OTP</string>
+    <string name="verify_otp_subtitle">Nhập mã 6 số đã gửi đến email của bạn</string>
+    <string name="verify_otp_button">Xác nhận</string>
+    <string name="otp_hint">Mã OTP (6 số)</string>
+    <string name="reset_password_title">Đặt lại mật khẩu</string>
+    <string name="reset_password_subtitle">Nhập mật khẩu mới cho tài khoản</string>
+    <string name="reset_password_button">Đặt lại mật khẩu</string>
+    <string name="new_password_hint">Mật khẩu mới</string>
+    <string name="confirm_password_hint">Xác nhận mật khẩu mới</string>
 
     <!-- Dashboard -->
-    <string name="dashboard_greeting">👋 Xin chào,</string>
-    <string name="dashboard_subtitle">Hãy tiếp tục học hôm nay 🚀</string>
+    <string name="dashboard_greeting">Xin chào,</string>
+    <string name="dashboard_default_user">bạn</string>
+    <string name="dashboard_subtitle">Sẵn sàng học vài từ mới hôm nay?</string>
+    <string name="dashboard_plan_title">Lộ trình hôm nay</string>
+    <string name="dashboard_plan_subtitle">Ôn nhanh các từ đến hạn, rồi khám phá thêm chủ đề mới.</string>
+    <string name="dashboard_stats_title">Tổng quan học tập</string>
     <string name="dashboard_stat_scans">Lượt quét</string>
     <string name="dashboard_stat_learned">Đã học</string>
     <string name="dashboard_stat_due">Cần ôn</string>
     <string name="dashboard_stat_mastered">Thành thạo</string>
-    <string name="dashboard_btn_review">🎯 Bắt đầu ôn tập</string>
-    <string name="dashboard_progress_title">📈 Tiến độ thành thạo</string>
+    <string name="dashboard_btn_review">Bắt đầu ôn tập</string>
+    <string name="dashboard_btn_explore">Khám phá chủ đề</string>
+    <string name="dashboard_progress_title">Tiến độ thành thạo</string>
+    <string name="dashboard_progress_percent">%d%% thành thạo</string>
+    <string name="dashboard_progress_short">%d%%</string>
+    <string name="dashboard_progress_caption">thành thạo</string>
+    <string name="dashboard_action_title">Hành động tiếp theo</string>
 
     <!-- Scan -->
-    <string name="scan_overlay">📷 Hướng camera vào vật thể\nvà nhấn nút chụp</string>
-    <string name="scan_analyzing">🔍 Đang nhận diện…\n(5–10 giây)</string>
-    <string name="scan_btn_play">🔊 Phát</string>
-    <string name="scan_btn_learn">📚 Học</string>
-    <string name="scan_btn_retake">📷 Chụp lại</string>
-    <string name="scan_cd_gallery">Chọn từ thư viện</string>
-    <string name="scan_cd_capture">Chụp</string>
-    <string name="scan_pending">⏳ Đang chờ admin kiểm duyệt</string>
+    <string name="scan_overlay">Đưa vật thể vào khung hình rồi nhấn chụp</string>
+    <string name="scan_analyzing">Đang nhận diện...\nVui lòng chờ trong giây lát</string>
+    <string name="scan_btn_play">Nghe phát âm</string>
+    <string name="scan_btn_learn">Lưu</string>
+    <string name="scan_btn_retake">Quét lại</string>
+    <string name="scan_cd_gallery">Chọn ảnh từ thư viện</string>
+    <string name="scan_cd_capture">Chụp ảnh</string>
+    <string name="scan_pending">Đang chờ admin kiểm duyệt</string>
+    <string name="scan_category_ai">Nhận diện bằng AI</string>
+    <string name="scan_result_label">Kết quả nhận diện</string>
+    <string name="scan_translation_label">Từ vựng</string>
+    <string name="scan_error_camera_permission">Cần quyền camera để quét vật thể</string>
+    <string name="scan_error_gallery_permission">Cần quyền truy cập ảnh</string>
+    <string name="scan_error_read_image">Không đọc được ảnh</string>
+    <string name="scan_error_invalid_image">Ảnh không hợp lệ</string>
+    <string name="scan_error_read_image_detail">Lỗi đọc ảnh: %s</string>
+    <string name="scan_error_read_cropped_image">Lỗi đọc ảnh đã cắt: %s</string>
+    <string name="scan_error_gemini_quota">Gemini đã hết quota, vui lòng thử lại sau.</string>
+    <string name="scan_error_not_recognized">Không nhận diện được vật thể, vui lòng chụp rõ hơn.</string>
+    <string name="scan_error_camera_detail">Lỗi camera: %s</string>
+    <string name="scan_error_process_image">Lỗi xử lý ảnh: %s</string>
+    <string name="scan_error_capture">Lỗi chụp ảnh: %s</string>
+    <string name="scan_error_open_crop">Không mở được trình cắt ảnh: %s</string>
+    <string name="scan_preview_title">Vật thể có rõ ràng không?</string>
+    <string name="scan_preview_scan_now">Quét ngay</string>
+    <string name="scan_preview_crop_again">Cắt lại</string>
+    <string name="scan_preview_retake">Chụp lại</string>
+    <string name="scan_translation_word">%1$s (%2$s)</string>
+    <string name="scan_examples_title">Ví dụ:</string>
+
+    <!-- Dictionary -->
+    <string name="dictionary_title">Tra từ</string>
+    <string name="dictionary_subtitle">Dịch nhanh và lưu từ cần học</string>
+    <string name="dictionary_input_label">Văn bản nguồn</string>
+    <string name="dictionary_result_label">Kết quả dịch</string>
+    <string name="dictionary_input_hint">Nhập văn bản để dịch...</string>
+    <string name="dictionary_loading">Đang dịch...</string>
+    <string name="dictionary_empty_prompt">Nhập văn bản để bắt đầu</string>
+    <string name="dictionary_save_word">Lưu vào danh sách học</string>
+    <string name="dictionary_swap_format">%1$s &lt;-&gt; %2$s</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Khám phá</string>
+    <string name="explore_subtitle">Học từ vựng theo chủ đề</string>
+    <string name="explore_empty_title">Chưa có chủ đề</string>
+    <string name="explore_empty_subtitle">Hãy thêm danh mục trong hệ thống</string>
+    <string name="category_detail_hint">Chạm vào từ để xem chi tiết</string>
+    <string name="category_detail_empty">Chưa có từ vựng</string>
 
     <!-- Review -->
-    <string name="review_finished">🎉 Hoàn thành!\nKhông còn từ nào cần ôn.</string>
+    <string name="review_finished">Hoàn thành!\nKhông còn từ nào cần ôn.</string>
+    <string name="review_no_words_none">Không còn từ nào cần ôn.</string>
+    <string name="review_no_words_start">Chưa có từ nào trong danh sách ôn tập.\nHãy quét một vật thể để bắt đầu.</string>
+    <string name="review_finished_today">Hôm nay đã ôn xong.\nKhông còn từ nào cần ôn.</string>
+    <string name="review_msg_good">✓ Tốt lắm!</string>
+    <string name="review_msg_again">Sẽ ôn lại sớm</string>
+    <string name="review_error_format">Lỗi: %s</string>
+    <string name="scan_added_to_review">Đã thêm vào ôn tập hôm nay</string>
+    <string name="review_session_title">Phiên ôn tập</string>
+    <string name="review_answer_label">Nghĩa và ví dụ</string>
     <string name="review_btn_reveal">Xem đáp án</string>
-    <string name="review_btn_wrong">❌ Sai</string>
-    <string name="review_btn_correct">✅ Đúng</string>
+    <string name="review_btn_wrong">Sai</string>
+    <string name="review_btn_correct">Đúng</string>
+    <string name="review_lang_hint">English</string>
+    <string name="review_quality_again">Quên</string>
+    <string name="review_quality_hard">Khó</string>
+    <string name="review_quality_good">Ổn</string>
+    <string name="review_quality_easy">Dễ</string>
+    <string name="flashcard_progress_empty">Tiến độ: 0/0</string>
+    <string name="flashcard_instructions">Vuốt trái: chưa biết | Chạm để lật | Vuốt phải: đã biết\nVuốt lên: khó</string>
+    <string name="flashcard_language_english">English</string>
+    <string name="flashcard_tap_to_translate">(Chạm để xem nghĩa)</string>
+    <string name="label_definition">Định nghĩa</string>
+    <string name="label_example">Ví dụ</string>
+    <string name="translation_verified">Đã xác minh</string>
+    <string name="translation_add_to_learn">Thêm vào danh sách học</string>
+    <string name="quiz_translate_prompt">Dịch từ này:</string>
+    <string name="quiz_choose_answer">Chọn đáp án đúng:</string>
+    <string name="quiz_submit">Nộp đáp án</string>
+    <string name="typing_instruction">Gõ bản dịch tiếng Anh:</string>
+    <string name="typing_answer_hint">Nhập câu trả lời...</string>
+    <string name="hint_first_letter">Chữ cái đầu</string>
+    <string name="hint_word_length">Độ dài từ</string>
+    <string name="action_skip">Bỏ qua</string>
+    <string name="action_check_answer">Kiểm tra</string>
+    <string name="listening_instruction">Nghe và gõ lại từ bạn nghe được:</string>
+    <string name="listening_play_audio">Phát âm thanh</string>
+    <string name="listening_play_slow">Phát chậm</string>
+    <string name="listening_repeat_count">Đã nghe: 0 lần</string>
+    <string name="listening_answer_hint">Nhập từ bạn nghe được...</string>
+    <string name="image_matching_instruction">Ghép ảnh với từ đúng</string>
+    <string name="pronunciation_instruction">Luyện phát âm</string>
+    <string name="pronunciation_listen_model">Nghe mẫu</string>
+    <string name="pronunciation_record_cd">Ghi âm phát âm</string>
+    <string name="pronunciation_record_status">Chạm micro để luyện tập</string>
+    <string name="pronunciation_next_word">Từ tiếp theo</string>
 
     <!-- History -->
     <string name="history_empty">Chưa có lịch sử quét</string>
@@ -60,6 +190,8 @@
     <string name="history_delete_title">Xóa lịch sử</string>
     <string name="history_delete_message">Bạn có chắc muốn xóa lần quét này?</string>
     <string name="history_btn_save">Lưu vào danh sách học</string>
+    <string name="history_scanned_image">Ảnh đã quét</string>
+    <string name="history_empty_vocab">Không có dữ liệu từ vựng</string>
 
     <!-- Streak -->
     <string name="streak_days_singular">ngày</string>
@@ -68,67 +200,63 @@
     <string name="streak_stat_best">Tốt nhất</string>
     <string name="streak_stat_total">Tổng</string>
     <string name="streak_stat_today">Hôm nay</string>
-    <string name="streak_stats_title">📊 Thống kê của bạn</string>
-    <string name="streak_today_done">✅ Đã ôn tập hôm nay!</string>
-    <string name="streak_today_pending">⏰ Chưa ôn tập hôm nay</string>
+    <string name="streak_stats_title">Thống kê của bạn</string>
+    <string name="streak_today_done">Đã ôn tập hôm nay!</string>
+    <string name="streak_today_pending">Chưa ôn tập hôm nay</string>
     <string name="streak_milestone_label">Mốc tiếp theo: %d ngày</string>
     <string name="streak_days_to_go">Còn %d ngày nữa</string>
     <string name="streak_milestone_reached">Đã đạt mốc!</string>
-
-    <!-- Streak motivation messages -->
-    <string name="streak_msg_start">🌟 Bắt đầu hành trình học của bạn hôm nay!</string>
-    <string name="streak_msg_dont_break">🔥 Đừng để mất chuỗi %d ngày của bạn!</string>
-    <string name="streak_msg_great_start">✨ Khởi đầu tốt! Quay lại vào ngày mai nhé!</string>
-    <string name="streak_msg_keep_going">💪 Tiếp tục nào! Xây dựng thói quen hàng ngày.</string>
-    <string name="streak_msg_momentum">🚀 %d ngày liên tiếp! Bạn đang có đà tốt.</string>
-    <string name="streak_msg_one_week">⭐ Một tuần rồi! Bạn đang rực cháy!</string>
-    <string name="streak_msg_two_weeks">🔥 Hai tuần! Không ai cản bạn được!</string>
-    <string name="streak_msg_champion">🏆 %d ngày! Bạn là nhà vô địch học tập!</string>
-    <string name="streak_msg_legend">👑 %d ngày! Sự cống hiến huyền thoại!</string>
+    <string name="streak_msg_start">Bắt đầu hành trình học của bạn hôm nay!</string>
+    <string name="streak_msg_dont_break">Đừng để mất chuỗi %d ngày của bạn!</string>
+    <string name="streak_msg_great_start">Khởi đầu tốt! Quay lại vào ngày mai nhé!</string>
+    <string name="streak_msg_keep_going">Tiếp tục nào! Xây dựng thói quen hằng ngày.</string>
+    <string name="streak_msg_momentum">%d ngày liên tiếp! Bạn đang có đà tốt.</string>
+    <string name="streak_msg_one_week">Một tuần rồi! Rất tốt!</string>
+    <string name="streak_msg_two_weeks">Hai tuần! Tiếp tục giữ nhịp nhé!</string>
+    <string name="streak_msg_champion">%d ngày! Bạn là người học rất kiên trì!</string>
+    <string name="streak_msg_legend">%d ngày! Một thành tích đáng tự hào!</string>
     <string name="streak_msg_default">Hãy học mỗi ngày!</string>
+    <string name="streak_milestone_title">Các mốc thành tích</string>
+    <string name="streak_milestone_content">3 ngày - Người mới bắt đầu\n7 ngày - Chiến binh tuần\n14 ngày - Hai tuần bền bỉ\n30 ngày - Bậc thầy tháng\n50 ngày - Vua kiên trì\n100 ngày - Câu lạc bộ thế kỷ\n365 ngày - Huyền thoại năm\n\nDuy trì chuỗi hằng ngày để mở khóa thành tích!</string>
+    <string name="streak_milestone_btn_ok">Đã hiểu</string>
+    <string name="streak_celebrate_title">Đạt mốc thành tích!</string>
+    <string name="streak_celebrate_msg">Chúc mừng! Bạn đã đạt chuỗi %d ngày!\n\nSự kiên trì của bạn thật đáng tự hào. Tiếp tục phát huy nhé!</string>
+    <string name="streak_celebrate_btn">Tuyệt vời</string>
 
-    <!-- Streak milestone dialog -->
-    <string name="streak_milestone_title">🎯 Các Mốc Thành Tích</string>
-    <string name="streak_milestone_content">3 ngày   — Huy hiệu Mới bắt đầu\n7 ngày   — Chiến binh tuần lễ\n14 ngày  — Nhà vô địch 2 tuần\n30 ngày  — Bậc thầy tháng\n50 ngày  — Vua kiên trì\n100 ngày — Câu lạc bộ thế kỷ\n365 ngày — Huyền thoại năm\n\nDuy trì chuỗi hàng ngày để mở khóa thành tích!</string>
-    <string name="streak_milestone_btn_ok">Hiểu rồi!</string>
-    <string name="streak_celebrate_title">🎉 Đạt mốc thành tích!</string>
-    <string name="streak_celebrate_msg">Chúc mừng! Bạn đã đạt chuỗi %d ngày!\n\nSự kiên trì của bạn thật đáng ngưỡng mộ. Tiếp tục phát huy!</string>
-    <string name="streak_celebrate_btn">Tuyệt vời!</string>
-
-    <!-- Collection -->
-    <string name="title_collections">Bộ sưu tập</string>
-    <string name="title_collection_detail">Chi tiết bộ sưu tập</string>
-    <string name="title_collection_insights">Thống kê bộ sưu tập</string>
-    <string name="collection_search_hint">Tìm kiếm bộ sưu tập…</string>
+    <!-- Collections -->
+    <string name="collection_search_hint">Tìm kiếm bộ sưu tập...</string>
     <string name="collection_empty_title">Chưa có bộ sưu tập</string>
     <string name="collection_empty_subtitle">Tạo bộ sưu tập đầu tiên\nđể sắp xếp từ vựng của bạn</string>
     <string name="collection_item_count">%d từ</string>
     <string name="collection_created_date">Tạo: %s</string>
     <string name="collection_btn_insights">Thống kê</string>
-    <string name="collection_btn_delete">Xoá</string>
+    <string name="collection_btn_delete">Xóa</string>
     <string name="collection_btn_review">Ôn tập bộ sưu tập</string>
+    <string name="collection_btn_review_short">Ôn tập</string>
+    <string name="collection_default_title">Bộ sưu tập</string>
+    <string name="collection_empty_title_detail">Bộ sưu tập trống</string>
     <string name="collection_cd_add">Thêm bộ sưu tập</string>
     <string name="collection_dialog_create_title">Tạo bộ sưu tập</string>
     <string name="collection_dialog_name_hint">Tên bộ sưu tập</string>
     <string name="collection_dialog_name_subtitle">Nhập tên cho bộ sưu tập mới</string>
-    <string name="collection_dialog_delete_title">Xoá bộ sưu tập</string>
-    <string name="collection_dialog_delete_msg">Bạn có chắc muốn xoá \'%s\'?</string>
+    <string name="collection_dialog_delete_title">Xóa bộ sưu tập</string>
+    <string name="collection_dialog_delete_msg">Bạn có chắc muốn xóa \"%s\"?</string>
     <string name="collection_add_to_title">Thêm vào bộ sưu tập</string>
-    <string name="collection_no_collections">Chưa có bộ sưu tập nào. Tạo trong mục Tài khoản nhé!</string>
-    <string name="collection_empty_words">Bộ sưu tập trống, thêm từ trước nhé!</string>
-    <string name="collection_created">Đã tạo \'%s\'!</string>
-    <string name="collection_deleted">Đã xoá \'%s\'</string>
+    <string name="collection_no_collections">Chưa có bộ sưu tập nào. Tạo trong mục Cá nhân nhé!</string>
+    <string name="collection_empty_words">Bộ sưu tập trống, hãy thêm từ trước nhé!</string>
+    <string name="collection_created">Đã tạo \"%s\"!</string>
+    <string name="collection_deleted">Đã xóa \"%s\"</string>
     <string name="collection_name_empty">Tên bộ sưu tập không được để trống</string>
     <string name="collection_added">Đã thêm vào bộ sưu tập</string>
-    <string name="collection_removed">Đã xoá khỏi bộ sưu tập</string>
+    <string name="collection_removed">Đã xóa khỏi bộ sưu tập</string>
     <string name="collection_added_to">Đã thêm vào \"%s\"</string>
-    <string name="profile_menu_collection">Bộ sưu tập</string>
 
-    <!-- Collection Insights -->
+    <!-- Collection insights -->
     <string name="ci_select_collection">Chọn bộ sưu tập</string>
-    <string name="ci_stats_title">📊 Thống kê</string>
-    <string name="ci_analytics_title">📈 Biểu đồ</string>
-    <string name="ci_suggestions_title">💡 Gợi ý thông minh</string>
+    <string name="ci_stats_title">Thống kê</string>
+    <string name="ci_analytics_title">Biểu đồ</string>
+    <string name="ci_suggestions_title">Gợi ý thông minh</string>
+    <string name="ci_suggestion_placeholder">Gợi ý học tập</string>
     <string name="ci_total_items">Tổng từ</string>
     <string name="ci_reviewed">Đã ôn</string>
     <string name="ci_mastered">Thành thạo</string>
@@ -141,10 +269,27 @@
     <string name="ci_reviewing_label">Đang học</string>
     <string name="ci_not_started_label">Chưa ôn</string>
 
-    <!-- Common buttons -->
-    <string name="btn_create">Tạo</string>
-    <string name="btn_cancel">Huỷ</string>
-    <string name="btn_delete">Xoá</string>
+    <!-- Analytics -->
+    <string name="analytics_total_words">Tổng từ</string>
+    <string name="analytics_mastered">Thành thạo</string>
+    <string name="analytics_reviews_today">Ôn hôm nay</string>
+    <string name="analytics_current_streak">Chuỗi hiện tại</string>
+    <string name="analytics_progress_7_days">Tiến độ 7 ngày gần đây</string>
+    <string name="analytics_mastery_distribution">Phân bố thành thạo</string>
+    <string name="analytics_daily_activity">Hoạt động hằng ngày</string>
+
+    <!-- Notifications -->
+    <string name="notification_settings_title">Cài đặt thông báo</string>
+    <string name="notification_daily_reminder">Nhắc học hằng ngày</string>
+    <string name="notification_daily_reminder_desc">Nhận nhắc nhở ôn tập mỗi ngày</string>
+    <string name="notification_reminder_time">Giờ nhắc</string>
+    <string name="notification_change_time">Đổi</string>
+    <string name="notification_streak_alert">Cảnh báo chuỗi học</string>
+    <string name="notification_streak_alert_desc">Nhận thông báo khi bạn sắp mất chuỗi học</string>
+    <string name="notification_milestones">Mừng mốc thành tích</string>
+    <string name="notification_milestones_desc">Nhận thông báo khi đạt mốc chuỗi học</string>
+    <string name="notification_status_default">Cấu hình thông báo ở phía trên</string>
+    <string name="notification_tip">Bật thông báo để giữ nhịp học và duy trì chuỗi ngày.</string>
 
     <!-- Profile -->
     <string name="profile_section_language">Ngôn ngữ</string>
@@ -155,13 +300,45 @@
     <string name="profile_menu_history">Lịch sử quét</string>
     <string name="profile_menu_analytics">Thống kê học tập</string>
     <string name="profile_menu_streak">Chuỗi ngày học</string>
+    <string name="profile_menu_collection">Bộ sưu tập</string>
     <string name="profile_btn_logout">Đăng xuất</string>
-    <string name="profile_badge">Học viên xuất sắc</string>
+    <string name="profile_bio_placeholder">Nhấn để thêm giới thiệu...</string>
+    <string name="profile_bio_dialog_title">Giới thiệu bản thân</string>
+    <string name="profile_bio_hint">Viết vài dòng về bạn...</string>
+    <string name="profile_menu_change_password">Đổi mật khẩu</string>
+    <string name="profile_menu_notifications">Cài đặt thông báo</string>
+    <string name="profile_change_password_title">Đổi mật khẩu</string>
+    <string name="profile_change_password_subtitle">Cập nhật mật khẩu mới để bảo vệ tài khoản học tập của bạn.</string>
+    <string name="profile_change_password_save">Cập nhật</string>
+    <string name="profile_current_password_hint">Mật khẩu hiện tại</string>
+    <string name="profile_new_password_hint">Mật khẩu mới</string>
+    <string name="profile_password_rules_title">Mật khẩu mới cần có</string>
+    <string name="profile_password_rules">Dài hơn 8 ký tự&#10;Có chữ thường và chữ viết hoa&#10;Có ít nhất 1 chữ số</string>
+    <string name="profile_badge">Người học tích cực</string>
+    <string name="profile_account_title">Tài khoản học tập</string>
+    <string name="profile_language_changed_vi">Đã chuyển sang tiếng Việt</string>
+    <string name="profile_language_changed_en">Switched to English</string>
+    <string name="profile_language_save_failed">Không lưu được ngôn ngữ lên tài khoản, app vẫn đổi tạm trên thiết bị này</string>
+    <string name="profile_menu_content_description">Menu hồ sơ</string>
+    <string name="profile_bio_updated">Đã cập nhật giới thiệu</string>
+    <string name="profile_avatar_updated">Đã cập nhật ảnh đại diện</string>
+    <string name="profile_error_format">Lỗi: %s</string>
+    <string name="profile_avatar_upload_error_format">Lỗi upload: %s</string>
+    <string name="profile_password_required">Vui lòng nhập đầy đủ thông tin</string>
+    <string name="profile_current_password_required">Vui lòng nhập mật khẩu hiện tại</string>
+    <string name="profile_new_password_required">Vui lòng nhập mật khẩu mới</string>
+    <string name="profile_password_min_length">Mật khẩu mới phải dài hơn 8 ký tự</string>
+    <string name="profile_password_lowercase_required">Mật khẩu mới phải có ít nhất 1 chữ thường</string>
+    <string name="profile_password_uppercase_required">Mật khẩu mới phải có ít nhất 1 chữ viết hoa</string>
+    <string name="profile_password_digit_required">Mật khẩu mới phải có ít nhất 1 chữ số</string>
+    <string name="profile_avatar_pick_error">Không đọc được ảnh đã chọn</string>
 
     <!-- Common -->
-    <string name="arrow">➔</string>
-    <string name="content_description_avatar">Avatar</string>
-    <string name="nav_explore">Kham pha</string>
-    <string name="title_explore">Kham pha</string>
-    <string name="title_explore_detail">Tu vung chu de</string>
+    <string name="btn_create">Tạo</string>
+    <string name="btn_save">Lưu</string>
+    <string name="btn_cancel">Hủy</string>
+    <string name="btn_delete">Xóa</string>
+    <string name="btn_close">Đóng</string>
+    <string name="arrow">›</string>
+    <string name="content_description_avatar">Ảnh đại diện</string>
 </resources>

@@ -35,7 +35,7 @@
         android:id="@+id/tvInstruction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="🎧 Listen and type what you hear:"
+        android:text="@string/listening_instruction"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
@@ -72,7 +72,7 @@
                 android:src="@android:drawable/ic_media_play"
                 android:background="@drawable/option_background"
                 android:scaleType="centerInside"
-                android:contentDescription="Play audio" />
+                android:contentDescription="@string/listening_play_audio" />
 
             <!-- Play Controls -->
             <LinearLayout
@@ -86,7 +86,7 @@
                     android:id="@+id/btnPlaySlow"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🐌 Play Slow"
+                    android:text="@string/listening_play_slow"
                     android:textSize="12sp"
                     app:cornerRadius="8dp"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
@@ -98,7 +98,7 @@
                 android:id="@+id/tvRepeatCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Played: 0 times"
+                android:text="@string/listening_repeat_count"
                 android:textSize="12sp"
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginTop="12dp" />
@@ -142,7 +142,7 @@
             android:id="@+id/etAnswer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Type what you heard..."
+            android:hint="@string/listening_answer_hint"
             android:textSize="18sp"
             android:padding="16dp"
             android:inputType="textCapWords"
@@ -166,7 +166,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="💡 First Letter"
+            android:text="@string/hint_first_letter"
             android:textSize="12sp"
             android:layout_marginEnd="8dp"
             app:cornerRadius="8dp"
@@ -177,7 +177,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="💡 Word Length"
+            android:text="@string/hint_word_length"
             android:textSize="12sp"
             android:layout_marginStart="8dp"
             app:cornerRadius="8dp"
@@ -201,7 +201,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="SKIP"
+            android:text="@string/action_skip"
             android:textSize="14sp"
             android:layout_marginEnd="8dp"
             app:cornerRadius="12dp"
@@ -212,7 +212,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:text="CHECK ANSWER"
+            android:text="@string/action_check_answer"
             android:textSize="14sp"
             android:textStyle="bold"
             android:layout_marginStart="8dp"

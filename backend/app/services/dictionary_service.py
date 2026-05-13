@@ -15,6 +15,7 @@ from app.models.scan_history import ScanHistory
 from app.models.translation import Translation, NguonDuLieu
 from app.services.gemini_service import GeminiService
 from app.services.tts_service import TTSService
+from app.utils.timezone import now_vietnam
 
 
 class DictionaryService:
@@ -331,7 +332,7 @@ class DictionaryService:
             ngon_ngu_tra_id=lang.id if lang else None,
             doi_tuong_id=object_id,
             nguon_du_lieu=source,
-            lan_tra_cuoi=datetime.utcnow(),
+            lan_tra_cuoi=now_vietnam(),
         ))
 
     def _normalize_object_code(self, text: str) -> str:

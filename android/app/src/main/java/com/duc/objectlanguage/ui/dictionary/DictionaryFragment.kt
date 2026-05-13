@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentDictionaryBinding
-import com.duc.objectlanguage.utils.LocaleHelper
 
 class DictionaryFragment : Fragment() {
 
@@ -42,15 +41,15 @@ class DictionaryFragment : Fragment() {
     }
 
     private fun applyDisplayLanguage() {
-        val isEn = LocaleHelper.getSavedLocale(requireContext()) == "en"
-        binding.tvTitle.text = if (isEn) "Translate" else "Dịch"
-        binding.etInput.hint = if (isEn) "Enter text to translate..." else "Nhập văn bản để dịch..."
+        binding.tvTitle.text = getString(R.string.dictionary_title)
+        binding.etInput.hint = getString(R.string.dictionary_input_hint)
     }
 
     private fun setupListeners() {
         binding.etInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
             override fun afterTextChanged(s: Editable?) {
                 val text = s?.toString() ?: ""
                 binding.btnClearInput.visibility = if (text.isNotEmpty()) View.VISIBLE else View.GONE
@@ -76,21 +75,17 @@ class DictionaryFragment : Fragment() {
         binding.btnSaveWord.setOnClickListener {
             viewModel.saveCurrentWord()
         }
-
-        // Audio playback reserved for future TTS integration
     }
 
     private fun setupObservers() {
         viewModel.fromLang.observe(viewLifecycleOwner) { from ->
             val to = viewModel.toLang.value ?: "vi"
-            binding.tvFromLang.text = langLabel(from)
-            binding.btnSwapLang.text = "${langLabel(from)} ⇌ ${langLabel(to)}"
+            updateLanguageLabels(from, to)
         }
 
         viewModel.toLang.observe(viewLifecycleOwner) { to ->
             val from = viewModel.fromLang.value ?: "en"
-            binding.tvToLang.text = langLabel(to)
-            binding.btnSwapLang.text = "${langLabel(from)} ⇌ ${langLabel(to)}"
+            updateLanguageLabels(from, to)
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
@@ -118,7 +113,6 @@ class DictionaryFragment : Fragment() {
                     binding.tvPhonetic.visibility = View.GONE
                 }
 
-                // Definitions (for single words)
                 binding.containerDefinitions.removeAllViews()
                 if (result.definitions.isNotEmpty()) {
                     binding.dividerDefs.visibility = View.VISIBLE
@@ -137,7 +131,6 @@ class DictionaryFragment : Fragment() {
                     binding.containerDefinitions.visibility = View.GONE
                 }
 
-                // Audio button (only available for single words via TTS)
                 binding.btnPlayAudio.visibility = View.GONE
                 binding.btnSaveWord.visibility = if (result.canSave && result.translationId != null) {
                     View.VISIBLE
@@ -168,9 +161,19 @@ class DictionaryFragment : Fragment() {
         }
     }
 
+    private fun updateLanguageLabels(from: String, to: String) {
+        binding.tvFromLang.text = langLabel(from)
+        binding.tvToLang.text = langLabel(to)
+        binding.btnSwapLang.text = getString(
+            R.string.dictionary_swap_format,
+            langLabel(from),
+            langLabel(to)
+        )
+    }
+
     private fun langLabel(code: String): String = when (code.lowercase()) {
-        "vi" -> "VI 🇻🇳"
-        "en" -> "EN 🇺🇸"
+        "vi" -> "VI"
+        "en" -> "EN"
         else -> code.uppercase()
     }
 

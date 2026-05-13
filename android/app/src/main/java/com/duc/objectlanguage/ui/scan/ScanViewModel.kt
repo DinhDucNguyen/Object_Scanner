@@ -10,6 +10,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.model.ScanResponse
 import com.duc.objectlanguage.data.model.TranslationResponse
@@ -127,7 +128,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             result.fold(
                 onSuccess = { response ->
                     if (response.learningAdded) {
-                        _addedMsg.value = "Da them vao on tap hom nay"
+                        _addedMsg.value = getApplication<Application>().getString(R.string.scan_added_to_review)
                     }
                 },
                 onFailure = { Log.w("ScanViewModel", "Save scan/learning failed: ${it.message}") }

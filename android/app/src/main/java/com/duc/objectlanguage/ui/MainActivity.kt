@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -11,6 +12,7 @@ import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.ActivityMainBinding
 import com.duc.objectlanguage.utils.LocaleHelper
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,18 +46,22 @@ class MainActivity : AppCompatActivity() {
         binding.toolbar.setupWithNavController(navController, appBarConfiguration)
         binding.bottomNavigation.setupWithNavController(navController)
 
-        // Ẩn bottom nav ở login/register
+        val hideToolbarDests = setOf(
+            R.id.loginFragment, R.id.registerFragment,
+            R.id.forgotPasswordFragment, R.id.verifyOtpFragment, R.id.resetPasswordFragment,
+            R.id.dashboardFragment, R.id.scanFragment, R.id.reviewFragment,
+            R.id.dictionaryFragment, R.id.profileFragment, R.id.exploreFragment
+        )
+        val hideBottomNavDests = setOf(
+            R.id.loginFragment, R.id.registerFragment,
+            R.id.forgotPasswordFragment, R.id.verifyOtpFragment, R.id.resetPasswordFragment
+        )
+
         navController.addOnDestinationChangedListener { _, dest, _ ->
-            when (dest.id) {
-                R.id.loginFragment, R.id.registerFragment -> {
-                    binding.bottomNavigation.visibility = View.GONE
-                    binding.toolbar.visibility = View.GONE
-                }
-                else -> {
-                    binding.bottomNavigation.visibility = View.VISIBLE
-                    binding.toolbar.visibility = View.VISIBLE
-                }
-            }
+            binding.toolbar.visibility =
+                if (dest.id in hideToolbarDests) View.GONE else View.VISIBLE
+            binding.bottomNavigation.visibility =
+                if (dest.id in hideBottomNavDests) View.GONE else View.VISIBLE
         }
 
         // Chỉ navigate khi Activity khởi tạo lần đầu (savedInstanceState == null).
@@ -65,6 +71,23 @@ class MainActivity : AppCompatActivity() {
             val app = application as ObjectLanguageApp
             if (app.tokenManager.isLoggedIn) {
                 navController.navigate(R.id.dashboardFragment)
+            }
+        }
+
+        syncAccountLanguage()
+    }
+
+    private fun syncAccountLanguage() {
+        val app = application as ObjectLanguageApp
+        if (!app.tokenManager.isLoggedIn) return
+
+        lifecycleScope.launch {
+            app.repository.getUserSettings().onSuccess { settings ->
+                val accountLanguage = settings.displayLanguage
+                if (accountLanguage.isNotBlank() && accountLanguage != LocaleHelper.getSavedLocale(this@MainActivity)) {
+                    LocaleHelper.setLocale(this@MainActivity, accountLanguage)
+                    recreate()
+                }
             }
         }
     }

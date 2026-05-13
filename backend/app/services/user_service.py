@@ -1,13 +1,30 @@
+# pyrefly: ignore [missing-import]
 from fastapi import HTTPException
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import timedelta
+import random
 
+# pyrefly: ignore [missing-import]
 from app.models.user import User
+# pyrefly: ignore [missing-import]
 from app.models.profile import Profile
 from app.models.user_settings import UserSettings
 from app.repositories.user_repo import UserRepository
-from app.schemas.user import UserCreate, UserLogin, UserSettingsUpdate
+from app.schemas.user import (
+    UserCreate, UserLogin, UserSettingsUpdate,
+    ForgotPasswordRequest, VerifyOtpRequest,
+    ResetPasswordRequest, ChangePasswordRequest,
+)
 from app.utils.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_token
+from app.services.email_service import EmailService
+from app.utils.cloudinary_helper import upload_image
+from app.utils.timezone import now_vietnam
+
+OTP_EXPIRE_MINUTES = 5
+
+# email -> {"otp": str, "expires_at": datetime}
+_otp_store: dict[str, dict] = {}
 
 
 class UserService:
@@ -60,7 +77,7 @@ class UserService:
         if status_name != "hoat_dong":
             raise HTTPException(403, "Tài khoản đã bị khóa")
 
-        user.lan_dang_nhap_cuoi = datetime.utcnow()
+        user.lan_dang_nhap_cuoi = now_vietnam()
         db.commit()
 
         return self._generate_tokens(user)
@@ -77,10 +94,14 @@ class UserService:
 
         return self._generate_tokens(user)
 
-    def get_profile(self, db: Session, user_id: int):
-        profile = self.repo.get_profile(db, user_id)
-        if not profile:
-            raise HTTPException(404, "Profile not found")
+    def update_profile(self, db: Session, user_id: int, data) -> dict:
+        profile = self._get_or_create_profile(db, user_id)
+        if data.full_name is not None:
+            profile.ho_ten = data.full_name
+        if data.bio is not None:
+            profile.gioi_thieu = data.bio
+        db.commit()
+        db.refresh(profile)
         return {
             "user_id": profile.user_id,
             "full_name": profile.ho_ten,
@@ -88,26 +109,130 @@ class UserService:
             "bio": profile.gioi_thieu,
         }
 
+    def upload_avatar(self, db: Session, user_id: int, image_bytes: bytes, filename: str) -> dict:
+        import os, uuid
+        profile = self._get_or_create_profile(db, user_id)
+        if not image_bytes:
+            raise HTTPException(400, "File ảnh không hợp lệ")
+
+        avatar_url = upload_image(image_bytes, folder="object_scanner/avatars")
+        if avatar_url is None:
+            uploads_dir = "uploads/avatars"
+            os.makedirs(uploads_dir, exist_ok=True)
+            ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "jpg"
+            if ext not in {"jpg", "jpeg", "png", "webp"}:
+                ext = "jpg"
+            new_filename = f"{user_id}_{uuid.uuid4().hex[:8]}.{ext}"
+            filepath = os.path.join(uploads_dir, new_filename)
+            with open(filepath, "wb") as f:
+                f.write(image_bytes)
+            avatar_url = f"/uploads/avatars/{new_filename}"
+
+        profile.anh_dai_dien = avatar_url
+        db.commit()
+        return {"avatar_url": avatar_url}
+
+    def get_profile(self, db: Session, user_id: int):
+        profile = self._get_or_create_profile(db, user_id)
+        return {
+            "user_id": profile.user_id,
+            "full_name": profile.ho_ten,
+            "avatar_url": profile.anh_dai_dien,
+            "bio": profile.gioi_thieu,
+        }
+
+    def _get_or_create_profile(self, db: Session, user_id: int) -> Profile:
+        user = self.repo.get_by_id(db, user_id)
+        if not user:
+            raise HTTPException(404, "Không tìm thấy người dùng")
+
+        profile = self.repo.get_profile(db, user_id)
+        if profile:
+            return profile
+
+        profile = Profile(user_id=user_id)
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
+        return profile
+
     def get_settings(self, db: Session, user_id: int):
         settings = self.repo.get_settings(db, user_id)
         if not settings:
-            raise HTTPException(404, "Settings not found")
+            settings = UserSettings(user_id=user_id)
+            db.add(settings)
+            db.commit()
+            db.refresh(settings)
         return {
             "user_id": settings.user_id,
-            "native_lang_id": settings.ngon_ngu_me,
-            "target_lang_id": settings.ngon_ngu_hoc,
-            "native_lang_code": settings.native_lang.ma_ngon_ngu if settings.native_lang else None,
-            "target_lang_code": settings.target_lang.ma_ngon_ngu if settings.target_lang else None,
+            "display_language": settings.ngon_ngu_giao_dien or "vi",
         }
 
     def update_settings(self, db: Session, user_id: int, data: UserSettingsUpdate):
         settings = self.repo.get_settings(db, user_id)
         if not settings:
-            raise HTTPException(404, "Settings not found")
+            settings = UserSettings(user_id=user_id)
+            db.add(settings)
 
-        if data.native_lang_id is not None:
-            settings.ngon_ngu_me = data.native_lang_id
-        if data.target_lang_id is not None:
-            settings.ngon_ngu_hoc = data.target_lang_id
+        if data.display_language is not None:
+            settings.ngon_ngu_giao_dien = data.display_language
 
-        return self.repo.update_settings(db, settings)
+        self.repo.update_settings(db, settings)
+        return {
+            "user_id": settings.user_id,
+            "display_language": settings.ngon_ngu_giao_dien or "vi",
+        }
+
+    # ------------------------------------------------------------------
+    # Forgot / Reset / Change password
+    # ------------------------------------------------------------------
+
+    def forgot_password(self, db: Session, data: ForgotPasswordRequest) -> dict:
+        user = self.repo.get_by_email(db, data.email)
+        if not user:
+            print(f"[DEBUG] forgot_password: email not found: {data.email}")
+            return {"message": "Nếu email tồn tại, mã OTP đã được gửi"}
+
+        otp_code = str(random.randint(100000, 999999))
+        _otp_store[data.email] = {
+            "otp": otp_code,
+            "expires_at": now_vietnam() + timedelta(minutes=OTP_EXPIRE_MINUTES),
+        }
+
+        ok = EmailService().send_otp(user.email, otp_code)
+        print(f"[DEBUG] forgot_password: sent OTP to {user.email}, result={ok}")
+        return {"message": "Nếu email tồn tại, mã OTP đã được gửi"}
+
+    def verify_otp(self, _db: Session, data: VerifyOtpRequest) -> dict:
+        entry = _otp_store.get(data.email)
+        if not entry or entry["otp"] != data.otp_code or entry["expires_at"] < now_vietnam():
+            raise HTTPException(400, "OTP không hợp lệ hoặc đã hết hạn")
+        return {"message": "OTP hợp lệ", "valid": True}
+
+    def reset_password(self, db: Session, data: ResetPasswordRequest) -> dict:
+        entry = _otp_store.get(data.email)
+        if not entry or entry["otp"] != data.otp_code or entry["expires_at"] < now_vietnam():
+            raise HTTPException(400, "OTP không hợp lệ hoặc đã hết hạn")
+
+        user = self.repo.get_by_email(db, data.email)
+        if not user:
+            raise HTTPException(400, "OTP không hợp lệ hoặc đã hết hạn")
+
+        user.mat_khau_ma_hoa = hash_password(data.new_password)
+        db.commit()
+        _otp_store.pop(data.email, None)
+
+        return {"message": "Đặt lại mật khẩu thành công"}
+
+    def change_password(self, db: Session, user_id: int, data: ChangePasswordRequest) -> dict:
+        user = self.repo.get_by_id(db, user_id)
+        if not user:
+            raise HTTPException(404, "Không tìm thấy người dùng")
+
+        if not verify_password(data.current_password, user.mat_khau_ma_hoa):
+            raise HTTPException(400, "Mật khẩu hiện tại không đúng")
+
+        user.mat_khau_ma_hoa = hash_password(data.new_password)
+        db.commit()
+
+        return {"message": "Đổi mật khẩu thành công"}

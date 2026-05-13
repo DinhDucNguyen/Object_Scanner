@@ -48,7 +48,7 @@
         android:id="@+id/tvInstruction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="🎴 Match images with words!"
+        android:text="@string/image_matching_instruction"
         android:textSize="16sp"
         android:textStyle="italic"
         android:textColor="@android:color/darker_gray"

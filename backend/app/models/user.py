@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, TIMESTAMP, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.session import Base
-from datetime import datetime
+from app.utils.timezone import now_vietnam
 
 
 class User(Base):
@@ -14,8 +14,8 @@ class User(Base):
     vai_tro_id = Column(Integer, ForeignKey("VaiTro.id"), nullable=False)
     trang_thai_id = Column(Integer, ForeignKey("TrangThaiNguoiDung.id"), nullable=False)
     lan_dang_nhap_cuoi = Column(DateTime, nullable=True)
-    ngay_tao = Column(TIMESTAMP, default=datetime.utcnow)
-    ngay_cap_nhat = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+    ngay_tao = Column(TIMESTAMP, default=now_vietnam)
+    ngay_cap_nhat = Column(TIMESTAMP, default=now_vietnam, onupdate=now_vietnam)
     thoi_gian_xoa = Column(DateTime, nullable=True)
 
     vai_tro_obj = relationship("VaiTro", back_populates="users")

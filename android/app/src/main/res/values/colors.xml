@@ -1,59 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary (Indigo) -->
-    <color name="primary">#4F46E5</color>
-    <color name="primary_dark">#312E81</color>
-    <color name="primary_light">#818CF8</color>
+    <!-- Brand -->
+    <color name="primary">#2563EB</color>
+    <color name="primary_dark">#1E40AF</color>
+    <color name="primary_light">#DBEAFE</color>
 
-    <!-- Secondary -->
-    <color name="secondary">#818CF8</color>
-    <color name="secondary_dark">#4F46E5</color>
+    <!-- Accent -->
+    <color name="secondary">#16A34A</color>
+    <color name="secondary_dark">#15803D</color>
 
     <!-- Background & Surface -->
-    <color name="background">#EEF2FF</color>
+    <color name="background">#F6F8FB</color>
     <color name="surface">#FFFFFF</color>
-    <color name="surface_variant">#E0E7FF</color>
+    <color name="surface_variant">#EAF0F7</color>
+    <color name="surface_soft">#F1F5F9</color>
+    <color name="surface_warm">#FFF7ED</color>
 
     <!-- Text -->
-    <color name="text_primary">#312E81</color>
-    <color name="text_secondary">#475569</color>
+    <color name="text_primary">#111827</color>
+    <color name="text_secondary">#5B6472</color>
+    <color name="text_muted">#94A3B8</color>
     <color name="text_on_primary">#FFFFFF</color>
 
     <!-- Status Colors -->
-    <color name="success">#22C55E</color>
+    <color name="success">#16A34A</color>
     <color name="success_light">#DCFCE7</color>
-    <color name="warning">#F59E0B</color>
+    <color name="warning">#D97706</color>
     <color name="warning_light">#FEF3C7</color>
-    <color name="error">#EF4444</color>
+    <color name="error">#DC2626</color>
     <color name="error_light">#FEE2E2</color>
 
     <!-- Other -->
-    <color name="divider">#CBD5E1</color>
+    <color name="divider">#D8DEE8</color>
+    <color name="overlay_dark">#B0000000</color>
+    <color name="overlay_soft">#66000000</color>
+    <color name="glass_white">#2EFFFFFF</color>
+    <color name="glass_stroke">#66FFFFFF</color>
+    <color name="scan_frame">#E6FFFFFF</color>
 
     <!-- Bottom Nav -->
-    <color name="bottom_nav_active">#4F46E5</color>
-    <color name="bottom_nav_inactive">#94A3B8</color>
+    <color name="bottom_nav_active">#2563EB</color>
+    <color name="bottom_nav_inactive">#8B95A5</color>
     <color name="bottom_nav_bg">#FFFFFF</color>
 
     <!-- Gradient Colors -->
-    <color name="gradient_start">#4F46E5</color>
-    <color name="gradient_end">#7C3AED</color>
-    <color name="gradient_accent">#818CF8</color>
+    <color name="gradient_start">#2563EB</color>
+    <color name="gradient_end">#0F766E</color>
+    <color name="gradient_accent">#16A34A</color>
 
     <!-- Card Accent Colors -->
-    <color name="card_scan_bg">#EEF2FF</color>
-    <color name="card_learned_bg">#DCFCE7</color>
-    <color name="card_due_bg">#FEF3C7</color>
-    <color name="card_mastered_bg">#F3E8FF</color>
+    <color name="card_scan_bg">#EFF6FF</color>
+    <color name="card_learned_bg">#ECFDF5</color>
+    <color name="card_due_bg">#FFFBEB</color>
+    <color name="card_mastered_bg">#F5F3FF</color>
 
-    <color name="card_scan_icon">#4F46E5</color>
+    <color name="card_scan_icon">#2563EB</color>
     <color name="card_learned_icon">#16A34A</color>
     <color name="card_due_icon">#D97706</color>
-    <color name="card_mastered_icon">#9333EA</color>
+    <color name="card_mastered_icon">#7C3AED</color>
+    <color name="violet">#7C3AED</color>
+    <color name="violet_light">#EDE9FE</color>
+    <color name="cyan">#0891B2</color>
+    <color name="cyan_light">#E0F7FA</color>
 
-    <!-- Material UI Components Colors -->
-    <color name="purple_500">#4F46E5</color>
-    <color name="purple_700">#312E81</color>
-    <color name="teal_200">#22C55E</color>
+    <!-- Legacy Material aliases -->
+    <color name="purple_500">#2563EB</color>
+    <color name="purple_700">#1E40AF</color>
+    <color name="teal_200">#86EFAC</color>
     <color name="teal_700">#15803D</color>
 </resources>

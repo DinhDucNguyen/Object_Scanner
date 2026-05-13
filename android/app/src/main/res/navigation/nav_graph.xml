@@ -17,6 +17,38 @@
             app:destination="@id/dashboardFragment"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_login_to_forgotPassword"
+            app:destination="@id/forgotPasswordFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.duc.objectlanguage.ui.auth.ForgotPasswordFragment"
+        android:label="@string/forgot_password_title">
+        <action
+            android:id="@+id/action_forgotPassword_to_verifyOtp"
+            app:destination="@id/verifyOtpFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/verifyOtpFragment"
+        android:name="com.duc.objectlanguage.ui.auth.VerifyOtpFragment"
+        android:label="@string/verify_otp_title">
+        <action
+            android:id="@+id/action_verifyOtp_to_resetPassword"
+            app:destination="@id/resetPasswordFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/resetPasswordFragment"
+        android:name="com.duc.objectlanguage.ui.auth.ResetPasswordFragment"
+        android:label="@string/reset_password_title">
+        <action
+            android:id="@+id/action_resetPassword_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -78,7 +110,7 @@
     <fragment
         android:id="@+id/historyDetailFragment"
         android:name="com.duc.objectlanguage.ui.history.HistoryDetailFragment"
-        android:label="Chi tiết lịch sử">
+        android:label="@string/title_history_detail">
         <argument
             android:name="scanId"
             app:argType="integer"
@@ -106,39 +138,39 @@
     <fragment
         android:id="@+id/flashcardFragment"
         android:name="com.duc.objectlanguage.ui.review.FlashcardFragment"
-        android:label="Flashcard Review" />
+        android:label="@string/title_flashcard" />
 
     <fragment
         android:id="@+id/quizFragment"
         android:name="com.duc.objectlanguage.ui.review.QuizFragment"
-        android:label="Quiz Mode" />
+        android:label="@string/title_quiz" />
 
     <fragment
         android:id="@+id/typingTestFragment"
         android:name="com.duc.objectlanguage.ui.review.TypingTestFragment"
-        android:label="Typing Test" />
+        android:label="@string/title_typing" />
 
     <fragment
         android:id="@+id/listeningTestFragment"
         android:name="com.duc.objectlanguage.ui.review.ListeningTestFragment"
-        android:label="Listening Test" />
+        android:label="@string/title_listening" />
 
     <fragment
         android:id="@+id/imageMatchingFragment"
         android:name="com.duc.objectlanguage.ui.review.ImageMatchingFragment"
-        android:label="Image Matching" />
+        android:label="@string/title_image_matching" />
 
     <!-- Wave 2: Pronunciation Practice -->
     <fragment
         android:id="@+id/pronunciationFragment"
         android:name="com.duc.objectlanguage.ui.review.PronunciationFragment"
-        android:label="Pronunciation Practice" />
+        android:label="@string/title_pronunciation" />
 
     <!-- Wave 3: Visual Analytics -->
     <fragment
         android:id="@+id/analyticsFragment"
         android:name="com.duc.objectlanguage.ui.analytics.AnalyticsFragment"
-        android:label="Analytics Dashboard" />
+        android:label="@string/title_analytics" />
 
     <!-- Wave 4: Collections & Insights -->
     <fragment
@@ -178,6 +210,11 @@
         android:id="@+id/streakFragment"
         android:name="com.duc.objectlanguage.ui.streak.StreakFragment"
         android:label="@string/title_streak" />
+
+    <fragment
+        android:id="@+id/notificationSettingsFragment"
+        android:name="com.duc.objectlanguage.ui.settings.NotificationSettingsFragment"
+        android:label="@string/notification_settings_title" />
 
 
     <fragment

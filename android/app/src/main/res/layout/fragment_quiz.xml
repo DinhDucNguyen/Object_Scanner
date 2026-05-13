@@ -95,7 +95,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Translate this word:"
+                    android:text="@string/quiz_translate_prompt"
                     android:textSize="14sp"
                     android:textColor="@android:color/white"
                     android:alpha="0.9"
@@ -121,7 +121,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Choose the correct answer:"
+            android:text="@string/quiz_choose_answer"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginTop="8dp"
@@ -187,7 +187,7 @@
             android:id="@+id/btnSubmit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="SUBMIT ANSWER"
+            android:text="@string/quiz_submit"
             android:textSize="16sp"
             android:textStyle="bold"
             android:padding="16dp"

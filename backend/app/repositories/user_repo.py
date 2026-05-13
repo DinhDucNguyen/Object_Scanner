@@ -19,6 +19,12 @@ class UserRepository:
             User.thoi_gian_xoa.is_(None)
         ).first()
 
+    def get_by_email(self, db: Session, email: str):
+        return db.query(User).filter(
+            User.email == email,
+            User.thoi_gian_xoa.is_(None)
+        ).first()
+
     def get_by_id(self, db: Session, user_id: int):
         return db.query(User).filter(
             User.id == user_id,

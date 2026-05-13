@@ -8,6 +8,7 @@ from app.repositories.history_repo import HistoryRepository
 from app.models.category import Category
 from app.schemas.common import StatsResponse
 from app.services.object_media_service import pick_primary_object_image
+from app.services.streak_service import StreakService
 
 
 class DataService:
@@ -17,6 +18,7 @@ class DataService:
         self.lang_repo = LanguageRepository()
         self.learn_repo = LearningProgressRepository()
         self.hist_repo = HistoryRepository()
+        self.streak_service = StreakService()
 
     def get_languages(self, db: Session):
         langs = self.lang_repo.get_active(db)
@@ -67,6 +69,7 @@ class DataService:
         return result
 
     def get_stats(self, db: Session, user_id: int):
+        streak = self.streak_service.get_streak(db, user_id)
         return StatsResponse(
             total_objects=self.obj_repo.count_all(db),
             total_translations=self.trans_repo.count_all(db),
@@ -74,5 +77,8 @@ class DataService:
             total_learned=self.learn_repo.count_by_user(db, user_id),
             due_today=self.learn_repo.count_due_today(db, user_id),
             mastered=self.learn_repo.count_mastered(db, user_id),
-            total_scans=self.hist_repo.count_by_user(db, user_id)
+            total_scans=self.hist_repo.count_by_user(db, user_id),
+            current_streak=streak["streak_hien_tai"],
+            longest_streak=streak["streak_dai_nhat"],
+            total_reviews=streak["tong_luot_on"],
         )

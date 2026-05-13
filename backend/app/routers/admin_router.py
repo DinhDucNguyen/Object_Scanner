@@ -12,7 +12,6 @@ Endpoints:
 """
 import os
 import uuid
-from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session
@@ -23,6 +22,7 @@ from app.models.object import Object
 from app.models.object_media import ObjectMedia
 from app.services.admin_service import AdminService
 from app.services.object_media_service import set_primary_object_image
+from app.utils.timezone import now_vietnam
 from app.utils.cloudinary_helper import upload_image
 from app.schemas.admin import (
     PredictionListItem,
@@ -188,7 +188,7 @@ def delete_object_media(media_id: int, db: Session = Depends(get_db)):
     ).first()
     if not media:
         raise HTTPException(404, "Khong tim thay anh doi tuong")
-    media.thoi_gian_xoa = datetime.utcnow()
+    media.thoi_gian_xoa = now_vietnam()
     db.commit()
     return {"message": "Da xoa anh doi tuong", "media_id": media.id}
 

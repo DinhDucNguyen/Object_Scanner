@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentLoginBinding
+import com.duc.objectlanguage.utils.LocaleHelper
 import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
@@ -48,10 +49,18 @@ class LoginFragment : Fragment() {
 
                 result.fold(
                     onSuccess = {
+                        val previousLanguage = LocaleHelper.getSavedLocale(requireContext())
+                        val accountLanguage = repo.getUserSettings().getOrNull()?.displayLanguage
+                        if (!accountLanguage.isNullOrBlank()) {
+                            LocaleHelper.setLocale(requireContext(), accountLanguage)
+                        }
                         val navController = findNavController()
                         val graph = navController.navInflater.inflate(R.navigation.nav_graph)
                         graph.setStartDestination(R.id.dashboardFragment)
                         navController.graph = graph
+                        if (!accountLanguage.isNullOrBlank() && accountLanguage != previousLanguage) {
+                            requireActivity().recreate()
+                        }
                     },
                     onFailure = {
                         Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
@@ -62,6 +71,10 @@ class LoginFragment : Fragment() {
 
         binding.tvGoRegister.setOnClickListener {
             findNavController().navigate(R.id.action_login_to_register)
+        }
+
+        binding.tvForgotPassword.setOnClickListener {
+            findNavController().navigate(R.id.action_login_to_forgotPassword)
         }
     }
 

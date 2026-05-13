@@ -1,11 +1,13 @@
 package com.duc.objectlanguage.data.repository
 
+import com.google.gson.JsonParser
 import com.duc.objectlanguage.data.api.RetrofitClient
 import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Response
 
 class AppRepository(private val tokenManager: TokenManager) {
 
@@ -44,6 +46,46 @@ class AppRepository(private val tokenManager: TokenManager) {
             } else {
                 Result.failure(Exception("Đăng ký thất bại. Tài khoản có thể đã tồn tại."))
             }
+        } catch (e: Exception) {
+            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+        }
+    }
+
+    suspend fun forgotPassword(email: String): Result<String> {
+        return try {
+            val response = api.forgotPassword(ForgotPasswordRequest(email))
+            if (response.isSuccessful) Result.success(response.body()?.message ?: "OTP đã được gửi")
+            else Result.failure(Exception("Gửi OTP thất bại"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+        }
+    }
+
+    suspend fun verifyOtp(email: String, otpCode: String): Result<String> {
+        return try {
+            val response = api.verifyOtp(VerifyOtpRequest(email, otpCode))
+            if (response.isSuccessful) Result.success(response.body()?.message ?: "OTP hợp lệ")
+            else Result.failure(Exception("OTP không hợp lệ hoặc đã hết hạn"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+        }
+    }
+
+    suspend fun resetPassword(email: String, otpCode: String, newPassword: String): Result<String> {
+        return try {
+            val response = api.resetPassword(ResetPasswordRequest(email, otpCode, newPassword))
+            if (response.isSuccessful) Result.success(response.body()?.message ?: "Đặt lại mật khẩu thành công")
+            else Result.failure(Exception("Đặt lại mật khẩu thất bại"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+        }
+    }
+
+    suspend fun changePassword(currentPassword: String, newPassword: String): Result<String> {
+        return try {
+            val response = api.changePassword(ChangePasswordRequest(currentPassword, newPassword))
+            if (response.isSuccessful) Result.success(response.body()?.message ?: "Đổi mật khẩu thành công")
+            else Result.failure(Exception(apiError(response, "Đổi mật khẩu thất bại")))
         } catch (e: Exception) {
             Result.failure(Exception("Không thể kết nối server: ${e.message}"))
         }
@@ -252,7 +294,29 @@ class AppRepository(private val tokenManager: TokenManager) {
         return try {
             val response = api.getProfile()
             if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-            else Result.failure(Exception("Lỗi tải profile"))
+            else Result.failure(Exception(apiError(response, "Lỗi tải profile")))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateProfile(fullName: String?, bio: String?): Result<ProfileData> {
+        return try {
+            val response = api.updateProfile(ProfileUpdateRequest(fullName, bio))
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception(apiError(response, "Cập nhật profile thất bại")))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun uploadAvatar(imageBytes: ByteArray, filename: String): Result<String> {
+        return try {
+            val body = imageBytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+            val part = okhttp3.MultipartBody.Part.createFormData("file", filename, body)
+            val response = api.uploadAvatar(part)
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!.avatarUrl)
+            else Result.failure(Exception(apiError(response, "Upload avatar thất bại")))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -268,9 +332,9 @@ class AppRepository(private val tokenManager: TokenManager) {
         }
     }
 
-    suspend fun updateUserSettings(nativeLangId: Int?, targetLangId: Int?): Result<UserSettingsResponse> {
+    suspend fun updateUserSettings(displayLanguage: String): Result<UserSettingsResponse> {
         return try {
-            val response = api.updateSettings(UserSettingsUpdate(nativeLangId, targetLangId))
+            val response = api.updateSettings(UserSettingsUpdate(displayLanguage))
             if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
             else Result.failure(Exception("Cập nhật thất bại"))
         } catch (e: Exception) {
@@ -346,6 +410,34 @@ class AppRepository(private val tokenManager: TokenManager) {
             else Result.failure(Exception("Lỗi đồng bộ streak"))
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    private fun apiError(response: Response<*>, fallback: String): String {
+        val raw = response.errorBody()?.string()
+        val detail = parseApiError(raw)
+        return if (detail.isNullOrBlank()) "$fallback (${response.code()})" else detail
+    }
+
+    private fun parseApiError(raw: String?): String? {
+        if (raw.isNullOrBlank()) return null
+        return try {
+            val json = JsonParser().parse(raw)
+            if (!json.isJsonObject) return raw
+            val obj = json.asJsonObject
+            val detail = obj.get("detail")
+            when {
+                detail == null -> obj.get("message")?.asString ?: raw
+                detail.isJsonPrimitive -> detail.asString
+                detail.isJsonArray && detail.asJsonArray.size() > 0 -> {
+                    val first = detail.asJsonArray[0]
+                    if (first.isJsonObject) first.asJsonObject.get("msg")?.asString ?: first.toString()
+                    else first.toString()
+                }
+                else -> detail.toString()
+            }
+        } catch (_: Exception) {
+            raw
         }
     }
 }

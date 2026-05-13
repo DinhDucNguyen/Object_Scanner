@@ -1,9 +1,10 @@
+# pyrefly: ignore [missing-import]
 from pydantic import BaseModel
+# pyrefly: ignore [missing-import]
 from typing import Optional, List
 from datetime import datetime
 
 
-# ====== Vocabulary payload (parsed từ DuDoanAI.mo_ta) ======
 
 class VocabTranslationSchema(BaseModel):
     """
@@ -13,9 +14,9 @@ class VocabTranslationSchema(BaseModel):
     lang_code: str
     word_name: str
     phonetic: Optional[str] = None
-    part_of_speech: Optional[str] = None    # n | v | adj | adv | ...
-    definition: Optional[str] = None        # Nghĩa tiếng Việt
-    example_sentences: List[str] = []       # 3 câu ví dụ tiếng Anh
+    part_of_speech: Optional[str] = None   
+    definition: Optional[str] = None       
+    example_sentences: List[str] = []    
 
 
 class VocabPayloadSchema(BaseModel):
@@ -25,14 +26,14 @@ class VocabPayloadSchema(BaseModel):
     translations: List[VocabTranslationSchema] = []
 
 
-# ====== Prediction list / detail ======
+
 
 class PredictionListItem(BaseModel):
     id: int
     scan_id: int
     nhan_du_doan: Optional[str] = None
     do_tin_cay: Optional[float] = None
-    trang_thai: str                         # cho_duyet | da_duyet | tu_choi
+    trang_thai: str                         
     thoi_gian: Optional[datetime] = None
 
     class Config:
@@ -46,10 +47,9 @@ class PredictionDetailResponse(BaseModel):
     do_tin_cay: Optional[float] = None
     trang_thai: str
     thoi_gian: Optional[datetime] = None
-    vocab_payload: Optional[VocabPayloadSchema] = None  # Dữ liệu từ vựng Gemini đã parse
+    vocab_payload: Optional[VocabPayloadSchema] = None 
 
 
-# ====== Admin actions ======
 
 class ApproveRequest(BaseModel):
     """

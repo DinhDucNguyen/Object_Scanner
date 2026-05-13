@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔔 Notification Settings"
+            android:text="@string/notification_settings_title"
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_marginBottom="24dp" />
@@ -49,14 +49,14 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Daily Reminder"
+                            android:text="@string/notification_daily_reminder"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Get reminded to review every day"
+                            android:text="@string/notification_daily_reminder_desc"
                             android:textSize="12sp"
                             android:textColor="@android:color/darker_gray" />
 
@@ -80,7 +80,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Reminder Time"
+                        android:text="@string/notification_reminder_time"
                         android:textSize="14sp" />
 
                     <TextView
@@ -96,7 +96,7 @@
                         android:id="@+id/selectTimeButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Change"
+                        android:text="@string/notification_change_time"
                         android:textSize="12sp"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
@@ -130,14 +130,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🔥 Streak Alert"
+                        android:text="@string/notification_streak_alert"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Get notified if you're about to lose your streak"
+                        android:text="@string/notification_streak_alert_desc"
                         android:textSize="12sp"
                         android:textColor="@android:color/darker_gray" />
 
@@ -177,14 +177,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🎉 Milestone Celebrations"
+                        android:text="@string/notification_milestones"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Get notified when you reach streak milestones"
+                        android:text="@string/notification_milestones_desc"
                         android:textSize="12sp"
                         android:textColor="@android:color/darker_gray" />
 
@@ -214,7 +214,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="12dp"
-                android:text="Configure your notification preferences above"
+                android:text="@string/notification_status_default"
                 android:textSize="14sp"
                 android:textAlignment="center" />
 
@@ -224,7 +224,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="💡 Tip: Enable notifications to maintain your learning streak and stay motivated!"
+            android:text="@string/notification_tip"
             android:textSize="12sp"
             android:textColor="@android:color/darker_gray"
             android:padding="8dp"

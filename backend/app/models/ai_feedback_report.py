@@ -1,10 +1,12 @@
+# pyrefly: ignore [missing-import]
 from sqlalchemy import (
     Column, Integer, String, Float, ForeignKey,
     TIMESTAMP, Enum, Text
 )
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import relationship
 from app.db.session import Base
-from datetime import datetime
+from app.utils.timezone import now_vietnam
 import enum
 
 
@@ -14,9 +16,9 @@ class NguonAI(str, enum.Enum):
 
 
 class TrangThaiDuyet(str, enum.Enum):
-    cho_duyet = "cho_duyet"  # Chờ admin kiểm duyệt
-    da_duyet  = "da_duyet"   # Đã duyệt → đã insert vào bảng chính
-    tu_choi   = "tu_choi"    # Bị từ chối
+    cho_duyet = "cho_duyet"
+    da_duyet  = "da_duyet"
+    tu_choi   = "tu_choi"
 
 
 class AIPrediction(Base):
@@ -28,18 +30,14 @@ class AIPrediction(Base):
     nhan_du_doan = Column(String(255), nullable=True)
     do_tin_cay  = Column(Float, nullable=True)
 
-    # Payload từ vựng Gemini (JSON string).
-    # Format: {"object_code": "...", "category": "...", "translations": [...]}
-    # Chỉ chuyển sang BanDich/ViDu sau khi admin duyệt.
     mo_ta       = Column(Text, nullable=True)
 
-    # Thay thế ket_qua_dung (Boolean) bằng trang_thai (Enum) rõ nghĩa hơn.
     trang_thai  = Column(
         Enum(TrangThaiDuyet),
         default=TrangThaiDuyet.cho_duyet,
         nullable=False,
         index=True,
     )
-    thoi_gian   = Column(TIMESTAMP, default=datetime.utcnow)
+    thoi_gian   = Column(TIMESTAMP, default=now_vietnam)
 
     scan = relationship("ScanHistory", back_populates="predictions")

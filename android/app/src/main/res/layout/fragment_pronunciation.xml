@@ -35,7 +35,7 @@
         android:id="@+id/tvInstruction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="🗣️ Practice pronunciation"
+        android:text="@string/pronunciation_instruction"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
@@ -108,7 +108,7 @@
         android:id="@+id/btnPlayModel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="🔊 LISTEN TO MODEL"
+        android:text="@string/pronunciation_listen_model"
         android:textSize="14sp"
         android:textStyle="bold"
         android:padding="16dp"
@@ -146,13 +146,13 @@
                 android:src="@android:drawable/ic_btn_speak_now"
                 android:background="@drawable/option_background"
                 android:scaleType="centerInside"
-                android:contentDescription="Record pronunciation" />
+                android:contentDescription="@string/pronunciation_record_cd" />
 
             <TextView
                 android:id="@+id/tvRecordingStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tap microphone to practice"
+                android:text="@string/pronunciation_record_status"
                 android:textSize="14sp"
                 android:textColor="@android:color/darker_gray"
                 android:gravity="center"
@@ -200,7 +200,7 @@
         android:id="@+id/btnNextWord"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="NEXT WORD"
+        android:text="@string/pronunciation_next_word"
         android:textSize="16sp"
         android:textStyle="bold"
         android:padding="16dp"

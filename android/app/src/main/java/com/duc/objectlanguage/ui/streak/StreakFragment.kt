@@ -31,8 +31,8 @@ class StreakFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         observeViewModel()
         setupButtons()
-        // Đồng bộ streak local → server mỗi khi mở màn hình
-        viewModel.syncToServer()
+        // Đồng bộ streak từ server về để DB là nguồn dữ liệu chuẩn
+        viewModel.loadFromServer()
     }
 
     private fun observeViewModel() {

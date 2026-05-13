@@ -33,7 +33,14 @@ class StreakDataStore(private val context: Context) {
      * Get current streak count
      */
     val currentStreak: Flow<Int> = context.dataStore.data.map { prefs ->
-        prefs[CURRENT_STREAK] ?: 0
+        val lastReviewDate = prefs[LAST_REVIEW_DATE] ?: return@map 0
+        val yesterday = getTodayStartTimestamp() - 24 * 60 * 60 * 1000
+
+        if (lastReviewDate >= yesterday) {
+            prefs[CURRENT_STREAK] ?: 0
+        } else {
+            0
+        }
     }
     
     /**
@@ -146,6 +153,40 @@ class StreakDataStore(private val context: Context) {
         }
     }
 
+    suspend fun replaceWithServer(
+        newStreak: Int,
+        newLongest: Int,
+        newTotal: Int,
+        lastReviewDate: String?
+    ) {
+        context.dataStore.edit { prefs ->
+            val safeStreak = newStreak.coerceAtLeast(0)
+
+            prefs[CURRENT_STREAK] = safeStreak
+            prefs[LONGEST_STREAK] = newLongest.coerceAtLeast(safeStreak)
+            prefs[TOTAL_REVIEWS] = newTotal.coerceAtLeast(0)
+
+            val lastTimestamp = parseDateStartTimestamp(lastReviewDate)
+            if (lastTimestamp == null) {
+                prefs.remove(LAST_REVIEW_DATE)
+                prefs[REVIEWS_TODAY] = 0
+            } else {
+                prefs[LAST_REVIEW_DATE] = lastTimestamp
+                val today = getTodayStartTimestamp()
+                prefs[REVIEWS_TODAY] = if (lastTimestamp >= today && safeStreak > 0) {
+                    (prefs[REVIEWS_TODAY] ?: 0).coerceAtLeast(1)
+                } else {
+                    0
+                }
+            }
+        }
+    }
+
+    suspend fun getLastReviewDateString(): String? {
+        val timestamp = context.dataStore.data.first()[LAST_REVIEW_DATE] ?: return null
+        return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(timestamp))
+    }
+
     /**
      * Reset all streak data (for testing)
      */
@@ -165,5 +206,16 @@ class StreakDataStore(private val context: Context) {
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
         return calendar.timeInMillis
+    }
+
+    private fun parseDateStartTimestamp(value: String?): Long? {
+        if (value.isNullOrBlank()) return null
+        return try {
+            SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+                isLenient = false
+            }.parse(value)?.time
+        } catch (_: Exception) {
+            null
+        }
     }
 }
