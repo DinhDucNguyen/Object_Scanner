@@ -24,6 +24,7 @@ from app.services.admin_service import AdminService
 from app.services.object_media_service import set_primary_object_image
 from app.utils.timezone import now_vietnam
 from app.utils.cloudinary_helper import upload_image
+from app.dependencies.get_current_user import require_admin_user_id
 from app.schemas.admin import (
     PredictionListItem,
     PredictionDetailResponse,
@@ -32,7 +33,11 @@ from app.schemas.admin import (
     RejectResponse,
 )
 
-router = APIRouter(prefix="/admin", tags=["Admin — Kiểm duyệt từ vựng"])
+router = APIRouter(
+    prefix="/admin",
+    tags=["Admin — Kiểm duyệt từ vựng"],
+    dependencies=[Depends(require_admin_user_id)],
+)
 admin_service = AdminService()
 OBJECT_UPLOAD_DIR = "uploads/objects"
 
@@ -123,7 +128,7 @@ async def add_object_media(
     """
     Add a canonical vocabulary image into AnhDoiTuong.
 
-    Images uploaded here are curated object images for flashcards/explore/review,
+    Images uploaded here are curated object images for explore/review,
     not user scan-history photos from LichSuQuet.url_anh.
     """
     obj = _get_object_or_404(db, object_code)

@@ -7,6 +7,8 @@ from app.repositories.learning_repo import LearningProgressRepository
 from app.repositories.translation_repo import TranslationRepository
 from app.schemas.common import ReviewCardResponse, ReviewRequest, ReviewResult, ViDuResponse
 from app.services.object_media_service import pick_primary_object_image
+from app.services.streak_service import StreakService
+from app.services.tts_service import TTSService
 from app.utils.sm2 import calculate_sm2
 from app.utils.timezone import now_vietnam
 
@@ -16,6 +18,8 @@ class LearningService:
         self.repo = LearningProgressRepository()
         self.trans_repo = TranslationRepository()
         self.lang_repo = LanguageRepository()
+        self.tts = TTSService()
+        self.streak_service = StreakService()
 
     def add_to_learning(self, db: Session, translation_id: int, user_id: int):
         progress, created = self.ensure_in_learning(db, translation_id, user_id)
@@ -42,11 +46,19 @@ class LearningService:
     def get_due_reviews(self, db: Session, user_id: int):
         due = self.repo.get_due_reviews(db, user_id)
         results = []
+        audio_url_updated = False
         for p in due:
             t = p.translation
             if not t:
                 continue
             lang = self.lang_repo.get_by_id(db, t.ngon_ngu_id)
+            lang_code = lang.ma_ngon_ngu if lang else "en"
+            audio_url = t.am_thanh_url
+            if not audio_url:
+                audio_url = self.tts.get_audio_url(t.tu_vung, lang_code)
+                if audio_url:
+                    t.am_thanh_url = audio_url
+                    audio_url_updated = True
             examples = [
                 ViDuResponse(
                     id=e.id,
@@ -54,7 +66,7 @@ class LearningService:
                     dich_nghia=e.dich_nghia,
                     nguon_du_lieu=e.nguon_du_lieu,
                 )
-                for e in (t.examples or [])
+                for e in sorted((t.examples or []), key=lambda item: item.id or 0)[:3]
             ]
             results.append(
                 ReviewCardResponse(
@@ -71,8 +83,11 @@ class LearningService:
                     interval=p.khoang_lap,
                     repetitions=p.so_lan_lap,
                     image_url=pick_primary_object_image(t.object),
+                    audio_url=audio_url,
                 )
             )
+        if audio_url_updated:
+            db.commit()
         return results
 
     def get_analytics(self, db: Session, user_id: int) -> dict:
@@ -83,9 +98,9 @@ class LearningService:
             "mastery": mastery,
         }
 
-    def submit_review(self, db: Session, progress_id: int, request: ReviewRequest):
+    def submit_review(self, db: Session, progress_id: int, request: ReviewRequest, user_id: int):
         progress = self.repo.get_by_id(db, progress_id)
-        if not progress:
+        if not progress or progress.user_id != user_id:
             raise HTTPException(404, "Progress not found")
 
         reviewed_at = now_vietnam()
@@ -104,6 +119,7 @@ class LearningService:
 
         self.repo.update(db, progress)
         db.commit()
+        self.streak_service.record_review(db, user_id)
         return ReviewResult(
             success=True,
             new_interval=result["interval"],

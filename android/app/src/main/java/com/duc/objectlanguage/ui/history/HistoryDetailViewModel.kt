@@ -6,13 +6,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.HistoryDetail
 import com.duc.objectlanguage.data.model.TranslationResponse
+import com.duc.objectlanguage.utils.AudioPlayerManager
 import kotlinx.coroutines.launch
 
 class HistoryDetailViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repo = (application as ObjectLanguageApp).repository
+    private val audioPlayer = AudioPlayerManager(application.applicationContext)
 
     private val _translations = MutableLiveData<List<TranslationResponse>>()
     val translations: LiveData<List<TranslationResponse>> = _translations
@@ -22,9 +25,6 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
-
-    private val _message = MutableLiveData<String?>()
-    val message: LiveData<String?> = _message
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
@@ -62,25 +62,37 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    fun addToLearning(translationId: Int?) {
-        if (translationId == null || translationId <= 0) {
-            _error.value = "Tu nay chua the luu"
+    fun playAudio(audioUrl: String?, word: String?, lang: String = "en") {
+        if (audioUrl.isNullOrBlank() && word.isNullOrBlank()) {
+            _error.value = getApplication<Application>().getString(R.string.history_audio_load_error)
             return
         }
 
         viewModelScope.launch {
-            repo.addToLearning(translationId).fold(
-                onSuccess = { _message.value = it },
-                onFailure = { _error.value = it.message ?: "Khong luu duoc tu" }
-            )
-        }
-    }
+            val bytes = audioUrl
+                ?.takeIf { it.isNotBlank() }
+                ?.let { repo.getAudioByUrl(it) }
+                ?: word
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { repo.getTtsAudio(it, lang) }
 
-    fun clearMessage() {
-        _message.value = null
+            if (bytes == null) {
+                _error.value = getApplication<Application>().getString(R.string.history_audio_load_error)
+                return@launch
+            }
+
+            audioPlayer.playMp3(bytes) {
+                _error.value = getApplication<Application>().getString(R.string.history_audio_play_error)
+            }
+        }
     }
 
     fun clearError() {
         _error.value = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        audioPlayer.release()
     }
 }

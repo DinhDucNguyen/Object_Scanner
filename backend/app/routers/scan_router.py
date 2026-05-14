@@ -1,5 +1,8 @@
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query
+# pyrefly: ignore [missing-import]
 from fastapi.responses import StreamingResponse
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import io
@@ -71,11 +74,11 @@ def get_translations(object_code: str, db: Session = Depends(get_db)):
 def get_example_sentences(
     object_code: str,
     lang: str = Query(default="en", description="Language code"),
-    count: int = Query(default=3, ge=1, le=5),
+    count: int = Query(default=3, ge=1, le=3),
 ):
     """Sinh câu ví dụ cho từ vựng bằng Gemini."""
     sentences = gemini_service.get_example_sentences(object_code, lang, count)
-    return {"word": object_code, "lang": lang, "sentences": sentences}
+    return {"word": object_code, "lang": lang, "sentences": sentences[:3]}
 
 
 @router.get("/tts/{word}")

@@ -26,36 +26,39 @@ class AppRepository(private val tokenManager: TokenManager) {
                 tokenManager.userId = body.user.id
                 Result.success(body)
             } else {
-                Result.failure(Exception("Sai tên đăng nhập hoặc mật khẩu"))
+                Result.failure(Exception(apiError(response, "Sai tên đăng nhập hoặc mật khẩu")))
             }
         } catch (e: Exception) {
             Result.failure(Exception("Không thể kết nối server: ${e.message}"))
         }
     }
 
-    suspend fun register(username: String, email: String, password: String): Result<TokenResponse> {
+    suspend fun register(username: String, email: String, password: String, fullName: String? = null): Result<String> {
         return try {
-            val response = api.register(RegisterRequest(username, email, password))
-            if (response.isSuccessful && response.body() != null) {
-                val body = response.body()!!
-                tokenManager.accessToken = body.accessToken
-                tokenManager.refreshToken = body.refreshToken
-                tokenManager.username = body.user.username
-                tokenManager.userId = body.user.id
-                Result.success(body)
+            val response = api.register(RegisterRequest(username, email, password, fullName))
+            if (response.isSuccessful) {
+                Result.success(response.body()?.message ?: "Đăng ký thành công")
             } else {
-                Result.failure(Exception("Đăng ký thất bại. Tài khoản có thể đã tồn tại."))
+                Result.failure(Exception(apiError(response, "Đăng ký thất bại")))
             }
         } catch (e: Exception) {
             Result.failure(Exception("Không thể kết nối server: ${e.message}"))
         }
     }
 
-    suspend fun forgotPassword(email: String): Result<String> {
+    suspend fun forgotPassword(email: String): Result<ForgotPasswordResponse> {
         return try {
             val response = api.forgotPassword(ForgotPasswordRequest(email))
-            if (response.isSuccessful) Result.success(response.body()?.message ?: "OTP đã được gửi")
-            else Result.failure(Exception("Gửi OTP thất bại"))
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null) Result.success(body)
+                else Result.failure(Exception("Phản hồi không hợp lệ"))
+            } else {
+                val msg = response.errorBody()?.string()?.let {
+                    try { org.json.JSONObject(it).optString("detail", "Gửi OTP thất bại") } catch (_: Exception) { "Gửi OTP thất bại" }
+                } ?: "Gửi OTP thất bại"
+                Result.failure(Exception(msg))
+            }
         } catch (e: Exception) {
             Result.failure(Exception("Không thể kết nối server: ${e.message}"))
         }
@@ -137,10 +140,19 @@ class AppRepository(private val tokenManager: TokenManager) {
         }
     }
 
+    suspend fun getAudioByUrl(audioUrl: String): ByteArray? {
+        return try {
+            val response = api.getAudioByUrl(normalizeAudioUrl(audioUrl))
+            if (response.isSuccessful) response.body()?.bytes() else null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun getExamples(word: String, lang: String = "en"): List<String> {
         return try {
             val response = api.getExamples(word, lang)
-            if (response.isSuccessful) response.body()?.sentences ?: emptyList()
+            if (response.isSuccessful) response.body()?.sentences?.take(3) ?: emptyList()
             else emptyList()
         } catch (e: Exception) {
             emptyList()
@@ -438,6 +450,15 @@ class AppRepository(private val tokenManager: TokenManager) {
             }
         } catch (_: Exception) {
             raw
+        }
+    }
+
+    private fun normalizeAudioUrl(audioUrl: String): String {
+        val trimmed = audioUrl.trim()
+        return if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            trimmed
+        } else {
+            trimmed.trimStart('/')
         }
     }
 }

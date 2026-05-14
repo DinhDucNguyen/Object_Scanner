@@ -1,9 +1,12 @@
 package com.duc.objectlanguage.ui.streak
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.duc.objectlanguage.R
@@ -49,6 +52,9 @@ class StreakFragment : Fragment() {
 
     private fun updateUI(data: StreakData) {
         binding.apply {
+            val accent = getStreakAccent(data.currentStreak)
+            val accentColor = ContextCompat.getColor(requireContext(), accent.colorRes)
+
             // Số ngày chuỗi
             currentStreakText.text = data.currentStreak.toString()
             currentStreakLabel.text = getString(
@@ -71,12 +77,10 @@ class StreakFragment : Fragment() {
             daysToMilestoneText.text = getString(R.string.streak_days_to_go, data.daysToMilestone)
 
             // Flame icon theo cường độ chuỗi
-            flameIcon.text = when {
-                data.currentStreak == 0     -> "💤"
-                data.currentStreak in 1..2  -> "🔥"
-                data.currentStreak in 3..6  -> "🔥🔥"
-                data.currentStreak in 7..13 -> "🔥🔥🔥"
-                else                        -> "🔥🔥🔥🔥"
+            flameIcon.imageTintList = if (data.currentStreak > 0) {
+                null
+            } else {
+                ColorStateList.valueOf(accentColor)
             }
 
             // Trạng thái hôm nay
@@ -87,8 +91,21 @@ class StreakFragment : Fragment() {
                 todayStatusIcon.text = "⏰"
                 todayStatusText.text = getString(R.string.streak_today_pending)
             }
+            todayStatusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
         }
     }
+
+    private fun getStreakAccent(currentStreak: Int): StreakAccent = when {
+        currentStreak == 0 -> StreakAccent(R.color.streak_idle)
+        currentStreak in 1..2 -> StreakAccent(R.color.streak_heat_1)
+        currentStreak in 3..6 -> StreakAccent(R.color.streak_heat_2)
+        currentStreak in 7..13 -> StreakAccent(R.color.streak_heat_3)
+        else -> StreakAccent(R.color.streak_heat_4)
+    }
+
+    private data class StreakAccent(
+        @ColorRes val colorRes: Int,
+    )
 
     private fun setupButtons() {
         binding.milestoneInfoButton.setOnClickListener { showMilestoneInfo() }

@@ -18,6 +18,7 @@ class StreakResponse(BaseModel):
     streak_hien_tai: int
     streak_dai_nhat: int
     tong_luot_on:    int
+    luot_on_hom_nay: int
     ngay_on_cuoi:    Optional[str] = None
 
 
@@ -26,6 +27,7 @@ class StreakSyncRequest(BaseModel):
     streak_hien_tai: int = 0
     streak_dai_nhat: int = 0
     tong_luot_on:    int = 0
+    luot_on_hom_nay: int = 0
     ngay_on_cuoi:    Optional[date] = None
 
 
@@ -67,5 +69,6 @@ def sync_streak(
         body.streak_hien_tai,
         body.streak_dai_nhat,
         body.tong_luot_on,
+        body.luot_on_hom_nay,
         body.ngay_on_cuoi,
     )

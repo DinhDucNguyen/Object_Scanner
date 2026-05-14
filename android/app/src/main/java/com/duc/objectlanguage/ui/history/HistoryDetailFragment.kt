@@ -17,7 +17,9 @@ class HistoryDetailFragment : Fragment() {
     private var _binding: FragmentHistoryDetailBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HistoryDetailViewModel by viewModels()
-    private var selectedTranslationId: Int? = null
+    private var currentAudioUrl: String? = null
+    private var currentWord: String? = null
+    private var currentLanguage: String = "en"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHistoryDetailBinding.inflate(inflater, container, false)
@@ -31,7 +33,6 @@ class HistoryDetailFragment : Fragment() {
         val objectCode = arguments?.getString("objectCode") ?: ""
         val imageUrl = arguments?.getString("imageUrl")
         val scanDate = arguments?.getString("scanDate")
-        selectedTranslationId = arguments?.getInt("translationId")?.takeIf { it > 0 }
 
         bindHeader(
             title = objectCode.replace("_", " ").replaceFirstChar { it.uppercase() },
@@ -40,8 +41,8 @@ class HistoryDetailFragment : Fragment() {
             confidence = null,
         )
         setupObservers()
-        binding.btnSaveWord.setOnClickListener {
-            viewModel.addToLearning(selectedTranslationId)
+        binding.btnPlayAudioHistory.setOnClickListener {
+            viewModel.playAudio(currentAudioUrl, currentWord, currentLanguage)
         }
         viewModel.loadDetail(scanId, objectCode)
     }
@@ -63,18 +64,10 @@ class HistoryDetailFragment : Fragment() {
                 scanDate = detail.scanDate,
                 confidence = detail.confidenceScore,
             )
-            selectedTranslationId = detail.translationId ?: selectedTranslationId
         }
 
         viewModel.translations.observe(viewLifecycleOwner) { translations ->
             bindTranslation(translations)
-        }
-
-        viewModel.message.observe(viewLifecycleOwner) { message ->
-            if (message != null) {
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                viewModel.clearMessage()
-            }
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
@@ -110,13 +103,18 @@ class HistoryDetailFragment : Fragment() {
         if (translation == null) {
             binding.tvEmpty.visibility = View.VISIBLE
             binding.cardTranslation.visibility = View.GONE
-            selectedTranslationId = selectedTranslationId?.takeIf { it > 0 }
+            currentAudioUrl = null
+            currentWord = null
+            currentLanguage = "en"
+            binding.btnPlayAudioHistory.visibility = View.GONE
             return
         }
 
-        selectedTranslationId = translation.id
         binding.tvEmpty.visibility = View.GONE
         binding.cardTranslation.visibility = View.VISIBLE
+        currentAudioUrl = translation.audioUrl
+        currentWord = translation.wordName
+        currentLanguage = translation.languageCode ?: "en"
 
         binding.tvWord.text = translation.wordName
         binding.tvPhonetic.apply {
@@ -132,7 +130,9 @@ class HistoryDetailFragment : Fragment() {
             text = example ?: ""
             visibility = if (example.isNullOrEmpty()) View.GONE else View.VISIBLE
         }
-        binding.btnSaveWord.visibility = if (selectedTranslationId != null) View.VISIBLE else View.GONE
+        binding.btnPlayAudioHistory.visibility = if (
+            translation.audioUrl.isNullOrBlank() && translation.wordName.isBlank()
+        ) View.GONE else View.VISIBLE
     }
 
     private fun formatDate(raw: String?): String {

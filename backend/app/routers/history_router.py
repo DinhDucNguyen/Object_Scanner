@@ -53,8 +53,15 @@ def delete_history(
 
 
 @router.get("/predictions/{scan_id}")
-def get_predictions(scan_id: int, db: Session = Depends(get_db)):
-    return history_service.get_predictions(db, scan_id)
+def get_predictions(
+    scan_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    predictions = history_service.get_predictions(db, scan_id, user_id)
+    if predictions is None:
+        raise HTTPException(404, "History item not found")
+    return predictions
 
 
 @router.post("/lich-su-quet", response_model=LichSuQuetResponse)

@@ -35,7 +35,11 @@ class CollectionService:
             item_count=0, created_at=result.ngay_tao
         )
 
-    def add_to_collection(self, db: Session, collection_id: int, data: CollectionItemAdd):
+    def add_to_collection(self, db: Session, collection_id: int, data: CollectionItemAdd, user_id: int):
+        collection = self.repo.get_by_id(db, collection_id)
+        if not collection or collection.user_id != user_id:
+            raise HTTPException(status_code=404, detail="Collection not found")
+
         existing = self.repo.get_item(db, collection_id, data.translation_id)
         if existing:
             return {"message": "Đã có trong bộ sưu tập"}

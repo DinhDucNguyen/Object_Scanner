@@ -74,7 +74,10 @@ class HistoryFeedbackService:
         db.commit()
         return result
 
-    def get_predictions(self, db: Session, scan_id: int):
+    def get_predictions(self, db: Session, scan_id: int, user_id: int | None = None):
+        if user_id is not None and not self.hist_repo.get_by_id_for_user(db, scan_id, user_id):
+            return None
+
         predictions = self.hist_repo.get_predictions(db, scan_id)
         return [
             {

@@ -1,5 +1,8 @@
 import os
-from fastapi import FastAPI
+import logging
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
@@ -7,16 +10,24 @@ from app.routers import auth_router, scan_router, review_router, collection_rout
 from app.routers import admin_router
 from app.routers import streak_router
 
+logger = logging.getLogger("uvicorn.error")
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     description="API Backend cho ứng dụng nhận diện vật thể đa ngôn ngữ"
 )
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    body = await request.body()
+    logger.error(f"[422] {request.method} {request.url} | body={body!r} | errors={exc.errors()}")
+    return JSONResponse(status_code=422, content={"detail": exc.errors()})
+
 # Cấu hình CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ALLOW_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

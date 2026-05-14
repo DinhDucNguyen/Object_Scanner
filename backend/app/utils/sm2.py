@@ -3,7 +3,7 @@ SM-2 Algorithm (Spaced Repetition)
 Tính toán interval, EF, repetitions cho ôn tập từ vựng
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from app.utils.timezone import now_vietnam
 
 
@@ -40,7 +40,8 @@ def calculate_sm2(
             new_interval = int(interval * new_ef)
 
     base_time = reviewed_at or now_vietnam()
-    next_review = base_time + timedelta(days=new_interval)
+    next_review_day = (base_time + timedelta(days=new_interval)).date()
+    next_review = datetime.combine(next_review_day, time.min)
 
     return {
         "repetitions": new_reps,

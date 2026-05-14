@@ -63,6 +63,19 @@
     <color name="cyan">#0891B2</color>
     <color name="cyan_light">#E0F7FA</color>
 
+    <!-- Streak Heat Palette -->
+    <color name="streak_idle">#94A3B8</color>
+    <color name="streak_idle_track">#E2E8F0</color>
+    <color name="streak_heat_1">#F97316</color>
+    <color name="streak_heat_1_track">#FFEDD5</color>
+    <color name="streak_heat_2">#FE2C55</color>
+    <color name="streak_heat_2_track">#FFE4EC</color>
+    <color name="streak_heat_3">#D946EF</color>
+    <color name="streak_heat_3_track">#FAE8FF</color>
+    <color name="streak_heat_4">#8B5CF6</color>
+    <color name="streak_heat_4_track">#EDE9FE</color>
+    <color name="streak_header_bg">#3B82F6</color>
+
     <!-- Legacy Material aliases -->
     <color name="purple_500">#2563EB</color>
     <color name="purple_700">#1E40AF</color>

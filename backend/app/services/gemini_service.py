@@ -309,7 +309,10 @@ Return ONLY valid JSON, no markdown or extra text."""
             if text.startswith("```"):
                 text = text.split("\n", 1)[1]
                 text = text.rsplit("```", 1)[0]
-            return json.loads(text)
+            sentences = json.loads(text)
+            if not isinstance(sentences, list):
+                return []
+            return [str(sentence).strip() for sentence in sentences if str(sentence).strip()][:count]
         except Exception as e:
             print(f"Gemini example sentences error: {e}")
             return []

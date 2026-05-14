@@ -1,177 +1,139 @@
 package com.duc.objectlanguage.workers
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.os.Build
-import androidx.core.app.NotificationCompat
-import androidx.work.*
-import com.duc.objectlanguage.ui.MainActivity
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.data.local.NotificationPreferences
 import com.duc.objectlanguage.data.local.StreakDataStore
+import com.duc.objectlanguage.data.local.TokenManager
+import com.duc.objectlanguage.data.repository.AppRepository
+import com.duc.objectlanguage.utils.AppNotificationHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
-/**
- * WorkManager worker for sending daily review reminders
- */
 class DailyReminderWorker(
     context: Context,
-    params: WorkerParameters
+    params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
-    
+
     companion object {
-        private const val NOTIFICATION_ID = 1001
-        private const val CHANNEL_ID = "daily_review_reminder"
-        private const val CHANNEL_NAME = "Daily Review Reminders"
         private const val WORK_NAME = "daily_reminder_work"
-        
-        /**
-         * Schedule daily reminder at specific time
-         */
+
         fun scheduleDailyReminder(context: Context, hourOfDay: Int = 19, minute: Int = 0) {
+            enqueueReminder(context, hourOfDay, minute, ExistingWorkPolicy.REPLACE)
+        }
+
+        private fun scheduleNextDailyReminder(context: Context, hourOfDay: Int, minute: Int) {
+            enqueueReminder(context, hourOfDay, minute, ExistingWorkPolicy.APPEND_OR_REPLACE)
+        }
+
+        private fun enqueueReminder(
+            context: Context,
+            hourOfDay: Int,
+            minute: Int,
+            policy: ExistingWorkPolicy,
+        ) {
             val currentTime = System.currentTimeMillis()
-            val calendar = java.util.Calendar.getInstance().apply {
-                set(java.util.Calendar.HOUR_OF_DAY, hourOfDay)
-                set(java.util.Calendar.MINUTE, minute)
-                set(java.util.Calendar.SECOND, 0)
-                
-                // If time has passed today, schedule for tomorrow
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, hourOfDay.coerceIn(0, 23))
+                set(Calendar.MINUTE, minute.coerceIn(0, 59))
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+
                 if (timeInMillis <= currentTime) {
-                    add(java.util.Calendar.DAY_OF_YEAR, 1)
+                    add(Calendar.DAY_OF_YEAR, 1)
                 }
             }
-            
-            val delay = calendar.timeInMillis - currentTime
-            
-            val workRequest = PeriodicWorkRequestBuilder<DailyReminderWorker>(
-                repeatInterval = 1,
-                repeatIntervalTimeUnit = TimeUnit.DAYS
-            )
-                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiresBatteryNotLow(true)
-                        .build()
-                )
+
+            val workRequest = OneTimeWorkRequestBuilder<DailyReminderWorker>()
+                .setInitialDelay(calendar.timeInMillis - currentTime, TimeUnit.MILLISECONDS)
                 .build()
-            
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+
+            WorkManager.getInstance(context.applicationContext).enqueueUniqueWork(
                 WORK_NAME,
-                ExistingPeriodicWorkPolicy.REPLACE,
-                workRequest
+                policy,
+                workRequest,
             )
         }
-        
-        /**
-         * Cancel daily reminder
-         */
+
         fun cancelDailyReminder(context: Context) {
-            WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
+            WorkManager.getInstance(context.applicationContext).cancelUniqueWork(WORK_NAME)
+        }
+
+        fun syncWithPreferences(context: Context) {
+            val appContext = context.applicationContext
+            CoroutineScope(Dispatchers.IO).launch {
+                val settings = NotificationPreferences(appContext).currentSettings()
+                if (settings.dailyReminderEnabled) {
+                    scheduleDailyReminder(appContext, settings.reminderHour, settings.reminderMinute)
+                } else {
+                    cancelDailyReminder(appContext)
+                }
+            }
         }
     }
-    
+
     override suspend fun doWork(): Result {
-        val streakDataStore = StreakDataStore(applicationContext)
-        
-        // Check if user has already reviewed today
-        val hasReviewedToday = streakDataStore.hasReviewedToday()
-        
-        if (!hasReviewedToday) {
-            // Get current streak
-            val currentStreak = streakDataStore.currentStreak.first()
-            
-            // Send notification
-            sendNotification(currentStreak)
-        }
-        
+        val settings = NotificationPreferences(applicationContext).currentSettings()
+        if (!settings.dailyReminderEnabled) return Result.success()
+        scheduleNextDailyReminder(applicationContext, settings.reminderHour, settings.reminderMinute)
+
+        if (!AppNotificationHelper.canPostNotifications(applicationContext)) return Result.success()
+
+        val tokenManager = TokenManager(applicationContext)
+        if (!tokenManager.isLoggedIn) return Result.success()
+
+        val streakStore = StreakDataStore(applicationContext)
+        if (streakStore.hasReviewedToday()) return Result.success()
+
+        val stats = AppRepository(tokenManager).getStats().getOrNull()
+        if (stats != null && stats.dueToday <= 0) return Result.success()
+
+        val currentStreak = streakStore.currentStreak.first()
+        val (title, message) = getNotificationContent(
+            streak = currentStreak,
+            dueToday = stats?.dueToday,
+            includeStreak = settings.streakAlertEnabled,
+        )
+        AppNotificationHelper.showDailyReminder(applicationContext, title, message)
+
         return Result.success()
     }
-    
-    /**
-     * Send notification reminder
-     */
-    private fun sendNotification(currentStreak: Int) {
-        val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) 
-            as NotificationManager
-        
-        // Create notification channel for Android 8.0+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = "Reminders to maintain your daily learning streak"
-                enableVibration(true)
-            }
-            notificationManager.createNotificationChannel(channel)
+
+    private fun getNotificationContent(
+        streak: Int,
+        dueToday: Int?,
+        includeStreak: Boolean,
+    ): Pair<String, String> {
+        val title = if (dueToday != null && dueToday > 0) {
+            applicationContext.resources.getQuantityString(
+                R.plurals.notification_due_title,
+                dueToday,
+                dueToday,
+            )
+        } else {
+            applicationContext.getString(R.string.notification_generic_title)
         }
-        
-        // Intent to open app when notification clicked
-        val intent = Intent(applicationContext, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra("open_review", true)
+
+        val message = when {
+            dueToday != null && dueToday > 0 && includeStreak && streak > 0 ->
+                applicationContext.getString(R.string.notification_due_streak_message, dueToday, streak)
+            dueToday != null && dueToday > 0 ->
+                applicationContext.getString(R.string.notification_due_message, dueToday)
+            includeStreak && streak > 0 ->
+                applicationContext.getString(R.string.notification_generic_streak_message, streak)
+            else ->
+                applicationContext.getString(R.string.notification_generic_message)
         }
-        
-        val pendingIntent = PendingIntent.getActivity(
-            applicationContext,
-            0,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        
-        // Build notification with dynamic content
-        val (title, message) = getNotificationContent(currentStreak)
-        
-        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
-            .build()
-        
-        notificationManager.notify(NOTIFICATION_ID, notification)
-    }
-    
-    /**
-     * Generate notification content based on streak
-     */
-    private fun getNotificationContent(streak: Int): Pair<String, String> {
-        return when {
-            streak == 0 -> Pair(
-                "Time to start learning! 🌟",
-                "Begin your daily review streak today. Your vocabulary is waiting!"
-            )
-            streak == 1 -> Pair(
-                "Day 2 awaits! 🔥",
-                "Don't break your 1-day streak. Quick review to keep the momentum!"
-            )
-            streak in 2..6 -> Pair(
-                "Keep your ${streak}-day streak alive! 💪",
-                "You're building a great habit. Just a few minutes of review today!"
-            )
-            streak in 7..13 -> Pair(
-                "Week ${streak/7} going strong! ⭐",
-                "${streak} days of consistent learning. Don't break the chain!"
-            )
-            streak in 14..29 -> Pair(
-                "Amazing ${streak}-day streak! 🚀",
-                "You're on fire! Quick review to maintain your impressive progress."
-            )
-            streak >= 30 -> Pair(
-                "${streak} days of excellence! 🏆",
-                "Your dedication is legendary. Keep the streak alive!"
-            )
-            else -> Pair(
-                "Daily review reminder 📚",
-                "Time for your daily vocabulary practice!"
-            )
-        }
+
+        return title to message
     }
 }

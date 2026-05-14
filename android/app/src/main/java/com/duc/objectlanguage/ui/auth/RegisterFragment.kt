@@ -1,6 +1,7 @@
 package com.duc.objectlanguage.ui.auth
 
 import android.os.Bundle
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentRegisterBinding
-import com.duc.objectlanguage.utils.LocaleHelper
+import com.duc.objectlanguage.utils.PasswordValidator
 import kotlinx.coroutines.launch
 
 class RegisterFragment : Fragment() {
@@ -30,12 +31,35 @@ class RegisterFragment : Fragment() {
         val repo = (requireActivity().application as ObjectLanguageApp).repository
 
         binding.btnRegister.setOnClickListener {
+            val fullName = binding.etFullName.text.toString().trim()
             val user = binding.etUsername.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
             val pass = binding.etPassword.text.toString().trim()
+            val confirmPass = binding.etConfirmPassword.text.toString().trim()
 
-            if (user.isEmpty() || email.isEmpty() || pass.isEmpty()) {
+            if (fullName.isEmpty() || user.isEmpty() || email.isEmpty() || pass.isEmpty() || confirmPass.isEmpty()) {
                 Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!Regex("^[a-zA-Z0-9_]{3,50}$").matches(user)) {
+                Toast.makeText(requireContext(), "Tên đăng nhập phải từ 3-50 ký tự, chỉ gồm chữ, số và underscore", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(requireContext(), "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val passwordError = PasswordValidator.validate(requireContext(), pass)
+            if (passwordError != null) {
+                Toast.makeText(requireContext(), passwordError, Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
+            if (pass != confirmPass) {
+                Toast.makeText(requireContext(), "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -43,17 +67,14 @@ class RegisterFragment : Fragment() {
             binding.progressBar.visibility = View.VISIBLE
 
             lifecycleScope.launch {
-                val result = repo.register(user, email, pass)
+                val result = repo.register(user, email, pass, fullName)
                 binding.progressBar.visibility = View.GONE
                 binding.btnRegister.isEnabled = true
 
                 result.fold(
-                    onSuccess = {
-                        repo.updateUserSettings(LocaleHelper.getSavedLocale(requireContext()))
-                        val navController = findNavController()
-                        val graph = navController.navInflater.inflate(R.navigation.nav_graph)
-                        graph.setStartDestination(R.id.dashboardFragment)
-                        navController.graph = graph
+                    onSuccess = { message ->
+                        Toast.makeText(requireContext(), "$message! Vui lòng đăng nhập.", Toast.LENGTH_SHORT).show()
+                        findNavController().navigate(R.id.action_register_to_login)
                     },
                     onFailure = {
                         Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
@@ -63,7 +84,7 @@ class RegisterFragment : Fragment() {
         }
 
         binding.tvGoLogin.setOnClickListener {
-            findNavController().popBackStack()
+            findNavController().navigate(R.id.action_register_to_login)
         }
     }
 
@@ -71,4 +92,5 @@ class RegisterFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }

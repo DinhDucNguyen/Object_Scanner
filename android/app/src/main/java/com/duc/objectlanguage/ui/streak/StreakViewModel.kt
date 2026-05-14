@@ -8,9 +8,11 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.data.local.NotificationPreferences
 import com.duc.objectlanguage.data.local.StreakDataStore
 import com.duc.objectlanguage.data.model.StreakResponse
 import com.duc.objectlanguage.data.model.StreakSyncRequest
+import com.duc.objectlanguage.utils.AppNotificationHelper
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -68,9 +70,10 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
             val current = streakStore.currentStreak.first()
             val longest = streakStore.longestStreak.first()
             val total = streakStore.totalReviews.first()
+            val today = streakStore.reviewsToday.first()
             val lastDate = streakStore.getLastReviewDateString()
 
-            repository.syncStreak(StreakSyncRequest(current, longest, total, lastDate))
+            repository.syncStreak(StreakSyncRequest(current, longest, total, today, lastDate))
                 .onSuccess { remote -> applyServerStreak(remote) }
         }
     }
@@ -88,6 +91,7 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
             remote.streakHienTai,
             remote.streakDaiNhat,
             remote.tongLuotOn,
+            remote.luotOnHomNay,
             remote.ngayOnCuoi
         )
     }
@@ -100,7 +104,11 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
         }
         if (achieved != null) {
             streakStore.updateMilestone(achieved)
-            _celebrateMilestone.postValue(achieved)
+            val settings = NotificationPreferences(ctx).currentSettings()
+            if (settings.milestoneCelebrationEnabled) {
+                _celebrateMilestone.postValue(achieved)
+                AppNotificationHelper.showMilestone(ctx, achieved)
+            }
         }
     }
 

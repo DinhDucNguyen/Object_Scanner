@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -7,7 +7,7 @@ from app.schemas.user import (
     UserCreate, UserLogin, ProfileResponse,
     UserSettingsResponse, UserSettingsUpdate,
     TokenResponse, RefreshRequest,
-    ForgotPasswordRequest, VerifyOtpRequest,
+    ForgotPasswordRequest, ForgotPasswordResponse, VerifyOtpRequest,
     ResetPasswordRequest, ChangePasswordRequest,
     ProfileUpdateRequest, AvatarUploadResponse,
     MessageResponse,
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/auth", tags=["Auth"])
 user_service = UserService()
 
 
-@router.post("/register", response_model=TokenResponse)
+@router.post("/register", response_model=MessageResponse)
 def register(data: UserCreate, db: Session = Depends(get_db)):
     return user_service.register(db, data)
 
@@ -77,10 +77,12 @@ def update_settings(
     return user_service.update_settings(db, user_id, data)
 
 
-@router.post("/forgot-password", response_model=MessageResponse)
+@router.post("/forgot-password", response_model=ForgotPasswordResponse)
 def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
-    """Gửi OTP 6 số về email. Luôn trả 200 để tránh email enumeration."""
-    return user_service.forgot_password(db, data)
+    try:
+        return user_service.forgot_password(db, data)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.post("/verify-otp", response_model=MessageResponse)

@@ -17,6 +17,7 @@ class Profile(Base):
     streak_hien_tai = Column(Integer, default=0, nullable=False)   # chuỗi ngày hiện tại
     streak_dai_nhat = Column(Integer, default=0, nullable=False)   # kỷ lục cá nhân
     tong_luot_on    = Column(Integer, default=0, nullable=False)   # tổng số lần ôn tập
+    luot_on_hom_nay = Column(Integer, default=0, nullable=False)   # số lần ôn trong ngày hiện tại
     ngay_on_cuoi    = Column(Date, nullable=True)                  # ngày ôn gần nhất
 
     user = relationship("User", back_populates="profile")

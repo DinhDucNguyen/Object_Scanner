@@ -120,6 +120,27 @@
                     android:visibility="gone" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPlayAudioReview"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:layout_marginBottom="18dp"
+                    android:contentDescription="@string/scan_btn_play"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="52dp"
+                    android:minHeight="52dp"
+                    android:text=""
+                    app:backgroundTint="@color/primary"
+                    app:cornerRadius="26dp"
+                    app:icon="@drawable/ic_volume"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="24dp"
+                    app:iconTint="@color/text_on_primary" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnReveal"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"

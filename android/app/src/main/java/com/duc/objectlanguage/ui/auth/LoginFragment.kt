@@ -49,17 +49,17 @@ class LoginFragment : Fragment() {
 
                 result.fold(
                     onSuccess = {
+                        val activity = requireActivity()
                         val previousLanguage = LocaleHelper.getSavedLocale(requireContext())
-                        val accountLanguage = repo.getUserSettings().getOrNull()?.displayLanguage
-                        if (!accountLanguage.isNullOrBlank()) {
-                            LocaleHelper.setLocale(requireContext(), accountLanguage)
-                        }
-                        val navController = findNavController()
-                        val graph = navController.navInflater.inflate(R.navigation.nav_graph)
-                        graph.setStartDestination(R.id.dashboardFragment)
-                        navController.graph = graph
-                        if (!accountLanguage.isNullOrBlank() && accountLanguage != previousLanguage) {
-                            requireActivity().recreate()
+
+                        resetGraphToDashboard()
+
+                        activity.lifecycleScope.launch {
+                            val accountLanguage = repo.getUserSettings().getOrNull()?.displayLanguage
+                            if (!accountLanguage.isNullOrBlank() && accountLanguage != previousLanguage) {
+                                LocaleHelper.setLocale(activity, accountLanguage)
+                                activity.recreate()
+                            }
                         }
                     },
                     onFailure = {
@@ -81,5 +81,12 @@ class LoginFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun resetGraphToDashboard() {
+        val navController = findNavController()
+        val graph = navController.navInflater.inflate(R.navigation.nav_graph)
+        graph.setStartDestination(R.id.dashboardFragment)
+        navController.graph = graph
     }
 }

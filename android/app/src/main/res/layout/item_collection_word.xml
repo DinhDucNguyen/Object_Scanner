@@ -79,7 +79,7 @@
             android:src="@android:drawable/ic_menu_close_clear_cancel"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Xóa"
-            android:tint="@color/error" />
+            app:tint="@color/error" />
 
     </LinearLayout>
 

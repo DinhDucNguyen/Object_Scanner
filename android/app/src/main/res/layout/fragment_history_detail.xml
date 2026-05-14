@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
@@ -75,7 +76,7 @@
                 app:strokeWidth="2dp"
                 app:strokeColor="@color/divider"
                 app:cardBackgroundColor="@color/surface"
-                xmlns:app="http://schemas.android.com/apk/res-auto">
+                >
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -83,15 +84,45 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Word -->
-                    <TextView
-                        android:id="@+id/tvWord"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/primary"
-                        android:textSize="22sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_marginBottom="4dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <!-- Word -->
+                        <TextView
+                            android:id="@+id/tvWord"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@color/primary"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPlayAudioHistory"
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            android:layout_marginStart="12dp"
+                            android:contentDescription="@string/history_btn_play_audio"
+                            android:insetLeft="0dp"
+                            android:insetTop="0dp"
+                            android:insetRight="0dp"
+                            android:insetBottom="0dp"
+                            android:minWidth="46dp"
+                            android:minHeight="46dp"
+                            android:text=""
+                            android:visibility="gone"
+                            app:backgroundTint="@color/primary"
+                            app:cornerRadius="23dp"
+                            app:icon="@drawable/ic_volume"
+                            app:iconGravity="textStart"
+                            app:iconPadding="0dp"
+                            app:iconSize="22dp"
+                            app:iconTint="@color/text_on_primary" />
+                    </LinearLayout>
 
                     <!-- Phonetic -->
                     <TextView
@@ -122,15 +153,6 @@
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp"
                         android:fontStyle="italic" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSaveWord"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:text="@string/history_btn_save"
-                        android:textStyle="bold"
-                        app:cornerRadius="18dp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

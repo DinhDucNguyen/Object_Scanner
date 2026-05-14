@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
@@ -64,7 +64,7 @@ class ScanResponse(BaseModel):
 # ====== Review ======
 
 class ReviewRequest(BaseModel):
-    quality: int  # 0-5
+    quality: int = Field(ge=0, le=5)
 
 class ReviewCardResponse(BaseModel):
     progress_id: int
@@ -80,6 +80,7 @@ class ReviewCardResponse(BaseModel):
     interval: int
     repetitions: int
     image_url: Optional[str] = None
+    audio_url: Optional[str] = None
 
 class ReviewResult(BaseModel):
     success: bool

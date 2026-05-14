@@ -28,6 +28,7 @@ class StreakService:
         last = profile.ngay_on_cuoi
 
         profile.tong_luot_on = (profile.tong_luot_on or 0) + 1
+        profile.luot_on_hom_nay = (profile.luot_on_hom_nay or 0) + 1 if last == today else 1
 
         if last is None:
             profile.streak_hien_tai = 1
@@ -54,6 +55,7 @@ class StreakService:
         streak_hien_tai: int,
         streak_dai_nhat: int,
         tong_luot_on: int,
+        luot_on_hom_nay: int,
         ngay_on_cuoi,
     ) -> dict:
         profile = self._get_or_create_profile(db, user_id)
@@ -74,6 +76,9 @@ class StreakService:
             and (profile.ngay_on_cuoi is None or ngay_on_cuoi > profile.ngay_on_cuoi)
         ):
             profile.ngay_on_cuoi = ngay_on_cuoi
+
+        if ngay_on_cuoi == today and luot_on_hom_nay > (profile.luot_on_hom_nay or 0):
+            profile.luot_on_hom_nay = luot_on_hom_nay
 
         if profile.streak_hien_tai > (profile.streak_dai_nhat or 0):
             profile.streak_dai_nhat = profile.streak_hien_tai
@@ -104,6 +109,14 @@ class StreakService:
         if (profile.streak_dai_nhat or 0) < normalized:
             profile.streak_dai_nhat = normalized
             changed = True
+        expected_today_reviews = profile.luot_on_hom_nay or 0
+        if profile.ngay_on_cuoi == today and normalized > 0:
+            expected_today_reviews = max(expected_today_reviews, 1)
+        else:
+            expected_today_reviews = 0
+        if expected_today_reviews != (profile.luot_on_hom_nay or 0):
+            profile.luot_on_hom_nay = expected_today_reviews
+            changed = True
         return changed
 
     def _normalized_streak_value(self, streak: int, last_review_date, today) -> int:
@@ -121,5 +134,6 @@ class StreakService:
             "streak_hien_tai": profile.streak_hien_tai or 0,
             "streak_dai_nhat": profile.streak_dai_nhat or 0,
             "tong_luot_on": profile.tong_luot_on or 0,
+            "luot_on_hom_nay": profile.luot_on_hom_nay or 0,
             "ngay_on_cuoi": str(profile.ngay_on_cuoi) if profile.ngay_on_cuoi else None,
         }

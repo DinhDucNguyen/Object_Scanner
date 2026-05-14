@@ -9,18 +9,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentReviewBinding
-import com.duc.objectlanguage.ui.streak.StreakViewModel
 
 class ReviewFragment : Fragment() {
 
     private var _binding: FragmentReviewBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ReviewViewModel by viewModels()
-    private val streakViewModel: StreakViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentReviewBinding.inflate(inflater, container, false)
@@ -73,6 +70,11 @@ class ReviewFragment : Fragment() {
         binding.btnHard.setOnClickListener  { submitAnswer(3) }
         binding.btnGood.setOnClickListener  { submitAnswer(4) }
         binding.btnEasy.setOnClickListener  { submitAnswer(5) }
+        binding.btnPlayAudioReview.setOnClickListener {
+            currentCard()?.let { card ->
+                viewModel.playAudio(card.audioUrl, card.wordName, card.languageCode.ifBlank { "en" })
+            }
+        }
 
     }
 
@@ -82,16 +84,13 @@ class ReviewFragment : Fragment() {
     }
 
     private fun submitAnswer(quality: Int) {
-        streakViewModel.recordReview()
         viewModel.submitAnswer(quality)
     }
 
     private fun updateCard() {
         val cards = viewModel.cards.value ?: return
-        val idx   = viewModel.currentIndex.value ?: 0
-        if (idx >= cards.size) return
-
-        val card = cards[idx]
+        val idx = viewModel.currentIndex.value ?: 0
+        val card = cards.getOrNull(idx) ?: return
 
         // Front: từ tiếng Anh + phiên âm
         binding.tvQuestion.text = card.wordName
@@ -124,6 +123,9 @@ class ReviewFragment : Fragment() {
         binding.buttonRow.visibility = View.GONE
         binding.cardContent.rotationY = 0f
     }
+
+    private fun currentCard() =
+        viewModel.cards.value?.getOrNull(viewModel.currentIndex.value ?: 0)
 
     override fun onDestroyView() {
         super.onDestroyView()

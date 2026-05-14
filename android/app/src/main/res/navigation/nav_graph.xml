@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/scanFragment">
 
     <fragment
         android:id="@+id/loginFragment"
@@ -56,9 +56,9 @@
         android:name="com.duc.objectlanguage.ui.auth.RegisterFragment"
         android:label="@string/title_register">
         <action
-            android:id="@+id/action_register_to_dashboard"
-            app:destination="@id/dashboardFragment"
-            app:popUpTo="@id/loginFragment"
+            android:id="@+id/action_register_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/registerFragment"
             app:popUpToInclusive="true" />
     </fragment>
 
@@ -70,7 +70,14 @@
     <fragment
         android:id="@+id/scanFragment"
         android:name="com.duc.objectlanguage.ui.scan.ScanFragment"
-        android:label="@string/title_scan" />
+        android:label="@string/title_scan">
+        <action
+            android:id="@+id/action_scan_to_login"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_scan_to_register"
+            app:destination="@id/registerFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/exploreFragment"
@@ -133,12 +140,6 @@
             android:defaultValue="@null"
             app:nullable="true" />
     </fragment>
-
-    <!-- Wave 1: Multi-Modal Review Modes -->
-    <fragment
-        android:id="@+id/flashcardFragment"
-        android:name="com.duc.objectlanguage.ui.review.FlashcardFragment"
-        android:label="@string/title_flashcard" />
 
     <fragment
         android:id="@+id/quizFragment"

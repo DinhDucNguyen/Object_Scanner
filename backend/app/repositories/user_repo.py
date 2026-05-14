@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.models.user import User
 from app.models.profile import Profile
 from app.models.user_settings import UserSettings
@@ -9,7 +10,7 @@ from app.models.user_status import TrangThaiNguoiDung
 class UserRepository:
     def get_by_username_or_email(self, db: Session, username: str, email: str):
         return db.query(User).filter(
-            (User.ten_dang_nhap == username) | (User.email == email),
+            (User.ten_dang_nhap == username) | (func.lower(User.email) == email.lower()),
             User.thoi_gian_xoa.is_(None)
         ).first()
 
@@ -21,7 +22,7 @@ class UserRepository:
 
     def get_by_email(self, db: Session, email: str):
         return db.query(User).filter(
-            User.email == email,
+            func.lower(User.email) == email.lower(),
             User.thoi_gian_xoa.is_(None)
         ).first()
 

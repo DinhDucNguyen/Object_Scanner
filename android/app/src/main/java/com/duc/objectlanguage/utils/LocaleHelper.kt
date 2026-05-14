@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import java.util.Locale
 
+
 object LocaleHelper {
 
     private const val PREFS_NAME = "app_prefs"
@@ -14,7 +15,7 @@ object LocaleHelper {
             .getString(KEY_LOCALE, "") ?: ""
         if (saved.isNotEmpty()) return normalizeLanguage(saved)
 
-        return normalizeLanguage(Locale.getDefault().language)
+        return "vi"
     }
 
     fun setLocale(context: Context, lang: String) {

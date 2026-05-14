@@ -37,7 +37,7 @@ def add_to_collection(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id)
 ):
-    return collection_service.add_to_collection(db, collection_id, data)
+    return collection_service.add_to_collection(db, collection_id, data, user_id)
 
 
 @router.get("/{collection_id}", response_model=CollectionDetailResponse)

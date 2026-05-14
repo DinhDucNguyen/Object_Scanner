@@ -14,13 +14,13 @@ interface ApiService {
     suspend fun login(@Body req: LoginRequest): Response<TokenResponse>
 
     @POST("api/auth/register")
-    suspend fun register(@Body req: RegisterRequest): Response<TokenResponse>
+    suspend fun register(@Body req: RegisterRequest): Response<MessageResponse>
 
     @POST("api/auth/refresh")
     suspend fun refreshToken(@Body req: RefreshRequest): Response<TokenResponse>
 
     @POST("api/auth/forgot-password")
-    suspend fun forgotPassword(@Body req: ForgotPasswordRequest): Response<MessageResponse>
+    suspend fun forgotPassword(@Body req: ForgotPasswordRequest): Response<ForgotPasswordResponse>
 
     @POST("api/auth/verify-otp")
     suspend fun verifyOtp(@Body req: VerifyOtpRequest): Response<MessageResponse>
@@ -46,6 +46,10 @@ interface ApiService {
         @Path("word") word: String,
         @Query("lang") lang: String = "en"
     ): Response<ResponseBody>
+
+    @GET
+    @Streaming
+    suspend fun getAudioByUrl(@Url url: String): Response<ResponseBody>
 
     // ====== EXAMPLES ======
     @GET("api/objects/{code}/examples")

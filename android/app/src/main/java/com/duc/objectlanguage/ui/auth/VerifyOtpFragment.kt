@@ -30,7 +30,9 @@ class VerifyOtpFragment : Fragment() {
         val repo = (requireActivity().application as ObjectLanguageApp).repository
 
         email = arguments?.getString("email") ?: ""
-        binding.tvEmailHint.text = "Mã đã gửi đến: $email"
+        val displayEmail = arguments?.getString("masked_email")?.takeIf { it.isNotEmpty() }
+            ?: maskEmail(email)
+        binding.tvEmailHint.text = "Mã đã gửi đến: $displayEmail"
 
         binding.btnVerify.setOnClickListener {
             val otp = binding.etOtp.text.toString().trim()
@@ -64,8 +66,15 @@ class VerifyOtpFragment : Fragment() {
 
         binding.tvResendOtp.setOnClickListener {
             lifecycleScope.launch {
-                repo.forgotPassword(email)
-                Toast.makeText(requireContext(), "Đã gửi lại mã OTP", Toast.LENGTH_SHORT).show()
+                val result = repo.forgotPassword(email)
+                result.fold(
+                    onSuccess = {
+                        Toast.makeText(requireContext(), "Đã gửi lại mã OTP", Toast.LENGTH_SHORT).show()
+                    },
+                    onFailure = {
+                        Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                    }
+                )
             }
         }
     }
@@ -73,5 +82,14 @@ class VerifyOtpFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun maskEmail(email: String): String {
+        val atIndex = email.indexOf('@')
+        if (atIndex < 2) return email
+        val local = email.substring(0, atIndex)
+        val domain = email.substring(atIndex)
+        val masked = local.first() + "*".repeat(local.length - 2) + local.last()
+        return "$masked$domain"
     }
 }

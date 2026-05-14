@@ -2,13 +2,31 @@ import re
 from pydantic import BaseModel, field_validator
 from typing import Optional
 
-MIN_PASSWORD_LENGTH = 6
-CHANGE_PASSWORD_MIN_LENGTH = 9
+MIN_PASSWORD_LENGTH = 8
 LOWERCASE_PATTERN = re.compile(r"[a-z]")
 UPPERCASE_PATTERN = re.compile(r"[A-Z]")
 DIGIT_PATTERN = re.compile(r"\d")
 USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,50}$")
 EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+
+
+def normalize_email(v: str) -> str:
+    email = v.strip().lower()
+    if not EMAIL_PATTERN.match(email):
+        raise ValueError("Email không hợp lệ")
+    return email
+
+
+def validate_password_strength(v: str, field_name: str = "Mật khẩu") -> str:
+    if len(v) < MIN_PASSWORD_LENGTH:
+        raise ValueError(f"{field_name} phải có ít nhất {MIN_PASSWORD_LENGTH} ký tự")
+    if not LOWERCASE_PATTERN.search(v):
+        raise ValueError(f"{field_name} phải có ít nhất 1 chữ thường")
+    if not UPPERCASE_PATTERN.search(v):
+        raise ValueError(f"{field_name} phải có ít nhất 1 chữ viết hoa")
+    if not DIGIT_PATTERN.search(v):
+        raise ValueError(f"{field_name} phải có ít nhất 1 chữ số")
+    return v
 
 
 class UserCreate(BaseModel):
@@ -20,23 +38,20 @@ class UserCreate(BaseModel):
     @field_validator("username")
     @classmethod
     def validate_username(cls, v: str) -> str:
-        if not USERNAME_PATTERN.match(v):
+        username = v.strip()
+        if not USERNAME_PATTERN.match(username):
             raise ValueError("Username phải từ 3-50 ký tự, chỉ gồm chữ, số và underscore")
-        return v
+        return username
 
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        if not EMAIL_PATTERN.match(v):
-            raise ValueError("Email không hợp lệ")
-        return v.lower()
+        return normalize_email(v)
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        if len(v) < MIN_PASSWORD_LENGTH:
-            raise ValueError(f"Mật khẩu phải có ít nhất {MIN_PASSWORD_LENGTH} ký tự")
-        return v
+        return validate_password_strength(v)
 
 
 class UserLogin(BaseModel):
@@ -104,14 +119,23 @@ class ForgotPasswordRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        if not EMAIL_PATTERN.match(v):
-            raise ValueError("Email không hợp lệ")
-        return v.lower()
+        return normalize_email(v)
+
+
+class ForgotPasswordResponse(BaseModel):
+    message: str
+    email: str
+    masked_email: str
 
 
 class VerifyOtpRequest(BaseModel):
     email: str
     otp_code: str
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        return normalize_email(v)
 
 
 class ResetPasswordRequest(BaseModel):
@@ -119,12 +143,15 @@ class ResetPasswordRequest(BaseModel):
     otp_code: str
     new_password: str
 
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        return normalize_email(v)
+
     @field_validator("new_password")
     @classmethod
     def validate_new_password(cls, v: str) -> str:
-        if len(v) < MIN_PASSWORD_LENGTH:
-            raise ValueError(f"Mật khẩu phải có ít nhất {MIN_PASSWORD_LENGTH} ký tự")
-        return v
+        return validate_password_strength(v, "Mật khẩu mới")
 
 
 class ChangePasswordRequest(BaseModel):
@@ -134,15 +161,7 @@ class ChangePasswordRequest(BaseModel):
     @field_validator("new_password")
     @classmethod
     def validate_new_password(cls, v: str) -> str:
-        if len(v) < CHANGE_PASSWORD_MIN_LENGTH:
-            raise ValueError("Mật khẩu mới phải dài hơn 8 ký tự")
-        if not LOWERCASE_PATTERN.search(v):
-            raise ValueError("Mật khẩu mới phải có ít nhất 1 chữ thường")
-        if not UPPERCASE_PATTERN.search(v):
-            raise ValueError("Mật khẩu mới phải có ít nhất 1 chữ viết hoa")
-        if not DIGIT_PATTERN.search(v):
-            raise ValueError("Mật khẩu mới phải có ít nhất 1 chữ số")
-        return v
+        return validate_password_strength(v, "Mật khẩu mới")
 
 
 class ProfileUpdateRequest(BaseModel):

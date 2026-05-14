@@ -50,6 +50,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/tvGuestCounter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_scan_hint"
+        android:paddingStart="14dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="6dp"
+        android:textColor="@color/text_on_primary"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cameraOverlay" />
+
     <LinearLayout
         android:id="@+id/loadingContainer"
         android:layout_width="wrap_content"
@@ -242,16 +260,25 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnPlayAudio"
-                        android:layout_width="0dp"
+                        android:layout_width="54dp"
                         android:layout_height="54dp"
                         android:layout_marginEnd="7dp"
-                        android:layout_weight="1"
-                        android:text="@string/scan_btn_play"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
+                        android:contentDescription="@string/scan_btn_play"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:minWidth="54dp"
+                        android:minHeight="54dp"
+                        android:text=""
                         android:visibility="gone"
                         app:backgroundTint="@color/primary"
-                        app:cornerRadius="16dp" />
+                        app:cornerRadius="16dp"
+                        app:icon="@drawable/ic_volume"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="24dp"
+                        app:iconTint="@color/text_on_primary" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnAddToCollection"

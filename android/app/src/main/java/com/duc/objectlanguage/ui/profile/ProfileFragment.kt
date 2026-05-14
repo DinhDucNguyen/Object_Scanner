@@ -26,6 +26,7 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.ApiConfig
 import com.duc.objectlanguage.databinding.FragmentProfileBinding
 import com.duc.objectlanguage.utils.LocaleHelper
+import com.duc.objectlanguage.utils.PasswordValidator
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -54,6 +55,11 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val app = requireActivity().application as ObjectLanguageApp
+        if (!app.tokenManager.isLoggedIn) {
+            resetGraphToGuestScan()
+            return
+        }
+
         binding.tvUsername.text = app.tokenManager.username ?: getString(R.string.dashboard_default_user)
         updateLangButtons()
         setupClicks()
@@ -100,12 +106,16 @@ class ProfileFragment : Fragment() {
         binding.btnMenu.setOnClickListener { showOverflowMenu() }
         binding.btnLogout.setOnClickListener {
             val app = requireActivity().application as ObjectLanguageApp
-            app.tokenManager.clear()
-            findNavController().navigate(
-                R.id.loginFragment, null,
-                androidx.navigation.NavOptions.Builder().setPopUpTo(R.id.nav_graph, true).build()
-            )
+            app.repository.logout()
+            resetGraphToGuestScan()
         }
+    }
+
+    private fun resetGraphToGuestScan() {
+        val navController = findNavController()
+        val graph = navController.navInflater.inflate(R.navigation.nav_graph)
+        graph.setStartDestination(R.id.scanFragment)
+        navController.graph = graph
     }
 
     private fun uploadSelectedAvatar(uri: Uri) {
@@ -200,7 +210,7 @@ class ProfileFragment : Fragment() {
                 }
             }
 
-            val passwordError = validateNewPassword(new)
+            val passwordError = PasswordValidator.validate(requireContext(), new)
             if (passwordError != null) {
                 tilNew.error = passwordError
                 etNew.requestFocus()
@@ -280,16 +290,6 @@ class ProfileFragment : Fragment() {
         binding.ivAvatar.imageTintList = ContextCompat.getColorStateList(requireContext(), R.color.text_on_primary)
     }
 
-    private fun validateNewPassword(password: String): String? {
-        return when {
-            password.length < MIN_PASSWORD_LENGTH -> getString(R.string.profile_password_min_length)
-            password.none { it.isLowerCase() } -> getString(R.string.profile_password_lowercase_required)
-            password.none { it.isUpperCase() } -> getString(R.string.profile_password_uppercase_required)
-            password.none { it.isDigit() } -> getString(R.string.profile_password_digit_required)
-            else -> null
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -298,6 +298,5 @@ class ProfileFragment : Fragment() {
     companion object {
         private const val AVATAR_JPEG_QUALITY = 86
         private const val MAX_AVATAR_SIZE_PX = 1024
-        private const val MIN_PASSWORD_LENGTH = 9
     }
 }

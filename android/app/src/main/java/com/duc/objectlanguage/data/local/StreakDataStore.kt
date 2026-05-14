@@ -157,6 +157,7 @@ class StreakDataStore(private val context: Context) {
         newStreak: Int,
         newLongest: Int,
         newTotal: Int,
+        newReviewsToday: Int,
         lastReviewDate: String?
     ) {
         context.dataStore.edit { prefs ->
@@ -174,7 +175,7 @@ class StreakDataStore(private val context: Context) {
                 prefs[LAST_REVIEW_DATE] = lastTimestamp
                 val today = getTodayStartTimestamp()
                 prefs[REVIEWS_TODAY] = if (lastTimestamp >= today && safeStreak > 0) {
-                    (prefs[REVIEWS_TODAY] ?: 0).coerceAtLeast(1)
+                    newReviewsToday.coerceAtLeast(1)
                 } else {
                     0
                 }

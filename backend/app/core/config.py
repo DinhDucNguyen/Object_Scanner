@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "Object Language API"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = True
+    CORS_ALLOW_ORIGINS: list[str] = ["*"]
+    ADMIN_ROLE_NAMES: list[str] = ["admin", "quan_tri", "quan_tri_vien"]
+    ADMIN_USER_IDS: list[int] = []
     
     # JWT — SECRET_KEY bắt buộc phải set trong .env
     SECRET_KEY: str
@@ -42,6 +45,36 @@ class Settings(BaseSettings):
                 return False
             if normalized in {"debug", "development", "dev"}:
                 return True
+        return value
+
+    @field_validator("CORS_ALLOW_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                return ["*"]
+            return [origin.strip() for origin in value.split(",") if origin.strip()]
+        return value
+
+    @field_validator("ADMIN_ROLE_NAMES", mode="before")
+    @classmethod
+    def parse_admin_role_names(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                return []
+            return [role.strip() for role in value.split(",") if role.strip()]
+        return value
+
+    @field_validator("ADMIN_USER_IDS", mode="before")
+    @classmethod
+    def parse_admin_user_ids(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                return []
+            return [int(user_id.strip()) for user_id in value.split(",") if user_id.strip()]
         return value
     
     class Config:

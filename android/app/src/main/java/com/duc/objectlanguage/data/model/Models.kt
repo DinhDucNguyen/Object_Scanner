@@ -5,10 +5,20 @@ import com.google.gson.annotations.SerializedName
 // ====== AUTH ======
 
 data class LoginRequest(val username: String, val password: String)
-data class RegisterRequest(val username: String, val email: String, val password: String)
+data class RegisterRequest(
+    val username: String,
+    val email: String,
+    val password: String,
+    @SerializedName("full_name") val fullName: String? = null
+)
 data class RefreshRequest(@SerializedName("refresh_token") val refreshToken: String)
 
 data class ForgotPasswordRequest(val email: String)
+data class ForgotPasswordResponse(
+    val message: String,
+    val email: String,
+    @SerializedName("masked_email") val maskedEmail: String
+)
 data class VerifyOtpRequest(val email: String, @SerializedName("otp_code") val otpCode: String)
 data class ResetPasswordRequest(
     val email: String,
@@ -108,7 +118,8 @@ data class ReviewCardResponse(
     @SerializedName("easiness_factor") val easinessFactor: Float,
     val interval: Int,
     val repetitions: Int,
-    @SerializedName("image_url") val imageUrl: String? = null
+    @SerializedName("image_url") val imageUrl: String? = null,
+    @SerializedName("audio_url") val audioUrl: String? = null
 )
 
 data class ReviewResult(
@@ -264,6 +275,7 @@ data class StreakResponse(
     @SerializedName("streak_hien_tai") val streakHienTai: Int,
     @SerializedName("streak_dai_nhat") val streakDaiNhat: Int,
     @SerializedName("tong_luot_on")    val tongLuotOn: Int,
+    @SerializedName("luot_on_hom_nay") val luotOnHomNay: Int = 0,
     @SerializedName("ngay_on_cuoi")    val ngayOnCuoi: String?
 )
 
@@ -289,6 +301,7 @@ data class StreakSyncRequest(
     @SerializedName("streak_hien_tai") val streakHienTai: Int,
     @SerializedName("streak_dai_nhat") val streakDaiNhat: Int,
     @SerializedName("tong_luot_on")    val tongLuotOn: Int,
+    @SerializedName("luot_on_hom_nay") val luotOnHomNay: Int,
     @SerializedName("ngay_on_cuoi")    val ngayOnCuoi: String?   // "yyyy-MM-dd"
 )
 

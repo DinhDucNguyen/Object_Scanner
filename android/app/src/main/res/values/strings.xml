@@ -21,7 +21,6 @@
     <string name="title_history_detail">Chi tiết lịch sử</string>
     <string name="title_streak">Chuỗi học</string>
     <string name="title_analytics">Thống kê</string>
-    <string name="title_flashcard">Flashcard</string>
     <string name="title_quiz">Trắc nghiệm</string>
     <string name="title_typing">Luyện gõ</string>
     <string name="title_listening">Luyện nghe</string>
@@ -39,11 +38,13 @@
     <string name="login_button">Đăng nhập</string>
     <string name="login_register_link">Chưa có tài khoản? Đăng ký ngay</string>
     <string name="register_title">Tạo tài khoản</string>
-    <string name="register_button">Đăng ký</string>
+    <string name="register_button">Tạo tài khoản</string>
     <string name="register_login_link">Đã có tài khoản? Đăng nhập</string>
+    <string name="auth_full_name_hint">Họ tên</string>
     <string name="auth_username_hint">Tên đăng nhập</string>
     <string name="auth_email_hint">Email</string>
     <string name="auth_password_hint">Mật khẩu</string>
+    <string name="auth_confirm_password_hint">Xác nhận mật khẩu</string>
     <string name="auth_logo">Logo</string>
     <string name="forgot_password_title">Quên mật khẩu</string>
     <string name="forgot_password_subtitle">Nhập email để nhận mã OTP</string>
@@ -77,6 +78,15 @@
     <string name="dashboard_progress_short">%d%%</string>
     <string name="dashboard_progress_caption">thành thạo</string>
     <string name="dashboard_action_title">Hành động tiếp theo</string>
+    <string name="dashboard_streak_title">Chuỗi ngày học</string>
+    <string name="dashboard_streak_content_desc">Xem chuỗi ngày học</string>
+    <string name="dashboard_streak_today_done">Đã ôn hôm nay</string>
+    <string name="dashboard_streak_today_pending">Chưa ôn hôm nay</string>
+    <string name="dashboard_streak_today_count_initial">Lượt ôn hôm nay: 0</string>
+    <string name="dashboard_streak_today_count">Lượt ôn hôm nay: %d</string>
+    <string name="dashboard_streak_next_milestone_initial">Còn 3 ngày tới mốc 3 ngày</string>
+    <string name="dashboard_streak_next_milestone">Còn %1$d ngày tới mốc %2$d ngày</string>
+    <string name="dashboard_streak_top_milestone">Đã đạt mốc chuỗi cao nhất</string>
 
     <!-- Scan -->
     <string name="scan_overlay">Đưa vật thể vào khung hình rồi nhấn chụp</string>
@@ -147,10 +157,6 @@
     <string name="review_quality_hard">Khó</string>
     <string name="review_quality_good">Ổn</string>
     <string name="review_quality_easy">Dễ</string>
-    <string name="flashcard_progress_empty">Tiến độ: 0/0</string>
-    <string name="flashcard_instructions">Vuốt trái: chưa biết | Chạm để lật | Vuốt phải: đã biết\nVuốt lên: khó</string>
-    <string name="flashcard_language_english">English</string>
-    <string name="flashcard_tap_to_translate">(Chạm để xem nghĩa)</string>
     <string name="label_definition">Định nghĩa</string>
     <string name="label_example">Ví dụ</string>
     <string name="translation_verified">Đã xác minh</string>
@@ -189,18 +195,20 @@
     <string name="history_filter_clear_dates">Bỏ lọc ngày</string>
     <string name="history_delete_title">Xóa lịch sử</string>
     <string name="history_delete_message">Bạn có chắc muốn xóa lần quét này?</string>
-    <string name="history_btn_save">Lưu vào danh sách học</string>
     <string name="history_scanned_image">Ảnh đã quét</string>
+    <string name="history_btn_play_audio">Nghe phát âm</string>
+    <string name="history_audio_load_error">Không tải được audio</string>
+    <string name="history_audio_play_error">Không phát được audio</string>
     <string name="history_empty_vocab">Không có dữ liệu từ vựng</string>
 
     <!-- Streak -->
     <string name="streak_days_singular">ngày</string>
     <string name="streak_days_plural">ngày</string>
     <string name="streak_current_label">Chuỗi ngày hiện tại</string>
-    <string name="streak_stat_best">Tốt nhất</string>
-    <string name="streak_stat_total">Tổng</string>
-    <string name="streak_stat_today">Hôm nay</string>
-    <string name="streak_stats_title">Thống kê của bạn</string>
+    <string name="streak_stat_best">Kỷ lục chuỗi</string>
+    <string name="streak_stat_total">Tổng lượt ôn</string>
+    <string name="streak_stat_today">Lượt ôn hôm nay</string>
+    <string name="streak_stats_title">Thống kê ôn tập</string>
     <string name="streak_today_done">Đã ôn tập hôm nay!</string>
     <string name="streak_today_pending">Chưa ôn tập hôm nay</string>
     <string name="streak_milestone_label">Mốc tiếp theo: %d ngày</string>
@@ -280,16 +288,52 @@
 
     <!-- Notifications -->
     <string name="notification_settings_title">Cài đặt thông báo</string>
+    <string name="notification_settings_subtitle">Chọn giờ nhắc ôn tập và cách app nhắc bạn duy trì thói quen học.</string>
     <string name="notification_daily_reminder">Nhắc học hằng ngày</string>
     <string name="notification_daily_reminder_desc">Nhận nhắc nhở ôn tập mỗi ngày</string>
     <string name="notification_reminder_time">Giờ nhắc</string>
     <string name="notification_change_time">Đổi</string>
+    <string name="notification_summary_enabled">Đang nhắc mỗi ngày lúc %s</string>
+    <string name="notification_summary_disabled">Đang tắt. Bật lên để app nhắc khi có từ đến hạn.</string>
+    <string name="notification_permission_title">Quyền thông báo</string>
+    <string name="notification_permission_required">Android cần bạn cho phép trước khi app có thể gửi thông báo.</string>
+    <string name="notification_permission_granted">Đã được phép gửi thông báo trên thiết bị này.</string>
+    <string name="notification_permission_button">Cho phép thông báo</string>
+    <string name="notification_permission_denied">Chưa có quyền thông báo nên chưa thể bật nhắc học.</string>
+    <string name="notification_test_button">Gửi thử thông báo</string>
+    <string name="notification_test_title">LengoLens đã sẵn sàng</string>
+    <string name="notification_test_message">Thông báo hoạt động tốt. Bạn sẽ nhận nhắc khi có từ cần ôn.</string>
+    <string name="notification_test_sent">Đã gửi thử thông báo.</string>
+    <string name="notification_detail_title">Tùy chọn nhắc nhở</string>
     <string name="notification_streak_alert">Cảnh báo chuỗi học</string>
-    <string name="notification_streak_alert_desc">Nhận thông báo khi bạn sắp mất chuỗi học</string>
+    <string name="notification_streak_alert_desc">Thêm nội dung nhắc giữ chuỗi khi bạn chưa ôn trong ngày.</string>
     <string name="notification_milestones">Mừng mốc thành tích</string>
-    <string name="notification_milestones_desc">Nhận thông báo khi đạt mốc chuỗi học</string>
+    <string name="notification_milestones_desc">Hiện chúc mừng và thông báo khi đạt mốc chuỗi học.</string>
     <string name="notification_status_default">Cấu hình thông báo ở phía trên</string>
-    <string name="notification_tip">Bật thông báo để giữ nhịp học và duy trì chuỗi ngày.</string>
+    <string name="notification_status_enabled">Đã bật nhắc học lúc %s.</string>
+    <string name="notification_status_disabled">Đã tắt nhắc học hằng ngày.</string>
+    <string name="notification_time_picker_title">Chọn giờ nhắc</string>
+    <string name="notification_time_saved">Đã lưu giờ nhắc %s. Bật nhắc học để sử dụng.</string>
+    <string name="notification_streak_alert_enabled">Đã bật nội dung nhắc giữ chuỗi.</string>
+    <string name="notification_streak_alert_disabled">Đã tắt nội dung nhắc giữ chuỗi.</string>
+    <string name="notification_milestone_enabled">Đã bật mừng mốc thành tích.</string>
+    <string name="notification_milestone_disabled">Đã tắt mừng mốc thành tích.</string>
+    <string name="notification_tip">Thông báo chỉ được gửi khi bạn đã đăng nhập, có từ đến hạn và chưa ôn trong ngày.</string>
+    <string name="notification_channel_daily_name">Nhắc ôn tập</string>
+    <string name="notification_channel_daily_desc">Nhắc bạn ôn các từ đến hạn mỗi ngày.</string>
+    <string name="notification_channel_milestone_name">Mốc học tập</string>
+    <string name="notification_channel_milestone_desc">Chúc mừng khi bạn đạt mốc chuỗi học.</string>
+    <string name="notification_due_message">Bạn có %d từ cần ôn hôm nay. Vào ôn vài phút nhé.</string>
+    <string name="notification_due_streak_message">Bạn có %1$d từ cần ôn hôm nay. Ôn ngay để giữ chuỗi %2$d ngày.</string>
+    <string name="notification_generic_title">Đến giờ ôn tập</string>
+    <string name="notification_generic_message">Mở LengoLens để ôn lại từ vựng hôm nay.</string>
+    <string name="notification_generic_streak_message">Mở LengoLens để giữ chuỗi %d ngày của bạn.</string>
+    <string name="notification_milestone_title">Đạt mốc %d ngày!</string>
+    <string name="notification_milestone_message">Bạn vừa giữ chuỗi học %d ngày. Tiếp tục rất ổn.</string>
+    <plurals name="notification_due_title">
+        <item quantity="one">Có %d từ cần ôn</item>
+        <item quantity="other">Có %d từ cần ôn</item>
+    </plurals>
 
     <!-- Profile -->
     <string name="profile_section_language">Ngôn ngữ</string>
@@ -313,7 +357,7 @@
     <string name="profile_current_password_hint">Mật khẩu hiện tại</string>
     <string name="profile_new_password_hint">Mật khẩu mới</string>
     <string name="profile_password_rules_title">Mật khẩu mới cần có</string>
-    <string name="profile_password_rules">Dài hơn 8 ký tự&#10;Có chữ thường và chữ viết hoa&#10;Có ít nhất 1 chữ số</string>
+    <string name="profile_password_rules">Ít nhất 8 ký tự&#10;Có chữ thường và chữ viết hoa&#10;Có ít nhất 1 chữ số</string>
     <string name="profile_badge">Người học tích cực</string>
     <string name="profile_account_title">Tài khoản học tập</string>
     <string name="profile_language_changed_vi">Đã chuyển sang tiếng Việt</string>
@@ -327,11 +371,21 @@
     <string name="profile_password_required">Vui lòng nhập đầy đủ thông tin</string>
     <string name="profile_current_password_required">Vui lòng nhập mật khẩu hiện tại</string>
     <string name="profile_new_password_required">Vui lòng nhập mật khẩu mới</string>
-    <string name="profile_password_min_length">Mật khẩu mới phải dài hơn 8 ký tự</string>
+    <string name="profile_password_min_length">Mật khẩu mới phải có ít nhất 8 ký tự</string>
     <string name="profile_password_lowercase_required">Mật khẩu mới phải có ít nhất 1 chữ thường</string>
     <string name="profile_password_uppercase_required">Mật khẩu mới phải có ít nhất 1 chữ viết hoa</string>
     <string name="profile_password_digit_required">Mật khẩu mới phải có ít nhất 1 chữ số</string>
     <string name="profile_avatar_pick_error">Không đọc được ảnh đã chọn</string>
+
+    <!-- Guest mode -->
+    <string name="guest_scan_counter">Còn %d/5 lượt quét hôm nay</string>
+    <string name="guest_scan_limit_title">Đã dùng hết lượt quét</string>
+    <string name="guest_scan_limit_msg">Bạn đã dùng hết 5 lượt quét miễn phí hôm nay. Đăng nhập để quét không giới hạn và lưu từ vựng!</string>
+    <string name="guest_feature_title">Tính năng dành cho thành viên</string>
+    <string name="guest_feature_msg">Đăng nhập để mở khoá ôn tập, từ điển, lịch sử và tất cả tính năng học tập.</string>
+    <string name="guest_btn_login">Đăng nhập</string>
+    <string name="guest_btn_register">Đăng ký</string>
+    <string name="guest_btn_later">Để sau</string>
 
     <!-- Common -->
     <string name="btn_create">Tạo</string>

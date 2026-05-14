@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentResetPasswordBinding
+import com.duc.objectlanguage.utils.PasswordValidator
 import kotlinx.coroutines.launch
 
 class ResetPasswordFragment : Fragment() {
@@ -34,9 +35,9 @@ class ResetPasswordFragment : Fragment() {
             val newPass = binding.etNewPassword.text.toString()
             val confirmPass = binding.etConfirmPassword.text.toString()
 
-            val passwordRegex = Regex("^(?=.*[A-Z])(?=.*[0-9]).{8,}$")
-            if (!passwordRegex.matches(newPass)) {
-                Toast.makeText(requireContext(), "Mật khẩu yếu, yêu cầu trên 8 ký tự, bao gồm chữ hoa và chữ số", Toast.LENGTH_LONG).show()
+            val passwordError = PasswordValidator.validate(requireContext(), newPass)
+            if (passwordError != null) {
+                Toast.makeText(requireContext(), passwordError, Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
             if (newPass != confirmPass) {
@@ -69,4 +70,5 @@ class ResetPasswordFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }

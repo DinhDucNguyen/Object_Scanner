@@ -46,9 +46,12 @@ class UserService:
             },
         }
 
-    def register(self, db: Session, data: UserCreate):
-        if self.repo.get_by_username_or_email(db, data.username, data.email):
-            raise HTTPException(400, "Username hoặc email đã tồn tại")
+    def register(self, db: Session, data: UserCreate) -> dict:
+        if self.repo.get_by_email(db, data.email):
+            raise HTTPException(400, "Email đã được sử dụng")
+
+        if self.repo.get_by_username(db, data.username):
+            raise HTTPException(400, "Tên đăng nhập đã được sử dụng")
 
         role = self.repo.get_role_by_name(db, "nguoi_dung")
         status = self.repo.get_status_by_name(db, "hoat_dong")
@@ -66,7 +69,7 @@ class UserService:
         settings = UserSettings()
         self.repo.create(db, user, profile, settings)
 
-        return self._generate_tokens(user)
+        return {"message": "Đăng ký thành công"}
 
     def login(self, db: Session, data: UserLogin):
         user = self.repo.get_by_username(db, data.username)
@@ -111,6 +114,7 @@ class UserService:
 
     def upload_avatar(self, db: Session, user_id: int, image_bytes: bytes, filename: str) -> dict:
         import os, uuid
+
         profile = self._get_or_create_profile(db, user_id)
         if not image_bytes:
             raise HTTPException(400, "File ảnh không hợp lệ")
@@ -183,25 +187,32 @@ class UserService:
             "display_language": settings.ngon_ngu_giao_dien or "vi",
         }
 
-    # ------------------------------------------------------------------
-    # Forgot / Reset / Change password
-    # ------------------------------------------------------------------
-
     def forgot_password(self, db: Session, data: ForgotPasswordRequest) -> dict:
         user = self.repo.get_by_email(db, data.email)
         if not user:
             print(f"[DEBUG] forgot_password: email not found: {data.email}")
-            return {"message": "Nếu email tồn tại, mã OTP đã được gửi"}
+            raise ValueError("Email không tồn tại")
 
+        email = user.email.lower()
         otp_code = str(random.randint(100000, 999999))
-        _otp_store[data.email] = {
+        _otp_store[email] = {
             "otp": otp_code,
             "expires_at": now_vietnam() + timedelta(minutes=OTP_EXPIRE_MINUTES),
         }
 
-        ok = EmailService().send_otp(user.email, otp_code)
-        print(f"[DEBUG] forgot_password: sent OTP to {user.email}, result={ok}")
-        return {"message": "Nếu email tồn tại, mã OTP đã được gửi"}
+        ok = EmailService().send_otp(email, otp_code)
+        print(f"[DEBUG] forgot_password: sent OTP to {email}, result={ok}")
+        masked = self._mask_email(email)
+        return {"message": "Mã OTP đã được gửi", "email": email, "masked_email": masked}
+
+    @staticmethod
+    def _mask_email(email: str) -> str:
+        at = email.find("@")
+        if at < 2:
+            return email
+        local = email[:at]
+        domain = email[at:]
+        return local[0] + "*" * (len(local) - 2) + local[-1] + domain
 
     def verify_otp(self, _db: Session, data: VerifyOtpRequest) -> dict:
         entry = _otp_store.get(data.email)

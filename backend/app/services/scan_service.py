@@ -114,9 +114,17 @@ class ScanService:
 
     def _to_dto(self, db: Session, t: Translation) -> TranslationResponse:
         lang = self.lang_repo.get_by_id(db, t.ngon_ngu_id)
+        lang_code = lang.ma_ngon_ngu if lang else "en"
+        audio_url = t.am_thanh_url
+        if not audio_url:
+            audio_url = self.tts.get_audio_url(t.tu_vung, lang_code)
+            if audio_url:
+                t.am_thanh_url = audio_url
+                db.commit()
+                db.refresh(t)
         examples = [
             ViDuResponse(id=e.id, cau_vi_du=e.cau_vi_du, dich_nghia=e.dich_nghia, nguon_du_lieu=e.nguon_du_lieu)
-            for e in (t.examples or [])
+            for e in sorted((t.examples or []), key=lambda item: item.id or 0)[:3]
         ]
         return TranslationResponse(
             id=t.id, object_id=t.doi_tuong_id, language_id=t.ngon_ngu_id,
@@ -126,6 +134,6 @@ class ScanService:
             part_of_speech=t.loai_tu,
             definition=t.dinh_nghia,
             examples=examples,
-            audio_url=t.am_thanh_url or self.tts.get_audio_url(t.tu_vung, lang.ma_ngon_ngu if lang else "en"),
+            audio_url=audio_url,
             data_source=t.nguon_du_lieu.value if isinstance(t.nguon_du_lieu, NguonDuLieu) else (str(t.nguon_du_lieu) if t.nguon_du_lieu else None)
         )

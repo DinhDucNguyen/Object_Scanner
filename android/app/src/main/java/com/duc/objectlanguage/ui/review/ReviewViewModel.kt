@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.ReviewCardResponse
+import com.duc.objectlanguage.utils.AudioPlayerManager
 import com.duc.objectlanguage.utils.LocaleHelper
 import kotlinx.coroutines.launch
 
@@ -33,6 +34,8 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _finishedMessage = MutableLiveData<String>()
     val finishedMessage: LiveData<String> = _finishedMessage
+
+    private val audioPlayer = AudioPlayerManager(application.applicationContext)
 
     fun loadCards() {
         viewModelScope.launch {
@@ -93,8 +96,30 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
         _message.value = null
     }
 
+    fun playAudio(audioUrl: String?, word: String, lang: String = "en") {
+        viewModelScope.launch {
+            val bytes = audioUrl
+                ?.takeIf { it.isNotBlank() }
+                ?.let { repo.getAudioByUrl(it) }
+                ?: repo.getTtsAudio(word, lang)
+            if (bytes == null) {
+                _message.value = "Không tải được audio"
+                return@launch
+            }
+
+            audioPlayer.playMp3(bytes) {
+                _message.value = "Không phát được audio"
+            }
+        }
+    }
+
     private fun localizedString(@StringRes resId: Int, vararg args: Any): String {
         val context = LocaleHelper.applyLocale(getApplication<Application>())
         return if (args.isEmpty()) context.getString(resId) else context.getString(resId, *args)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        audioPlayer.release()
     }
 }

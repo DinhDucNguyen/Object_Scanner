@@ -4,7 +4,6 @@ import android.app.Application
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.BitmapFactory
-import android.media.MediaPlayer
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -15,17 +14,21 @@ import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.model.ScanResponse
 import com.duc.objectlanguage.data.model.TranslationResponse
 import com.duc.objectlanguage.data.repository.CollectionRepository
+import com.duc.objectlanguage.utils.AudioPlayerManager
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.io.File
 
 class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = (application as ObjectLanguageApp).repository
-    private val collectionRepo = CollectionRepository((application as ObjectLanguageApp).tokenManager)
+    private val app = application as ObjectLanguageApp
+    private val repo = app.repository
+    private val collectionRepo = CollectionRepository(app.tokenManager)
+    private val guestSessionManager = app.guestSessionManager
+
+    val isGuest: Boolean get() = !app.tokenManager.isLoggedIn
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
@@ -42,10 +45,22 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
     private val _addedMsg = MutableLiveData<String?>()
     val addedMsg: LiveData<String?> = _addedMsg
 
-    private var mediaPlayer: MediaPlayer? = null
+    private val _remainingScans = MutableLiveData(guestSessionManager.getRemainingScans())
+    val remainingScans: LiveData<Int> = _remainingScans
+
+    private val _showGuestUpsell = MutableLiveData(false)
+    val showGuestUpsell: LiveData<Boolean> = _showGuestUpsell
+
+    private val audioPlayer = AudioPlayerManager(application.applicationContext)
 
     fun scanWithDetection(yoloResult: DetectionResult?, imageBytes: ByteArray) {
         if (_isLoading.value == true) return
+
+        if (isGuest && !guestSessionManager.canScan()) {
+            _showGuestUpsell.value = true
+            return
+        }
+
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
@@ -61,11 +76,10 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                 if (dbResult != null && dbResult.translations.isNotEmpty()) {
                     _scanResult.value = dbResult
                     loadExamples(dbResult)
-                    saveScanAndQueueReview(objectCode, yoloResult.confidence, imageBytes)
+                    onScanSuccess(objectCode, yoloResult.confidence, imageBytes)
                     _isLoading.value = false
                     return@launch
                 }
-                // YOLO detect được nhưng DB rỗng → skip ML Kit, xuống Gemini ngay
                 Log.d("ScanViewModel", "YOLO DB miss → Gemini")
                 runGemini(imageBytes)
                 return@launch
@@ -74,8 +88,13 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             // 2. ML Kit — chỉ chạy khi YOLO không detect được
             try {
                 val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                val labels = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
-                    .process(InputImage.fromBitmap(bitmap, 0)).await()
+                    ?: throw IllegalArgumentException("Invalid image")
+                val labels = try {
+                    ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
+                        .process(InputImage.fromBitmap(bitmap, 0)).await()
+                } finally {
+                    bitmap.recycle()
+                }
                 val topLabel = labels.maxByOrNull { it.confidence }
                 if (topLabel != null && topLabel.confidence > 0.6f) {
                     val objectCode = normalizeObjectCode(topLabel.text)
@@ -87,7 +106,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     if (dbResult != null && dbResult.translations.isNotEmpty()) {
                         _scanResult.value = dbResult
                         loadExamples(dbResult)
-                        saveScanAndQueueReview(objectCode, topLabel.confidence, imageBytes)
+                        onScanSuccess(objectCode, topLabel.confidence, imageBytes)
                         _isLoading.value = false
                         return@launch
                     }
@@ -98,6 +117,15 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
             // 3. Gemini — fallback cuối cùng
             runGemini(imageBytes)
+        }
+    }
+
+    private fun onScanSuccess(objectCode: String, confidence: Float, imageBytes: ByteArray) {
+        if (isGuest) {
+            guestSessionManager.incrementScan()
+            _remainingScans.value = guestSessionManager.getRemainingScans()
+        } else {
+            saveScanAndQueueReview(objectCode, confidence, imageBytes)
         }
     }
 
@@ -113,7 +141,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     else -> {
                         _scanResult.value = it
                         loadExamples(it)
-                        saveScanAndQueueReview(it.objectCode, 1.0f, imageBytes)
+                        onScanSuccess(it.objectCode, 1.0f, imageBytes)
                     }
                 }
             },
@@ -138,8 +166,13 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun loadExamples(result: com.duc.objectlanguage.data.model.ScanResponse) {
         if (result.translations.isEmpty()) return
-        val t = result.translations[0]
-        val stored = t.examples.mapNotNull { it.cauViDu }
+        val t = result.translations.firstOrNull { it.languageCode == "en" }
+            ?: result.translations.first()
+        val stored = t.examples
+            .mapNotNull { it.cauViDu?.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .take(3)
         if (stored.isNotEmpty()) _examples.value = stored
         else loadExamplesFromGemini(t.wordName, t.languageCode ?: "en")
     }
@@ -162,8 +195,8 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             "laptop computer" to "laptop",
             "notebook computer" to "laptop",
             "notebook" to "laptop",
-            "table" to "chair",  // ML Kit thường nhầm
-            "desk" to "chair",
+            "table" to "dining_table",
+            "desk" to "dining_table",
             "tv" to "television",
             "bike" to "bicycle"
         )
@@ -188,6 +221,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         
         try {
             val bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                ?: return imageBytes
             val maxSize = 800
             val ratio = maxSize.toFloat() / maxOf(bitmap.width, bitmap.height)
             
@@ -199,7 +233,10 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             
             val stream = java.io.ByteArrayOutputStream()
             resized.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, stream)
-            return stream.toByteArray()
+            val compressed = stream.toByteArray()
+            if (resized !== bitmap) resized.recycle()
+            bitmap.recycle()
+            return compressed
         } catch (e: Exception) {
             // Nếu lỗi thì trả ảnh gốc
             return imageBytes
@@ -208,28 +245,18 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadExamplesFromGemini(word: String, lang: String) {
         viewModelScope.launch {
-            _examples.value = repo.getExamples(word, lang)
+            _examples.value = repo.getExamples(word, lang).distinct().take(3)
         }
     }
 
-    fun playAudio(word: String, lang: String) {
+    fun playAudio(audioUrl: String?, word: String, lang: String) {
         viewModelScope.launch {
-            val bytes = repo.getTtsAudio(word, lang)
+            val bytes = audioUrl
+                ?.takeIf { it.isNotBlank() }
+                ?.let { repo.getAudioByUrl(it) }
+                ?: repo.getTtsAudio(word, lang)
             if (bytes != null) {
-                try {
-                    val tmpFile = File.createTempFile("tts_", ".mp3", getApplication<ObjectLanguageApp>().cacheDir)
-                    tmpFile.writeBytes(bytes)
-                    mediaPlayer?.release()
-                    mediaPlayer = MediaPlayer().apply {
-                        setDataSource(tmpFile.absolutePath)
-                        prepare()
-                        start()
-                        setOnCompletionListener {
-                            release()
-                            tmpFile.delete()
-                        }
-                    }
-                } catch (e: Exception) {
+                audioPlayer.playMp3(bytes) {
                     _error.value = "Không phát được audio"
                 }
             } else {
@@ -253,6 +280,8 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         _examples.value = emptyList()
         _error.value = null
     }
+
+    fun clearGuestUpsell() { _showGuestUpsell.value = false }
 
     fun clearAddedMsg() { _addedMsg.value = null }
 
@@ -281,6 +310,6 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
-        mediaPlayer?.release()
+        audioPlayer.release()
     }
 }

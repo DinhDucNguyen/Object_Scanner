@@ -1,5 +1,8 @@
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, Depends
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
+# pyrefly: ignore [missing-import]  
 from typing import List
 
 from app.db.session import get_db
@@ -43,4 +46,4 @@ def submit_review(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id)
 ):
-    return learning_service.submit_review(db, progress_id, request)
+    return learning_service.submit_review(db, progress_id, request, user_id)

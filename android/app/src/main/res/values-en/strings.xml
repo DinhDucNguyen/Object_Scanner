@@ -21,7 +21,6 @@
     <string name="title_history_detail">History Detail</string>
     <string name="title_streak">Daily Streak</string>
     <string name="title_analytics">Analytics</string>
-    <string name="title_flashcard">Flashcards</string>
     <string name="title_quiz">Quiz Mode</string>
     <string name="title_typing">Typing Test</string>
     <string name="title_listening">Listening Test</string>
@@ -39,12 +38,37 @@
     <string name="login_button">Log in</string>
     <string name="login_register_link">No account yet? Register now</string>
     <string name="register_title">Create account</string>
-    <string name="register_button">Register</string>
+    <string name="register_button">Create account</string>
     <string name="register_login_link">Already have an account? Log in</string>
+    <string name="auth_full_name_hint">Full name</string>
     <string name="auth_username_hint">Username</string>
     <string name="auth_email_hint">Email</string>
     <string name="auth_password_hint">Password</string>
+    <string name="auth_confirm_password_hint">Confirm password</string>
     <string name="auth_logo">Logo</string>
+    <string name="forgot_password_title">Forgot password</string>
+    <string name="forgot_password_subtitle">Enter your email to receive an OTP</string>
+    <string name="forgot_password_button">Send OTP</string>
+    <string name="forgot_password_link">Forgot password?</string>
+    <string name="verify_otp_title">Verify OTP</string>
+    <string name="verify_otp_subtitle">Enter the 6-digit code sent to your email</string>
+    <string name="verify_otp_button">Verify</string>
+    <string name="otp_hint">OTP code (6 digits)</string>
+    <string name="reset_password_title">Reset password</string>
+    <string name="reset_password_subtitle">Enter a new password for your account</string>
+    <string name="reset_password_button">Reset password</string>
+    <string name="new_password_hint">New password</string>
+    <string name="confirm_password_hint">Confirm new password</string>
+
+    <!-- Guest mode -->
+    <string name="guest_scan_counter">%d/5 scans remaining today</string>
+    <string name="guest_scan_limit_title">Scan limit reached</string>
+    <string name="guest_scan_limit_msg">You have used all 5 free scans for today. Log in to scan without limits and save vocabulary!</string>
+    <string name="guest_feature_title">Members-only feature</string>
+    <string name="guest_feature_msg">Log in to unlock reviews, dictionary, history, and all learning features.</string>
+    <string name="guest_btn_login">Log in</string>
+    <string name="guest_btn_register">Register</string>
+    <string name="guest_btn_later">Maybe later</string>
 
     <!-- Dashboard -->
     <string name="dashboard_greeting">Hello,</string>
@@ -64,6 +88,15 @@
     <string name="dashboard_progress_short">%d%%</string>
     <string name="dashboard_progress_caption">mastered</string>
     <string name="dashboard_action_title">Next actions</string>
+    <string name="dashboard_streak_title">Daily streak</string>
+    <string name="dashboard_streak_content_desc">View daily streak</string>
+    <string name="dashboard_streak_today_done">Reviewed today</string>
+    <string name="dashboard_streak_today_pending">No review yet today</string>
+    <string name="dashboard_streak_today_count_initial">Reviews today: 0</string>
+    <string name="dashboard_streak_today_count">Reviews today: %d</string>
+    <string name="dashboard_streak_next_milestone_initial">3 days to the 3-day milestone</string>
+    <string name="dashboard_streak_next_milestone">%1$d days to the %2$d-day milestone</string>
+    <string name="dashboard_streak_top_milestone">Top streak milestone reached</string>
 
     <!-- Scan -->
     <string name="scan_overlay">Place an object in frame, then capture</string>
@@ -134,10 +167,6 @@
     <string name="review_quality_hard">Hard</string>
     <string name="review_quality_good">Good</string>
     <string name="review_quality_easy">Easy</string>
-    <string name="flashcard_progress_empty">Progress: 0/0</string>
-    <string name="flashcard_instructions">Swipe left: do not know | Tap to flip | Swipe right: know it\nSwipe up: difficult</string>
-    <string name="flashcard_language_english">English</string>
-    <string name="flashcard_tap_to_translate">(Tap to see translation)</string>
     <string name="label_definition">Definition</string>
     <string name="label_example">Example</string>
     <string name="translation_verified">Verified</string>
@@ -176,18 +205,20 @@
     <string name="history_filter_clear_dates">Clear dates</string>
     <string name="history_delete_title">Delete history</string>
     <string name="history_delete_message">Delete this scan from history?</string>
-    <string name="history_btn_save">Save to learning list</string>
     <string name="history_scanned_image">Scanned image</string>
+    <string name="history_btn_play_audio">Play pronunciation</string>
+    <string name="history_audio_load_error">Could not load audio</string>
+    <string name="history_audio_play_error">Could not play audio</string>
     <string name="history_empty_vocab">No vocabulary data</string>
 
     <!-- Streak -->
     <string name="streak_days_singular">day</string>
     <string name="streak_days_plural">days</string>
     <string name="streak_current_label">Current streak</string>
-    <string name="streak_stat_best">Best</string>
-    <string name="streak_stat_total">Total</string>
-    <string name="streak_stat_today">Today</string>
-    <string name="streak_stats_title">Your statistics</string>
+    <string name="streak_stat_best">Best streak</string>
+    <string name="streak_stat_total">Total reviews</string>
+    <string name="streak_stat_today">Reviews today</string>
+    <string name="streak_stats_title">Review statistics</string>
     <string name="streak_today_done">Completed today!</string>
     <string name="streak_today_pending">Review pending today</string>
     <string name="streak_milestone_label">Next milestone: %d days</string>
@@ -267,16 +298,52 @@
 
     <!-- Notifications -->
     <string name="notification_settings_title">Notification Settings</string>
+    <string name="notification_settings_subtitle">Choose when LengoLens reminds you and how it helps keep your learning habit alive.</string>
     <string name="notification_daily_reminder">Daily Reminder</string>
     <string name="notification_daily_reminder_desc">Get reminded to review every day</string>
     <string name="notification_reminder_time">Reminder Time</string>
     <string name="notification_change_time">Change</string>
+    <string name="notification_summary_enabled">Reminding you every day at %s</string>
+    <string name="notification_summary_disabled">Off. Enable this to get reminders when words are due.</string>
+    <string name="notification_permission_title">Notification permission</string>
+    <string name="notification_permission_required">Android needs your permission before the app can send notifications.</string>
+    <string name="notification_permission_granted">Notifications are allowed on this device.</string>
+    <string name="notification_permission_button">Allow notifications</string>
+    <string name="notification_permission_denied">Notification permission is missing, so reminders cannot be enabled yet.</string>
+    <string name="notification_test_button">Send test notification</string>
+    <string name="notification_test_title">LengoLens is ready</string>
+    <string name="notification_test_message">Notifications are working. You will be reminded when words are due.</string>
+    <string name="notification_test_sent">Test notification sent.</string>
+    <string name="notification_detail_title">Reminder options</string>
     <string name="notification_streak_alert">Streak Alert</string>
-    <string name="notification_streak_alert_desc">Get notified if you are about to lose your streak</string>
+    <string name="notification_streak_alert_desc">Add streak-preserving copy when you have not reviewed today.</string>
     <string name="notification_milestones">Milestone Celebrations</string>
-    <string name="notification_milestones_desc">Get notified when you reach streak milestones</string>
+    <string name="notification_milestones_desc">Show celebrations and notifications when you reach streak milestones.</string>
     <string name="notification_status_default">Configure your notification preferences above</string>
-    <string name="notification_tip">Enable notifications to keep your learning rhythm and daily streak.</string>
+    <string name="notification_status_enabled">Daily reminder enabled for %s.</string>
+    <string name="notification_status_disabled">Daily reminder disabled.</string>
+    <string name="notification_time_picker_title">Select reminder time</string>
+    <string name="notification_time_saved">Reminder time saved for %s. Enable daily reminders to use it.</string>
+    <string name="notification_streak_alert_enabled">Streak reminder copy enabled.</string>
+    <string name="notification_streak_alert_disabled">Streak reminder copy disabled.</string>
+    <string name="notification_milestone_enabled">Milestone celebrations enabled.</string>
+    <string name="notification_milestone_disabled">Milestone celebrations disabled.</string>
+    <string name="notification_tip">Notifications are sent only when you are logged in, have due words, and have not reviewed today.</string>
+    <string name="notification_channel_daily_name">Review reminders</string>
+    <string name="notification_channel_daily_desc">Reminders for due vocabulary reviews.</string>
+    <string name="notification_channel_milestone_name">Learning milestones</string>
+    <string name="notification_channel_milestone_desc">Celebrations when you reach streak milestones.</string>
+    <string name="notification_due_message">You have %d words due today. A few minutes is enough.</string>
+    <string name="notification_due_streak_message">You have %1$d words due today. Review now to keep your %2$d-day streak.</string>
+    <string name="notification_generic_title">Time to review</string>
+    <string name="notification_generic_message">Open LengoLens for today\'s vocabulary practice.</string>
+    <string name="notification_generic_streak_message">Open LengoLens to keep your %d-day streak.</string>
+    <string name="notification_milestone_title">%d-day milestone reached!</string>
+    <string name="notification_milestone_message">You just kept a %d-day learning streak. Keep going.</string>
+    <plurals name="notification_due_title">
+        <item quantity="one">%d word due</item>
+        <item quantity="other">%d words due</item>
+    </plurals>
 
     <!-- Profile -->
     <string name="profile_section_language">Language</string>
@@ -300,7 +367,7 @@
     <string name="profile_current_password_hint">Current password</string>
     <string name="profile_new_password_hint">New password</string>
     <string name="profile_password_rules_title">New password needs</string>
-    <string name="profile_password_rules">More than 8 characters&#10;Lowercase and uppercase letters&#10;At least 1 number</string>
+    <string name="profile_password_rules">At least 8 characters&#10;Lowercase and uppercase letters&#10;At least 1 number</string>
     <string name="profile_badge">Active learner</string>
     <string name="profile_account_title">Learning account</string>
     <string name="profile_language_changed_vi">Đã chuyển sang tiếng Việt</string>
@@ -314,7 +381,7 @@
     <string name="profile_password_required">Please fill in all fields</string>
     <string name="profile_current_password_required">Please enter your current password</string>
     <string name="profile_new_password_required">Please enter a new password</string>
-    <string name="profile_password_min_length">New password must be longer than 8 characters</string>
+    <string name="profile_password_min_length">New password must be at least 8 characters</string>
     <string name="profile_password_lowercase_required">New password needs at least 1 lowercase letter</string>
     <string name="profile_password_uppercase_required">New password needs at least 1 uppercase letter</string>
     <string name="profile_password_digit_required">New password needs at least 1 number</string>

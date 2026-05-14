@@ -3,6 +3,7 @@ package com.duc.objectlanguage
 import android.app.Application
 import android.content.Context
 import com.duc.objectlanguage.data.api.RetrofitClient
+import com.duc.objectlanguage.data.local.GuestSessionManager
 import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.repository.AppRepository
 import com.duc.objectlanguage.utils.LocaleHelper
@@ -13,6 +14,7 @@ class ObjectLanguageApp : Application() {
 
     lateinit var tokenManager: TokenManager
     lateinit var repository: AppRepository
+    lateinit var guestSessionManager: GuestSessionManager
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(LocaleHelper.applyLocale(base))
@@ -21,6 +23,7 @@ class ObjectLanguageApp : Application() {
     override fun onCreate() {
         super.onCreate()
         tokenManager = TokenManager(this)
+        guestSessionManager = GuestSessionManager(this)
 
         // Initialize Retrofit client with TokenManager
         RetrofitClient.init(tokenManager)
@@ -29,6 +32,6 @@ class ObjectLanguageApp : Application() {
 
         // Schedule background workers for streaks and notifications
         StreakResetWorker.scheduleStreakCheck(this)
-        DailyReminderWorker.scheduleDailyReminder(this, hourOfDay = 19, minute = 0)
+        DailyReminderWorker.syncWithPreferences(this)
     }
 }

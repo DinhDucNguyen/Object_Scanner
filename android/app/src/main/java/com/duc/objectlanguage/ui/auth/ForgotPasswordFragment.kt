@@ -1,6 +1,7 @@
 package com.duc.objectlanguage.ui.auth
 
 import android.os.Bundle
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,6 +34,10 @@ class ForgotPasswordFragment : Fragment() {
                 Toast.makeText(requireContext(), "Vui lòng nhập email", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(requireContext(), "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             binding.btnSendOtp.isEnabled = false
             binding.progressBar.visibility = View.VISIBLE
@@ -43,9 +48,11 @@ class ForgotPasswordFragment : Fragment() {
                 binding.btnSendOtp.isEnabled = true
 
                 result.fold(
-                    onSuccess = {
-                        Toast.makeText(requireContext(), "Mã OTP đã được gửi đến email của bạn", Toast.LENGTH_LONG).show()
-                        val bundle = Bundle().apply { putString("email", email) }
+                    onSuccess = { res ->
+                        val bundle = Bundle().apply {
+                            putString("email", res.email)
+                            putString("masked_email", res.maskedEmail)
+                        }
                         findNavController().navigate(R.id.action_forgotPassword_to_verifyOtp, bundle)
                     },
                     onFailure = {

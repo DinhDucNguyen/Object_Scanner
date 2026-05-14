@@ -14,9 +14,10 @@ class LearningProgressRepository:
         ).first()
 
     def get_due_reviews(self, db: Session, user_id: int):
+        today = now_vietnam().date()
         return db.query(LearningProgress).filter(
             LearningProgress.user_id == user_id,
-            LearningProgress.ngay_on_tiep <= now_vietnam()
+            func.date(LearningProgress.ngay_on_tiep) <= today
         ).all()
 
     def get_by_id(self, db: Session, progress_id: int):
@@ -26,9 +27,10 @@ class LearningProgressRepository:
         return db.query(LearningProgress).filter(LearningProgress.user_id == user_id).count()
 
     def count_due_today(self, db: Session, user_id: int):
+        today = now_vietnam().date()
         return db.query(LearningProgress).filter(
             LearningProgress.user_id == user_id,
-            LearningProgress.ngay_on_tiep <= now_vietnam()
+            func.date(LearningProgress.ngay_on_tiep) <= today
         ).count()
 
     def count_mastered(self, db: Session, user_id: int):

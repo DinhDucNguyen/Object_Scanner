@@ -156,7 +156,7 @@ class CollectionInsightsViewModel(application: Application) : AndroidViewModel(a
         // Gợi ý 3: Tỉ lệ thành công
         when {
             insights.successRate < 0.5 ->
-                suggestions.add("💪 Thử dùng các chế độ ôn khác nhau (Flashcard, Quiz, Gõ từ) để nhớ lâu hơn.")
+                suggestions.add("💪 Thử dùng các chế độ ôn khác nhau (Quiz, Gõ từ) để nhớ lâu hơn.")
             insights.successRate < 0.75 ->
                 suggestions.add("📊 Tỉ lệ đúng ${(insights.successRate * 100).toInt()}%. Luyện phát âm sẽ giúp nhớ từ tốt hơn.")
             insights.successRate >= 0.75 ->

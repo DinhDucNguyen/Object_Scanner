@@ -359,9 +359,8 @@
                     android:layout_height="40dp"
                     android:layout_marginEnd="14dp"
                     android:background="@drawable/bg_icon_warning"
-                    android:padding="10dp"
-                    android:src="@drawable/ic_book"
-                    app:tint="@color/warning" />
+                    android:padding="8dp"
+                    android:src="@drawable/ic_streak_fire" />
 
                 <TextView
                     android:layout_width="0dp"

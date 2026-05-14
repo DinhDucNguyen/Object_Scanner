@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentDictionaryBinding
+import com.duc.objectlanguage.ui.collection.SaveToCollectionBottomSheet
 
 class DictionaryFragment : Fragment() {
 
@@ -73,7 +74,9 @@ class DictionaryFragment : Fragment() {
         }
 
         binding.btnSaveWord.setOnClickListener {
-            viewModel.saveCurrentWord()
+            val translationId = viewModel.result.value?.translationId ?: return@setOnClickListener
+            SaveToCollectionBottomSheet.newInstance(translationId)
+                .show(childFragmentManager, "save_to_collection")
         }
     }
 

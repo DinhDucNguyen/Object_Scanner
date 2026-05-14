@@ -22,8 +22,10 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentScanBinding
+import com.duc.objectlanguage.ui.common.GuestUpsellDialog
 import com.yalantis.ucrop.UCrop
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -139,6 +141,7 @@ class ScanFragment : Fragment() {
 
                 binding.resultCard.visibility = View.VISIBLE
                 binding.cameraOverlay.visibility = View.GONE
+                binding.tvGuestCounter.visibility = View.GONE
                 binding.scanFrame.visibility = View.GONE
                 binding.cameraControls.visibility = View.GONE
                 binding.btnCapture.visibility = View.GONE
@@ -146,7 +149,6 @@ class ScanFragment : Fragment() {
                 binding.tvObjectName.text = result.objectCode.replaceFirstChar { it.uppercase() }
                 binding.tvCategory.text = result.categoryName ?: getString(R.string.scan_category_ai)
 
-                // Chỉ hiển thị bản dịch tiếng Anh
                 val enTrans = result.translations.firstOrNull { it.languageCode == "en" }
                     ?: result.translations.firstOrNull()
                 if (enTrans != null) {
@@ -160,14 +162,18 @@ class ScanFragment : Fragment() {
                     if (!enTrans.definition.isNullOrEmpty()) sb.appendLine(enTrans.definition)
                     binding.tvTranslations.text = sb.toString().trimEnd()
 
-                    binding.btnPlayAudio.visibility = View.VISIBLE
-                    binding.btnPlayAudio.setOnClickListener {
-                        viewModel.playAudio(enTrans.wordName, "en")
-                    }
-
-                    binding.btnAddToCollection.visibility = View.VISIBLE
-                    binding.btnAddToCollection.setOnClickListener {
-                        viewModel.showAddToCollectionDialog(enTrans.id, requireContext())
+                    if (!viewModel.isGuest) {
+                        binding.btnPlayAudio.visibility = View.VISIBLE
+                        binding.btnPlayAudio.setOnClickListener {
+                            viewModel.playAudio(enTrans.audioUrl, enTrans.wordName, "en")
+                        }
+                        binding.btnAddToCollection.visibility = View.VISIBLE
+                        binding.btnAddToCollection.setOnClickListener {
+                            viewModel.showAddToCollectionDialog(enTrans.id, requireContext())
+                        }
+                    } else {
+                        binding.btnPlayAudio.visibility = View.GONE
+                        binding.btnAddToCollection.visibility = View.GONE
                     }
                 }
             } else {
@@ -177,14 +183,18 @@ class ScanFragment : Fragment() {
                 binding.cameraControls.visibility = View.VISIBLE
                 binding.btnCapture.visibility = View.VISIBLE
                 binding.btnGallery.visibility = View.VISIBLE
+                if (viewModel.isGuest) {
+                    binding.tvGuestCounter.visibility = View.VISIBLE
+                }
             }
         }
 
         viewModel.examples.observe(viewLifecycleOwner) { sentences ->
-            if (sentences.isNotEmpty()) {
+            val visibleSentences = sentences.take(3)
+            if (visibleSentences.isNotEmpty()) {
                 binding.tvExamples.visibility = View.VISIBLE
                 binding.tvExamples.text = getString(R.string.scan_examples_title) +
-                    "\n" + sentences.mapIndexed { i, s -> "${i + 1}. $s" }.joinToString("\n")
+                    "\n" + visibleSentences.mapIndexed { i, s -> "${i + 1}. $s" }.joinToString("\n")
             } else {
                 binding.tvExamples.visibility = View.GONE
             }
@@ -201,6 +211,29 @@ class ScanFragment : Fragment() {
                 Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
                 viewModel.clearAddedMsg()
             }
+        }
+
+        viewModel.remainingScans.observe(viewLifecycleOwner) { remaining ->
+            if (viewModel.isGuest) {
+                binding.tvGuestCounter.text = getString(R.string.guest_scan_counter, remaining)
+            }
+        }
+
+        viewModel.showGuestUpsell.observe(viewLifecycleOwner) { show ->
+            if (show) {
+                GuestUpsellDialog.show(
+                    context = requireContext(),
+                    reason = GuestUpsellDialog.Reason.SCAN_LIMIT,
+                    onLogin = { findNavController().navigate(R.id.action_scan_to_login) },
+                    onRegister = { findNavController().navigate(R.id.action_scan_to_register) }
+                )
+                viewModel.clearGuestUpsell()
+            }
+        }
+
+        // Hiển thị counter ngay khi vào màn hình (chỉ với guest)
+        if (viewModel.isGuest) {
+            binding.tvGuestCounter.visibility = View.VISIBLE
         }
 
         // ===== Buttons =====
@@ -221,6 +254,7 @@ class ScanFragment : Fragment() {
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
+            if (_binding == null) return@addListener
             val cameraProvider = cameraProviderFuture.get()
 
             val preview = Preview.Builder().build().also {
@@ -264,6 +298,9 @@ class ScanFragment : Fragment() {
                         
                         // Apply rotation
                         val rotatedBitmap = rotateBitmap(bitmap, rotation.toFloat())
+                        if (rotatedBitmap !== bitmap) {
+                            bitmap.recycle()
+                        }
                         
                         // Convert sang JPEG bytes
                         val jpegBytes = bitmapToJpegBytes(rotatedBitmap)

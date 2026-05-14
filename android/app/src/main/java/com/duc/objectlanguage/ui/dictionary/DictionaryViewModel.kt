@@ -1,13 +1,13 @@
 package com.duc.objectlanguage.ui.dictionary
 
 import android.app.Application
-import android.media.MediaPlayer
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.model.TranslateResponse
+import com.duc.objectlanguage.utils.AudioPlayerManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -36,7 +36,7 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
     val toLang: LiveData<String> = _toLang
 
     private var translateJob: Job? = null
-    private var mediaPlayer: MediaPlayer? = null
+    private val audioPlayer = AudioPlayerManager(application.applicationContext)
     private var lastRequestKey: String? = null
 
     fun loadDefaultLangs() {
@@ -97,23 +97,11 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
 
     fun playAudio(audioUrl: String?) {
         if (audioUrl.isNullOrEmpty()) {
-            // Fallback: use TTS via the word in result
             _error.value = "Không có audio cho từ này"
             return
         }
-        try {
-            mediaPlayer?.release()
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(audioUrl)
-                prepareAsync()
-                setOnPreparedListener { start() }
-                setOnErrorListener { _, _, _ ->
-                    _error.postValue("Lỗi phát audio")
-                    true
-                }
-            }
-        } catch (e: Exception) {
-            _error.value = "Lỗi phát audio: ${e.message}"
+        audioPlayer.playUrl(audioUrl) {
+            _error.postValue("Lỗi phát audio")
         }
     }
 
@@ -129,6 +117,6 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
 
     override fun onCleared() {
         super.onCleared()
-        mediaPlayer?.release()
+        audioPlayer.release()
     }
 }
