@@ -1,5 +1,5 @@
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query, Request
 # pyrefly: ignore [missing-import]
 from fastapi.responses import StreamingResponse
 # pyrefly: ignore [missing-import]
@@ -46,8 +46,10 @@ def scan_object(
 
 @router.post("/scan/image", response_model=ScanResponse)
 async def scan_image(
+    request: Request,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    user_id: Optional[int] = Depends(get_optional_user_id),
 ):
     """Scan bằng ảnh — gọi Gemini Vision API để nhận diện."""
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -59,7 +61,12 @@ async def scan_image(
     
     compressed_bytes = compress_image(image_bytes)
     
-    return scan_service.process_scan_image(db, compressed_bytes)
+    return scan_service.process_scan_image(
+        db,
+        compressed_bytes,
+        user_id=user_id,
+        base_url=str(request.base_url).rstrip("/"),
+    )
 
 
 @router.get("/objects/{object_code}/translations", response_model=List[TranslationResponse])

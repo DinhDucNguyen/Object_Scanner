@@ -11,6 +11,7 @@ from app.models.example import ViDu
 from app.models.translation import Translation
 from app.models.object_media import ObjectMedia
 from app.models.learning_progress import LearningProgress
+from app.models.review_log import ReviewLog
 from app.models.user_collection import UserCollection
 from app.models.collection_item import CollectionItem
 from app.models.scan_history import ScanHistory

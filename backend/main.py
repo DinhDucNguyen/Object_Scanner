@@ -2,7 +2,7 @@ import os
 import logging
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
@@ -48,11 +48,17 @@ os.makedirs("uploads/scans", exist_ok=True)
 os.makedirs("uploads/objects", exist_ok=True)
 os.makedirs("uploads/avatars", exist_ok=True)
 os.makedirs("uploads/tts", exist_ok=True)
+os.makedirs("static/admin", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/admin-panel", StaticFiles(directory="static/admin", html=True), name="admin-panel")
 
 @app.get("/")
 def read_root():
     return {"message": f"Welcome to {settings.APP_NAME}"}
+
+@app.get("/admin")
+def admin_redirect():
+    return RedirectResponse(url="/admin-panel/index.html")
 
 if __name__ == "__main__":
     import uvicorn

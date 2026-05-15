@@ -241,15 +241,29 @@
                         android:textSize="17sp" />
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tvExamples"
+                <LinearLayout
+                    android:id="@+id/llExamplesContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
-                    android:lineSpacingExtra="6dp"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="15sp"
-                    android:visibility="gone" />
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/scan_examples_title"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <LinearLayout
+                        android:id="@+id/llExamples"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"

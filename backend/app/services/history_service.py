@@ -153,7 +153,7 @@ class HistoryFeedbackService:
     def _pick_review_translation(self, db: Session, object_id: int) -> Translation | None:
         translations = [
             t for t in self.trans_repo.get_by_object_id(db, object_id)
-            if getattr(t, "thoi_gian_xoa", None) is None
+            if getattr(t, "thoi_gian_xoa", None) is None and bool(t.da_xac_nhan)
         ]
         if not translations:
             return None

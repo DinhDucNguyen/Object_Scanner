@@ -278,13 +278,20 @@
     <string name="ci_not_started_label">Chưa ôn</string>
 
     <!-- Analytics -->
+    <string name="analytics_overview_title">Tổng quan học tập</string>
+    <string name="analytics_due_today">Cần ôn hôm nay</string>
+    <string name="analytics_longest_streak">Kỷ lục chuỗi</string>
+    <string name="analytics_total_reviews">Tổng lượt ôn</string>
+    <string name="analytics_empty_title">Chưa có dữ liệu học tập</string>
+    <string name="analytics_empty_message">Hãy lưu vài từ và ôn tập để biểu đồ bắt đầu có số liệu.</string>
+    <string name="analytics_no_chart_data">Chưa có dữ liệu biểu đồ</string>
     <string name="analytics_total_words">Tổng từ</string>
     <string name="analytics_mastered">Thành thạo</string>
     <string name="analytics_reviews_today">Ôn hôm nay</string>
     <string name="analytics_current_streak">Chuỗi hiện tại</string>
-    <string name="analytics_progress_7_days">Tiến độ 7 ngày gần đây</string>
+    <string name="analytics_progress_7_days">Lượt ôn tích lũy 7 ngày</string>
     <string name="analytics_mastery_distribution">Phân bố thành thạo</string>
-    <string name="analytics_daily_activity">Hoạt động hằng ngày</string>
+    <string name="analytics_daily_activity">Lượt ôn từng ngày</string>
 
     <!-- Notifications -->
     <string name="notification_settings_title">Cài đặt thông báo</string>

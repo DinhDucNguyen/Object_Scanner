@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — LengoLens</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --sb-w: 230px;
+      --tb-h: 52px;
+      --sb-bg: #1e2a3a;
+      --sb-hover: rgba(255, 255, 255, .06);
+      --sb-active: rgba(13, 110, 253, .18);
+      --sb-border: rgba(255, 255, 255, .08);
+      --sb-text: rgba(255, 255, 255, .6);
+      --sb-text-active: #fff;
+      --primary: #0d6efd;
+      --primary-hover: #0b5ed7;
+      --success: #198754;
+      --danger: #dc3545;
+      --warning: #fd7e14;
+      --bg: #f0f2f5;
+      --surface: #fff;
+      --border: #dee2e6;
+      --text: #212529;
+      --muted: #6c757d;
+      --radius: 6px;
+      --card-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    /* ─── Login ─── */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--sb-bg);
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 360px;
+      background: var(--surface);
+      border-radius: 8px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .35);
+      overflow: hidden;
+    }
+
+    .login-header {
+      background: var(--primary);
+      padding: 1.5rem 1.5rem 1.25rem;
+      text-align: center;
+      color: #fff;
+    }
+
+    .login-header .logo-wrap {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, .2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin: 0 auto .75rem;
+    }
+
+    .login-header h4 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .login-header p {
+      margin: .2rem 0 0;
+      font-size: .8rem;
+      opacity: .8;
+    }
+
+    .login-body {
+      padding: 1.5rem;
+    }
+
+    .login-body .form-label {
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .login-body .form-control {
+      font-size: .9rem;
+      border-radius: var(--radius);
+      border-color: var(--border);
+    }
+
+    .login-body .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, .15);
+    }
+
+    .pass-wrap {
+      position: relative;
+    }
+
+    .pass-wrap .form-control {
+      padding-right: 38px;
+    }
+
+    .pass-eye {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .btn-login {
+      background: var(--primary);
+      border: none;
+      font-weight: 600;
+      border-radius: var(--radius);
+      height: 40px;
+      font-size: .9rem;
+    }
+
+    .btn-login:hover {
+      background: var(--primary-hover);
+    }
+
+    /* ─── Sidebar ─── */
+    #sidebar {
+      width: var(--sb-w);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 200;
+      background: var(--sb-bg);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(0, 0, 0, .15);
+    }
+
+    .sb-brand {
+      padding: .9rem 1rem;
+      border-bottom: 1px solid var(--sb-border);
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      flex-shrink: 0;
+    }
+
+    .sb-brand .icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .sb-brand .name {
+      color: #fff;
+      font-weight: 700;
+      font-size: .95rem;
+      line-height: 1.2;
+    }
+
+    .sb-brand .sub {
+      color: rgba(255, 255, 255, .35);
+      font-size: .68rem;
+      font-weight: 400;
+    }
+
+    .sb-menu {
+      flex: 1;
+      overflow-y: auto;
+      padding: .5rem 0;
+    }
+
+    .sb-section {
+      color: rgba(255, 255, 255, .28);
+      font-size: .62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      padding: .9rem 1rem .3rem;
+    }
+
+    .nav-item {
+      display: block;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      color: var(--sb-text);
+      padding: .5rem 1rem;
+      text-decoration: none;
+      font-size: .85rem;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+      transition: background .12s, color .12s, border-color .12s;
+    }
+
+    .nav-link i {
+      font-size: .95rem;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .nav-link:hover {
+      background: var(--sb-hover);
+      color: rgba(255, 255, 255, .85);
+    }
+
+    .nav-link.active {
+      background: var(--sb-active);
+      color: var(--sb-text-active);
+      border-left-color: var(--primary);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: #dc3545;
+      color: #fff;
+      font-size: .65rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .sb-footer {
+      padding: .6rem .75rem;
+      border-top: 1px solid var(--sb-border);
+      flex-shrink: 0;
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      width: 100%;
+      background: none;
+      border: 1px solid var(--sb-border);
+      color: rgba(255, 255, 255, .4);
+      font-size: .8rem;
+      padding: .4rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background .12s, color .12s;
+    }
+
+    .btn-logout:hover {
+      background: var(--sb-hover);
+      color: rgba(255, 255, 255, .7);
+    }
+
+    /* ─── Main ─── */
+    #main {
+      margin-left: var(--sb-w);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Topbar ─── */
+    #topbar {
+      height: var(--tb-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 1.25rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+    }
+
+    #page-title {
+      font-size: .95rem;
+      font-weight: 600;
+      flex: 1;
+      color: var(--text);
+    }
+
+    .tb-user {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .tb-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    #topbar-username {
+      font-size: .82rem;
+      color: var(--muted);
+    }
+
+    /* ─── Content sections ─── */
+    .section {
+      display: none;
+      padding: 1.25rem;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* ─── Stat cards ─── */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .875rem;
+      margin-bottom: 1.1rem;
+    }
+
+    @media (min-width: 1100px) {
+      .stat-row {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    .stat-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+      box-shadow: var(--card-shadow);
+      border-top: 3px solid transparent;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: box-shadow .15s, transform .1s;
+    }
+
+    .stat-box:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+      transform: translateY(-1px);
+    }
+
+    .stat-box .sb-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: .4rem;
+    }
+
+    .stat-box .sb-label {
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .stat-box .sb-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .9rem;
+    }
+
+    .stat-box .sb-val {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    /* ─── Section toolbar ─── */
+    .section-toolbar {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .875rem;
+    }
+
+    .section-toolbar .spacer {
+      flex: 1;
+    }
+
+    .input-search {
+      position: relative;
+    }
+
+    .input-search i {
+      position: absolute;
+      left: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: .82rem;
+      pointer-events: none;
+    }
+
+    .input-search input {
+      padding-left: 28px;
+      border-color: var(--border);
+      border-radius: var(--radius);
+      font-size: .83rem;
+      height: 33px;
+    }
+
+    .input-search input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, .12);
+      outline: none;
+    }
+
+    /* ─── Panel / table card ─── */
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: .65rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+
+    .table {
+      margin-bottom: 0;
+      font-size: .85rem;
+    }
+
+    .table thead th {
+      background: #f8f9fa;
+      border-top: none;
+      border-bottom: 1px solid var(--border);
+      font-size: .73rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      padding: .55rem 1rem;
+      white-space: nowrap;
+    }
+
+    .table tbody td {
+      padding: .65rem 1rem;
+      vertical-align: middle;
+      border-color: #f0f0f0;
+    }
+
+    .table tbody tr:hover>td {
+      background: #f8f9fa;
+    }
+
+    .table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem;
+      color: var(--muted);
+    }
+
+    .empty-state i {
+      font-size: 2rem;
+      opacity: .25;
+      display: block;
+      margin-bottom: .5rem;
+    }
+
+    .empty-state p {
+      margin: 0;
+      font-size: .85rem;
+    }
+
+    /* ─── Badges ─── */
+    .badge {
+      font-size: .7rem;
+      font-weight: 600;
+      padding: .25em .6em;
+      border-radius: 4px;
+    }
+
+    .badge-pending {
+      background: #fff3cd;
+      color: #664d03;
+    }
+
+    .badge-approved {
+      background: #d1e7dd;
+      color: #0a3622;
+    }
+
+    .badge-rejected {
+      background: #f8d7da;
+      color: #58151c;
+    }
+
+    .badge-lang {
+      background: #cfe2ff;
+      color: #084298;
+    }
+
+    .badge-neutral {
+      background: #f1f3f5;
+      color: #495057;
+    }
+
+    .badge-role-admin {
+      background: #f8d7da;
+      color: #58151c;
+    }
+
+    .badge-role-user {
+      background: #d1e7dd;
+      color: #0a3622;
+    }
+
+    /* ─── Action icon buttons ─── */
+    .btn-actions {
+      display: flex;
+      gap: 3px;
+    }
+
+    .btn-act {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .82rem;
+      cursor: pointer;
+      transition: all .1s;
+    }
+
+    .btn-act:hover {
+      background: #e7f1ff;
+      border-color: #b6d4fe;
+      color: var(--primary);
+    }
+
+    .btn-act.del:hover {
+      background: #f8d7da;
+      border-color: #f5c2c7;
+      color: var(--danger);
+    }
+
+    .translation-stack {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      flex-wrap: wrap;
+    }
+
+    #section-objects .table th:nth-child(4),
+    #section-objects .table td:nth-child(4) {
+      min-width: 120px;
+    }
+
+    #section-objects .table th:nth-child(5),
+    #section-objects .table td:nth-child(5) {
+      min-width: 140px;
+    }
+
+    /* ─── Confidence bar ─── */
+    .conf-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .conf-track {
+      height: 5px;
+      width: 55px;
+      background: #e9ecef;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .conf-fill {
+      height: 100%;
+      border-radius: 99px;
+    }
+
+    /* ─── Bootstrap overrides ─── */
+    .btn {
+      border-radius: var(--radius);
+      font-size: .83rem;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .btn-sm {
+      padding: .28rem .65rem;
+      font-size: .78rem;
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: var(--radius);
+      border-color: var(--border);
+      font-size: .85rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, .12);
+    }
+
+    .form-label {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .modal-content {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, .15);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid var(--border);
+      padding: .875rem 1.1rem;
+    }
+
+    .modal-title {
+      font-weight: 700;
+      font-size: .9rem;
+    }
+
+    .modal-body {
+      padding: 1.1rem;
+    }
+
+    .modal-footer {
+      border-top: 1px solid var(--border);
+      padding: .7rem 1.1rem;
+    }
+
+    .vocab-lang-block {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .875rem;
+      margin-top: .6rem;
+      background: #fafbfc;
+    }
+
+    /* ─── Toast ─── */
+    #toast-container {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+
+    .toast-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .6rem .9rem;
+      border-radius: 6px;
+      min-width: 230px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .1);
+      font-size: .82rem;
+      font-weight: 500;
+      animation: slideUp .16s ease;
+    }
+
+    .toast-item.success {
+      border-left: 3px solid var(--success);
+    }
+
+    .toast-item.success i {
+      color: var(--success);
+    }
+
+    .toast-item.danger {
+      border-left: 3px solid var(--danger);
+    }
+
+    .toast-item.danger i {
+      color: var(--danger);
+    }
+
+    .toast-item.warning {
+      border-left: 3px solid var(--warning);
+    }
+
+    .toast-item.warning i {
+      color: var(--warning);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 4px;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════ LOGIN ═══════════════════════════════ -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="login-header">
+        <div class="logo-wrap"><i class="bi bi-eye-fill"></i></div>
+        <h4>LengoLens</h4>
+        <p>Trang quản trị hệ thống</p>
+      </div>
+      <div class="login-body">
+        <div class="mb-3">
+          <label class="form-label">Tài khoản</label>
+          <input id="login-user" type="text" class="form-control" placeholder="username hoặc email" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Mật khẩu</label>
+          <div class="pass-wrap">
+            <input id="login-pass" type="password" class="form-control" placeholder="••••••••" />
+            <button class="pass-eye" type="button" onclick="togglePass()"><i id="pass-eye-icon"
+                class="bi bi-eye-slash"></i></button>
+          </div>
+        </div>
+        <div id="login-err" class="alert alert-danger py-2 px-3 mb-3"
+          style="display:none;font-size:.82rem;border-radius:var(--radius);"></div>
+        <button class="btn btn-primary btn-login w-100 text-white" onclick="doLogin()">
+          <span id="login-label">Đăng nhập</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════ -->
+  <div id="sidebar">
+    <div class="sb-brand">
+      <div class="icon"><i class="bi bi-eye-fill"></i></div>
+      <div>
+        <div class="name">LengoLens</div>
+        <div class="sub">Admin Panel</div>
+      </div>
+    </div>
+    <nav class="sb-menu">
+      <div class="sb-section">Tổng quan</div>
+      <a class="nav-link active" href="#" data-section="dashboard">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+      <div class="sb-section">Nội dung</div>
+      <a class="nav-link" href="#" data-section="predictions">
+        <i class="bi bi-clock-history"></i> Kiểm duyệt
+        <span class="nav-badge" id="badge-predictions" style="display:none;">0</span>
+      </a>
+      <a class="nav-link" href="#" data-section="objects">
+        <i class="bi bi-box-seam"></i> Đối tượng
+      </a>
+      <a class="nav-link" href="#" data-section="translations">
+        <i class="bi bi-translate"></i> Bản dịch
+      </a>
+      <a class="nav-link" href="#" data-section="scan-history">
+        <i class="bi bi-camera-fill"></i> Lịch sử quét
+      </a>
+      <a class="nav-link" href="#" data-section="categories">
+        <i class="bi bi-folder2-open"></i> Danh mục
+      </a>
+      <div class="sb-section">Hệ thống</div>
+      <a class="nav-link" href="#" data-section="users">
+        <i class="bi bi-people"></i> Người dùng
+      </a>
+    </nav>
+    <div class="sb-footer">
+      <button class="btn-logout" onclick="doLogout()">
+        <i class="bi bi-box-arrow-left"></i> Đăng xuất
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
+  <div id="main">
+    <div id="topbar">
+      <span id="page-title">Dashboard</span>
+      <div class="tb-user">
+        <div class="tb-avatar" id="topbar-avatar">A</div>
+        <span id="topbar-username">Admin</span>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="section-dashboard" class="section active">
+      <div class="stat-row" id="stat-cards"></div>
+      <div class="panel">
+        <div class="panel-header">
+          <i class="bi bi-clock-history text-warning"></i>
+          Predictions đang chờ duyệt
+          <div class="ms-auto d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="loadDashboard()">
+              <i class="bi bi-arrow-clockwise"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-primary" onclick="navigateTo('predictions')">
+              Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+        <div id="dash-pending-table"></div>
+      </div>
+    </div>
+
+    <!-- Predictions -->
+    <div id="section-predictions" class="section">
+      <div class="section-toolbar">
+        <select id="pred-filter" class="form-select form-select-sm" style="width:145px;" onchange="loadPredictions()">
+          <option value="cho_duyet">Chờ duyệt</option>
+          <option value="da_duyet">Đã duyệt</option>
+          <option value="tu_choi">Từ chối</option>
+        </select>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadPredictions()">
+          <i class="bi bi-arrow-clockwise"></i> Làm mới
+        </button>
+      </div>
+      <div id="batch-toolbar" class="d-flex align-items-center gap-2 mb-2 px-2 py-2 rounded"
+        style="display:none!important;background:#e7f1ff;border:1px solid #b6d4fe;">
+        <span class="fw-semibold text-primary" style="font-size:.83rem;"><span id="batch-count">0</span> prediction đã
+          chọn</span>
+        <div class="ms-auto d-flex gap-2">
+          <button class="btn btn-sm btn-success" onclick="batchApprove()"><i class="bi bi-check-lg me-1"></i>Duyệt tất
+            cả</button>
+          <button class="btn btn-sm btn-danger" onclick="batchReject()"><i class="bi bi-x-lg me-1"></i>Từ chối tất
+            cả</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <i class="bi bi-clock-history text-warning"></i> Predictions
+          <span class="ms-auto text-muted result-count" style="font-size:.75rem;font-weight:400;"></span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th style="width:36px;"><input type="checkbox" id="pred-check-all" class="form-check-input"
+                    onchange="toggleAllPredChecks(this)" /></th>
+                <th style="width:60px;">ID</th>
+                <th style="width:52px;">Ảnh</th>
+                <th>Nhãn dự đoán</th>
+                <th style="width:130px;">Độ tin cậy</th>
+                <th style="width:120px;">Trạng thái</th>
+                <th style="width:155px;">Thời gian</th>
+                <th style="width:55px;"></th>
+              </tr>
+            </thead>
+            <tbody id="pred-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objects -->
+    <div id="section-objects" class="section">
+      <div class="section-toolbar">
+        <div class="input-search">
+          <i class="bi bi-search"></i>
+          <input id="obj-search" type="text" class="form-control form-control-sm" style="width:200px;"
+            placeholder="Tìm mã đối tượng..." oninput="loadObjects()" />
+        </div>
+        <select id="obj-cat-filter" class="form-select form-select-sm" style="width:170px;" onchange="loadObjects()">
+          <option value="">Tất cả danh mục</option>
+        </select>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-outline-secondary me-1" onclick="loadObjects()"><i
+            class="bi bi-arrow-clockwise"></i></button>
+        <button class="btn btn-sm btn-primary" onclick="openCreateObjectModal()">
+          <i class="bi bi-plus-lg me-1"></i>Thêm mới
+        </button>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <i class="bi bi-box-seam text-primary"></i> Đối tượng
+          <span class="ms-auto text-muted result-count" style="font-size:.75rem;font-weight:400;"></span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th style="width:60px;">ID</th>
+                <th>Mã đối tượng</th>
+                <th>Danh mục</th>
+                <th style="width:130px;">Bản dịch</th>
+                <th style="width:110px;"></th>
+              </tr>
+            </thead>
+            <tbody id="obj-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Translations -->
+    <div id="section-translations" class="section">
+      <div class="section-toolbar">
+        <div class="input-search">
+          <i class="bi bi-search"></i>
+          <input id="trans-search" type="text" class="form-control form-control-sm" style="width:185px;"
+            placeholder="Tìm mã đối tượng..." oninput="loadTranslations()" />
+        </div>
+        <select id="trans-lang-filter" class="form-select form-select-sm" style="width:155px;"
+          onchange="loadTranslations()">
+          <option value="">Tất cả ngôn ngữ</option>
+          <option value="en">English</option>
+          <option value="vi">Tiếng Việt</option>
+        </select>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-outline-secondary me-1" onclick="loadTranslations()"><i
+            class="bi bi-arrow-clockwise"></i></button>
+        <button class="btn btn-sm btn-primary" onclick="openCreateTransModal()">
+          <i class="bi bi-plus-lg me-1"></i>Thêm mới
+        </button>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <i class="bi bi-translate text-primary"></i> Bản dịch
+          <span class="ms-auto text-muted result-count" style="font-size:.75rem;font-weight:400;"></span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th style="width:60px;">ID</th>
+                <th>Object</th>
+                <th style="width:65px;">Lang</th>
+                <th>Từ vựng</th>
+                <th>Phiên âm</th>
+                <th style="width:105px;">Xác nhận</th>
+                <th style="width:60px;">Ví dụ</th>
+                <th style="width:60px;"></th>
+              </tr>
+            </thead>
+            <tbody id="trans-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div id="section-categories" class="section">
+      <div class="section-toolbar">
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-outline-secondary me-1" onclick="loadCategories()"><i
+            class="bi bi-arrow-clockwise"></i></button>
+        <button class="btn btn-sm btn-primary" onclick="openCreateCatModal()">
+          <i class="bi bi-plus-lg me-1"></i>Thêm mới
+        </button>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <i class="bi bi-folder2-open text-warning"></i> Danh mục
+          <span class="ms-auto text-muted result-count" style="font-size:.75rem;font-weight:400;"></span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th style="width:60px;">ID</th>
+                <th>Tên danh mục</th>
+                <th style="width:130px;">Danh mục cha</th>
+                <th>Mô tả</th>
+                <th style="width:60px;"></th>
+              </tr>
+            </thead>
+            <tbody id="cat-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan History -->
+    <div id="section-scan-history" class="section">
+      <div class="section-toolbar">
+        <div class="input-search">
+          <i class="bi bi-search"></i>
+          <input id="sh-obj-search" type="text" class="form-control form-control-sm" style="width:175px;"
+            placeholder="Mã đối tượng..." oninput="loadScanHistory()" />
+        </div>
+        <div class="input-search ms-1">
+          <i class="bi bi-person"></i>
+          <input id="sh-user-search" type="text" class="form-control form-control-sm"
+            style="width:160px;padding-left:28px;" placeholder="User ID..." oninput="loadScanHistory()" />
+        </div>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadScanHistory()"><i
+            class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <i class="bi bi-camera-fill text-warning"></i> Lịch sử quét
+          <span class="ms-auto text-muted result-count" style="font-size:.75rem;font-weight:400;"></span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th style="width:60px;">ID</th>
+                <th style="width:52px;">Ảnh</th>
+                <th style="width:120px;">User</th>
+                <th>Đối tượng</th>
+                <th style="width:130px;">Tin cậy</th>
+                <th style="width:165px;">Thời gian</th>
+              </tr>
+            </thead>
+            <tbody id="sh-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users -->
+    <div id="section-users" class="section">
+      <div class="section-toolbar">
+        <div class="input-search">
+          <i class="bi bi-search"></i>
+          <input id="user-search" type="text" class="form-control form-control-sm" style="width:210px;"
+            placeholder="Username hoặc email..." oninput="loadUsers()" />
+        </div>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadUsers()"><i
+            class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <i class="bi bi-people text-primary"></i> Người dùng
+          <span class="ms-auto text-muted result-count" style="font-size:.75rem;font-weight:400;"></span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th style="width:60px;">ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Họ tên</th>
+                <th style="width:90px;">Vai trò</th>
+                <th style="width:100px;">Trạng thái</th>
+                <th style="width:130px;">Đăng nhập cuối</th>
+                <th style="width:55px;"></th>
+              </tr>
+            </thead>
+            <tbody id="user-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <!-- ═══ Confirm Modal ═══ -->
+  <div class="modal fade" id="confirm-modal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-title" id="cm-title">Xác nhận</span>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="cm-body" style="font-size:.88rem;"></div>
+        <div class="modal-footer">
+          <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+          <button class="btn btn-sm btn-danger" id="cm-confirm">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Prediction Modal ═══ -->
+  <div class="modal fade" id="pred-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-title">Prediction <span class="text-primary">#<span id="pm-id"></span></span></span>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="pm-body"></div>
+        <div class="modal-footer" id="pm-footer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Form Modal ═══ -->
+  <div class="modal fade" id="form-modal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-title" id="fm-title"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="fm-body"></div>
+        <div class="modal-footer">
+          <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+          <button class="btn btn-sm btn-primary" id="fm-submit">Lưu thay đổi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // ============================================================
+    // State
+    // ============================================================
+    let TOKEN = localStorage.getItem('admin_token') || '';
+    const API = '/api/admin';
+    let categories = [];
+
+    // ============================================================
+    // Auth
+    // ============================================================
+    function togglePass() {
+      const inp = document.getElementById('login-pass');
+      const ico = document.getElementById('pass-eye-icon');
+      if (inp.type === 'password') { inp.type = 'text'; ico.className = 'bi bi-eye'; }
+      else { inp.type = 'password'; ico.className = 'bi bi-eye-slash'; }
+    }
+
+    async function doLogin() {
+      const user = document.getElementById('login-user').value.trim();
+      const pass = document.getElementById('login-pass').value;
+      const err = document.getElementById('login-err');
+      const btn = document.getElementById('login-label');
+      err.style.display = 'none';
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang đăng nhập...';
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: user, password: pass }),
+        });
+        if (!res.ok) {
+          err.textContent = 'Sai tài khoản hoặc mật khẩu';
+          err.style.display = '';
+          btn.textContent = 'Đăng nhập';
+          return;
+        }
+        const data = await res.json();
+        TOKEN = data.access_token;
+        localStorage.setItem('admin_token', TOKEN);
+        document.getElementById('login-screen').style.display = 'none';
+        setUserDisplay(user);
+        initApp();
+      } catch (e) {
+        err.textContent = 'Không kết nối được server';
+        err.style.display = '';
+        btn.textContent = 'Đăng nhập';
+      }
+    }
+
+    function setUserDisplay(user) {
+      const name = user || 'Admin';
+      document.getElementById('topbar-username').textContent = name;
+      document.getElementById('topbar-avatar').textContent = name.charAt(0).toUpperCase();
+    }
+
+    function doLogout(expired = false) {
+      TOKEN = '';
+      localStorage.removeItem('admin_token');
+      document.querySelectorAll('.modal.show').forEach(el => {
+        bootstrap.Modal.getInstance(el)?.hide();
+      });
+      const err = document.getElementById('login-err');
+      if (expired) {
+        err.textContent = 'Phiên làm việc đã hết hạn, vui lòng đăng nhập lại.';
+        err.style.display = '';
+      } else {
+        err.style.display = 'none';
+      }
+      document.getElementById('login-screen').style.display = '';
+      document.getElementById('login-label').textContent = 'Đăng nhập';
+    }
+
+    // ============================================================
+    // Init
+    // ============================================================
+    function initApp() {
+      document.querySelectorAll('[data-section]').forEach(a => {
+        a.addEventListener('click', e => { e.preventDefault(); navigateTo(a.dataset.section); });
+      });
+      loadCategories();
+      navigateTo('dashboard');
+    }
+
+    const SECTION_LABELS = {
+      dashboard: 'Dashboard', predictions: 'Kiểm duyệt',
+      objects: 'Đối tượng', translations: 'Bản dịch',
+      'scan-history': 'Lịch sử quét', categories: 'Danh mục', users: 'Người dùng',
+    };
+
+    function navigateTo(section) {
+      document.querySelectorAll('[data-section]').forEach(a =>
+        a.classList.toggle('active', a.dataset.section === section)
+      );
+      document.querySelectorAll('.section').forEach(s =>
+        s.classList.toggle('active', s.id === 'section-' + section)
+      );
+      document.getElementById('page-title').textContent = SECTION_LABELS[section] || section;
+      const loaders = {
+        dashboard: loadDashboard, predictions: loadPredictions,
+        objects: loadObjects, translations: loadTranslations,
+        'scan-history': loadScanHistory, categories: loadCategories, users: loadUsers,
+      };
+      if (loaders[section]) loaders[section]();
+    }
+
+    // ============================================================
+    // API helpers
+    // ============================================================
+    async function api(path, opts = {}) {
+      const res = await fetch(API + path, {
+        ...opts,
+        headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json', ...(opts.headers || {}) },
+      });
+      if (res.status === 401) { doLogout(true); throw new Error('Phiên hết hạn'); }
+      return res;
+    }
+
+    async function apiJSON(path, opts = {}) {
+      const res = await api(path, opts);
+      if (!res.ok) { const t = await res.text(); throw new Error(t); }
+      return res.json();
+    }
+
+    // ============================================================
+    // Toast
+    // ============================================================
+    const TOAST_ICONS = { success: 'bi-check-circle-fill', danger: 'bi-x-circle-fill', warning: 'bi-exclamation-triangle-fill' };
+
+    function toast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `toast-item ${type}`;
+      el.innerHTML = `<i class="bi ${TOAST_ICONS[type] || 'bi-info-circle'}"></i><span>${msg}</span>`;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(16px)'; el.style.transition = '.18s'; setTimeout(() => el.remove(), 180); }, 2800);
+    }
+
+    // ============================================================
+    // Confirm modal (thay thế browser confirm)
+    // ============================================================
+    function confirmAction(message, onConfirm, title = 'Xác nhận') {
+      document.getElementById('cm-title').textContent = title;
+      document.getElementById('cm-body').textContent = message;
+      const btn = document.getElementById('cm-confirm');
+      const modal = new bootstrap.Modal(document.getElementById('confirm-modal'));
+      const handler = () => { modal.hide(); onConfirm(); btn.removeEventListener('click', handler); };
+      btn.addEventListener('click', handler);
+      document.getElementById('confirm-modal').addEventListener('hidden.bs.modal', () => {
+        btn.removeEventListener('click', handler);
+      }, { once: true });
+      modal.show();
+    }
+
+    // ============================================================
+    // Helpers
+    // ============================================================
+    function confBar(v) {
+      if (!v) return '<span class="text-muted">—</span>';
+      const pct = Math.round(v * 100);
+      const color = pct >= 80 ? '#198754' : pct >= 60 ? '#fd7e14' : '#dc3545';
+      return `<div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:${pct}%;background:${color};"></div></div><small style="color:${color};font-weight:600;">${pct}%</small></div>`;
+    }
+
+    function translationBadge(approved, pending = 0) {
+      approved = Number(approved || 0);
+      pending = Number(pending || 0);
+      const pendingLabel = pending > 0
+        ? `<span class="badge badge-pending" title="B&#7843;n d&#7883;ch Gemini ch&#432;a duy&#7879;t">${pending} ch&#7901; duy&#7879;t</span>`
+        : '';
+      return `<div class="translation-stack">
+    <span class="badge ${approved > 0 ? 'badge-approved' : 'badge-neutral'}" title="B&#7843;n d&#7883;ch &#273;&#227; duy&#7879;t">${approved} b&#7843;n d&#7883;ch</span>
+    ${pendingLabel}
+  </div>`;
+    }
+
+    function fmtDate(s) {
+      if (!s) return '—';
+      return new Date(s).toLocaleString('vi', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function fmtDateShort(s) {
+      if (!s) return '—';
+      return new Date(s).toLocaleDateString('vi', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function emptyRow(cols, icon, msg) {
+      return `<tr><td colspan="${cols}"><div class="empty-state"><i class="bi ${icon}"></i><p>${msg}</p></div></td></tr>`;
+    }
+
+    // ============================================================
+    // Dashboard
+    // ============================================================
+    async function loadDashboard() {
+      try {
+        const stats = await apiJSON('/dashboard');
+
+        const badge = document.getElementById('badge-predictions');
+        if (stats.pending_predictions > 0) { badge.textContent = stats.pending_predictions; badge.style.display = ''; }
+        else { badge.style.display = 'none'; }
+
+        const cards = [
+          { label: 'Người dùng', value: stats.total_users, icon: 'bi-people-fill', color: '#0d6efd', bg: '#e7f1ff', nav: 'users' },
+          { label: 'Đối tượng', value: stats.total_objects, icon: 'bi-box-seam-fill', color: '#6610f2', bg: '#f0e6ff', nav: 'objects' },
+          { label: 'Bản dịch', value: stats.total_translations, icon: 'bi-translate', color: '#198754', bg: '#d1e7dd', nav: 'translations' },
+          { label: 'Lịch sử quét', value: stats.total_scans, icon: 'bi-camera-fill', color: '#fd7e14', bg: '#ffe5cc', nav: null },
+          { label: 'Chờ duyệt', value: stats.pending_predictions, icon: 'bi-hourglass-split', color: '#dc3545', bg: '#f8d7da', nav: 'predictions' },
+          { label: 'Đã duyệt', value: stats.approved_predictions, icon: 'bi-check-circle-fill', color: '#198754', bg: '#d1e7dd', nav: 'predictions' },
+        ];
+
+        document.getElementById('stat-cards').innerHTML = cards.map(c => `
+      <div class="stat-box" style="border-top-color:${c.color};" ${c.nav ? `onclick="navigateTo('${c.nav}')" title="Xem ${c.label}"` : ''}>
+        <div class="sb-top">
+          <span class="sb-label">${c.label}</span>
+          <div class="sb-icon" style="background:${c.bg};color:${c.color};"><i class="bi ${c.icon}"></i></div>
+        </div>
+        <div class="sb-val">${c.value.toLocaleString()}</div>
+      </div>`).join('');
+
+        const preds = await apiJSON('/predictions?trang_thai=cho_duyet&limit=8');
+        document.getElementById('dash-pending-table').innerHTML = preds.length
+          ? `<div class="table-responsive"><table class="table table-hover">
+          <thead><tr><th style="width:60px;">ID</th><th style="width:52px;">Ảnh</th><th>Nhãn</th><th style="width:130px;">Tin cậy</th><th style="width:155px;">Thời gian</th><th style="width:130px;"></th></tr></thead>
+          <tbody>${preds.map(p => `
+            <tr>
+              <td><span class="text-primary fw-semibold">#${p.id}</span></td>
+              <td>${p.scan_image_url ? `<img src="${p.scan_image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;cursor:pointer;" onclick="openPredModal(${p.id})" title="Xem chi tiết">` : '<span class="text-muted" style="font-size:.75rem;">N/A</span>'}</td>
+              <td><code class="text-dark" style="background:#f1f3f5;padding:1px 6px;border-radius:3px;font-size:.8rem;">${p.nhan_du_doan || '—'}</code></td>
+              <td>${confBar(p.do_tin_cay)}</td>
+              <td class="text-muted" style="font-size:.82rem;">${fmtDate(p.thoi_gian)}</td>
+              <td>
+                <div class="btn-actions">
+                  <button class="btn-act" onclick="openPredModal(${p.id})" title="Chi tiết"><i class="bi bi-eye"></i></button>
+                  <button class="btn-act" onclick="approvePredDash(${p.id})" title="Duyệt" style="color:#198754;"><i class="bi bi-check-lg"></i></button>
+                  <button class="btn-act del" onclick="rejectPredDash(${p.id})" title="Từ chối"><i class="bi bi-x-lg"></i></button>
+                </div>
+              </td>
+            </tr>`).join('')}
+          </tbody></table></div>`
+          : '<div class="empty-state"><i class="bi bi-check2-all"></i><p>Không có prediction chờ duyệt</p></div>';
+      } catch (e) {
+        toast('Lỗi tải dashboard: ' + e.message, 'danger');
+      }
+    }
+
+    // ============================================================
+    // Predictions
+    // ============================================================
+    async function loadPredictions() {
+      const status = document.getElementById('pred-filter')?.value || 'cho_duyet';
+      try {
+        const data = await apiJSON(`/predictions?trang_thai=${status}&limit=100`);
+        const countEl = document.querySelector('#section-predictions .result-count');
+        if (countEl) countEl.textContent = data.length ? `${data.length} kết quả` : '';
+        const isPending = (document.getElementById('pred-filter')?.value || '') === 'cho_duyet';
+        document.getElementById('pred-body').innerHTML = data.length
+          ? data.map(p => `
+          <tr>
+            <td>${isPending ? `<input type="checkbox" class="form-check-input pred-check" data-id="${p.id}" onchange="updateBatchToolbar()">` : ''}</td>
+            <td><span class="text-primary fw-semibold">#${p.id}</span></td>
+            <td>${p.scan_image_url ? `<img src="${p.scan_image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;cursor:pointer;" onclick="openPredModal(${p.id})" title="Xem chi tiết">` : '<span class="text-muted" style="font-size:.75rem;">N/A</span>'}</td>
+            <td><code style="background:#f1f3f5;padding:1px 6px;border-radius:3px;font-size:.8rem;">${p.nhan_du_doan || '—'}</code></td>
+            <td>${confBar(p.do_tin_cay)}</td>
+            <td>${statusBadge(p.trang_thai)}</td>
+            <td class="text-muted" style="font-size:.82rem;">${fmtDate(p.thoi_gian)}</td>
+            <td>
+              <div class="btn-actions">
+                <button class="btn-act" onclick="openPredModal(${p.id})" title="Chi tiết"><i class="bi bi-eye"></i></button>
+              </div>
+            </td>
+          </tr>`).join('')
+          : emptyRow(8, 'bi-inbox', 'Không có prediction nào');
+        document.getElementById('pred-check-all').checked = false;
+        updateBatchToolbar();
+      } catch (e) { toast('Lỗi tải predictions: ' + e.message, 'danger'); }
+    }
+
+    function statusBadge(s) {
+      const map = { cho_duyet: 'badge-pending', da_duyet: 'badge-approved', tu_choi: 'badge-rejected' };
+      const labels = { cho_duyet: 'Chờ duyệt', da_duyet: 'Đã duyệt', tu_choi: 'Từ chối' };
+      return `<span class="badge ${map[s] || 'badge-neutral'}">${labels[s] || s}</span>`;
+    }
+
+    async function openPredModal(id) {
+      const modal = new bootstrap.Modal(document.getElementById('pred-modal'));
+      document.getElementById('pm-id').textContent = id;
+      document.getElementById('pm-body').innerHTML = `<div class="text-center py-4"><div class="spinner-border text-primary" style="width:1.5rem;height:1.5rem;"></div></div>`;
+      document.getElementById('pm-footer').innerHTML = '';
+      modal.show();
+      try {
+        const p = await apiJSON(`/predictions/${id}`);
+        const vp = p.vocab_payload;
+        const langFlags = { en: '🇬🇧', vi: '🇻🇳', ja: '🇯🇵', ko: '🇰🇷', zh: '🇨🇳', fr: '🇫🇷', de: '🇩🇪' };
+        let html = `
+      ${p.scan_image_url ? `
+      <div class="text-center mb-3">
+        <img src="${p.scan_image_url}" style="max-height:220px;max-width:100%;border-radius:8px;object-fit:contain;border:1px solid #dee2e6;" alt="Ảnh quét">
+      </div>` : ''}
+      <div class="row g-2 mb-3">
+        <div class="col-4"><div class="p-2 rounded bg-light">
+          <div class="text-muted" style="font-size:.7rem;font-weight:600;text-transform:uppercase;">Nhãn</div>
+          <code style="font-size:.88rem;">${p.nhan_du_doan || '—'}</code>
+        </div></div>
+        <div class="col-4"><div class="p-2 rounded bg-light">
+          <div class="text-muted" style="font-size:.7rem;font-weight:600;text-transform:uppercase;">Độ tin cậy</div>
+          <div class="mt-1">${confBar(p.do_tin_cay)}</div>
+        </div></div>
+        <div class="col-4"><div class="p-2 rounded bg-light">
+          <div class="text-muted" style="font-size:.7rem;font-weight:600;text-transform:uppercase;">Trạng thái</div>
+          <div class="mt-1">${statusBadge(p.trang_thai)}</div>
+        </div></div>
+      </div>`;
+        if (vp) {
+          html += `<p class="fw-bold mb-2" style="font-size:.85rem;">
+        <i class="bi bi-book text-primary me-1"></i>Vocab Payload — <code style="font-size:.82rem;">${vp.object_code}</code></p>`;
+          (vp.translations || []).forEach(t => {
+            html += `<div class="vocab-lang-block">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span>${langFlags[t.lang_code] || '🌐'}</span>
+            <span class="badge badge-lang">${t.lang_code.toUpperCase()}</span>
+            <strong>${t.word_name || ''}</strong>
+            ${t.phonetic ? `<span class="text-muted fst-italic" style="font-size:.82rem;">${t.phonetic}</span>` : ''}
+            ${t.part_of_speech ? `<span class="badge" style="background:#e9d5ff;color:#6b21a8;">${t.part_of_speech}</span>` : ''}
+          </div>
+          ${t.definition ? `<p class="mb-1" style="font-size:.84rem;">${t.definition}</p>` : ''}
+          ${(t.example_sentences || []).length ? `<ul class="mb-0 ps-3" style="font-size:.8rem;color:var(--muted);">
+            ${t.example_sentences.map(s => typeof s === 'object'
+              ? `<li>${s.en || ''}${s.vi ? `<div class="fst-italic" style="font-size:.78rem;">${s.vi}</div>` : ''}</li>`
+              : `<li>${s}</li>`).join('')}
+          </ul>` : ''}
+        </div>`;
+          });
+        }
+        document.getElementById('pm-body').innerHTML = html;
+        if (p.trang_thai === 'cho_duyet') {
+          document.getElementById('pm-footer').innerHTML = `
+        <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button class="btn btn-sm btn-danger ms-auto me-1" onclick="rejectPred(${id})">
+          <i class="bi bi-x-lg me-1"></i>Từ chối
+        </button>
+        <button class="btn btn-sm btn-warning me-1" onclick="showApproveForm(${id})">
+          <i class="bi bi-pencil me-1"></i>Chỉnh & Duyệt
+        </button>
+        <button class="btn btn-sm btn-success" onclick="approvePred(${id}, {})">
+          <i class="bi bi-check-lg me-1"></i>Duyệt ngay
+        </button>`;
+        } else {
+          document.getElementById('pm-footer').innerHTML = `<button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>`;
+        }
+      } catch (e) {
+        document.getElementById('pm-body').innerHTML = `<div class="alert alert-danger">Lỗi tải dữ liệu: ${e.message}</div>`;
+      }
+    }
+
+    async function approvePred(id, overrides) {
+      try {
+        await apiJSON(`/predictions/${id}/approve`, { method: 'POST', body: JSON.stringify(overrides || {}) });
+        toast('Đã duyệt prediction #' + id);
+        bootstrap.Modal.getInstance(document.getElementById('pred-modal'))?.hide();
+        loadPredictions(); updatePendingBadge();
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+    }
+
+    async function showApproveForm(id) {
+      const p = await apiJSON(`/predictions/${id}`).catch(() => null);
+      const vp = p?.vocab_payload;
+      const firstTrans = vp?.translations?.[0] || {};
+      const examples = (firstTrans.example_sentences || [])
+        .map(s => typeof s === 'object' ? (s.en || '') + (s.vi ? ' | ' + s.vi : '') : s)
+        .join('\n');
+
+      document.getElementById('pm-body').innerHTML = `
+    <p class="text-muted mb-3" style="font-size:.82rem;"><i class="bi bi-info-circle me-1"></i>Chỉnh sửa trước khi duyệt. Để trống = giữ nguyên giá trị Gemini.</p>
+    <div class="row g-2">
+      <div class="col-6">
+        <label class="form-label fw-semibold" style="font-size:.8rem;">Từ vựng</label>
+        <input id="ov-word" class="form-control form-control-sm" value="${firstTrans.word_name || ''}">
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold" style="font-size:.8rem;">Phiên âm (IPA)</label>
+        <input id="ov-phonetic" class="form-control form-control-sm" value="${firstTrans.phonetic || ''}">
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold" style="font-size:.8rem;">Loại từ</label>
+        <input id="ov-pos" class="form-control form-control-sm" value="${firstTrans.part_of_speech || ''}">
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold" style="font-size:.8rem;">Định nghĩa</label>
+        <textarea id="ov-def" class="form-control form-control-sm" rows="2">${firstTrans.definition || ''}</textarea>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold" style="font-size:.8rem;">Ví dụ (mỗi dòng một câu)</label>
+        <textarea id="ov-ex" class="form-control form-control-sm" rows="3">${examples}</textarea>
+      </div>
+    </div>`;
+
+      document.getElementById('pm-footer').innerHTML = `
+    <button class="btn btn-sm btn-outline-secondary" onclick="openPredModal(${id})"><i class="bi bi-arrow-left me-1"></i>Quay lại</button>
+    <button class="btn btn-sm btn-success ms-auto" onclick="confirmApproveWithEdits(${id})">
+      <i class="bi bi-check-lg me-1"></i>Xác nhận duyệt
+    </button>`;
+    }
+
+    async function confirmApproveWithEdits(id) {
+      const word = document.getElementById('ov-word')?.value.trim();
+      const phonetic = document.getElementById('ov-phonetic')?.value.trim();
+      const pos = document.getElementById('ov-pos')?.value.trim();
+      const def = document.getElementById('ov-def')?.value.trim();
+      const exRaw = document.getElementById('ov-ex')?.value.trim();
+      const examples = exRaw ? exRaw.split('\n').map(s => s.trim()).filter(Boolean) : [];
+
+      const overrides = {};
+      if (word) overrides.override_word_name = word;
+      if (phonetic) overrides.override_phonetic = phonetic;
+      if (pos) overrides.override_part_of_speech = pos;
+      if (def) overrides.override_definition = def;
+      if (examples.length) overrides.override_example_sentences = examples;
+
+      await approvePred(id, overrides);
+    }
+
+    async function rejectPred(id) {
+      confirmAction('Từ chối prediction này?', async () => {
+        try {
+          await apiJSON(`/predictions/${id}/reject`, { method: 'POST' });
+          toast('Đã từ chối prediction #' + id, 'warning');
+          bootstrap.Modal.getInstance(document.getElementById('pred-modal'))?.hide();
+          loadPredictions(); updatePendingBadge();
+        } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      });
+    }
+
+    async function approvePredDash(id) {
+      try {
+        await apiJSON(`/predictions/${id}/approve`, { method: 'POST', body: JSON.stringify({}) });
+        toast('Đã duyệt prediction #' + id);
+        loadDashboard();
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+    }
+
+    async function rejectPredDash(id) {
+      confirmAction(`Từ chối prediction #${id}?`, async () => {
+        try {
+          await apiJSON(`/predictions/${id}/reject`, { method: 'POST' });
+          toast('Đã từ chối prediction #' + id, 'warning');
+          loadDashboard();
+        } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      });
+    }
+
+    async function updatePendingBadge() {
+      try {
+        const stats = await apiJSON('/dashboard');
+        const badge = document.getElementById('badge-predictions');
+        if (stats.pending_predictions > 0) { badge.textContent = stats.pending_predictions; badge.style.display = ''; }
+        else { badge.style.display = 'none'; }
+      } catch (_) { }
+    }
+
+    // ============================================================
+    // Categories
+    // ============================================================
+    async function loadCategories() {
+      try {
+        categories = await apiJSON('/categories');
+        const filterEl = document.getElementById('obj-cat-filter');
+        if (filterEl) {
+          const cur = filterEl.value;
+          filterEl.innerHTML = '<option value="">Tất cả danh mục</option>' +
+            categories.map(c => `<option value="${c.id}" ${String(c.id) === cur ? 'selected' : ''}>${c.ten_danh_muc}</option>`).join('');
+        }
+        const tbody = document.getElementById('cat-body');
+        if (!tbody) return;
+        const countEl = document.querySelector('#section-categories .result-count');
+        if (countEl) countEl.textContent = categories.length ? `${categories.length} danh mục` : '';
+        tbody.innerHTML = categories.length
+          ? categories.map(c => {
+            const parentName = categories.find(x => x.id === c.danh_muc_cha)?.ten_danh_muc;
+            return `<tr>
+            <td class="text-muted">${c.id}</td>
+            <td class="fw-semibold">${c.ten_danh_muc || '—'}</td>
+            <td>${parentName ? `<span class="badge badge-neutral">${parentName}</span>` : '<span class="text-muted">—</span>'}</td>
+            <td class="text-muted" style="font-size:.82rem;">${c.mo_ta || '—'}</td>
+            <td>
+              <div class="btn-actions">
+                <button class="btn-act" onclick='openEditCatModal(${JSON.stringify(c)})' title="Sửa"><i class="bi bi-pencil"></i></button>
+                <button class="btn-act del" onclick="deleteCat(${c.id})" title="Xoá"><i class="bi bi-trash3"></i></button>
+              </div>
+            </td>
+          </tr>`;
+          }).join('')
+          : emptyRow(5, 'bi-folder-x', 'Chưa có danh mục nào');
+      } catch (e) { toast('Lỗi tải danh mục: ' + e.message, 'danger'); }
+    }
+
+    function catOptions(selectedId) {
+      return `<option value="">— Không có —</option>` +
+        categories.map(c => `<option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.ten_danh_muc}</option>`).join('');
+    }
+
+    function openCreateCatModal() {
+      document.getElementById('fm-submit').style.display = '';
+      document.getElementById('fm-title').textContent = 'Thêm danh mục mới';
+      document.getElementById('fm-body').innerHTML = `
+    <div class="mb-3"><label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+      <input id="cat-name" class="form-control form-control-sm" placeholder="Ví dụ: Trái cây" /></div>
+    <div class="mb-3"><label class="form-label">Danh mục cha</label>
+      <select id="cat-parent" class="form-select form-select-sm">${catOptions(null)}</select></div>
+    <div class="mb-3"><label class="form-label">Mô tả</label>
+      <textarea id="cat-desc" class="form-control form-control-sm" rows="2"></textarea></div>`;
+      document.getElementById('fm-submit').onclick = async () => {
+        const body = { ten_danh_muc: document.getElementById('cat-name').value.trim(), danh_muc_cha: document.getElementById('cat-parent').value || null, mo_ta: document.getElementById('cat-desc').value.trim() || null };
+        if (!body.ten_danh_muc) { toast('Nhập tên danh mục', 'warning'); return; }
+        try { await apiJSON('/categories', { method: 'POST', body: JSON.stringify(body) }); toast('Đã thêm danh mục'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadCategories(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      };
+      new bootstrap.Modal(document.getElementById('form-modal')).show();
+    }
+
+    function openEditCatModal(c) {
+      document.getElementById('fm-submit').style.display = '';
+      document.getElementById('fm-title').textContent = 'Sửa danh mục #' + c.id;
+      document.getElementById('fm-body').innerHTML = `
+    <div class="mb-3"><label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+      <input id="cat-name" class="form-control form-control-sm" value="${c.ten_danh_muc || ''}" /></div>
+    <div class="mb-3"><label class="form-label">Danh mục cha</label>
+      <select id="cat-parent" class="form-select form-select-sm">${catOptions(c.danh_muc_cha)}</select></div>
+    <div class="mb-3"><label class="form-label">Mô tả</label>
+      <textarea id="cat-desc" class="form-control form-control-sm" rows="2">${c.mo_ta || ''}</textarea></div>`;
+      document.getElementById('fm-submit').onclick = async () => {
+        const body = { ten_danh_muc: document.getElementById('cat-name').value.trim(), danh_muc_cha: document.getElementById('cat-parent').value || null, mo_ta: document.getElementById('cat-desc').value.trim() || null };
+        try { await apiJSON(`/categories/${c.id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Đã cập nhật danh mục'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadCategories(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      };
+      new bootstrap.Modal(document.getElementById('form-modal')).show();
+    }
+
+    async function deleteCat(id) {
+      confirmAction('Xoá danh mục này? Hành động không thể hoàn tác.', async () => {
+        try { await apiJSON(`/categories/${id}`, { method: 'DELETE' }); toast('Đã xoá danh mục', 'warning'); loadCategories(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      }, 'Xoá danh mục');
+    }
+
+    // ============================================================
+    // Objects
+    // ============================================================
+    async function loadObjects() {
+      const search = document.getElementById('obj-search')?.value || '';
+      const catId = document.getElementById('obj-cat-filter')?.value || '';
+      try {
+        let url = `/objects?limit=100&offset=0`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (catId) url += `&category_id=${catId}`;
+        const data = await apiJSON(url);
+        const countEl = document.querySelector('#section-objects .result-count');
+        if (countEl) countEl.textContent = data.length ? `${data.length} đối tượng` : '';
+        document.getElementById('obj-body').innerHTML = data.length
+          ? data.map(o => `
+          <tr>
+            <td class="text-muted">${o.id}</td>
+            <td><code style="background:#f1f3f5;padding:1px 7px;border-radius:3px;font-size:.8rem;">${o.ma_doi_tuong || '—'}</code></td>
+            <td>${o.category_name ? `<span class="badge badge-neutral">${o.category_name}</span>` : '<span class="text-muted">—</span>'}</td>
+            <td>${translationBadge(o.translation_count, o.pending_translation_count)}</td>
+            <td>
+              <div class="btn-actions">
+                <button class="btn-act" onclick="openObjMediaModal('${o.ma_doi_tuong}')" title="Quản lý ảnh"><i class="bi bi-image"></i></button>
+                <button class="btn-act" onclick='openEditObjModal(${JSON.stringify(o)})' title="Sửa"><i class="bi bi-pencil"></i></button>
+                <button class="btn-act del" onclick="deleteObj(${o.id})" title="Xoá"><i class="bi bi-trash3"></i></button>
+              </div>
+            </td>
+          </tr>`).join('')
+          : emptyRow(5, 'bi-box-seam', 'Không có đối tượng nào');
+      } catch (e) { toast('Lỗi tải đối tượng: ' + e.message, 'danger'); }
+    }
+
+    function openCreateObjectModal() {
+      document.getElementById('fm-submit').style.display = '';
+      document.getElementById('fm-title').textContent = 'Thêm đối tượng mới';
+      document.getElementById('fm-body').innerHTML = `
+    <div class="mb-3"><label class="form-label">Mã đối tượng <span class="text-danger">*</span></label>
+      <input id="obj-code" class="form-control form-control-sm" placeholder="vd: apple, dog, car..." /></div>
+    <div class="mb-3"><label class="form-label">Danh mục</label>
+      <select id="obj-cat" class="form-select form-select-sm">${catOptions(null)}</select></div>`;
+      document.getElementById('fm-submit').onclick = async () => {
+        const body = { ma_doi_tuong: document.getElementById('obj-code').value.trim(), danh_muc_id: document.getElementById('obj-cat').value || null };
+        if (!body.ma_doi_tuong) { toast('Nhập mã đối tượng', 'warning'); return; }
+        try { await apiJSON('/objects', { method: 'POST', body: JSON.stringify(body) }); toast('Đã thêm đối tượng'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadObjects(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      };
+      new bootstrap.Modal(document.getElementById('form-modal')).show();
+    }
+
+    function openEditObjModal(o) {
+      document.getElementById('fm-submit').style.display = '';
+      document.getElementById('fm-title').textContent = 'Sửa đối tượng: ' + o.ma_doi_tuong;
+      document.getElementById('fm-body').innerHTML = `
+    <div class="mb-3"><label class="form-label">Danh mục</label>
+      <select id="obj-cat" class="form-select form-select-sm">${catOptions(o.danh_muc_id)}</select></div>`;
+      document.getElementById('fm-submit').onclick = async () => {
+        const body = { danh_muc_id: document.getElementById('obj-cat').value || null };
+        try { await apiJSON(`/objects/${o.id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Đã cập nhật'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadObjects(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      };
+      new bootstrap.Modal(document.getElementById('form-modal')).show();
+    }
+
+    async function deleteObj(id) {
+      confirmAction('Xoá đối tượng này? Tất cả bản dịch liên quan sẽ bị xoá.', async () => {
+        try { await apiJSON(`/objects/${id}`, { method: 'DELETE' }); toast('Đã xoá đối tượng', 'warning'); loadObjects(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      }, 'Xoá đối tượng');
+    }
+
+    // ============================================================
+    // Translations
+    // ============================================================
+    async function loadTranslations() {
+      const search = document.getElementById('trans-search')?.value || '';
+      const lang = document.getElementById('trans-lang-filter')?.value || '';
+      try {
+        let url = `/translations?limit=100`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (lang) url += `&lang_code=${lang}`;
+        const data = await apiJSON(url);
+        window._transCache = {};
+        data.forEach(t => { window._transCache[t.id] = t; });
+        const countEl = document.querySelector('#section-translations .result-count');
+        if (countEl) countEl.textContent = data.length ? `${data.length} bản dịch` : '';
+        document.getElementById('trans-body').innerHTML = data.length
+          ? data.map(t => `
+          <tr>
+            <td class="text-muted">${t.id}</td>
+            <td><code style="background:#f1f3f5;padding:1px 5px;border-radius:3px;font-size:.78rem;">${t.object_code || t.doi_tuong_id}</code></td>
+            <td><span class="badge badge-lang">${(t.lang_code || '').toUpperCase()}</span></td>
+            <td class="fw-semibold">${t.tu_vung || '—'}</td>
+            <td class="text-muted fst-italic" style="font-size:.82rem;">${t.phien_am || '—'}</td>
+            <td>${t.da_xac_nhan
+              ? '<span class="badge badge-approved"><i class="bi bi-check-lg me-1"></i>Đã xác nhận</span>'
+              : '<span class="badge badge-neutral">Chưa xác nhận</span>'}</td>
+            <td><span class="badge badge-neutral">${t.example_count}</span></td>
+            <td>
+              <div class="btn-actions">
+                <button class="btn-act" onclick="openViewTransModal(window._transCache[${t.id}])" title="Xem"><i class="bi bi-eye"></i></button>
+                <button class="btn-act" onclick="openEditTransModal(window._transCache[${t.id}])" title="Sửa"><i class="bi bi-pencil"></i></button>
+                <button class="btn-act del" onclick="deleteTrans(${t.id})" title="Xoá"><i class="bi bi-trash3"></i></button>
+              </div>
+            </td>
+          </tr>`).join('')
+          : emptyRow(8, 'bi-translate', 'Không có bản dịch nào');
+      } catch (e) { toast('Lỗi tải bản dịch: ' + e.message, 'danger'); }
+    }
+
+    function openCreateTransModal() {
+      document.getElementById('fm-submit').style.display = '';
+      document.getElementById('fm-title').textContent = 'Thêm bản dịch mới';
+      document.getElementById('fm-body').innerHTML = `
+    <div class="row g-2 mb-2">
+      <div class="col-6"><label class="form-label">Object ID <span class="text-danger">*</span></label>
+        <input id="t-oid" type="number" class="form-control form-control-sm" /></div>
+      <div class="col-6"><label class="form-label">Ngôn ngữ <span class="text-danger">*</span></label>
+        <select id="t-lang" class="form-select form-select-sm">
+          <option value="en">English</option>
+          <option value="vi">Tiếng Việt</option>
+        </select></div>
+    </div>
+    <div class="mb-2"><label class="form-label">Từ vựng <span class="text-danger">*</span></label>
+      <input id="t-word" class="form-control form-control-sm" /></div>
+    <div class="row g-2 mb-2">
+      <div class="col-6"><label class="form-label">Phiên âm</label>
+        <input id="t-phon" class="form-control form-control-sm" placeholder="/ˈæp.əl/" /></div>
+      <div class="col-6"><label class="form-label">Loại từ</label>
+        <input id="t-pos" class="form-control form-control-sm" placeholder="n. / v. / adj." /></div>
+    </div>
+    <div class="mb-2"><label class="form-label">Định nghĩa</label>
+      <textarea id="t-def" class="form-control form-control-sm" rows="2"></textarea></div>
+    <div class="mb-2"><label class="form-label">Ví dụ <small class="text-muted">(mỗi dòng 1 câu)</small></label>
+      <textarea id="t-ex" class="form-control form-control-sm" rows="3" placeholder="A red apple is on the table. | Một quả táo đỏ ở trên bàn.&#10;She ate an apple every morning."></textarea></div>`;
+      document.getElementById('fm-submit').onclick = async () => {
+        const body = {
+          doi_tuong_id: parseInt(document.getElementById('t-oid').value),
+          lang_code: document.getElementById('t-lang').value,
+          tu_vung: document.getElementById('t-word').value.trim(),
+          phien_am: document.getElementById('t-phon').value.trim() || null,
+          loai_tu: document.getElementById('t-pos').value.trim() || null,
+          dinh_nghia: document.getElementById('t-def').value.trim() || null,
+          example_sentences: document.getElementById('t-ex').value.split('\n').map(s => s.trim()).filter(Boolean),
+        };
+        if (!body.doi_tuong_id || !body.tu_vung) { toast('Thiếu thông tin bắt buộc', 'warning'); return; }
+        try { await apiJSON('/translations', { method: 'POST', body: JSON.stringify(body) }); toast('Đã thêm bản dịch'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadTranslations(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      };
+      new bootstrap.Modal(document.getElementById('form-modal')).show();
+    }
+
+    function openViewTransModal(t) {
+      document.getElementById('fm-submit').style.display = 'none';
+      document.getElementById('fm-title').textContent = 'Chi tiết bản dịch #' + t.id;
+      const exList = Array.isArray(t.examples) ? t.examples : [];
+      const examples = exList.length
+        ? `<ol class="mb-0 ps-3">${exList.map(e => `
+            <li style="font-size:.83rem;">${e.cau_vi_du || ''}
+              ${e.dich_nghia ? `<div class="text-muted" style="font-size:.79rem;font-style:italic;">${e.dich_nghia}</div>` : ''}
+            </li>`).join('')}</ol>`
+        : '<span class="text-muted" style="font-size:.83rem;">Chưa có ví dụ</span>';
+      document.getElementById('fm-body').innerHTML = `
+    <div class="mb-2 p-2 rounded" style="background:#f8f9fa;font-size:.82rem;">
+      Object: <code>${t.object_code || t.doi_tuong_id}</code>
+      <span class="badge badge-lang ms-1">${(t.lang_code || '').toUpperCase()}</span>
+      ${t.da_xac_nhan ? '<span class="badge badge-approved ms-1"><i class="bi bi-check-lg me-1"></i>Đã xác nhận</span>' : '<span class="badge badge-neutral ms-1">Chưa xác nhận</span>'}
+    </div>
+    <table class="table table-sm table-borderless mb-2" style="font-size:.85rem;">
+      <tr><th style="width:110px;color:var(--text-muted);">Từ vựng</th><td class="fw-semibold">${t.tu_vung || '—'}</td></tr>
+      <tr><th style="color:var(--text-muted);">Phiên âm</th><td class="fst-italic text-primary">${t.phien_am || '—'}</td></tr>
+      <tr><th style="color:var(--text-muted);">Loại từ</th><td>${t.loai_tu || '—'}</td></tr>
+      <tr><th style="color:var(--text-muted);">Định nghĩa</th><td>${t.dinh_nghia || '—'}</td></tr>
+    </table>
+    <div><label class="form-label fw-semibold" style="font-size:.83rem;">Ví dụ (${t.example_count || 0})</label>${examples}</div>`;
+      new bootstrap.Modal(document.getElementById('form-modal')).show();
+    }
+
+    function openEditTransModal(t) {
+      document.getElementById('fm-submit').style.display = '';
+      document.getElementById('fm-title').textContent = 'Sửa bản dịch #' + t.id;
+      document.getElementById('fm-body').innerHTML = `
+    <div class="mb-2 p-2 rounded bg-light" style="font-size:.82rem;">
+      Object: <code>${t.object_code || t.doi_tuong_id}</code>
+      <span class="badge badge-lang ms-1">${(t.lang_code || '').toUpperCase()}</span>
+    </div>
+    <div class="mb-2"><label class="form-label">Từ vựng</label>
+      <input id="t-word" class="form-control form-control-sm" value="${t.tu_vung || ''}" /></div>
+    <div class="row g-2 mb-2">
+      <div class="col-6"><label class="form-label">Phiên âm</label>
+        <input id="t-phon" class="form-control form-control-sm" value="${t.phien_am || ''}" /></div>
+      <div class="col-6"><label class="form-label">Loại từ</label>
+        <input id="t-pos" class="form-control form-control-sm" value="${t.loai_tu || ''}" /></div>
+    </div>
+    <div class="mb-2"><label class="form-label">Định nghĩa</label>
+      <textarea id="t-def" class="form-control form-control-sm" rows="2">${t.dinh_nghia || ''}</textarea></div>
+    <div class="mb-2"><label class="form-label">Trạng thái xác nhận</label>
+      <select id="t-confirmed" class="form-select form-select-sm">
+        <option value="true" ${t.da_xac_nhan ? 'selected' : ''}>Đã xác nhận</option>
+        <option value="false" ${!t.da_xac_nhan ? 'selected' : ''}>Chưa xác nhận</option>
+      </select></div>
+    <div class="mb-2"><label class="form-label">Ví dụ <small class="text-muted">(mỗi dòng 1 câu, có thể thêm <code>| dịch nghĩa</code>)</small></label>
+      <textarea id="t-ex" class="form-control form-control-sm" rows="4" placeholder="A red apple. | Một quả táo đỏ.&#10;She reads books.">${(t.examples||[]).map(e => e.dich_nghia ? e.cau_vi_du + ' | ' + e.dich_nghia : e.cau_vi_du||'').join('\n')}</textarea></div>`;
+      document.getElementById('fm-submit').onclick = async () => {
+        const exRaw = document.getElementById('t-ex')?.value.trim();
+        const body = {
+          tu_vung: document.getElementById('t-word').value.trim() || null,
+          phien_am: document.getElementById('t-phon').value.trim() || null,
+          loai_tu: document.getElementById('t-pos').value.trim() || null,
+          dinh_nghia: document.getElementById('t-def').value.trim() || null,
+          da_xac_nhan: document.getElementById('t-confirmed').value === 'true',
+          example_sentences: exRaw ? exRaw.split('\n').map(s => s.trim()).filter(Boolean) : [],
+        };
+        try { await apiJSON(`/translations/${t.id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Đã cập nhật bản dịch'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadTranslations(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      };
+      new bootstrap.Modal(document.getElementById('form-modal')).show();
+    }
+
+    async function deleteTrans(id) {
+      confirmAction('Xoá bản dịch này?', async () => {
+        try { await apiJSON(`/translations/${id}`, { method: 'DELETE' }); toast('Đã xoá bản dịch', 'warning'); loadTranslations(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      }, 'Xoá bản dịch');
+    }
+
+    // ============================================================
+    // Users
+    // ============================================================
+    async function loadUsers() {
+      const search = document.getElementById('user-search')?.value || '';
+      try {
+        const data = await apiJSON(`/users?limit=100${search ? '&search=' + encodeURIComponent(search) : ''}`);
+        const panel = document.querySelector('#section-users .panel-header .result-count');
+        if (panel) panel.textContent = `${data.length} người dùng`;
+        document.getElementById('user-body').innerHTML = data.length
+          ? data.map(u => {
+            const isAdmin = (u.vai_tro || '').toLowerCase().includes('admin') || (u.vai_tro || '').includes('quan_tri');
+            const isActive = (u.trang_thai || '').toLowerCase().includes('hoat') || u.trang_thai === 'active';
+            return `<tr>
+            <td class="text-muted">${u.id}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem;font-weight:700;flex-shrink:0;">${u.ten_dang_nhap.charAt(0).toUpperCase()}</div>
+                <span class="fw-semibold">${u.ten_dang_nhap}</span>
+              </div>
+            </td>
+            <td class="text-muted" style="font-size:.82rem;">${u.email}</td>
+            <td>${u.ho_ten || '—'}</td>
+            <td><span class="badge ${isAdmin ? 'badge-role-admin' : 'badge-role-user'}">${u.vai_tro || '—'}</span></td>
+            <td><span class="badge ${isActive ? 'badge-approved' : 'badge-rejected'}">${isActive ? 'Hoạt động' : 'Bị khoá'}</span></td>
+            <td class="text-muted" style="font-size:.82rem;">${fmtDateShort(u.lan_dang_nhap_cuoi)}</td>
+            <td>
+              <div class="btn-actions">
+                <button class="btn-act" onclick="openUserStatsModal(${u.id}, '${u.ten_dang_nhap}')" title="Xem thống kê"><i class="bi bi-bar-chart-line"></i></button>
+                <button class="btn-act" onclick="openUserRoleModal(${u.id}, '${u.vai_tro}')" title="Đổi vai trò"><i class="bi bi-shield-half"></i></button>
+                <button class="btn-act ${isActive ? 'del' : ''}" onclick="toggleUserStatus(${u.id}, ${isActive})" title="${isActive ? 'Khoá tài khoản' : 'Mở khoá'}">
+                  <i class="bi ${isActive ? 'bi-lock' : 'bi-unlock'}"></i>
+                </button>
+              </div>
+            </td>
+          </tr>`;
+          }).join('')
+          : emptyRow(8, 'bi-people', 'Không có người dùng nào');
+      } catch (e) { toast('Lỗi tải users: ' + e.message, 'danger'); }
+    }
+
+    async function toggleUserStatus(userId, isCurrentlyActive) {
+      const newStatusId = isCurrentlyActive ? 2 : 1;
+      const action = isCurrentlyActive ? 'Khoá tài khoản này?' : 'Mở khoá tài khoản này?';
+      confirmAction(action, async () => {
+        try {
+          await apiJSON(`/users/${userId}/status`, { method: 'PUT', body: JSON.stringify({ trang_thai_id: newStatusId }) });
+          toast(isCurrentlyActive ? 'Đã khoá tài khoản' : 'Đã mở khoá tài khoản', isCurrentlyActive ? 'warning' : 'success');
+          loadUsers();
+        } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      });
+    }
+
+    function openUserRoleModal(userId, currentRole) {
+      document.getElementById('fm-title').textContent = 'Cập nhật vai trò — #' + userId;
+      const isAdmin = (currentRole || '').toLowerCase().includes('admin') || currentRole === 'quan_tri';
+      document.getElementById('fm-body').innerHTML = `
+    <div class="mb-3 p-2 rounded bg-light d-flex align-items-center gap-2" style="font-size:.84rem;">
+      <i class="bi bi-person-circle text-muted"></i>
+      Vai trò hiện tại: <span class="badge ${isAdmin ? 'badge-role-admin' : 'badge-role-user'} ms-1">${currentRole || '—'}</span>
+    </div>
+    <div class="mb-3"><label class="form-label">Vai trò mới</label>
+      <select id="role-id" class="form-select form-select-sm">
+        <option value="1" ${!isAdmin ? 'selected' : ''}>Người dùng (nguoi_dung)</option>
+        <option value="2" ${isAdmin ? 'selected' : ''}>Quản trị (admin)</option>
+      </select></div>`;
+      document.getElementById('fm-submit').onclick = async () => {
+        const vai_tro_id = parseInt(document.getElementById('role-id').value);
+        try { await apiJSON(`/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ vai_tro_id }) }); toast('Đã cập nhật vai trò'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadUsers(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      };
+      new bootstrap.Modal(document.getElementById('form-modal')).show();
+    }
+
+    // ============================================================
+    // Batch Predictions
+    // ============================================================
+    function toggleAllPredChecks(masterCb) {
+      document.querySelectorAll('.pred-check').forEach(cb => { cb.checked = masterCb.checked; });
+      updateBatchToolbar();
+    }
+
+    function updateBatchToolbar() {
+      const checked = document.querySelectorAll('.pred-check:checked');
+      const toolbar = document.getElementById('batch-toolbar');
+      if (!toolbar) return;
+      if (checked.length > 0) {
+        toolbar.style.display = 'flex';
+        document.getElementById('batch-count').textContent = checked.length;
+      } else {
+        toolbar.style.display = 'none';
+      }
+    }
+
+    async function batchApprove() {
+      const ids = Array.from(document.querySelectorAll('.pred-check:checked')).map(el => parseInt(el.dataset.id));
+      if (!ids.length) { toast('Chọn ít nhất 1 prediction', 'warning'); return; }
+      confirmAction(`Duyệt ${ids.length} prediction đã chọn?`, async () => {
+        let ok = 0, fail = 0;
+        for (const id of ids) {
+          try { await apiJSON(`/predictions/${id}/approve`, { method: 'POST', body: JSON.stringify({}) }); ok++; }
+          catch { fail++; }
+        }
+        toast(`Đã duyệt ${ok} prediction${fail ? `, ${fail} lỗi` : ''}`, fail ? 'warning' : 'success');
+        loadPredictions(); updatePendingBadge();
+      }, 'Duyệt hàng loạt');
+    }
+
+    async function batchReject() {
+      const ids = Array.from(document.querySelectorAll('.pred-check:checked')).map(el => parseInt(el.dataset.id));
+      if (!ids.length) { toast('Chọn ít nhất 1 prediction', 'warning'); return; }
+      confirmAction(`Từ chối ${ids.length} prediction đã chọn?`, async () => {
+        let ok = 0, fail = 0;
+        for (const id of ids) {
+          try { await apiJSON(`/predictions/${id}/reject`, { method: 'POST' }); ok++; }
+          catch { fail++; }
+        }
+        toast(`Đã từ chối ${ok} prediction${fail ? `, ${fail} lỗi` : ''}`, 'warning');
+        loadPredictions(); updatePendingBadge();
+      }, 'Từ chối hàng loạt');
+    }
+
+    // ============================================================
+    // Scan History
+    // ============================================================
+    async function loadScanHistory() {
+      const objCode = document.getElementById('sh-obj-search')?.value.trim() || '';
+      const userIdRaw = document.getElementById('sh-user-search')?.value.trim() || '';
+      const userId = userIdRaw && !isNaN(userIdRaw) ? parseInt(userIdRaw) : null;
+      try {
+        let url = `/scan-history?limit=100`;
+        if (objCode) url += `&object_code=${encodeURIComponent(objCode)}`;
+        if (userId) url += `&user_id=${userId}`;
+        const data = await apiJSON(url);
+        const countEl = document.querySelector('#section-scan-history .result-count');
+        if (countEl) countEl.textContent = data.length ? `${data.length} lượt quét` : '';
+        document.getElementById('sh-body').innerHTML = data.length
+          ? data.map(s => `
+          <tr>
+            <td class="text-muted">${s.id}</td>
+            <td>${s.url_anh
+              ? `<img src="${s.url_anh}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" />`
+              : '<span class="text-muted" style="font-size:.75rem;">N/A</span>'}</td>
+            <td>
+              <span class="fw-semibold" style="font-size:.82rem;">${s.username || '—'}</span>
+              ${s.user_id ? `<br><span class="text-muted" style="font-size:.72rem;">ID: ${s.user_id}</span>` : ''}
+            </td>
+            <td>${s.object_code
+              ? `<code style="background:#f1f3f5;padding:1px 6px;border-radius:3px;font-size:.8rem;">${s.object_code}</code>`
+              : '<span class="text-muted">—</span>'}</td>
+            <td>${confBar(s.do_tin_cay)}</td>
+            <td class="text-muted" style="font-size:.82rem;">${fmtDate(s.thoi_gian)}</td>
+          </tr>`).join('')
+          : '<tr><td colspan="6"><div class="empty-state"><i class="bi bi-camera"></i><p>Chưa có lịch sử quét</p></div></td></tr>';
+      } catch (e) { toast('Lỗi tải lịch sử quét: ' + e.message, 'danger'); }
+    }
+
+    // ============================================================
+    // Object Media Management
+    // ============================================================
+    async function openObjMediaModal(objectCode) {
+      document.getElementById('fm-title').textContent = `Ảnh đối tượng — ${objectCode}`;
+      document.getElementById('fm-submit').style.display = 'none';
+      document.getElementById('fm-body').innerHTML = `<div class="text-center py-3"><div class="spinner-border text-primary" style="width:1.4rem;height:1.4rem;"></div></div>`;
+      const modal = new bootstrap.Modal(document.getElementById('form-modal'));
+      modal.show();
+
+      async function renderMediaModal() {
+        try {
+          const media = await apiJSON(`/objects/${objectCode}/media`);
+          let html = `
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Ảnh hiện tại</label>
+          ${media.length === 0
+              ? '<p class="text-muted" style="font-size:.83rem;">Chưa có ảnh nào.</p>'
+              : `<div class="d-flex flex-wrap gap-2">${media.map(m => `
+                <div style="width:80px;">
+                  <img src="${m.url}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:2px solid ${m.is_primary ? 'var(--primary)' : 'var(--border)'};" />
+                  <div class="d-flex gap-1 mt-1 justify-content-center">
+                    ${m.is_primary
+                      ? `<button class="btn-act" style="width:36px;color:#f59e0b;" onclick="unsetMediaPrimary(${m.id}, '${objectCode}')" title="Bỏ ảnh chính"><i class="bi bi-star-fill"></i></button>`
+                      : `<button class="btn-act" style="width:36px;" onclick="setMediaPrimary(${m.id}, '${objectCode}')" title="Đặt làm ảnh chính"><i class="bi bi-star"></i></button>`
+                    }
+                    <button class="btn-act del" style="width:36px;" onclick="deleteMedia(${m.id}, '${objectCode}')" title="Xoá"><i class="bi bi-trash3"></i></button>
+                  </div>
+                </div>`).join('')}</div>`}
+        </div>
+        <hr/>
+        <label class="form-label fw-semibold">Thêm ảnh mới</label>
+        <div class="mb-2">
+          <label class="form-label">URL ảnh</label>
+          <input id="media-url" class="form-control form-control-sm" placeholder="https://..." />
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Hoặc upload file</label>
+          <input id="media-file" type="file" accept="image/*" class="form-control form-control-sm" />
+        </div>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="media-primary" checked />
+          <label class="form-check-label" style="font-size:.83rem;">Đặt làm ảnh chính</label>
+        </div>
+        <button class="btn btn-sm btn-primary w-100" onclick="uploadObjectMedia('${objectCode}')">
+          <i class="bi bi-upload me-1"></i>Lưu ảnh
+        </button>`;
+          document.getElementById('fm-body').innerHTML = html;
+        } catch (e) {
+          document.getElementById('fm-body').innerHTML = `<div class="alert alert-danger">Lỗi: ${e.message}</div>`;
+        }
+      }
+      window._currentMediaObjectCode = objectCode;
+      window._renderMediaModal = renderMediaModal;
+      await renderMediaModal();
+    }
+
+    async function uploadObjectMedia(objectCode) {
+      const urlInput = document.getElementById('media-url')?.value.trim();
+      const fileInput = document.getElementById('media-file');
+      const isPrimary = document.getElementById('media-primary')?.checked ?? true;
+
+      const formData = new FormData();
+      formData.append('is_primary', isPrimary);
+      if (fileInput?.files?.[0]) {
+        formData.append('image', fileInput.files[0]);
+      } else if (urlInput) {
+        formData.append('image_url', urlInput);
+      } else {
+        toast('Nhập URL hoặc chọn file ảnh', 'warning'); return;
+      }
+
+      try {
+        await fetch(`${API}/objects/${objectCode}/media`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + TOKEN },
+          body: formData,
+        }).then(async r => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
+        toast('Đã thêm ảnh');
+        if (window._renderMediaModal) await window._renderMediaModal();
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+    }
+
+    async function setMediaPrimary(mediaId, objectCode) {
+      try {
+        await apiJSON(`/objects/media/${mediaId}/primary`, { method: 'POST' });
+        toast('Đã đặt ảnh chính');
+        if (window._renderMediaModal) await window._renderMediaModal();
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+    }
+
+    async function deleteMedia(mediaId, objectCode) {
+      if (!window.confirm('Xoá ảnh này?')) return;
+      try {
+        await apiJSON(`/objects/media/${mediaId}`, { method: 'DELETE' });
+        toast('Đã xoá ảnh', 'warning');
+        if (window._renderMediaModal) await window._renderMediaModal();
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+    }
+
+    async function unsetMediaPrimary(mediaId, objectCode) {
+      try {
+        await apiJSON(`/objects/media/${mediaId}/unset-primary`, { method: 'POST' });
+        toast('Đã bỏ ảnh chính');
+        if (window._renderMediaModal) await window._renderMediaModal();
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+    }
+
+    // ============================================================
+    // User Stats
+    // ============================================================
+    async function openUserStatsModal(userId, username) {
+      document.getElementById('fm-title').textContent = `Thống kê — ${username}`;
+      document.getElementById('fm-submit').style.display = 'none';
+      document.getElementById('fm-body').innerHTML = `<div class="text-center py-3"><div class="spinner-border text-primary" style="width:1.4rem;height:1.4rem;"></div></div>`;
+      new bootstrap.Modal(document.getElementById('form-modal')).show();
+      try {
+        const s = await apiJSON(`/users/${userId}/stats`);
+        document.getElementById('fm-body').innerHTML = `
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <div class="p-3 rounded text-center" style="background:#e7f1ff;">
+            <div style="font-size:1.6rem;font-weight:800;color:var(--primary);">${s.total_scans}</div>
+            <div style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;">Lượt quét</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="p-3 rounded text-center" style="background:#d1fae5;">
+            <div style="font-size:1.6rem;font-weight:800;color:#059669;">${s.total_learned}</div>
+            <div style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;">Từ đã học</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="p-3 rounded text-center" style="background:#fef3c7;">
+            <div style="font-size:1.6rem;font-weight:800;color:#d97706;">${s.total_reviews}</div>
+            <div style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;">Lượt ôn tập</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="p-3 rounded text-center" style="background:#fce7f3;">
+            <div style="font-size:1.6rem;font-weight:800;color:#db2777;">🔥 ${s.streak_hien_tai}</div>
+            <div style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;">Streak hiện tại</div>
+          </div>
+        </div>
+      </div>
+      <div class="p-2 rounded bg-light" style="font-size:.82rem;">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Streak dài nhất:</span>
+          <strong>${s.streak_dai_nhat} ngày</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-muted">Quét gần nhất:</span>
+          <span>${fmtDate(s.last_scan_at)}</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span class="text-muted">Ôn tập gần nhất:</span>
+          <span>${fmtDate(s.last_review_at)}</span>
+        </div>
+      </div>`;
+      } catch (e) {
+        document.getElementById('fm-body').innerHTML = `<div class="alert alert-danger">Lỗi: ${e.message}</div>`;
+      }
+    }
+
+    // ============================================================
+    // Startup
+    // ============================================================
+    if (TOKEN) {
+      document.getElementById('login-screen').style.display = 'none';
+      initApp();
+    }
+    document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  </script>
+</body>
+
+</html>

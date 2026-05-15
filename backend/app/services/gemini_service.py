@@ -56,9 +56,9 @@ class GeminiService:
             "part_of_speech": "n",
             "definition": "từ tiếng Việt: giải thích ngắn gọn bằng tiếng Việt",
             "example_sentences": [
-                "Example sentence 1 using the word.",
-                "Example sentence 2 using the word.",
-                "Example sentence 3 using the word."
+                {"en": "Example sentence 1 using the word.", "vi": "Câu ví dụ 1 bằng tiếng Việt."},
+                {"en": "Example sentence 2 using the word.", "vi": "Câu ví dụ 2 bằng tiếng Việt."},
+                {"en": "Example sentence 3 using the word.", "vi": "Câu ví dụ 3 bằng tiếng Việt."}
             ]
         }
     ]
@@ -69,7 +69,7 @@ Rules:
 - phonetic: IPA format with slashes (e.g., /ˈæp.əl/)
 - part_of_speech: use abbreviations ONLY — n (noun), v (verb), adj (adjective), adv (adverb), prep (preposition), conj (conjunction), pron (pronoun), interj (interjection)
 - definition: format MUST be "Vietnamese word: brief Vietnamese explanation" (e.g., "máy tính xách tay: thiết bị điện tử cầm tay dùng để làm việc")
-- example_sentences: EXACTLY 3 sentences in English, simple and suitable for language learners
+- example_sentences: EXACTLY 3 objects, each with "en" (English sentence) and "vi" (Vietnamese translation), simple and suitable for language learners
 - Return ONLY valid JSON, no markdown, no extra text"""
 
         try:

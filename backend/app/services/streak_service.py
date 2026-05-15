@@ -1,52 +1,23 @@
+from datetime import date, datetime, timedelta
+
+# pyrefly: ignore [missing-import]
+from sqlalchemy import func
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
-# pyrefly: ignore [missing-import]
-from app.models.profile import Profile
-# pyrefly: ignore [missing-import]
+
+from app.models.review_log import ReviewLog
 from app.utils.timezone import now_vietnam
-from datetime import timedelta
 
 
 class StreakService:
-    """
-    Daily streak rules:
-      - Same day review: keep current streak, increment total reviews.
-      - Next consecutive day: current streak += 1.
-      - Missed more than one day: current streak resets to 1 on the next review.
-    """
+    """Build streak metrics from LichSuOnTap, the single source of review truth."""
 
     def get_streak(self, db: Session, user_id: int) -> dict:
-        profile = self._get_or_create_profile(db, user_id)
-        if self._normalize_profile(profile):
-            db.commit()
-            db.refresh(profile)
-        return self._to_dict(profile)
+        return self._build_streak(db, user_id)
 
     def record_review(self, db: Session, user_id: int) -> dict:
-        profile = self._get_or_create_profile(db, user_id)
-        today = self._today()
-        last = profile.ngay_on_cuoi
-
-        profile.tong_luot_on = (profile.tong_luot_on or 0) + 1
-        profile.luot_on_hom_nay = (profile.luot_on_hom_nay or 0) + 1 if last == today else 1
-
-        if last is None:
-            profile.streak_hien_tai = 1
-        elif last == today:
-            profile.streak_hien_tai = max(profile.streak_hien_tai or 0, 1)
-        elif last == today - timedelta(days=1):
-            profile.streak_hien_tai = (profile.streak_hien_tai or 0) + 1
-        else:
-            profile.streak_hien_tai = 1
-
-        if profile.streak_hien_tai > (profile.streak_dai_nhat or 0):
-            profile.streak_dai_nhat = profile.streak_hien_tai
-
-        profile.ngay_on_cuoi = today
-
-        db.commit()
-        db.refresh(profile)
-        return self._to_dict(profile)
+        # Review submissions create LichSuOnTap rows; this is a compatibility read.
+        return self._build_streak(db, user_id)
 
     def sync_from_client(
         self,
@@ -58,82 +29,95 @@ class StreakService:
         luot_on_hom_nay: int,
         ngay_on_cuoi,
     ) -> dict:
-        profile = self._get_or_create_profile(db, user_id)
+        # Client summary counters are ignored because LichSuOnTap is authoritative.
+        return self._build_streak(db, user_id)
+
+    def _build_streak(self, db: Session, user_id: int) -> dict:
         today = self._today()
+        review_dates = self._review_dates(db, user_id, today)
+        total_reviews = self._total_reviews(db, user_id)
+        reviews_today = self._reviews_on_date(db, user_id, today)
+        last_review = review_dates[-1] if review_dates else None
 
-        self._normalize_profile(profile, today)
-        client_current = self._normalized_streak_value(streak_hien_tai, ngay_on_cuoi, today)
-
-        if client_current > (profile.streak_hien_tai or 0):
-            profile.streak_hien_tai = client_current
-        if streak_dai_nhat > (profile.streak_dai_nhat or 0):
-            profile.streak_dai_nhat = streak_dai_nhat
-        if tong_luot_on > (profile.tong_luot_on or 0):
-            profile.tong_luot_on = tong_luot_on
-        if (
-            ngay_on_cuoi
-            and ngay_on_cuoi <= today
-            and (profile.ngay_on_cuoi is None or ngay_on_cuoi > profile.ngay_on_cuoi)
-        ):
-            profile.ngay_on_cuoi = ngay_on_cuoi
-
-        if ngay_on_cuoi == today and luot_on_hom_nay > (profile.luot_on_hom_nay or 0):
-            profile.luot_on_hom_nay = luot_on_hom_nay
-
-        if profile.streak_hien_tai > (profile.streak_dai_nhat or 0):
-            profile.streak_dai_nhat = profile.streak_hien_tai
-
-        db.commit()
-        db.refresh(profile)
-        return self._to_dict(profile)
-
-    def _get_or_create_profile(self, db: Session, user_id: int) -> Profile:
-        profile = db.query(Profile).filter(Profile.user_id == user_id).first()
-        if not profile:
-            profile = Profile(user_id=user_id)
-            db.add(profile)
-            db.flush()
-        return profile
-
-    def _normalize_profile(self, profile: Profile, today=None) -> bool:
-        today = today or self._today()
-        changed = False
-        normalized = self._normalized_streak_value(
-            profile.streak_hien_tai or 0,
-            profile.ngay_on_cuoi,
-            today,
-        )
-        if normalized != (profile.streak_hien_tai or 0):
-            profile.streak_hien_tai = normalized
-            changed = True
-        if (profile.streak_dai_nhat or 0) < normalized:
-            profile.streak_dai_nhat = normalized
-            changed = True
-        expected_today_reviews = profile.luot_on_hom_nay or 0
-        if profile.ngay_on_cuoi == today and normalized > 0:
-            expected_today_reviews = max(expected_today_reviews, 1)
-        else:
-            expected_today_reviews = 0
-        if expected_today_reviews != (profile.luot_on_hom_nay or 0):
-            profile.luot_on_hom_nay = expected_today_reviews
-            changed = True
-        return changed
-
-    def _normalized_streak_value(self, streak: int, last_review_date, today) -> int:
-        if not last_review_date:
-            return 0
-        if last_review_date < today - timedelta(days=1):
-            return 0
-        return max(streak or 0, 0)
-
-    def _today(self):
-        return now_vietnam().date()
-
-    def _to_dict(self, profile: Profile) -> dict:
         return {
-            "streak_hien_tai": profile.streak_hien_tai or 0,
-            "streak_dai_nhat": profile.streak_dai_nhat or 0,
-            "tong_luot_on": profile.tong_luot_on or 0,
-            "luot_on_hom_nay": profile.luot_on_hom_nay or 0,
-            "ngay_on_cuoi": str(profile.ngay_on_cuoi) if profile.ngay_on_cuoi else None,
+            "streak_hien_tai": self._current_streak(review_dates, today),
+            "streak_dai_nhat": self._longest_streak(review_dates),
+            "tong_luot_on": total_reviews,
+            "luot_on_hom_nay": reviews_today,
+            "ngay_on_cuoi": str(last_review) if last_review else None,
         }
+
+    def _review_dates(self, db: Session, user_id: int, today: date) -> list[date]:
+        review_day = func.date(ReviewLog.thoi_diem_on)
+        rows = (
+            db.query(review_day)
+            .filter(ReviewLog.user_id == user_id)
+            .distinct()
+            .order_by(review_day)
+            .all()
+        )
+        dates = []
+        for (value,) in rows:
+            review_date = self._coerce_date(value)
+            if review_date and review_date <= today:
+                dates.append(review_date)
+        return sorted(set(dates))
+
+    def _total_reviews(self, db: Session, user_id: int) -> int:
+        return db.query(func.count(ReviewLog.id)).filter(ReviewLog.user_id == user_id).scalar() or 0
+
+    def _reviews_on_date(self, db: Session, user_id: int, review_date: date) -> int:
+        return (
+            db.query(func.count(ReviewLog.id))
+            .filter(
+                ReviewLog.user_id == user_id,
+                func.date(ReviewLog.thoi_diem_on) == review_date,
+            )
+            .scalar()
+            or 0
+        )
+
+    def _current_streak(self, review_dates: list[date], today: date) -> int:
+        if not review_dates:
+            return 0
+
+        review_days = set(review_dates)
+        cursor = today if today in review_days else today - timedelta(days=1)
+        if cursor not in review_days:
+            return 0
+
+        streak = 0
+        while cursor in review_days:
+            streak += 1
+            cursor -= timedelta(days=1)
+        return streak
+
+    def _longest_streak(self, review_dates: list[date]) -> int:
+        longest = 0
+        current = 0
+        previous = None
+
+        for review_date in review_dates:
+            if previous and review_date == previous + timedelta(days=1):
+                current += 1
+            else:
+                current = 1
+            longest = max(longest, current)
+            previous = review_date
+
+        return longest
+
+    def _coerce_date(self, value) -> date | None:
+        if isinstance(value, datetime):
+            return value.date()
+        if isinstance(value, date):
+            return value
+        if isinstance(value, str):
+            try:
+                return date.fromisoformat(value[:10])
+            except ValueError:
+                return None
+        return None
+
+    def _today(self) -> date:
+        return now_vietnam().date()

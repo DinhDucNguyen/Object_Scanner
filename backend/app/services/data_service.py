@@ -58,7 +58,6 @@ class DataService:
                 "object_code": obj.ma_doi_tuong,
                 "category_id": obj.danh_muc_id,
                 "category_name": obj.category.ten_danh_muc if obj.category else None,
-                "difficulty_level": obj.muc_do_kho,
                 "translation_count": len(obj.translations),
                 "word_name": primary_translation.tu_vung if primary_translation else obj.ma_doi_tuong,
                 "phonetic": primary_translation.phien_am if primary_translation else None,

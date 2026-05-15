@@ -2,6 +2,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from app.models.learning_progress import LearningProgress
+from app.models.review_log import ReviewLog
 from app.core.constants import SM2_MASTERED_MIN_REPETITIONS
 from app.utils.timezone import now_vietnam
 
@@ -40,22 +41,26 @@ class LearningProgressRepository:
         ).count()
 
     def get_weekly_review_counts(self, db: Session, user_id: int) -> list:
-        seven_days_ago = now_vietnam() - timedelta(days=6)
+        seven_days_ago = now_vietnam().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=6)
         results = (
             db.query(
-                func.date(LearningProgress.lan_on_cuoi).label("review_date"),
-                func.count(LearningProgress.id).label("count")
+                func.date(ReviewLog.thoi_diem_on).label("review_date"),
+                func.count(ReviewLog.id).label("count")
             )
             .filter(
-                LearningProgress.user_id == user_id,
-                LearningProgress.lan_on_cuoi >= seven_days_ago,
-                LearningProgress.so_lan_lap > 0
+                ReviewLog.user_id == user_id,
+                ReviewLog.thoi_diem_on >= seven_days_ago,
             )
-            .group_by(func.date(LearningProgress.lan_on_cuoi))
-            .order_by(func.date(LearningProgress.lan_on_cuoi))
+            .group_by(func.date(ReviewLog.thoi_diem_on))
+            .order_by(func.date(ReviewLog.thoi_diem_on))
             .all()
         )
-        return [(str(r.review_date), r.count) for r in results]
+        return [(str(r.review_date), int(r.count)) for r in results]
+
+    def create_review_log(self, db: Session, log: ReviewLog):
+        db.add(log)
+        db.flush()
+        return log
 
     def get_mastery_distribution(self, db: Session, user_id: int) -> dict:
         rows = db.query(LearningProgress.so_lan_lap).filter(

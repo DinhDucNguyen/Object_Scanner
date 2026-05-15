@@ -1,7 +1,7 @@
 # pyrefly: ignore [missing-import]
 from pydantic import BaseModel
 # pyrefly: ignore [missing-import]
-from typing import Optional, List
+from typing import Optional, List, Union, Any
 from datetime import datetime
 
 
@@ -16,7 +16,7 @@ class VocabTranslationSchema(BaseModel):
     phonetic: Optional[str] = None
     part_of_speech: Optional[str] = None   
     definition: Optional[str] = None       
-    example_sentences: List[str] = []    
+    example_sentences: List[Union[str, dict]] = []
 
 
 class VocabPayloadSchema(BaseModel):
@@ -33,8 +33,9 @@ class PredictionListItem(BaseModel):
     scan_id: int
     nhan_du_doan: Optional[str] = None
     do_tin_cay: Optional[float] = None
-    trang_thai: str                         
+    trang_thai: str
     thoi_gian: Optional[datetime] = None
+    scan_image_url: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -47,6 +48,7 @@ class PredictionDetailResponse(BaseModel):
     do_tin_cay: Optional[float] = None
     trang_thai: str
     thoi_gian: Optional[datetime] = None
+    scan_image_url: Optional[str] = None
     vocab_payload: Optional[VocabPayloadSchema] = None 
 
 
@@ -62,7 +64,6 @@ class ApproveRequest(BaseModel):
     override_definition: Optional[str] = None
     override_example_sentences: Optional[List[str]] = None
     category_id: Optional[int] = None
-    difficulty_level: int = 1
 
 
 class ApproveResponse(BaseModel):
@@ -72,9 +73,193 @@ class ApproveResponse(BaseModel):
     object_id: Optional[int] = None
     translation_id: Optional[int] = None
     examples_created: int = 0
+    users_enrolled: int = 0
 
 
 class RejectResponse(BaseModel):
     success: bool
     message: str
     prediction_id: int
+
+
+# ---------------------------------------------------------------------------
+# Category
+# ---------------------------------------------------------------------------
+
+class CategoryAdminResponse(BaseModel):
+    id: int
+    ten_danh_muc: Optional[str] = None
+    danh_muc_cha: Optional[int] = None
+    mo_ta: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class CategoryCreateRequest(BaseModel):
+    ten_danh_muc: str
+    danh_muc_cha: Optional[int] = None
+    mo_ta: Optional[str] = None
+
+
+class CategoryUpdateRequest(BaseModel):
+    ten_danh_muc: Optional[str] = None
+    danh_muc_cha: Optional[int] = None
+    mo_ta: Optional[str] = None
+
+
+# ---------------------------------------------------------------------------
+# Object
+# ---------------------------------------------------------------------------
+
+class ObjectListItem(BaseModel):
+    id: int
+    ma_doi_tuong: Optional[str] = None
+    danh_muc_id: Optional[int] = None
+    category_name: Optional[str] = None
+    translation_count: int = 0
+    pending_translation_count: int = 0
+    has_image: bool = False
+
+    class Config:
+        from_attributes = True
+
+
+class ObjectDetailResponse(BaseModel):
+    id: int
+    ma_doi_tuong: Optional[str] = None
+    danh_muc_id: Optional[int] = None
+    category_name: Optional[str] = None
+    translation_count: int = 0
+    pending_translation_count: int = 0
+    has_image: bool = False
+
+    class Config:
+        from_attributes = True
+
+
+class ObjectCreateRequest(BaseModel):
+    ma_doi_tuong: str
+    danh_muc_id: Optional[int] = None
+
+
+class ObjectUpdateRequest(BaseModel):
+    danh_muc_id: Optional[int] = None
+
+
+# ---------------------------------------------------------------------------
+# Translation
+# ---------------------------------------------------------------------------
+
+class ExampleItem(BaseModel):
+    id: int
+    cau_vi_du: Optional[str] = None
+    dich_nghia: Optional[str] = None
+
+
+class TranslationAdminResponse(BaseModel):
+    id: int
+    doi_tuong_id: Optional[int] = None
+    object_code: Optional[str] = None
+    lang_code: Optional[str] = None
+    tu_vung: Optional[str] = None
+    phien_am: Optional[str] = None
+    loai_tu: Optional[str] = None
+    dinh_nghia: Optional[str] = None
+    am_thanh_url: Optional[str] = None
+    da_xac_nhan: bool = False
+    example_count: int = 0
+    examples: List[ExampleItem] = []
+
+    class Config:
+        from_attributes = True
+
+
+class TranslationCreateRequest(BaseModel):
+    doi_tuong_id: int
+    lang_code: str
+    tu_vung: str
+    phien_am: Optional[str] = None
+    loai_tu: Optional[str] = None
+    dinh_nghia: Optional[str] = None
+    example_sentences: List[str] = []
+
+
+class TranslationUpdateRequest(BaseModel):
+    tu_vung: Optional[str] = None
+    phien_am: Optional[str] = None
+    loai_tu: Optional[str] = None
+    dinh_nghia: Optional[str] = None
+    da_xac_nhan: Optional[bool] = None
+    example_sentences: Optional[List[str]] = None
+
+
+# ---------------------------------------------------------------------------
+# User
+# ---------------------------------------------------------------------------
+
+class UserAdminResponse(BaseModel):
+    id: int
+    ten_dang_nhap: str
+    email: str
+    ho_ten: Optional[str] = None
+    vai_tro: Optional[str] = None
+    trang_thai: Optional[str] = None
+    ngay_tao: Optional[datetime] = None
+    lan_dang_nhap_cuoi: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserRoleUpdate(BaseModel):
+    vai_tro_id: int
+
+
+class UserStatusUpdate(BaseModel):
+    trang_thai_id: int
+
+
+# ---------------------------------------------------------------------------
+# Scan History
+# ---------------------------------------------------------------------------
+
+class ScanHistoryAdminItem(BaseModel):
+    id: int
+    user_id: Optional[int] = None
+    username: Optional[str] = None
+    doi_tuong_id: Optional[int] = None
+    object_code: Optional[str] = None
+    url_anh: Optional[str] = None
+    do_tin_cay: Optional[float] = None
+    thoi_gian: Optional[datetime] = None
+
+
+# ---------------------------------------------------------------------------
+# User Stats
+# ---------------------------------------------------------------------------
+
+class UserStatsAdminResponse(BaseModel):
+    user_id: int
+    total_scans: int = 0
+    total_reviews: int = 0
+    total_learned: int = 0
+    streak_hien_tai: int = 0
+    streak_dai_nhat: int = 0
+    last_scan_at: Optional[datetime] = None
+    last_review_at: Optional[datetime] = None
+
+
+# ---------------------------------------------------------------------------
+# Dashboard
+# ---------------------------------------------------------------------------
+
+class DashboardStats(BaseModel):
+    total_users: int = 0
+    total_objects: int = 0
+    total_translations: int = 0
+    total_scans: int = 0
+    pending_predictions: int = 0
+    approved_predictions: int = 0
+    rejected_predictions: int = 0
+    objects_without_images: int = 0

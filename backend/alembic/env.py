@@ -32,6 +32,7 @@ from app.models.object import Object  # noqa: F401
 from app.models.translation import Translation  # noqa: F401
 from app.models.example import ViDu  # noqa: F401
 from app.models.learning_progress import LearningProgress  # noqa: F401
+from app.models.review_log import ReviewLog  # noqa: F401
 from app.models.object_media import ObjectMedia  # noqa: F401
 from app.models.user_collection import UserCollection  # noqa: F401
 from app.models.collection_item import CollectionItem  # noqa: F401

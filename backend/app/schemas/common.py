@@ -9,7 +9,6 @@ class ObjectResponse(BaseModel):
     id: int
     category_id: Optional[int] = None
     object_code: str
-    difficulty_level: int
     deleted: bool
     category_name: Optional[str] = None
     translation_count: int = 0
@@ -58,8 +57,10 @@ class ScanResponse(BaseModel):
     object_id: int
     object_code: str
     category_name: Optional[str] = None
-    difficulty_level: int = 1
     translations: List[TranslationResponse]
+    scan_id: Optional[int] = None
+    prediction_id: Optional[int] = None
+    pending_review: bool = False
 
 # ====== Review ======
 

@@ -281,7 +281,7 @@ def find_or_create_object(
             obj = legacy
             stats["objects_renamed"] += 1
         else:
-            obj = Object(ma_doi_tuong=object_code, muc_do_kho=1)
+            obj = Object(ma_doi_tuong=object_code)
             db.add(obj)
             db.flush()
             stats["objects_created"] += 1
@@ -290,8 +290,6 @@ def find_or_create_object(
         obj.thoi_gian_xoa = None
     if obj.danh_muc_id is None:
         obj.danh_muc_id = category.id
-    if obj.muc_do_kho is None:
-        obj.muc_do_kho = 1
     return obj
 
 

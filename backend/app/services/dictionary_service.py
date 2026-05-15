@@ -183,7 +183,7 @@ class DictionaryService:
             Object.thoi_gian_xoa.is_(None),
         ).first()
         if not obj:
-            obj = Object(ma_doi_tuong=object_code, muc_do_kho=1, tao_boi=user_id)
+            obj = Object(ma_doi_tuong=object_code, tao_boi=user_id)
             db.add(obj)
             db.flush()
 

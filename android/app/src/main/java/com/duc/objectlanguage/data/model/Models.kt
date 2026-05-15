@@ -69,8 +69,10 @@ data class ScanResponse(
     @SerializedName("object_id") val objectId: Int,
     @SerializedName("object_code") val objectCode: String,
     @SerializedName("category_name") val categoryName: String?,
-    @SerializedName("difficulty_level") val difficultyLevel: Int,
-    val translations: List<TranslationResponse>
+    val translations: List<TranslationResponse>,
+    @SerializedName("scan_id") val scanId: Int? = null,
+    @SerializedName("prediction_id") val predictionId: Int? = null,
+    @SerializedName("pending_review") val pendingReview: Boolean = false
 )
 
 data class ViDuResponse(
@@ -242,7 +244,6 @@ data class ObjectData(
     @SerializedName("object_code") val objectCode: String,
     @SerializedName("category_id") val categoryId: Int?,
     @SerializedName("category_name") val categoryName: String?,
-    @SerializedName("difficulty_level") val difficultyLevel: Int,
     @SerializedName("translation_count") val translationCount: Int,
     @SerializedName("word_name") val wordName: String?,
     val phonetic: String?,

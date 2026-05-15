@@ -25,7 +25,7 @@ class EmailService:
             return False
 
     def send_otp(self, to_email: str, otp_code: str) -> bool:
-        subject = "Mã xác nhận đặt lại mật khẩu – Object Scanner"
+        subject = "Mã xác nhận đặt lại mật khẩu – LengoLens"
         html_body = f"""
         <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:32px;
                     border:1px solid #e0e0e0;border-radius:12px;">

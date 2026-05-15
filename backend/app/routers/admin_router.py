@@ -31,6 +31,12 @@ from app.schemas.admin import (
     ApproveRequest,
     ApproveResponse,
     RejectResponse,
+    CategoryAdminResponse, CategoryCreateRequest, CategoryUpdateRequest,
+    ObjectListItem, ObjectDetailResponse, ObjectCreateRequest, ObjectUpdateRequest,
+    TranslationAdminResponse, TranslationCreateRequest, TranslationUpdateRequest,
+    UserAdminResponse, UserRoleUpdate, UserStatusUpdate,
+    DashboardStats,
+    ScanHistoryAdminItem, UserStatsAdminResponse,
 )
 
 router = APIRouter(
@@ -185,6 +191,19 @@ def set_media_primary(media_id: int, db: Session = Depends(get_db)):
     return {"message": "Da dat anh chinh", "media_id": media.id}
 
 
+@router.post("/objects/media/{media_id}/unset-primary")
+def unset_media_primary(media_id: int, db: Session = Depends(get_db)):
+    media = db.query(ObjectMedia).filter(
+        ObjectMedia.id == media_id,
+        ObjectMedia.thoi_gian_xoa.is_(None),
+    ).first()
+    if not media:
+        raise HTTPException(404, "Khong tim thay anh doi tuong")
+    media.doi_tuong_chinh = False
+    db.commit()
+    return {"message": "Da bo anh chinh", "media_id": media.id}
+
+
 @router.delete("/objects/media/{media_id}")
 def delete_object_media(media_id: int, db: Session = Depends(get_db)):
     media = db.query(ObjectMedia).filter(
@@ -217,3 +236,177 @@ def _extension_from_content_type(content_type: str | None) -> str:
         "image/jpg": ".jpg",
     }
     return mapping.get((content_type or "").lower(), ".jpg")
+
+
+# ==========================================================================
+# Dashboard
+# ==========================================================================
+
+@router.get("/dashboard", response_model=DashboardStats)
+def get_dashboard(db: Session = Depends(get_db)):
+    """Thống kê tổng quan cho trang chủ admin."""
+    return admin_service.get_dashboard_stats(db)
+
+
+# ==========================================================================
+# Category CRUD
+# ==========================================================================
+
+@router.get("/categories", response_model=List[CategoryAdminResponse])
+def list_categories(db: Session = Depends(get_db)):
+    return admin_service.list_categories(db)
+
+
+@router.post("/categories", response_model=CategoryAdminResponse)
+def create_category(req: CategoryCreateRequest, db: Session = Depends(get_db)):
+    return admin_service.create_category(db, req)
+
+
+@router.put("/categories/{category_id}", response_model=CategoryAdminResponse)
+def update_category(category_id: int, req: CategoryUpdateRequest, db: Session = Depends(get_db)):
+    result = admin_service.update_category(db, category_id, req)
+    if not result:
+        raise HTTPException(404, "Không tìm thấy danh mục")
+    return result
+
+
+@router.delete("/categories/{category_id}")
+def delete_category(category_id: int, db: Session = Depends(get_db)):
+    if not admin_service.delete_category(db, category_id):
+        raise HTTPException(404, "Không tìm thấy danh mục")
+    return {"message": "Đã xoá danh mục"}
+
+
+# ==========================================================================
+# Object CRUD
+# ==========================================================================
+
+@router.get("/objects", response_model=List[ObjectListItem])
+def list_objects(
+    search: Optional[str] = Query(default=None),
+    category_id: Optional[int] = Query(default=None),
+    no_image: Optional[bool] = Query(default=None, description="true = chỉ hiện đối tượng chưa có ảnh"),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+):
+    return admin_service.list_objects(db, limit=limit, offset=offset, search=search, category_id=category_id, no_image=no_image)
+
+
+@router.get("/objects/{object_id}", response_model=ObjectDetailResponse)
+def get_object(object_id: int, db: Session = Depends(get_db)):
+    result = admin_service.get_object(db, object_id)
+    if not result:
+        raise HTTPException(404, "Không tìm thấy đối tượng")
+    return result
+
+
+@router.post("/objects", response_model=ObjectDetailResponse)
+def create_object(req: ObjectCreateRequest, db: Session = Depends(get_db)):
+    return admin_service.create_object(db, req)
+
+
+@router.put("/objects/{object_id}", response_model=ObjectDetailResponse)
+def update_object(object_id: int, req: ObjectUpdateRequest, db: Session = Depends(get_db)):
+    result = admin_service.update_object(db, object_id, req)
+    if not result:
+        raise HTTPException(404, "Không tìm thấy đối tượng")
+    return result
+
+
+@router.delete("/objects/{object_id}")
+def delete_object(object_id: int, db: Session = Depends(get_db)):
+    if not admin_service.delete_object(db, object_id):
+        raise HTTPException(404, "Không tìm thấy đối tượng")
+    return {"message": "Đã xoá đối tượng"}
+
+
+# ==========================================================================
+# Translation CRUD
+# ==========================================================================
+
+@router.get("/translations", response_model=List[TranslationAdminResponse])
+def list_translations(
+    object_id: Optional[int] = Query(default=None),
+    search: Optional[str] = Query(default=None),
+    lang_code: Optional[str] = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+):
+    return admin_service.list_translations(
+        db, object_id=object_id, search=search, lang_code=lang_code, limit=limit, offset=offset
+    )
+
+
+@router.post("/translations", response_model=TranslationAdminResponse)
+def create_translation(req: TranslationCreateRequest, db: Session = Depends(get_db)):
+    return admin_service.create_translation(db, req)
+
+
+@router.put("/translations/{translation_id}", response_model=TranslationAdminResponse)
+def update_translation(translation_id: int, req: TranslationUpdateRequest, db: Session = Depends(get_db)):
+    result = admin_service.update_translation(db, translation_id, req)
+    if not result:
+        raise HTTPException(404, "Không tìm thấy bản dịch")
+    return result
+
+
+@router.delete("/translations/{translation_id}")
+def delete_translation(translation_id: int, db: Session = Depends(get_db)):
+    if not admin_service.delete_translation(db, translation_id):
+        raise HTTPException(404, "Không tìm thấy bản dịch")
+    return {"message": "Đã xoá bản dịch"}
+
+
+# ==========================================================================
+# User management
+# ==========================================================================
+
+@router.get("/users", response_model=List[UserAdminResponse])
+def list_users(
+    search: Optional[str] = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+):
+    return admin_service.list_users(db, limit=limit, offset=offset, search=search)
+
+
+@router.put("/users/{user_id}/role")
+def update_user_role(user_id: int, req: UserRoleUpdate, db: Session = Depends(get_db)):
+    if not admin_service.update_user_role(db, user_id, req):
+        raise HTTPException(404, "Không tìm thấy người dùng")
+    return {"message": "Đã cập nhật vai trò"}
+
+
+@router.put("/users/{user_id}/status")
+def update_user_status(user_id: int, req: UserStatusUpdate, db: Session = Depends(get_db)):
+    if not admin_service.update_user_status(db, user_id, req):
+        raise HTTPException(404, "Không tìm thấy người dùng")
+    return {"message": "Đã cập nhật trạng thái"}
+
+
+@router.get("/users/{user_id}/stats", response_model=UserStatsAdminResponse)
+def get_user_stats(user_id: int, db: Session = Depends(get_db)):
+    """Stats của một user: tổng quét, tổng ôn, từ đã học, streak."""
+    result = admin_service.get_user_stats(db, user_id)
+    if not result:
+        raise HTTPException(404, "Không tìm thấy người dùng")
+    return result
+
+
+# ==========================================================================
+# Scan History
+# ==========================================================================
+
+@router.get("/scan-history", response_model=List[ScanHistoryAdminItem])
+def list_scan_history(
+    user_id: Optional[int] = Query(default=None),
+    object_code: Optional[str] = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+):
+    """Lịch sử quét toàn bộ hệ thống, có thể lọc theo user hoặc mã đối tượng."""
+    return admin_service.list_scan_history(db, user_id=user_id, object_code=object_code, limit=limit, offset=offset)

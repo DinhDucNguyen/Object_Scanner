@@ -66,7 +66,6 @@ class CategoryDetailFragment : Fragment() {
         detailBinding.detailDefinition.text = item.definition ?: "Chua co nghia hien thi"
         detailBinding.detailCategory.text = "Chu de: $categoryName"
         detailBinding.detailObjectCode.text = "Ma tu: ${item.objectCode}"
-        detailBinding.detailDifficulty.text = "Cap do ${item.difficultyLevel}"
         detailBinding.detailTranslationCount.text = "${item.translationCount} ban dich"
 
         if (item.phonetic.isNullOrBlank()) {

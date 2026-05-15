@@ -2,12 +2,12 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.learning_progress import LearningProgress
+from app.models.review_log import ReviewLog
 from app.repositories.language_repo import LanguageRepository
 from app.repositories.learning_repo import LearningProgressRepository
 from app.repositories.translation_repo import TranslationRepository
 from app.schemas.common import ReviewCardResponse, ReviewRequest, ReviewResult, ViDuResponse
 from app.services.object_media_service import pick_primary_object_image
-from app.services.streak_service import StreakService
 from app.services.tts_service import TTSService
 from app.utils.sm2 import calculate_sm2
 from app.utils.timezone import now_vietnam
@@ -19,7 +19,6 @@ class LearningService:
         self.trans_repo = TranslationRepository()
         self.lang_repo = LanguageRepository()
         self.tts = TTSService()
-        self.streak_service = StreakService()
 
     def add_to_learning(self, db: Session, translation_id: int, user_id: int):
         progress, created = self.ensure_in_learning(db, translation_id, user_id)
@@ -104,11 +103,15 @@ class LearningService:
             raise HTTPException(404, "Progress not found")
 
         reviewed_at = now_vietnam()
+        old_repetitions = progress.so_lan_lap or 0
+        old_easiness_factor = float(progress.do_de_nho or 2.5)
+        old_interval = progress.khoang_lap or 0
+
         result = calculate_sm2(
             quality=request.quality,
-            repetitions=progress.so_lan_lap,
-            easiness_factor=float(progress.do_de_nho),
-            interval=progress.khoang_lap,
+            repetitions=old_repetitions,
+            easiness_factor=old_easiness_factor,
+            interval=old_interval,
             reviewed_at=reviewed_at,
         )
         progress.so_lan_lap = result["repetitions"]
@@ -118,8 +121,25 @@ class LearningService:
         progress.lan_on_cuoi = reviewed_at
 
         self.repo.update(db, progress)
+        self.repo.create_review_log(
+            db,
+            ReviewLog(
+                user_id=user_id,
+                tien_do_hoc_id=progress.id,
+                ban_dich_id=progress.ban_dich_id,
+                chat_luong=request.quality,
+                thoi_diem_on=reviewed_at,
+                khoang_lap_cu=old_interval,
+                khoang_lap_moi=result["interval"],
+                do_de_nho_cu=old_easiness_factor,
+                do_de_nho_moi=result["easiness_factor"],
+                so_lan_lap_cu=old_repetitions,
+                so_lan_lap_moi=result["repetitions"],
+                ngay_on_tiep=result["next_review_date"],
+                thoi_gian_tao=reviewed_at,
+            ),
+        )
         db.commit()
-        self.streak_service.record_review(db, user_id)
         return ReviewResult(
             success=True,
             new_interval=result["interval"],

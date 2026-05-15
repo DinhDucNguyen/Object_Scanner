@@ -21,6 +21,8 @@ import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+data class ExampleItem(val en: String, val vi: String?)
+
 class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     private val app = application as ObjectLanguageApp
@@ -39,8 +41,8 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
-    private val _examples = MutableLiveData<List<String>>()
-    val examples: LiveData<List<String>> = _examples
+    private val _examples = MutableLiveData<List<ExampleItem>>()
+    val examples: LiveData<List<ExampleItem>> = _examples
 
     private val _addedMsg = MutableLiveData<String?>()
     val addedMsg: LiveData<String?> = _addedMsg
@@ -65,8 +67,9 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             _isLoading.value = true
             _error.value = null
 
-            // 1. YOLO — nếu đủ confidence
-            if (yoloResult != null && yoloResult.confidence >= 0.5f) {
+            // 1. YOLO — thử DB lookup khi confidence >= 0.80
+            Log.d("ScanViewModel", "YOLO result: ${if (yoloResult != null) "${yoloResult.label} (${yoloResult.confidence})" else "null — no detection"}")
+            if (yoloResult != null && yoloResult.confidence >= 0.80f) {
                 val objectCode = normalizeObjectCode(yoloResult.label)
                 Log.d("ScanViewModel", "YOLOv10: ${yoloResult.label} (${yoloResult.confidence})")
                 val yoloScan = repo.scanByCode(objectCode, yoloResult.confidence)
@@ -80,9 +83,13 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     _isLoading.value = false
                     return@launch
                 }
-                Log.d("ScanViewModel", "YOLO DB miss → Gemini")
-                runGemini(imageBytes)
-                return@launch
+                // DB miss — nếu YOLO rất tự tin thì skip ML Kit, dùng Gemini ngay
+                if (yoloResult.confidence >= 0.90f) {
+                    Log.d("ScanViewModel", "YOLO high-conf DB miss → Gemini")
+                    runGemini(imageBytes)
+                    return@launch
+                }
+                Log.d("ScanViewModel", "YOLO low-conf DB miss → try ML Kit")
             }
 
             // 2. ML Kit — chỉ chạy khi YOLO không detect được
@@ -122,11 +129,16 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun onScanSuccess(objectCode: String, confidence: Float, imageBytes: ByteArray) {
         if (isGuest) {
-            guestSessionManager.incrementScan()
-            _remainingScans.value = guestSessionManager.getRemainingScans()
+            recordGuestScanIfNeeded()
         } else {
             saveScanAndQueueReview(objectCode, confidence, imageBytes)
         }
+    }
+
+    private fun recordGuestScanIfNeeded() {
+        if (!isGuest) return
+        guestSessionManager.incrementScan()
+        _remainingScans.value = guestSessionManager.getRemainingScans()
     }
 
     private suspend fun runGemini(imageBytes: ByteArray) {
@@ -141,7 +153,12 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     else -> {
                         _scanResult.value = it
                         loadExamples(it)
-                        onScanSuccess(it.objectCode, 1.0f, imageBytes)
+                        if (it.pendingReview) {
+                            recordGuestScanIfNeeded()
+                            _addedMsg.value = getApplication<Application>().getString(R.string.scan_pending)
+                        } else {
+                            onScanSuccess(it.objectCode, 1.0f, imageBytes)
+                        }
                     }
                 }
             },
@@ -169,11 +186,12 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         val t = result.translations.firstOrNull { it.languageCode == "en" }
             ?: result.translations.first()
         val stored = t.examples
-            .mapNotNull { it.cauViDu?.trim() }
-            .filter { it.isNotEmpty() }
-            .distinct()
+            .filter { !it.cauViDu.isNullOrBlank() }
+            .distinctBy { it.cauViDu?.trim() }
             .take(3)
+            .map { ExampleItem(en = it.cauViDu!!.trim(), vi = it.dichNghia?.trim()) }
         if (stored.isNotEmpty()) _examples.value = stored
+        else if (result.pendingReview) _examples.value = emptyList()
         else loadExamplesFromGemini(t.wordName, t.languageCode ?: "en")
     }
     
@@ -245,7 +263,10 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadExamplesFromGemini(word: String, lang: String) {
         viewModelScope.launch {
-            _examples.value = repo.getExamples(word, lang).distinct().take(3)
+            _examples.value = repo.getExamples(word, lang)
+                .distinct()
+                .take(3)
+                .map { ExampleItem(en = it, vi = null) }
         }
     }
 

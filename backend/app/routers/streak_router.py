@@ -23,7 +23,7 @@ class StreakResponse(BaseModel):
 
 
 class StreakSyncRequest(BaseModel):
-    """Android gửi toàn bộ trạng thái local lên để đồng bộ."""
+    """Payload cũ từ Android; server không dùng làm nguồn thống kê."""
     streak_hien_tai: int = 0
     streak_dai_nhat: int = 0
     tong_luot_on:    int = 0
@@ -42,27 +42,27 @@ def get_streak(
     return streak_service.get_streak(db, user_id)
 
 
-@router.post("/record", response_model=StreakResponse, summary="Ghi nhận 1 lượt ôn tập")
+@router.post("/record", response_model=StreakResponse, summary="Lấy lại streak sau lượt ôn")
 def record_review(
     db:      Session = Depends(get_db),
     user_id: int     = Depends(get_current_user_id),
 ):
     """
-    Gọi sau mỗi lần user submit answer trong Review.
-    Server tự tính streak dựa theo ngày.
+    Lượt ôn thật được ghi ở endpoint submit review vào LichSuOnTap.
+    Endpoint này chỉ trả về streak mới nhất để tương thích client cũ.
     """
     return streak_service.record_review(db, user_id)
 
 
-@router.post("/sync", response_model=StreakResponse, summary="Đồng bộ streak từ thiết bị")
+@router.post("/sync", response_model=StreakResponse, summary="Lấy streak server cho client cũ")
 def sync_streak(
     body:    StreakSyncRequest,
     db:      Session = Depends(get_db),
     user_id: int     = Depends(get_current_user_id),
 ):
     """
-    Android gửi trạng thái streak local lên khi có mạng.
-    Server chỉ ghi đè nếu giá trị từ client lớn hơn.
+    Server bỏ qua counter local vì LichSuOnTap là nguồn dữ liệu chính.
+    Giữ endpoint để app phiên bản cũ không lỗi khi gọi sync.
     """
     return streak_service.sync_from_client(
         db, user_id,

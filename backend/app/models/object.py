@@ -11,7 +11,6 @@ class Object(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     danh_muc_id = Column(Integer, ForeignKey("DanhMuc.id"), nullable=True, index=True)
     ma_doi_tuong = Column(String(100), unique=True, nullable=True)
-    muc_do_kho = Column(Integer, default=1)
     tao_boi = Column(Integer, ForeignKey("NguoiDung.id"), nullable=True)
     thoi_gian_xoa = Column(DateTime, nullable=True)
 

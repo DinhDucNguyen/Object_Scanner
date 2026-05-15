@@ -1,319 +1,506 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true">
 
-        <!-- Header -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/title_analytics"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:gravity="center"
-            android:paddingBottom="16dp" />
-
-        <!-- Stats Cards Row -->
         <LinearLayout
+            android:id="@+id/contentAnalytics"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
+            android:orientation="vertical"
+            android:paddingStart="18dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="18dp"
+            android:paddingBottom="26dp">
 
-            <!-- Total Words Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="10dp"
+                android:text="@string/analytics_overview_title"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/surface"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/divider"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <ImageView
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:background="@drawable/bg_icon_success"
+                            android:contentDescription="@null"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_dictionary"
+                            app:tint="@color/card_learned_icon" />
+
+                        <TextView
+                            android:id="@+id/tvTotalWords"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="9dp"
+                            android:text="0"
+                            android:textColor="@color/text_primary"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            tools:text="54" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/analytics_total_words"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/surface"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/divider"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <ImageView
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:background="@drawable/bg_icon_warning"
+                            android:contentDescription="@null"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_book"
+                            app:tint="@color/card_due_icon" />
+
+                        <TextView
+                            android:id="@+id/tvDueToday"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="9dp"
+                            android:text="0"
+                            android:textColor="@color/text_primary"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            tools:text="6" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/analytics_due_today"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/surface"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/divider"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <ImageView
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:background="@drawable/bg_icon_violet"
+                            android:contentDescription="@null"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_explore"
+                            app:tint="@color/card_mastered_icon" />
+
+                        <TextView
+                            android:id="@+id/tvMasteredWords"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="9dp"
+                            android:text="0"
+                            android:textColor="@color/text_primary"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            tools:text="18" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/analytics_mastered"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/surface"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/divider"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <ImageView
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:background="@drawable/bg_icon_primary"
+                            android:contentDescription="@null"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_streak_fire" />
+
+                        <TextView
+                            android:id="@+id/tvCurrentStreak"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="9dp"
+                            android:text="0"
+                            android:textColor="@color/text_primary"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            tools:text="4" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/analytics_current_streak"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/surface"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/divider"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <TextView
+                            android:id="@+id/tvReviewsToday"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/streak_heat_1"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            tools:text="9" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/analytics_reviews_today"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/surface"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/divider"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <TextView
+                            android:id="@+id/tvLongestStreak"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/streak_heat_3"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            tools:text="12" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/analytics_longest_streak"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/surface"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/divider"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <TextView
+                            android:id="@+id/tvTotalReviews"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/primary"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            tools:text="84" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/analytics_total_reviews"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAnalyticsEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
                 app:cardBackgroundColor="@color/surface"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:strokeWidth="2dp"
                 app:strokeColor="@color/divider"
-                app:cardCornerRadius="16dp"
-                android:layout_marginBottom="16dp">
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="16dp"
-                    android:gravity="center">
+                    android:padding="22dp">
+
+                    <ImageView
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:background="@drawable/bg_icon_primary"
+                        android:contentDescription="@null"
+                        android:padding="13dp"
+                        android:src="@drawable/ic_dictionary"
+                        app:tint="@color/primary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/analytics_total_words"
-                        android:textSize="12sp"
-                        android:textColor="@android:color/darker_gray" />
+                        android:layout_marginTop="12dp"
+                        android:gravity="center"
+                        android:text="@string/analytics_empty_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tvTotalWords"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="32sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/holo_blue_dark"
-                        android:layout_marginTop="8dp"
-                        tools:text="156" />
-
+                        android:layout_marginTop="6dp"
+                        android:gravity="center"
+                        android:text="@string/analytics_empty_message"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Mastered Words Card -->
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
+                android:id="@+id/cardProgress"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/analytics_mastered"
-                        android:textSize="12sp"
-                        android:textColor="@android:color/darker_gray" />
-
-                    <TextView
-                        android:id="@+id/tvMasteredWords"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="32sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/holo_green_dark"
-                        android:layout_marginTop="8dp"
-                        tools:text="89" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
-
-        <!-- Stats Cards Row 2 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <!-- Reviews Today Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="14dp"
                 app:cardBackgroundColor="@color/surface"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:strokeWidth="2dp"
                 app:strokeColor="@color/divider"
-                app:cardCornerRadius="16dp"
-                android:layout_marginBottom="16dp">
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp"
-                    android:gravity="center">
+                    android:padding="16dp">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/analytics_reviews_today"
-                        android:textSize="12sp"
-                        android:textColor="@android:color/darker_gray" />
+                        android:text="@string/analytics_progress_7_days"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/tvReviewsToday"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="32sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/holo_orange_dark"
-                        android:layout_marginTop="8dp"
-                        tools:text="23" />
-
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/lineChartProgress"
+                        android:layout_width="match_parent"
+                        android:layout_height="210dp"
+                        android:layout_marginTop="12dp" />
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Current Streak Card -->
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
+                android:id="@+id/cardActivity"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="14dp"
+                app:cardBackgroundColor="@color/surface"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp"
-                    android:gravity="center">
+                    android:padding="16dp">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/analytics_current_streak"
-                        android:textSize="12sp"
-                        android:textColor="@android:color/darker_gray" />
+                        android:text="@string/analytics_daily_activity"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/tvCurrentStreak"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="28sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/holo_red_dark"
-                        android:layout_marginTop="8dp"
-                        tools:text="7 days" />
-
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/barChartActivity"
+                        android:layout_width="match_parent"
+                        android:layout_height="210dp"
+                        android:layout_marginTop="12dp" />
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardMastery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/surface"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/analytics_mastery_distribution"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/pieChartMastery"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
+                        android:layout_marginTop="12dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
+    </ScrollView>
 
-        <!-- Progress Chart Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardProgress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/analytics_progress_7_days"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:layout_marginBottom="16dp" />
-
-                <com.github.mikephil.charting.charts.LineChart
-                    android:id="@+id/lineChartProgress"
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Mastery Distribution Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardMastery"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/analytics_mastery_distribution"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:layout_marginBottom="16dp" />
-
-                <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/pieChartMastery"
-                    android:layout_width="match_parent"
-                    android:layout_height="250dp" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Activity Chart Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardActivity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/analytics_daily_activity"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:layout_marginBottom="16dp" />
-
-                <com.github.mikephil.charting.charts.BarChart
-                    android:id="@+id/barChartActivity"
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Stats Summary Card (Hidden) -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardStats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone">
-        </com.google.android.material.card.MaterialCardView>
-
-    </LinearLayout>
-
-    <!-- Loading Indicator -->
     <ProgressBar
         android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
         android:layout_gravity="center"
         android:visibility="gone" />
-
-</ScrollView>
+</FrameLayout>

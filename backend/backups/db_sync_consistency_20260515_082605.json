@@ -1,0 +1,938 @@
+{
+  "metadata": [
+    {
+      "dry_run": false,
+      "created_at": "2026-05-15T08:26:05.214069",
+      "note": "TraTuDien intentionally untouched."
+    }
+  ],
+  "created": [
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 38,
+        "user_id": 1,
+        "tien_do_hoc_id": 5,
+        "ban_dich_id": 69,
+        "chat_luong": 3,
+        "thoi_diem_on": "2026-05-12T21:21:22",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "1.68",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-18T21:21:22",
+        "thoi_gian_tao": "2026-05-12T21:21:22"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 39,
+        "user_id": 1,
+        "tien_do_hoc_id": 8,
+        "ban_dich_id": 67,
+        "chat_luong": 3,
+        "thoi_diem_on": "2026-05-13T11:56:43",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.22",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-19T11:56:43",
+        "thoi_gian_tao": "2026-05-13T11:56:43"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 40,
+        "user_id": 1,
+        "tien_do_hoc_id": 9,
+        "ban_dich_id": 70,
+        "chat_luong": 4,
+        "thoi_diem_on": "2026-05-13T11:56:44",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.46",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-19T11:56:44",
+        "thoi_gian_tao": "2026-05-13T11:56:44"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 41,
+        "user_id": 1,
+        "tien_do_hoc_id": 10,
+        "ban_dich_id": 71,
+        "chat_luong": 3,
+        "thoi_diem_on": "2026-05-13T11:56:46",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.36",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-19T11:56:46",
+        "thoi_gian_tao": "2026-05-13T11:56:46"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 42,
+        "user_id": 1,
+        "tien_do_hoc_id": 11,
+        "ban_dich_id": 72,
+        "chat_luong": 5,
+        "thoi_diem_on": "2026-05-13T11:56:47",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.70",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-19T11:56:47",
+        "thoi_gian_tao": "2026-05-13T11:56:47"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 43,
+        "user_id": 1,
+        "tien_do_hoc_id": 12,
+        "ban_dich_id": 73,
+        "chat_luong": 4,
+        "thoi_diem_on": "2026-05-13T11:56:49",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.46",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-19T11:56:49",
+        "thoi_gian_tao": "2026-05-13T11:56:49"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 44,
+        "user_id": 1,
+        "tien_do_hoc_id": 6,
+        "ban_dich_id": 61,
+        "chat_luong": 3,
+        "thoi_diem_on": "2026-05-13T21:23:27",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "1.82",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-19T21:23:27",
+        "thoi_gian_tao": "2026-05-13T21:23:27"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 45,
+        "user_id": 1,
+        "tien_do_hoc_id": 13,
+        "ban_dich_id": 74,
+        "chat_luong": 3,
+        "thoi_diem_on": "2026-05-13T21:23:33",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.22",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-19T21:23:33",
+        "thoi_gian_tao": "2026-05-13T21:23:33"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 46,
+        "user_id": 1,
+        "tien_do_hoc_id": 14,
+        "ban_dich_id": 75,
+        "chat_luong": 4,
+        "thoi_diem_on": "2026-05-14T12:04:23",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.46",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-20T00:00:00",
+        "thoi_gian_tao": "2026-05-14T12:04:23"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 47,
+        "user_id": 1,
+        "tien_do_hoc_id": 15,
+        "ban_dich_id": 56,
+        "chat_luong": 3,
+        "thoi_diem_on": "2026-05-14T12:04:25",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.36",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-20T00:00:00",
+        "thoi_gian_tao": "2026-05-14T12:04:25"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 48,
+        "user_id": 1,
+        "tien_do_hoc_id": 16,
+        "ban_dich_id": 226,
+        "chat_luong": 5,
+        "thoi_diem_on": "2026-05-14T12:04:26",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.70",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-20T00:00:00",
+        "thoi_gian_tao": "2026-05-14T12:04:26"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 49,
+        "user_id": 1,
+        "tien_do_hoc_id": 18,
+        "ban_dich_id": 206,
+        "chat_luong": 5,
+        "thoi_diem_on": "2026-05-14T12:04:29",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.60",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-20T00:00:00",
+        "thoi_gian_tao": "2026-05-14T12:04:29"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 50,
+        "user_id": 1,
+        "tien_do_hoc_id": 19,
+        "ban_dich_id": 175,
+        "chat_luong": 4,
+        "thoi_diem_on": "2026-05-14T12:04:30",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.46",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-20T00:00:00",
+        "thoi_gian_tao": "2026-05-14T12:04:30"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 51,
+        "user_id": 1,
+        "tien_do_hoc_id": 20,
+        "ban_dich_id": 227,
+        "chat_luong": 5,
+        "thoi_diem_on": "2026-05-14T12:04:31",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.60",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-20T00:00:00",
+        "thoi_gian_tao": "2026-05-14T12:04:31"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 52,
+        "user_id": 1,
+        "tien_do_hoc_id": 25,
+        "ban_dich_id": 230,
+        "chat_luong": 4,
+        "thoi_diem_on": "2026-05-14T12:04:33",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.46",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-20T00:00:00",
+        "thoi_gian_tao": "2026-05-14T12:04:33"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 53,
+        "user_id": 1,
+        "tien_do_hoc_id": 26,
+        "ban_dich_id": 212,
+        "chat_luong": 3,
+        "thoi_diem_on": "2026-05-14T12:04:34",
+        "khoang_lap_cu": 1,
+        "khoang_lap_moi": 6,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.36",
+        "so_lan_lap_cu": 1,
+        "so_lan_lap_moi": 2,
+        "ngay_on_tiep": "2026-05-20T00:00:00",
+        "thoi_gian_tao": "2026-05-14T12:04:34"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 54,
+        "user_id": 3,
+        "tien_do_hoc_id": 23,
+        "ban_dich_id": 61,
+        "chat_luong": 3,
+        "thoi_diem_on": "2026-05-13T22:39:33",
+        "khoang_lap_cu": 0,
+        "khoang_lap_moi": 1,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.36",
+        "so_lan_lap_cu": 0,
+        "so_lan_lap_moi": 1,
+        "ngay_on_tiep": "2026-05-14T22:39:33",
+        "thoi_gian_tao": "2026-05-13T22:39:33"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 55,
+        "user_id": 3,
+        "tien_do_hoc_id": 22,
+        "ban_dich_id": 229,
+        "chat_luong": 5,
+        "thoi_diem_on": "2026-05-13T22:39:36",
+        "khoang_lap_cu": 0,
+        "khoang_lap_moi": 1,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.60",
+        "so_lan_lap_cu": 0,
+        "so_lan_lap_moi": 1,
+        "ngay_on_tiep": "2026-05-14T22:39:36",
+        "thoi_gian_tao": "2026-05-13T22:39:36"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 56,
+        "user_id": 4,
+        "tien_do_hoc_id": 28,
+        "ban_dich_id": 61,
+        "chat_luong": 5,
+        "thoi_diem_on": "2026-05-14T11:24:50",
+        "khoang_lap_cu": 0,
+        "khoang_lap_moi": 1,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.60",
+        "so_lan_lap_cu": 0,
+        "so_lan_lap_moi": 1,
+        "ngay_on_tiep": "2026-05-15T11:24:50",
+        "thoi_gian_tao": "2026-05-14T11:24:50"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 57,
+        "user_id": 4,
+        "tien_do_hoc_id": 29,
+        "ban_dich_id": 231,
+        "chat_luong": 3,
+        "thoi_diem_on": "2026-05-14T11:24:52",
+        "khoang_lap_cu": 0,
+        "khoang_lap_moi": 1,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.36",
+        "so_lan_lap_cu": 0,
+        "so_lan_lap_moi": 1,
+        "ngay_on_tiep": "2026-05-15T11:24:52",
+        "thoi_gian_tao": "2026-05-14T11:24:52"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 58,
+        "user_id": 4,
+        "tien_do_hoc_id": 30,
+        "ban_dich_id": 227,
+        "chat_luong": 3,
+        "thoi_diem_on": "2026-05-14T11:30:56",
+        "khoang_lap_cu": 0,
+        "khoang_lap_moi": 1,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.36",
+        "so_lan_lap_cu": 0,
+        "so_lan_lap_moi": 1,
+        "ngay_on_tiep": "2026-05-15T11:30:56",
+        "thoi_gian_tao": "2026-05-14T11:30:56"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 59,
+        "user_id": 4,
+        "tien_do_hoc_id": 31,
+        "ban_dich_id": 232,
+        "chat_luong": 4,
+        "thoi_diem_on": "2026-05-14T11:45:26",
+        "khoang_lap_cu": 0,
+        "khoang_lap_moi": 1,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.50",
+        "so_lan_lap_cu": 0,
+        "so_lan_lap_moi": 1,
+        "ngay_on_tiep": "2026-05-15T11:45:26",
+        "thoi_gian_tao": "2026-05-14T11:45:26"
+      }
+    },
+    {
+      "table": "LichSuOnTap",
+      "row": {
+        "id": 60,
+        "user_id": 5,
+        "tien_do_hoc_id": 27,
+        "ban_dich_id": 61,
+        "chat_luong": 5,
+        "thoi_diem_on": "2026-05-14T11:16:14",
+        "khoang_lap_cu": 0,
+        "khoang_lap_moi": 1,
+        "do_de_nho_cu": null,
+        "do_de_nho_moi": "2.60",
+        "so_lan_lap_cu": 0,
+        "so_lan_lap_moi": 1,
+        "ngay_on_tiep": "2026-05-15T11:16:14",
+        "thoi_gian_tao": "2026-05-14T11:16:14"
+      }
+    }
+  ],
+  "updated_before": [
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 174,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "computer_mouse",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 186,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "smartphone",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 187,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "power_adapter",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 191,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "wireless_earbuds",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 194,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "microphone_arm_stand",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 177,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "pen",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 181,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "ballpoint_pen",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 180,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "travel_mug",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 184,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "thermal_mug",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 179,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "eyeglasses",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 192,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "first_aid_cabinet",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 189,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "bear_figurine",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 199,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "air_cooler",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 200,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "electric_fly_swatter",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 196,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "bonsai_tree",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    }
+  ],
+  "updated_after": [
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 174,
+        "danh_muc_id": 1,
+        "ma_doi_tuong": "computer_mouse",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 186,
+        "danh_muc_id": 1,
+        "ma_doi_tuong": "smartphone",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 187,
+        "danh_muc_id": 1,
+        "ma_doi_tuong": "power_adapter",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 191,
+        "danh_muc_id": 1,
+        "ma_doi_tuong": "wireless_earbuds",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 194,
+        "danh_muc_id": 1,
+        "ma_doi_tuong": "microphone_arm_stand",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 177,
+        "danh_muc_id": 2,
+        "ma_doi_tuong": "pen",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 181,
+        "danh_muc_id": 2,
+        "ma_doi_tuong": "ballpoint_pen",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 180,
+        "danh_muc_id": 3,
+        "ma_doi_tuong": "travel_mug",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 184,
+        "danh_muc_id": 3,
+        "ma_doi_tuong": "thermal_mug",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 179,
+        "danh_muc_id": 8,
+        "ma_doi_tuong": "eyeglasses",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 192,
+        "danh_muc_id": 16,
+        "ma_doi_tuong": "first_aid_cabinet",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 189,
+        "danh_muc_id": 16,
+        "ma_doi_tuong": "bear_figurine",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 199,
+        "danh_muc_id": 16,
+        "ma_doi_tuong": "air_cooler",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 200,
+        "danh_muc_id": 16,
+        "ma_doi_tuong": "electric_fly_swatter",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 196,
+        "danh_muc_id": 4,
+        "ma_doi_tuong": "bonsai_tree",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    }
+  ],
+  "deleted": [
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 173,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "helmet",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 175,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "outerwear",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 176,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "asphalt",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 178,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "sunglasses",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 182,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "room",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 183,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "tableware",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 185,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "sky",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 188,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "toy",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 190,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "bumper",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 193,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "metal",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 195,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "flowerpot",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 197,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "musical_instrument",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "DoiTuong",
+      "row": {
+        "id": 198,
+        "danh_muc_id": null,
+        "ma_doi_tuong": "product",
+        "muc_do_kho": 1,
+        "tao_boi": null,
+        "thoi_gian_xoa": null
+      }
+    },
+    {
+      "table": "BoSuuTap",
+      "row": {
+        "id": 5,
+        "user_id": 3,
+        "ten_bo_suu_tap": "Favorite ",
+        "cong_khai": false,
+        "ngay_tao": "2026-05-13T16:05:29",
+        "thoi_gian_xoa": null
+      }
+    }
+  ]
+}

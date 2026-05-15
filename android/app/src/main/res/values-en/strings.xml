@@ -288,13 +288,20 @@
     <string name="ci_not_started_label">Not started</string>
 
     <!-- Analytics -->
+    <string name="analytics_overview_title">Learning overview</string>
+    <string name="analytics_due_today">Due today</string>
+    <string name="analytics_longest_streak">Best streak</string>
+    <string name="analytics_total_reviews">Total reviews</string>
+    <string name="analytics_empty_title">No learning data yet</string>
+    <string name="analytics_empty_message">Save a few words and review them to start filling these charts.</string>
+    <string name="analytics_no_chart_data">No chart data yet</string>
     <string name="analytics_total_words">Total Words</string>
     <string name="analytics_mastered">Mastered</string>
     <string name="analytics_reviews_today">Reviews Today</string>
     <string name="analytics_current_streak">Current Streak</string>
-    <string name="analytics_progress_7_days">Learning Progress (Last 7 Days)</string>
+    <string name="analytics_progress_7_days">Cumulative reviews over 7 days</string>
     <string name="analytics_mastery_distribution">Mastery Distribution</string>
-    <string name="analytics_daily_activity">Daily Activity</string>
+    <string name="analytics_daily_activity">Daily reviews</string>
 
     <!-- Notifications -->
     <string name="notification_settings_title">Notification Settings</string>

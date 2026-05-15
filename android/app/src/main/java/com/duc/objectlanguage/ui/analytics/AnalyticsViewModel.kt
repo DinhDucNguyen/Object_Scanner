@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.model.AnalyticsResponse
 import com.duc.objectlanguage.data.model.StatsResponse
+import com.duc.objectlanguage.data.model.StreakResponse
 import kotlinx.coroutines.launch
 
 class AnalyticsViewModel(application: Application) : AndroidViewModel(application) {
@@ -20,6 +21,9 @@ class AnalyticsViewModel(application: Application) : AndroidViewModel(applicatio
     private val _analytics = MutableLiveData<AnalyticsResponse?>()
     val analytics: LiveData<AnalyticsResponse?> = _analytics
 
+    private val _streak = MutableLiveData<StreakResponse?>()
+    val streak: LiveData<StreakResponse?> = _streak
+
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
@@ -30,16 +34,27 @@ class AnalyticsViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            try {
-                repo.getStats().onSuccess { _stats.value = it }
-                repo.getAnalytics().onSuccess { _analytics.value = it }
-            } catch (e: Exception) {
-                _error.value = "Lỗi tải dữ liệu: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
+
+            repo.getStats().fold(
+                onSuccess = { _stats.value = it },
+                onFailure = { _error.value = it.message ?: "Không tải được thống kê" }
+            )
+
+            repo.getAnalytics().fold(
+                onSuccess = { _analytics.value = it },
+                onFailure = { _error.value = it.message ?: "Không tải được biểu đồ" }
+            )
+
+            repo.getStreak().fold(
+                onSuccess = { _streak.value = it },
+                onFailure = { _error.value = it.message ?: "Không tải được chuỗi học" }
+            )
+
+            _isLoading.value = false
         }
     }
 
-    fun clearError() { _error.value = null }
+    fun clearError() {
+        _error.value = null
+    }
 }

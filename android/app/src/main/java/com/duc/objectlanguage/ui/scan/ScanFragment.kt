@@ -22,7 +22,11 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentScanBinding
 import com.duc.objectlanguage.ui.common.GuestUpsellDialog
@@ -139,6 +143,7 @@ class ScanFragment : Fragment() {
                     return@observe
                 }
 
+                val isPending = result.pendingReview
                 binding.resultCard.visibility = View.VISIBLE
                 binding.cameraOverlay.visibility = View.GONE
                 binding.tvGuestCounter.visibility = View.GONE
@@ -147,7 +152,11 @@ class ScanFragment : Fragment() {
                 binding.btnCapture.visibility = View.GONE
                 binding.btnGallery.visibility = View.GONE
                 binding.tvObjectName.text = result.objectCode.replaceFirstChar { it.uppercase() }
-                binding.tvCategory.text = result.categoryName ?: getString(R.string.scan_category_ai)
+                binding.tvCategory.text = if (isPending) {
+                    getString(R.string.scan_pending)
+                } else {
+                    result.categoryName ?: getString(R.string.scan_category_ai)
+                }
 
                 val enTrans = result.translations.firstOrNull { it.languageCode == "en" }
                     ?: result.translations.firstOrNull()
@@ -167,9 +176,13 @@ class ScanFragment : Fragment() {
                         binding.btnPlayAudio.setOnClickListener {
                             viewModel.playAudio(enTrans.audioUrl, enTrans.wordName, "en")
                         }
-                        binding.btnAddToCollection.visibility = View.VISIBLE
-                        binding.btnAddToCollection.setOnClickListener {
-                            viewModel.showAddToCollectionDialog(enTrans.id, requireContext())
+                        if (isPending) {
+                            binding.btnAddToCollection.visibility = View.GONE
+                        } else {
+                            binding.btnAddToCollection.visibility = View.VISIBLE
+                            binding.btnAddToCollection.setOnClickListener {
+                                viewModel.showAddToCollectionDialog(enTrans.id, requireContext())
+                            }
                         }
                     } else {
                         binding.btnPlayAudio.visibility = View.GONE
@@ -189,14 +202,26 @@ class ScanFragment : Fragment() {
             }
         }
 
-        viewModel.examples.observe(viewLifecycleOwner) { sentences ->
-            val visibleSentences = sentences.take(3)
-            if (visibleSentences.isNotEmpty()) {
-                binding.tvExamples.visibility = View.VISIBLE
-                binding.tvExamples.text = getString(R.string.scan_examples_title) +
-                    "\n" + visibleSentences.mapIndexed { i, s -> "${i + 1}. $s" }.joinToString("\n")
+        viewModel.examples.observe(viewLifecycleOwner) { items ->
+            binding.llExamples.removeAllViews()
+            if (items.isNotEmpty()) {
+                binding.llExamplesContainer.visibility = View.VISIBLE
+                val inflater = LayoutInflater.from(requireContext())
+                items.forEachIndexed { i, item ->
+                    val itemView = inflater.inflate(R.layout.item_example_sentence, binding.llExamples, false)
+                    val tvEn = itemView.findViewById<android.widget.TextView>(R.id.tvEnSentence)
+                    val tvVi = itemView.findViewById<android.widget.TextView>(R.id.tvViTranslation)
+                    tvEn.text = "${i + 1}. ${item.en}"
+                    if (!item.vi.isNullOrBlank()) {
+                        tvVi.text = item.vi
+                        itemView.setOnClickListener {
+                            tvVi.visibility = if (tvVi.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                        }
+                    }
+                    binding.llExamples.addView(itemView)
+                }
             } else {
-                binding.tvExamples.visibility = View.GONE
+                binding.llExamplesContainer.visibility = View.GONE
             }
         }
 
@@ -364,9 +389,13 @@ class ScanFragment : Fragment() {
             .setView(imageView)
             .setPositiveButton(getString(R.string.scan_preview_scan_now)) { dialog, _ ->
                 dialog.dismiss()
-                val confirmedBitmap = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                val yoloResult = detectorHelper?.detectBitmap(confirmedBitmap)
-                viewModel.scanWithDetection(yoloResult, imageBytes)
+                lifecycleScope.launch {
+                    val yoloResult = withContext(Dispatchers.Default) {
+                        val bmp = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                        detectorHelper?.detectBitmap(bmp)
+                    }
+                    viewModel.scanWithDetection(yoloResult, imageBytes)
+                }
             }
             .setNeutralButton(getString(R.string.scan_preview_crop_again)) { dialog, _ ->
                 dialog.dismiss()
