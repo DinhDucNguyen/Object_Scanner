@@ -4,16 +4,17 @@ Admin Moderation Router
 REST API để admin kiểm duyệt từ vựng do Gemini đề xuất.
 
 Endpoints:
-  GET  /api/admin/predictions             — Danh sách (lọc theo trạng thái)
-  GET  /api/admin/predictions/{id}        — Chi tiết kèm vocab_payload
-  POST /api/admin/predictions/{id}/approve — Duyệt → insert DoiTuong/BanDich/ViDu
-  POST /api/admin/predictions/{id}/reject  — Từ chối
-  GET  /api/admin/stats                   — Thống kê nhanh
+  GET  /api/admin/predictions                    — Danh sách (lọc theo trạng thái)
+  GET  /api/admin/predictions/export-training    — Xuất JSONL training data (da_duyet)
+  GET  /api/admin/predictions/{id}               — Chi tiết kèm vocab_payload
+  POST /api/admin/predictions/{id}/approve       — Duyệt → insert DoiTuong/BanDich/ViDu
+  POST /api/admin/predictions/{id}/reject        — Từ chối
+  GET  /api/admin/stats                          — Thống kê nhanh
 """
 import os
 import uuid
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, Response, UploadFile
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -34,7 +35,7 @@ from app.schemas.admin import (
     CategoryAdminResponse, CategoryCreateRequest, CategoryUpdateRequest,
     ObjectListItem, ObjectDetailResponse, ObjectCreateRequest, ObjectUpdateRequest,
     TranslationAdminResponse, TranslationCreateRequest, TranslationUpdateRequest,
-    UserAdminResponse, UserRoleUpdate, UserStatusUpdate,
+    UserAdminResponse, UserRoleUpdate, UserStatusUpdate, UserPasswordReset,
     DashboardStats,
     ScanHistoryAdminItem, UserStatsAdminResponse,
 )
@@ -57,6 +58,19 @@ def list_predictions(
 ):
     """Danh sách predictions của Gemini, lọc theo trạng thái kiểm duyệt."""
     return admin_service.list_predictions(db, trang_thai=trang_thai, limit=limit, offset=offset)
+
+
+@router.get("/predictions/export-training")
+def export_training_data(db: Session = Depends(get_db)):
+    """Xuất dữ liệu training — predictions Gemini đã duyệt, định dạng JSONL."""
+    import json as _json
+    records = admin_service.export_training_data(db)
+    content = "\n".join(_json.dumps(r, ensure_ascii=False) for r in records)
+    return Response(
+        content=content,
+        media_type="application/x-ndjson",
+        headers={"Content-Disposition": "attachment; filename=gemini_training_data.jsonl"},
+    )
 
 
 @router.get("/predictions/{prediction_id}", response_model=PredictionDetailResponse)
@@ -330,12 +344,13 @@ def list_translations(
     object_id: Optional[int] = Query(default=None),
     search: Optional[str] = Query(default=None),
     lang_code: Optional[str] = Query(default=None),
+    approved: Optional[bool] = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
     return admin_service.list_translations(
-        db, object_id=object_id, search=search, lang_code=lang_code, limit=limit, offset=offset
+        db, object_id=object_id, search=search, lang_code=lang_code, approved=approved, limit=limit, offset=offset
     )
 
 
@@ -387,6 +402,20 @@ def update_user_status(user_id: int, req: UserStatusUpdate, db: Session = Depend
     return {"message": "Đã cập nhật trạng thái"}
 
 
+@router.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    if not admin_service.delete_user(db, user_id):
+        raise HTTPException(404, "Không tìm thấy người dùng")
+    return {"message": "Đã xoá người dùng"}
+
+
+@router.post("/users/{user_id}/reset-password")
+def reset_user_password(user_id: int, req: UserPasswordReset, db: Session = Depends(get_db)):
+    if not admin_service.reset_user_password(db, user_id, req.new_password):
+        raise HTTPException(404, "Không tìm thấy người dùng")
+    return {"message": "Đã đặt lại mật khẩu"}
+
+
 @router.get("/users/{user_id}/stats", response_model=UserStatsAdminResponse)
 def get_user_stats(user_id: int, db: Session = Depends(get_db)):
     """Stats của một user: tổng quét, tổng ôn, từ đã học, streak."""
@@ -403,10 +432,16 @@ def get_user_stats(user_id: int, db: Session = Depends(get_db)):
 @router.get("/scan-history", response_model=List[ScanHistoryAdminItem])
 def list_scan_history(
     user_id: Optional[int] = Query(default=None),
+    username: Optional[str] = Query(default=None),
     object_code: Optional[str] = Query(default=None),
+    date_from: Optional[str] = Query(default=None),
+    date_to: Optional[str] = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
-    """Lịch sử quét toàn bộ hệ thống, có thể lọc theo user hoặc mã đối tượng."""
-    return admin_service.list_scan_history(db, user_id=user_id, object_code=object_code, limit=limit, offset=offset)
+    """Lịch sử quét toàn bộ hệ thống, có thể lọc theo user, mã đối tượng và khoảng ngày."""
+    return admin_service.list_scan_history(
+        db, user_id=user_id, username=username, object_code=object_code,
+        date_from=date_from, date_to=date_to, limit=limit, offset=offset
+    )

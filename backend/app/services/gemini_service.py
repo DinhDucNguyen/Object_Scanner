@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 # TODO: Migrate to google.genai package (google-generativeai is deprecated)
 # See: https://github.com/google-gemini/deprecated-generative-ai-python
@@ -7,6 +8,8 @@ import google.generativeai as genai
 # pyrefly: ignore [missing-import]
 from google.api_core.exceptions import ResourceExhausted
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class GeminiService:
@@ -23,14 +26,14 @@ class GeminiService:
             for model_name in self.models_to_try:
                 try:
                     self.model = genai.GenerativeModel(model_name)
-                    print(f"[OK] Using {model_name}")
+                    logger.info("Using %s", model_name)
                     break
                 except Exception as e:
-                    print(f"[WARN] {model_name} not available: {e}")
+                    logger.warning("%s not available: %s", model_name, e)
                     continue
 
             if not self.model:
-                print("[ERROR] No Gemini model available!")
+                logger.error("No Gemini model available!")
         else:
             self.model = None
 
@@ -39,10 +42,10 @@ class GeminiService:
         Gọi Gemini Vision API để nhận diện vật thể từ ảnh.
         """
         if not self.model:
-            print("[WARN] Gemini model not initialized!")
+            logger.warning("Gemini model not initialized!")
             return {"_error": "model_not_initialized", "_message": "Gemini model not initialized"}
 
-        print(f"[INFO] Calling Gemini API with image size: {len(image_bytes)} bytes")
+        logger.info("Calling Gemini API with image size: %d bytes", len(image_bytes))
 
         prompt = """Analyze this image and identify the main object. Return a JSON object with this exact format:
 {
@@ -83,10 +86,10 @@ Rules:
                         {"mime_type": "image/jpeg", "data": image_bytes}
                     ])
                     if model_name != "gemini-2.5-flash":
-                        print(f"[OK] Fallback model succeeded: {model_name}")
+                        logger.info("Fallback model succeeded: %s", model_name)
                     break
                 except ResourceExhausted as e:
-                    print(f"[WARN] Model quota exhausted: {model_name}")
+                    logger.warning("Model quota exhausted: %s", model_name)
                     last_quota_error = e
                     continue
 
@@ -102,10 +105,10 @@ Rules:
                 text = text.rsplit("```", 1)[0].strip()
 
             if not text:
-                print("[ERROR] Gemini returned empty text response")
+                logger.error("Gemini returned empty text response")
                 return {"_error": "empty_response", "_message": "Gemini returned empty response"}
 
-            print(f"[OK] Gemini response: {text[:200]}...")
+            logger.info("Gemini response: %s...", text[:200])
 
             # Trích JSON block chắc chắn hơn (lấy từ { đầu tiên tới } cuối cùng)
             json_str = text
@@ -117,7 +120,7 @@ Rules:
             try:
                 result = json.loads(json_str)
                 result = self._sanitize_result(result)
-                print(f"[OK] Parsed object_code: {result.get('object_code', 'N/A')}")
+                logger.info("Parsed object_code: %s", result.get('object_code', 'N/A'))
                 return result
             except Exception:
                 # Fallback parse khi model trả text gần-JSON nhưng sai format.
@@ -140,15 +143,13 @@ Rules:
                     }]
                 }
                 fallback = self._sanitize_result(fallback)
-                print(f"[WARN] Fallback parsed object_code: {fallback.get('object_code', 'N/A')}")
+                logger.warning("Fallback parsed object_code: %s", fallback.get('object_code', 'N/A'))
                 return fallback
         except ResourceExhausted as e:
-            print(f"[ERROR] Gemini quota exceeded: {e}")
+            logger.error("Gemini quota exceeded: %s", e)
             return {"_error": "quota_exceeded", "_message": str(e)}
         except Exception as e:
-            print(f"[ERROR] Gemini API error: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error("Gemini API error: %s", e, exc_info=True)
             return {"_error": "api_error", "_message": str(e)}
 
     def _normalize_object_code(self, raw: str) -> str:
@@ -216,7 +217,7 @@ Text: {text}"""
         except ResourceExhausted:
             return {"_error": "quota_exceeded"}
         except Exception as e:
-            print(f"[ERROR] Gemini translate error: {e}")
+            logger.error("Gemini translate error: %s", e)
             return None
 
     def analyze_dictionary_text(self, text: str, from_lang: str = "en", to_lang: str = "vi") -> dict | None:
@@ -288,7 +289,7 @@ Input: {text}"""
         except ResourceExhausted:
             return {"_error": "quota_exceeded"}
         except Exception as e:
-            print(f"[ERROR] Gemini dictionary analysis error: {e}")
+            logger.error("Gemini dictionary analysis error: %s", e)
             return None
 
     def get_example_sentences(self, word: str, lang_code: str = "en", count: int = 3) -> list:
@@ -314,5 +315,5 @@ Return ONLY valid JSON, no markdown or extra text."""
                 return []
             return [str(sentence).strip() for sentence in sentences if str(sentence).strip()][:count]
         except Exception as e:
-            print(f"Gemini example sentences error: {e}")
+            logger.error("Gemini example sentences error: %s", e)
             return []

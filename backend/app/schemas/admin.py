@@ -1,8 +1,9 @@
 # pyrefly: ignore [missing-import]
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 # pyrefly: ignore [missing-import]
 from typing import Optional, List, Union, Any
 from datetime import datetime
+from app.schemas.user import validate_password_strength
 
 
 
@@ -91,6 +92,7 @@ class CategoryAdminResponse(BaseModel):
     ten_danh_muc: Optional[str] = None
     danh_muc_cha: Optional[int] = None
     mo_ta: Optional[str] = None
+    object_count: int = 0
 
     class Config:
         from_attributes = True
@@ -218,6 +220,15 @@ class UserRoleUpdate(BaseModel):
 
 class UserStatusUpdate(BaseModel):
     trang_thai_id: int
+
+
+class UserPasswordReset(BaseModel):
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        return validate_password_strength(v, "Mật khẩu mới")
 
 
 # ---------------------------------------------------------------------------

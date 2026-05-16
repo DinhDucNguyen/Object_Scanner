@@ -34,7 +34,6 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
             longestStreak = longest,
             totalReviews = total,
             reviewsToday = today,
-            motivationMessage = buildMotivationMessage(current, today),
             nextMilestone = getNextMilestone(current),
             daysToMilestone = getDaysToMilestone(current),
         )
@@ -112,20 +111,6 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    private fun buildMotivationMessage(streak: Int, reviewsToday: Int): String {
-        return when {
-            reviewsToday == 0 && streak == 0 -> ctx.getString(R.string.streak_msg_start)
-            reviewsToday == 0 && streak > 0 -> ctx.getString(R.string.streak_msg_dont_break, streak)
-            reviewsToday > 0 && streak == 0 -> ctx.getString(R.string.streak_msg_great_start)
-            streak == 1 -> ctx.getString(R.string.streak_msg_keep_going)
-            streak in 2..6 -> ctx.getString(R.string.streak_msg_momentum, streak)
-            streak in 7..13 -> ctx.getString(R.string.streak_msg_one_week)
-            streak in 14..29 -> ctx.getString(R.string.streak_msg_two_weeks)
-            streak in 30..99 -> ctx.getString(R.string.streak_msg_champion, streak)
-            streak >= 100 -> ctx.getString(R.string.streak_msg_legend, streak)
-            else -> ctx.getString(R.string.streak_msg_default)
-        }
-    }
 
     private fun getNextMilestone(current: Int): Int =
         listOf(3, 7, 14, 30, 50, 100, 365).firstOrNull { it > current } ?: 365
@@ -139,7 +124,6 @@ data class StreakData(
     val longestStreak: Int,
     val totalReviews: Int,
     val reviewsToday: Int,
-    val motivationMessage: String,
     val nextMilestone: Int,
     val daysToMilestone: Int,
 )

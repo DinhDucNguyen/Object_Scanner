@@ -1,8 +1,11 @@
+import logging
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class EmailService:
@@ -21,7 +24,7 @@ class EmailService:
                 server.sendmail(settings.SMTP_FROM, to_email, msg.as_string())
             return True
         except Exception as e:
-            print(f"[ERROR] EmailService._send: {e}")
+            logger.error("EmailService._send: %s", e)
             return False
 
     def send_otp(self, to_email: str, otp_code: str) -> bool:

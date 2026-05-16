@@ -1,9 +1,12 @@
+import logging
 # pyrefly: ignore [missing-import]
 from fastapi import HTTPException
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 from datetime import timedelta
 import random
+
+logger = logging.getLogger(__name__)
 
 # pyrefly: ignore [missing-import]
 from app.models.user import User
@@ -190,7 +193,7 @@ class UserService:
     def forgot_password(self, db: Session, data: ForgotPasswordRequest) -> dict:
         user = self.repo.get_by_email(db, data.email)
         if not user:
-            print(f"[DEBUG] forgot_password: email not found: {data.email}")
+            logger.debug("forgot_password: email not found: %s", data.email)
             raise ValueError("Email không tồn tại")
 
         email = user.email.lower()
@@ -201,7 +204,7 @@ class UserService:
         }
 
         ok = EmailService().send_otp(email, otp_code)
-        print(f"[DEBUG] forgot_password: sent OTP to {email}, result={ok}")
+        logger.debug("forgot_password: sent OTP to %s, result=%s", email, ok)
         masked = self._mask_email(email)
         return {"message": "Mã OTP đã được gửi", "email": email, "masked_email": masked}
 

@@ -67,8 +67,7 @@ class StreakFragment : Fragment() {
             totalReviewsText.text  = data.totalReviews.toString()
             reviewsTodayText.text  = data.reviewsToday.toString()
 
-            // Tin nhắn động lực — đã được format từ ViewModel
-            motivationText.text = data.motivationMessage
+            motivationText.text = buildMotivationMessage(data.currentStreak, data.reviewsToday)
 
             // Mốc tiếp theo
             nextMilestoneText.text = getString(R.string.streak_milestone_label, data.nextMilestone)
@@ -93,6 +92,19 @@ class StreakFragment : Fragment() {
             }
             todayStatusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
         }
+    }
+
+    private fun buildMotivationMessage(streak: Int, reviewsToday: Int): String = when {
+        reviewsToday == 0 && streak == 0 -> getString(R.string.streak_msg_start)
+        reviewsToday == 0 && streak > 0  -> getString(R.string.streak_msg_dont_break, streak)
+        reviewsToday > 0  && streak == 0 -> getString(R.string.streak_msg_great_start)
+        streak == 1                       -> getString(R.string.streak_msg_keep_going)
+        streak in 2..6                    -> getString(R.string.streak_msg_momentum, streak)
+        streak in 7..13                   -> getString(R.string.streak_msg_one_week)
+        streak in 14..29                  -> getString(R.string.streak_msg_two_weeks)
+        streak in 30..99                  -> getString(R.string.streak_msg_champion, streak)
+        streak >= 100                     -> getString(R.string.streak_msg_legend, streak)
+        else                              -> getString(R.string.streak_msg_default)
     }
 
     private fun getStreakAccent(currentStreak: Int): StreakAccent = when {

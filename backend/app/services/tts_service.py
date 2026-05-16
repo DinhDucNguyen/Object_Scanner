@@ -1,10 +1,13 @@
 import hashlib
 import io
+import logging
 import re
 from pathlib import Path
 from urllib.parse import quote
 
 from gtts import gTTS
+
+logger = logging.getLogger(__name__)
 
 
 class TTSService:
@@ -40,7 +43,7 @@ class TTSService:
             cache_path.write_bytes(audio_bytes)
             return audio_bytes
         except Exception as e:
-            print(f"TTS error: {e}")
+            logger.error("TTS error: %s", e)
             return None
 
     def _normalize_lang(self, lang_code: str) -> str:

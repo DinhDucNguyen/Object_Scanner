@@ -32,6 +32,7 @@ from app.models.user import User
 from app.models.review_log import ReviewLog
 from app.services.tts_service import TTSService
 from app.utils.timezone import now_vietnam
+from app.utils.security import hash_password
 from app.schemas.admin import (
     ApproveRequest, ApproveResponse,
     RejectResponse,
@@ -107,6 +108,38 @@ class AdminService:
             scan_image_url=scan.url_anh if scan else None,
             vocab_payload=vocab_payload,
         )
+
+    def export_training_data(self, db: Session) -> list[dict]:
+        """
+        Xuất toàn bộ predictions đã duyệt (da_duyet, nguon_ai=gemini)
+        dưới dạng list dict — mỗi phần tử là 1 record training.
+        """
+        from app.models.ai_feedback_report import NguonAI
+        predictions = (
+            db.query(AIPrediction)
+            .filter(
+                AIPrediction.trang_thai == TrangThaiDuyet.da_duyet,
+                AIPrediction.nguon_ai == NguonAI.gemini,
+            )
+            .order_by(AIPrediction.thoi_gian.desc())
+            .all()
+        )
+        records = []
+        for p in predictions:
+            try:
+                payload = json.loads(p.mo_ta or "{}")
+            except Exception:
+                payload = {}
+            records.append({
+                "prediction_id": p.id,
+                "scan_id": p.scan_id,
+                "object_code": p.nhan_du_doan,
+                "image_url": payload.get("scan_image_url"),
+                "approved_at": p.thoi_gian.isoformat() if p.thoi_gian else None,
+                "translations": payload.get("translations", []),
+                "category": payload.get("category"),
+            })
+        return records
 
     # ------------------------------------------------------------------
     # Approve — Insert vào bảng chính
@@ -407,8 +440,20 @@ class AdminService:
     # ------------------------------------------------------------------
 
     def list_categories(self, db: Session) -> List[CategoryAdminResponse]:
+        from sqlalchemy import func
         cats = db.query(Category).filter(Category.thoi_gian_xoa.is_(None)).order_by(Category.id).all()
-        return [CategoryAdminResponse.model_validate(c) for c in cats]
+        counts = dict(
+            db.query(Object.danh_muc_id, func.count(Object.id))
+            .filter(Object.thoi_gian_xoa.is_(None), Object.danh_muc_id.isnot(None))
+            .group_by(Object.danh_muc_id)
+            .all()
+        )
+        result = []
+        for c in cats:
+            item = CategoryAdminResponse.model_validate(c)
+            item.object_count = counts.get(c.id, 0)
+            result.append(item)
+        return result
 
     def create_category(self, db: Session, req: CategoryCreateRequest) -> CategoryAdminResponse:
         cat = Category(ten_danh_muc=req.ten_danh_muc, danh_muc_cha=req.danh_muc_cha, mo_ta=req.mo_ta)
@@ -542,6 +587,7 @@ class AdminService:
         object_id: Optional[int] = None,
         search: Optional[str] = None,
         lang_code: Optional[str] = None,
+        approved: Optional[bool] = None,
         limit: int = 50,
         offset: int = 0,
     ) -> List[TranslationAdminResponse]:
@@ -553,6 +599,8 @@ class AdminService:
         if lang_code:
             from app.models.language import Language as LangModel
             query = query.join(Translation.language).filter(LangModel.ma_ngon_ngu == lang_code)
+        if approved is not None:
+            query = query.filter(Translation.da_xac_nhan == approved)
         trans = query.order_by(Translation.id.desc()).offset(offset).limit(limit).all()
         result = []
         for t in trans:
@@ -705,6 +753,22 @@ class AdminService:
         db.commit()
         return True
 
+    def delete_user(self, db: Session, user_id: int) -> bool:
+        u = db.query(User).filter(User.id == user_id, User.thoi_gian_xoa.is_(None)).first()
+        if not u:
+            return False
+        u.thoi_gian_xoa = now_vietnam()
+        db.commit()
+        return True
+
+    def reset_user_password(self, db: Session, user_id: int, new_password: str) -> bool:
+        u = db.query(User).filter(User.id == user_id, User.thoi_gian_xoa.is_(None)).first()
+        if not u:
+            return False
+        u.mat_khau_ma_hoa = hash_password(new_password)
+        db.commit()
+        return True
+
     # ------------------------------------------------------------------
     # Scan History
     # ------------------------------------------------------------------
@@ -713,10 +777,14 @@ class AdminService:
         self,
         db: Session,
         user_id: Optional[int] = None,
+        username: Optional[str] = None,
         object_code: Optional[str] = None,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
         limit: int = 50,
         offset: int = 0,
     ) -> List[ScanHistoryAdminItem]:
+        from datetime import datetime as dt
         query = (
             db.query(ScanHistory, User, Object)
             .outerjoin(User, ScanHistory.user_id == User.id)
@@ -725,8 +793,14 @@ class AdminService:
         )
         if user_id:
             query = query.filter(ScanHistory.user_id == user_id)
+        if username:
+            query = query.filter(User.ten_dang_nhap.ilike(f"%{username}%"))
         if object_code:
             query = query.filter(Object.ma_doi_tuong.ilike(f"%{object_code}%"))
+        if date_from:
+            query = query.filter(ScanHistory.thoi_gian >= dt.fromisoformat(date_from))
+        if date_to:
+            query = query.filter(ScanHistory.thoi_gian <= dt.fromisoformat(date_to + "T23:59:59"))
         rows = query.offset(offset).limit(limit).all()
         result = []
         for scan, user, obj in rows:
