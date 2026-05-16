@@ -141,6 +141,112 @@ class AdminService:
             })
         return records
 
+    def export_training_data_grouped(self, db: Session) -> list[dict]:
+        """
+        Xuất training data gom nhóm theo object_code.
+        Mỗi record chứa danh sách ảnh từ nhiều nguồn (confirmed + mọi scan Gemini cùng nhãn),
+        giúp tập training có đa dạng góc độ cho cùng một vật thể.
+        """
+        from collections import defaultdict
+        from app.models.ai_feedback_report import NguonAI
+
+        approved = (
+            db.query(AIPrediction)
+            .filter(
+                AIPrediction.trang_thai == TrangThaiDuyet.da_duyet,
+                AIPrediction.nguon_ai == NguonAI.gemini,
+            )
+            .all()
+        )
+        if not approved:
+            return []
+
+        groups: dict[str, dict] = {}
+        for p in approved:
+            code = p.nhan_du_doan
+            if not code:
+                continue
+            if code not in groups:
+                try:
+                    payload = json.loads(p.mo_ta or "{}")
+                except Exception:
+                    payload = {}
+                groups[code] = {
+                    "object_code": code,
+                    "approved_prediction_ids": [],
+                    "translations": payload.get("translations", []),
+                    "category": None,
+                    "images": [],
+                    "_seen": set(),
+                }
+            groups[code]["approved_prediction_ids"].append(p.id)
+
+        object_codes = list(groups.keys())
+
+        # Lấy danh mục thật từ DB thay vì dùng Gemini's suggestion
+        objs_with_cat = (
+            db.query(Object)
+            .filter(
+                Object.ma_doi_tuong.in_(object_codes),
+                Object.thoi_gian_xoa.is_(None),
+            )
+            .all()
+        )
+        for obj in objs_with_cat:
+            if obj.ma_doi_tuong in groups:
+                groups[obj.ma_doi_tuong]["category"] = (
+                    obj.category.ten_danh_muc if obj.category else None
+                )
+
+        # Ảnh từ scan đã xác nhận đúng (ScanHistory → Object.ma_doi_tuong)
+        confirmed = (
+            db.query(ScanHistory, Object)
+            .join(Object, ScanHistory.doi_tuong_id == Object.id)
+            .filter(
+                Object.ma_doi_tuong.in_(object_codes),
+                ScanHistory.url_anh.isnot(None),
+            )
+            .all()
+        )
+        for scan, obj in confirmed:
+            code = obj.ma_doi_tuong
+            g = groups.get(code)
+            if g and scan.url_anh not in g["_seen"]:
+                g["images"].append({"url": scan.url_anh, "source": "confirmed", "scan_id": scan.id})
+                g["_seen"].add(scan.url_anh)
+
+        # Ảnh từ mọi prediction Gemini cùng nhãn (kể cả chưa duyệt / từ chối)
+        gemini_scans = (
+            db.query(AIPrediction, ScanHistory)
+            .join(ScanHistory, AIPrediction.scan_id == ScanHistory.id)
+            .filter(
+                AIPrediction.nhan_du_doan.in_(object_codes),
+                AIPrediction.nguon_ai == NguonAI.gemini,
+                ScanHistory.url_anh.isnot(None),
+            )
+            .all()
+        )
+        for pred, scan in gemini_scans:
+            code = pred.nhan_du_doan
+            g = groups.get(code)
+            if g and scan.url_anh not in g["_seen"]:
+                g["images"].append({
+                    "url": scan.url_anh,
+                    "source": "gemini_scan",
+                    "scan_id": scan.id,
+                    "prediction_id": pred.id,
+                })
+                g["_seen"].add(scan.url_anh)
+
+        records = []
+        for g in groups.values():
+            g.pop("_seen")
+            g["total_images"] = len(g["images"])
+            records.append(g)
+
+        records.sort(key=lambda r: r["total_images"], reverse=True)
+        return records
+
     # ------------------------------------------------------------------
     # Approve — Insert vào bảng chính
     # ------------------------------------------------------------------
@@ -198,6 +304,17 @@ class AdminService:
         else:
             if request.category_id is not None:
                 obj.danh_muc_id = request.category_id
+
+        # Tự gán danh mục từ Gemini nếu admin chưa chọn và Gemini trả về đúng tên trong DB
+        if obj.danh_muc_id is None:
+            gemini_category = raw.get("category")
+            if gemini_category:
+                matched_cat = db.query(Category).filter(
+                    Category.ten_danh_muc == gemini_category,
+                    Category.thoi_gian_xoa.is_(None),
+                ).first()
+                if matched_cat:
+                    obj.danh_muc_id = matched_cat.id
 
         if p.scan and p.scan.doi_tuong_id is None:
             p.scan.doi_tuong_id = obj.id

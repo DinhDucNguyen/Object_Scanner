@@ -78,6 +78,7 @@ class ScanService:
         if obj:
             existing_translations = self._approved_translations(db, obj.id)
             if existing_translations:
+                self._record_confirmed_scan(db, user_id, obj.id, image_bytes, base_url)
                 return ScanResponse(
                     source="internal_db",
                     object_id=obj.id,
@@ -176,6 +177,30 @@ class ScanService:
         db.flush()
         db.commit()
         return scan, prediction
+
+    def _record_confirmed_scan(
+        self,
+        db: Session,
+        user_id: int | None,
+        object_id: int,
+        image_bytes: bytes,
+        base_url: str | None,
+    ) -> None:
+        """Lưu ảnh vào ScanHistory khi object đã có trong DB.
+        Ảnh này tự động vào pool training data mà không cần admin duyệt lại."""
+        try:
+            image_url = self._save_scan_image(image_bytes, base_url)
+            scan = ScanHistory(
+                user_id=user_id,
+                doi_tuong_id=object_id,
+                do_tin_cay=1.0,
+                url_anh=image_url,
+                thoi_gian=now_vietnam(),
+            )
+            db.add(scan)
+            db.commit()
+        except Exception:
+            db.rollback()
 
     def _save_scan_image(self, image_bytes: bytes, base_url: str | None) -> str | None:
         image_url = upload_image(image_bytes)

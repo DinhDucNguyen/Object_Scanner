@@ -5,8 +5,11 @@ REST API để admin kiểm duyệt từ vựng do Gemini đề xuất.
 
 Endpoints:
   GET  /api/admin/predictions                    — Danh sách (lọc theo trạng thái)
-  GET  /api/admin/predictions/export-training    — Xuất JSONL training data (da_duyet)
+  GET  /api/admin/predictions/export-training         — Xuất JSONL flat (1 dòng/prediction)
+  GET  /api/admin/predictions/export-training-grouped — Xuất JSONL gom nhóm theo object + ảnh đa góc
   GET  /api/admin/predictions/{id}               — Chi tiết kèm vocab_payload
+  PATCH /api/admin/training-images/{scan_id}/unlink   — Bỏ ảnh khỏi pool training
+  PATCH /api/admin/training-images/{scan_id}/reassign — Chuyển ảnh sang đối tượng khác
   POST /api/admin/predictions/{id}/approve       — Duyệt → insert DoiTuong/BanDich/ViDu
   POST /api/admin/predictions/{id}/reject        — Từ chối
   GET  /api/admin/stats                          — Thống kê nhanh
@@ -60,6 +63,15 @@ def list_predictions(
     return admin_service.list_predictions(db, trang_thai=trang_thai, limit=limit, offset=offset)
 
 
+@router.get("/training-summary")
+def training_summary(db: Session = Depends(get_db)):
+    """Trả JSON tóm tắt dữ liệu training — dùng cho UI dashboard."""
+    records = admin_service.export_training_data_grouped(db)
+    for r in records:
+        r["images"] = r["images"][:6]
+    return records
+
+
 @router.get("/predictions/export-training")
 def export_training_data(db: Session = Depends(get_db)):
     """Xuất dữ liệu training — predictions Gemini đã duyệt, định dạng JSONL."""
@@ -71,6 +83,51 @@ def export_training_data(db: Session = Depends(get_db)):
         media_type="application/x-ndjson",
         headers={"Content-Disposition": "attachment; filename=gemini_training_data.jsonl"},
     )
+
+
+@router.get("/predictions/export-training-grouped")
+def export_training_grouped(db: Session = Depends(get_db)):
+    """Xuất training data gom nhóm theo object — mỗi object có danh sách ảnh đa góc độ."""
+    import json as _json
+    records = admin_service.export_training_data_grouped(db)
+    content = "\n".join(_json.dumps(r, ensure_ascii=False) for r in records)
+    return Response(
+        content=content,
+        media_type="application/x-ndjson",
+        headers={"Content-Disposition": "attachment; filename=gemini_training_grouped.jsonl"},
+    )
+
+
+@router.patch("/training-images/{scan_id}/unlink")
+def unlink_training_image(scan_id: int, db: Session = Depends(get_db)):
+    """Bỏ liên kết ảnh scan khỏi pool training (không xoá ảnh, chỉ set doi_tuong_id = null)."""
+    scan = db.query(ScanHistory).filter(ScanHistory.id == scan_id).first()
+    if not scan:
+        raise HTTPException(404, "Không tìm thấy scan")
+    scan.doi_tuong_id = None
+    db.commit()
+    return {"message": "Đã bỏ liên kết ảnh khỏi pool training", "scan_id": scan_id}
+
+
+@router.patch("/training-images/{scan_id}/reassign")
+def reassign_training_image(
+    scan_id: int,
+    target_object_code: str = Query(..., description="Mã đối tượng đích"),
+    db: Session = Depends(get_db),
+):
+    """Chuyển ảnh scan sang đối tượng khác trong pool training."""
+    scan = db.query(ScanHistory).filter(ScanHistory.id == scan_id).first()
+    if not scan:
+        raise HTTPException(404, "Không tìm thấy scan")
+    obj = db.query(Object).filter(
+        Object.ma_doi_tuong == target_object_code.lower().strip(),
+        Object.thoi_gian_xoa.is_(None),
+    ).first()
+    if not obj:
+        raise HTTPException(404, f"Không tìm thấy đối tượng '{target_object_code}'")
+    scan.doi_tuong_id = obj.id
+    db.commit()
+    return {"message": f"Đã chuyển ảnh sang '{target_object_code}'", "scan_id": scan_id, "new_object_id": obj.id}
 
 
 @router.get("/predictions/{prediction_id}", response_model=PredictionDetailResponse)

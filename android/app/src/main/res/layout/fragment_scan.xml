@@ -118,7 +118,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:contentDescription="@string/scan_cd_gallery"
-        android:src="@android:drawable/ic_menu_gallery"
+        android:src="@drawable/ic_photo_library"
         app:backgroundTint="@color/surface"
         app:elevation="6dp"
         app:fabCustomSize="48dp"
@@ -126,15 +126,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/cameraControls"
         app:maxImageSize="20dp"
-        app:tint="@color/primary" />
+        app:tint="@color/text_primary" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnCapture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/scan_cd_capture"
-        android:src="@android:drawable/ic_menu_camera"
-        app:backgroundTint="@color/primary"
+        android:src="@drawable/ic_camera"
+        app:backgroundTint="@color/surface"
         app:elevation="8dp"
         app:fabCustomSize="56dp"
         app:layout_constraintBottom_toBottomOf="@id/cameraControls"
@@ -142,7 +142,7 @@
         app:layout_constraintStart_toStartOf="@id/cameraControls"
         app:layout_constraintTop_toTopOf="@id/cameraControls"
         app:maxImageSize="22dp"
-        app:tint="@color/text_on_primary" />
+        app:tint="@color/text_primary" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/resultCard"

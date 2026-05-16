@@ -3,9 +3,7 @@ import logging
 import re
 # TODO: Migrate to google.genai package (google-generativeai is deprecated)
 # See: https://github.com/google-gemini/deprecated-generative-ai-python
-# pyrefly: ignore [missing-import]
 import google.generativeai as genai
-# pyrefly: ignore [missing-import]
 from google.api_core.exceptions import ResourceExhausted
 from app.core.config import settings
 
@@ -50,7 +48,7 @@ class GeminiService:
         prompt = """Analyze this image and identify the main object. Return a JSON object with this exact format:
 {
     "object_code": "english_name_lowercase_no_spaces",
-    "category": "category_name",
+    "category": "one category from the list below",
     "translations": [
         {
             "lang_code": "en",
@@ -69,6 +67,7 @@ class GeminiService:
 
 Rules:
 - object_code: lowercase English, underscores for spaces (e.g., "water_bottle")
+- category: choose EXACTLY one from this list (use the exact Vietnamese name): Con người, Phương tiện, Động vật, Phụ kiện, Thể thao, Nhà bếp, Thực phẩm, Nội thất, Điện tử, Đồ gia dụng, Đồ dùng học tập, Biển báo & đô thị
 - phonetic: IPA format with slashes (e.g., /ˈæp.əl/)
 - part_of_speech: use abbreviations ONLY — n (noun), v (verb), adj (adjective), adv (adverb), prep (preposition), conj (conjunction), pron (pronoun), interj (interjection)
 - definition: format MUST be "Vietnamese word: brief Vietnamese explanation" (e.g., "máy tính xách tay: thiết bị điện tử cầm tay dùng để làm việc")

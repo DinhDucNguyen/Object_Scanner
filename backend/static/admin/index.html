@@ -902,6 +902,9 @@
       font-size: .8rem;
       font-family: 'SFMono-Regular', Consolas, monospace;
     }
+    .td-thumb-wrap { width:80px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .td-thumb-wrap img { width:80px; height:80px; object-fit:cover; border-radius:6px; display:block; cursor:zoom-in; }
+    .td-thumb-actions { display:flex; flex-direction:row; justify-content:center; gap:4px; width:100%; }
   </style>
 </head>
 
@@ -968,6 +971,9 @@
       <a class="nav-link" href="#" data-section="categories">
         <i class="bi bi-folder2-open"></i> Danh mục
       </a>
+      <a class="nav-link" href="#" data-section="training-data">
+        <i class="bi bi-database-fill-gear"></i> Training Data
+      </a>
       <div class="sb-section">Hệ thống</div>
       <a class="nav-link" href="#" data-section="users">
         <i class="bi bi-people"></i> Người dùng
@@ -1027,10 +1033,14 @@
         <button class="btn btn-sm btn-outline-secondary" onclick="loadPredictions()">
           <i class="bi bi-arrow-clockwise"></i> Làm mới
         </button>
-        <a id="btn-export-training" href="/api/admin/predictions/export-training"
-          class="btn btn-sm btn-outline-success" title="Tải file JSONL dữ liệu Gemini đã duyệt để train model">
-          <i class="bi bi-download me-1"></i>Export training data
-        </a>
+        <button id="btn-export-training" onclick="exportTrainingData()"
+          class="btn btn-sm btn-outline-success" title="Tải file JSONL — mỗi dòng là 1 prediction đã duyệt">
+          <i class="bi bi-download me-1"></i>Export flat
+        </button>
+        <button id="btn-export-grouped" onclick="exportTrainingGrouped()"
+          class="btn btn-sm btn-success" title="Tải file JSONL gom nhóm theo object — bao gồm ảnh từ nhiều góc độ">
+          <i class="bi bi-collection me-1"></i>Export grouped
+        </button>
       </div>
       <div id="training-stats-bar" class="d-flex align-items-center gap-3 px-3 py-2 mb-2 rounded"
         style="background:#f0fdf4;border:1px solid #bbf7d0;font-size:.82rem;">
@@ -1316,10 +1326,61 @@
         </div>
       </div>
     </div>
+
+    <!-- Training Data -->
+    <div id="section-training-data" class="section">
+      <div class="section-toolbar">
+        <span class="fw-semibold" style="font-size:.9rem;">Dữ liệu training từ Gemini</span>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadTrainingData()">
+          <i class="bi bi-arrow-clockwise"></i> Làm mới
+        </button>
+        <button class="btn btn-sm btn-success" onclick="exportTrainingGrouped()">
+          <i class="bi bi-collection me-1"></i>Export grouped
+        </button>
+      </div>
+      <div id="td-summary-bar" class="d-flex gap-4 px-3 py-2 mb-3 rounded"
+        style="background:#f0fdf4;border:1px solid #bbf7d0;font-size:.83rem;">
+        <span><i class="bi bi-boxes text-success me-1"></i>Objects: <strong id="td-total-objects">—</strong></span>
+        <span><i class="bi bi-images text-primary me-1"></i>Tổng ảnh: <strong id="td-total-images">—</strong></span>
+      </div>
+      <div id="td-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;"></div>
+      <div id="td-empty" class="text-center text-muted py-5" style="display:none;">
+        <i class="bi bi-inbox" style="font-size:2.5rem;opacity:.3;"></i>
+        <div class="mt-2">Chưa có object nào được duyệt</div>
+      </div>
+    </div>
   </div>
 
   <!-- Toast container -->
   <div id="toast-container"></div>
+
+  <!-- ═══ Reassign Training Image Modal ═══ -->
+  <div class="modal fade" id="reassign-modal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-title" style="font-size:.95rem;">Chuyển ảnh sang đối tượng khác</span>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2" style="font-size:.83rem;color:#64748b;">
+            Ảnh hiện thuộc: <strong id="rm-current-code" style="color:#0f172a;">—</strong>
+          </div>
+          <input type="text" id="rm-search" class="form-control form-control-sm mb-2"
+            placeholder="Tìm mã đối tượng..." autocomplete="off">
+          <select id="rm-select" class="form-select form-select-sm" size="6">
+            <option disabled>Đang tải...</option>
+          </select>
+          <div id="rm-hint" class="text-muted mt-1" style="font-size:.75rem;">Chọn đối tượng đích rồi bấm Chuyển</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+          <button class="btn btn-sm btn-primary" id="rm-confirm">Chuyển</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ═══ Confirm Modal ═══ -->
   <div class="modal fade" id="confirm-modal" tabindex="-1">
@@ -1462,6 +1523,7 @@
       dashboard: 'Dashboard', predictions: 'Kiểm duyệt',
       objects: 'Đối tượng', translations: 'Bản dịch',
       'scan-history': 'Lịch sử quét', categories: 'Danh mục', users: 'Người dùng',
+      'training-data': 'Training Data',
     };
 
     function navigateTo(section) {
@@ -1476,6 +1538,7 @@
         dashboard: loadDashboard, predictions: loadPredictions,
         objects: loadObjects, translations: loadTranslations,
         'scan-history': loadScanHistory, categories: loadCategories, users: loadUsers,
+        'training-data': loadTrainingData,
       };
       if (loaders[section]) loaders[section]();
     }
@@ -1627,6 +1690,50 @@
       if (sel) { sel.value = status; loadPredictions(); }
     }
 
+    async function exportTrainingData() {
+      const btn = document.getElementById('btn-export-training');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Đang xuất...'; }
+      try {
+        const res = await fetch('/api/admin/predictions/export-training', {
+          headers: { 'Authorization': 'Bearer ' + TOKEN }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'gemini_training_data.jsonl';
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('Xuất thất bại: ' + e.message);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-download me-1"></i>Export training data'; }
+      }
+    }
+
+    async function exportTrainingGrouped() {
+      const btn = document.getElementById('btn-export-grouped');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Đang xuất...'; }
+      try {
+        const res = await fetch('/api/admin/predictions/export-training-grouped', {
+          headers: { 'Authorization': 'Bearer ' + TOKEN }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'gemini_training_grouped.jsonl';
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('Xuất thất bại: ' + e.message);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-collection me-1"></i>Export grouped'; }
+      }
+    }
+
     async function loadTrainingStats() {
       try {
         const stats = await apiJSON('/stats');
@@ -1638,6 +1745,8 @@
         document.getElementById('training-rejected-count').textContent = rejected;
         const exportBtn = document.getElementById('btn-export-training');
         if (exportBtn) exportBtn.classList.toggle('disabled', approved === 0);
+        const groupedBtn = document.getElementById('btn-export-grouped');
+        if (groupedBtn) groupedBtn.classList.toggle('disabled', approved === 0);
       } catch (_) {}
     }
 
@@ -1693,7 +1802,7 @@
         let html = `
       ${p.scan_image_url ? `
       <div class="text-center mb-3">
-        <img src="${p.scan_image_url}" style="max-height:220px;max-width:100%;border-radius:8px;object-fit:contain;border:1px solid #dee2e6;" alt="Ảnh quét">
+        <img src="${p.scan_image_url}" style="max-height:220px;max-width:100%;border-radius:8px;object-fit:contain;border:1px solid #dee2e6;cursor:zoom-in;" alt="Ảnh quét" onclick="zoomImage('${p.scan_image_url}')" title="Nhấn để xem to">
       </div>` : ''}
       <div class="row g-2 mb-3">
         <div class="col-4"><div class="p-2 rounded bg-light">
@@ -2236,6 +2345,120 @@
     }
 
     // ============================================================
+    // Training Data
+    // ============================================================
+    async function loadTrainingData() {
+      const grid = document.getElementById('td-grid');
+      const empty = document.getElementById('td-empty');
+      grid.innerHTML = '<div class="text-muted p-3"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải...</div>';
+      empty.style.display = 'none';
+      try {
+        const records = await apiJSON('/training-summary');
+        if (!records || records.length === 0) {
+          grid.innerHTML = '';
+          empty.style.display = '';
+          document.getElementById('td-total-objects').textContent = '0';
+          document.getElementById('td-total-images').textContent = '0';
+          return;
+        }
+        const totalImages = records.reduce((s, r) => s + (r.total_images || 0), 0);
+        document.getElementById('td-total-objects').textContent = records.length;
+        document.getElementById('td-total-images').textContent = totalImages;
+
+        grid.innerHTML = records.map(r => {
+          const thumbs = (r.images || []).slice(0, 6).map(img => `
+            <div class="td-thumb-wrap">
+              <img src="${img.url}" alt="" title="${img.source}" onclick="zoomImage('${img.url}')"
+                style="border:2px solid ${img.source === 'confirmed' ? '#86efac' : '#93c5fd'};border-radius:6px;"
+                onerror="this.parentElement.style.display='none'">
+              <div class="td-thumb-actions">
+                <button class="btn-act del" onclick="unlinkScan(${img.scan_id},'${r.object_code}')" title="Xoá khỏi pool"><i class="bi bi-trash3"></i></button>
+                <button class="btn-act" onclick="openReassign(${img.scan_id},'${r.object_code}')" title="Chuyển đối tượng"><i class="bi bi-arrow-left-right"></i></button>
+              </div>
+            </div>`
+          ).join('');
+          const translations = (r.translations || []).slice(0, 2).map(t =>
+            `<span class="badge bg-light text-dark border me-1" style="font-size:.72rem;">${t.language_code || ''}: ${t.word || ''}</span>`
+          ).join('');
+          const badgeColor = r.total_images >= 5 ? '#22c55e' : r.total_images >= 2 ? '#f59e0b' : '#94a3b8';
+          return `
+          <div class="panel" style="padding:0;overflow:hidden;">
+            <div style="padding:.75rem 1rem .5rem;display:flex;align-items:center;gap:.5rem;">
+              <span style="font-weight:600;font-size:.92rem;flex:1;">${r.object_code}</span>
+              <span style="background:${badgeColor};color:#fff;border-radius:99px;padding:2px 10px;font-size:.75rem;font-weight:600;">
+                ${r.total_images} ảnh
+              </span>
+            </div>
+            ${r.category ? `<div style="padding:0 1rem .4rem;font-size:.75rem;color:#64748b;">${r.category}</div>` : ''}
+            <div style="padding:.25rem .75rem .8rem;display:flex;flex-wrap:wrap;gap:5px;min-height:60px;">
+              ${thumbs || '<span class="text-muted" style="font-size:.8rem;">Chưa có ảnh</span>'}
+            </div>
+          </div>`;
+        }).join('');
+      } catch (e) {
+        grid.innerHTML = `<div class="text-danger p-3">Lỗi: ${e.message}</div>`;
+      }
+    }
+
+    // Training image management
+    async function unlinkScan(scanId, objectCode) {
+      if (!confirm(`Bỏ ảnh này khỏi pool training của "${objectCode}"?\n(Ảnh vẫn được giữ trong lịch sử quét, chỉ không dùng để train)`)) return;
+      try {
+        await apiJSON(`/training-images/${scanId}/unlink`, { method: 'PATCH' });
+        toast('Đã bỏ liên kết ảnh', 'success');
+        loadTrainingData();
+      } catch (e) {
+        toast('Lỗi: ' + e.message, 'danger');
+      }
+    }
+
+    let _reassignScanId = null;
+    let _reassignCurrentCode = null;
+    let _cachedObjects = [];
+
+    async function openReassign(scanId, currentCode) {
+      _reassignScanId = scanId;
+      _reassignCurrentCode = currentCode;
+      document.getElementById('rm-current-code').textContent = currentCode;
+      document.getElementById('rm-search').value = '';
+      if (_cachedObjects.length === 0) {
+        try { _cachedObjects = await apiJSON('/objects?limit=500'); } catch (_) { _cachedObjects = []; }
+      }
+      _fillReassignSelect('');
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('reassign-modal')).show();
+    }
+
+    function _fillReassignSelect(search) {
+      const sel = document.getElementById('rm-select');
+      const q = (search || '').toLowerCase();
+      const filtered = _cachedObjects
+        .filter(o => o.ma_doi_tuong !== _reassignCurrentCode)
+        .filter(o => !q || o.ma_doi_tuong.includes(q) || (o.category_name || '').toLowerCase().includes(q))
+        .slice(0, 60);
+      sel.innerHTML = filtered.map(o =>
+        `<option value="${o.ma_doi_tuong}">${o.ma_doi_tuong}${o.category_name ? ' — ' + o.category_name : ''}</option>`
+      ).join('') || '<option disabled>Không tìm thấy</option>';
+    }
+
+    document.getElementById('rm-search').addEventListener('input', e => _fillReassignSelect(e.target.value));
+
+    document.getElementById('rm-confirm').addEventListener('click', async () => {
+      const sel = document.getElementById('rm-select');
+      const targetCode = sel.value;
+      if (!targetCode || sel.options[sel.selectedIndex]?.disabled) {
+        toast('Vui lòng chọn đối tượng đích', 'warning'); return;
+      }
+      try {
+        await apiJSON(`/training-images/${_reassignScanId}/reassign?target_object_code=${encodeURIComponent(targetCode)}`, { method: 'PATCH' });
+        bootstrap.Modal.getInstance(document.getElementById('reassign-modal')).hide();
+        toast(`Đã chuyển ảnh sang "${targetCode}"`, 'success');
+        _cachedObjects = [];
+        loadTrainingData();
+      } catch (e) {
+        toast('Lỗi: ' + e.message, 'danger');
+      }
+    });
+
     // Users
     // ============================================================
     async function loadUsers() {
@@ -2430,7 +2653,7 @@
           <tr>
             <td class="text-muted">${s.id}</td>
             <td>${s.url_anh
-              ? `<img src="${s.url_anh}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" />`
+              ? `<img src="${s.url_anh}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;cursor:zoom-in;" onclick="zoomImage('${s.url_anh}')" title="Nhấn để xem to" />`
               : '<span class="text-muted" style="font-size:.75rem;">N/A</span>'}</td>
             <td>
               <span class="fw-semibold" style="font-size:.82rem;">${s.username || '—'}</span>
