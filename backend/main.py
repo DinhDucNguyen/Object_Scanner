@@ -5,7 +5,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
+from app.core.limiter import limiter
 from app.routers import auth_router, scan_router, review_router, collection_router, history_router, data_router, dictionary_router
 from app.routers import admin_router
 from app.routers import streak_router
@@ -15,8 +18,13 @@ logger = logging.getLogger("uvicorn.error")
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="API Backend cho ứng dụng nhận diện vật thể đa ngôn ngữ"
+    description="API Backend cho ứng dụng nhận diện vật thể đa ngôn ngữ",
+    docs_url="/docs" if settings.DEBUG else None,
+    redoc_url="/redoc" if settings.DEBUG else None,
+    openapi_url="/openapi.json" if settings.DEBUG else None,
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -24,11 +32,14 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     logger.error(f"[422] {request.method} {request.url} | body={body!r} | errors={exc.errors()}")
     return JSONResponse(status_code=422, content={"detail": exc.errors()})
 
+cors_allow_origins = settings.CORS_ALLOW_ORIGINS
+cors_allow_credentials = "*" not in cors_allow_origins
+
 # Cấu hình CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ALLOW_ORIGINS,
-    allow_credentials=True,
+    allow_origins=cors_allow_origins,
+    allow_credentials=cors_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )

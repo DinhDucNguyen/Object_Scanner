@@ -17,4 +17,5 @@ class Object(Base):
     category = relationship("Category", back_populates="objects")
     translations = relationship("Translation", back_populates="object", cascade="all, delete-orphan")
     media = relationship("ObjectMedia", back_populates="object", cascade="all, delete-orphan")
+    aliases = relationship("ObjectAlias", back_populates="object", cascade="all, delete-orphan")
     scan_histories = relationship("ScanHistory", back_populates="object")

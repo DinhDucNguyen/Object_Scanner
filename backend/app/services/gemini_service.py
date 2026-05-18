@@ -91,6 +91,8 @@ Rules:
                     logger.warning("Model quota exhausted: %s", model_name)
                     last_quota_error = e
                     continue
+            else:
+                print(f"[Gemini] Model used for scan: {model_name}")
 
             if response is None:
                 if last_quota_error is not None:
@@ -149,6 +151,75 @@ Rules:
             return {"_error": "quota_exceeded", "_message": str(e)}
         except Exception as e:
             logger.error("Gemini API error: %s", e, exc_info=True)
+            return {"_error": "api_error", "_message": str(e)}
+
+    def generate_vocab_for_object_code(self, object_code: str) -> dict:
+        """
+        Sinh dữ liệu từ vựng cho object_code bằng text prompt (không cần ảnh).
+        Trả về cùng format với identify_object.
+        """
+        if not self.model:
+            return {"_error": "no_model", "_message": "Gemini model not initialized"}
+
+        display_name = object_code.replace("_", " ")
+        prompt = f"""Generate vocabulary data for the object: "{display_name}"
+
+Return a JSON object with this exact format:
+{{
+    "object_code": "{object_code}",
+    "category": "one category from the list below",
+    "translations": [
+        {{
+            "lang_code": "en",
+            "word_name": "English name",
+            "phonetic": "/IPA/",
+            "part_of_speech": "n",
+            "definition": "Vietnamese word: brief Vietnamese explanation",
+            "example_sentences": [
+                {{"en": "sentence 1", "vi": "dich 1"}},
+                {{"en": "sentence 2", "vi": "dich 2"}},
+                {{"en": "sentence 3", "vi": "dich 3"}}
+            ]
+        }},
+        {{
+            "lang_code": "vi",
+            "word_name": "Ten tieng Viet",
+            "phonetic": null,
+            "part_of_speech": "n",
+            "definition": "ten Viet: giai thich ngan tieng Viet",
+            "example_sentences": [
+                {{"en": "sentence 1", "vi": "dich 1"}},
+                {{"en": "sentence 2", "vi": "dich 2"}},
+                {{"en": "sentence 3", "vi": "dich 3"}}
+            ]
+        }}
+    ]
+}}
+
+Rules:
+- object_code: keep exactly as "{object_code}"
+- category: choose EXACTLY one from: Con nguoi, Phuong tien, Dong vat, Phu kien, The thao, Nha bep, Thuc pham, Noi that, Dien tu, Do gia dung, Do dung hoc tap, Bien bao & do thi
+- phonetic: IPA format with slashes (e.g., /ap.el/), null if unknown
+- part_of_speech: n/v/adj/adv only
+- definition: "Vietnamese word: brief Vietnamese explanation"
+- example_sentences: EXACTLY 3 per language
+Return ONLY valid JSON, no markdown."""
+
+        try:
+            response = self.model.generate_content(prompt)
+            text = response.text.strip()
+            first = text.find("{")
+            last = text.rfind("}")
+            if first == -1 or last == -1:
+                return {"_error": "parse_error", "_message": "No JSON in response"}
+            result = json.loads(text[first:last + 1])
+            result = self._sanitize_result(result)
+            result["object_code"] = object_code
+            return result
+        except ResourceExhausted as e:
+            return {"_error": "quota_exceeded", "_message": str(e)}
+        except Exception as e:
+            logger.error("Error generating vocab for %s: %s", object_code, e)
             return {"_error": "api_error", "_message": str(e)}
 
     def _normalize_object_code(self, raw: str) -> str:

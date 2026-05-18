@@ -78,6 +78,10 @@ class DictionaryFragment : Fragment() {
             SaveToCollectionBottomSheet.newInstance(translationId)
                 .show(childFragmentManager, "save_to_collection")
         }
+
+        binding.btnPlayAudio.setOnClickListener {
+            viewModel.playAudio(viewModel.pronunciationTarget(viewModel.result.value))
+        }
     }
 
     private fun setupObservers() {
@@ -134,7 +138,11 @@ class DictionaryFragment : Fragment() {
                     binding.containerDefinitions.visibility = View.GONE
                 }
 
-                binding.btnPlayAudio.visibility = View.GONE
+                binding.btnPlayAudio.visibility = if (viewModel.pronunciationTarget(result) != null) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
                 binding.btnSaveWord.visibility = if (result.canSave && result.translationId != null) {
                     View.VISIBLE
                 } else {
@@ -142,6 +150,7 @@ class DictionaryFragment : Fragment() {
                 }
             } else if (viewModel.isLoading.value != true) {
                 binding.cardResult.visibility = View.GONE
+                binding.btnPlayAudio.visibility = View.GONE
                 binding.btnSaveWord.visibility = View.GONE
                 if (binding.etInput.text.isNullOrEmpty()) {
                     binding.groupEmptyState.visibility = View.VISIBLE

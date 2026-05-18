@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 from gtts import gTTS
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("uvicorn.error")
 
 
 class TTSService:
@@ -30,9 +30,11 @@ class TTSService:
         lang = self._normalize_lang(lang_code)
         cache_path = self._cache_path(text, lang)
         if cache_path.exists():
+            logger.info("TTS source=cache text=%r lang=%s file=%s", text, lang, cache_path)
             return cache_path.read_bytes()
 
         try:
+            logger.info("TTS source=gtts_generate text=%r lang=%s file=%s", text, lang, cache_path)
             tts = gTTS(text=text, lang=lang, slow=False)
             audio_buffer = io.BytesIO()
             tts.write_to_fp(audio_buffer)
@@ -41,9 +43,10 @@ class TTSService:
 
             cache_path.parent.mkdir(parents=True, exist_ok=True)
             cache_path.write_bytes(audio_bytes)
+            logger.info("TTS source=gtts_saved text=%r lang=%s bytes=%d file=%s", text, lang, len(audio_bytes), cache_path)
             return audio_bytes
         except Exception as e:
-            logger.error("TTS error: %s", e)
+            logger.error("TTS source=error text=%r lang=%s error=%s", text, lang, e)
             return None
 
     def _normalize_lang(self, lang_code: str) -> str:

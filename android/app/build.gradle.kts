@@ -5,6 +5,12 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
 android {
     namespace = "com.duc.objectlanguage"
     compileSdk = 34
@@ -18,21 +24,20 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Read from local.properties
-        val properties = Properties()
-        val localPropertiesFile = rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) {
-            properties.load(localPropertiesFile.inputStream())
-        }
-
         // Build config fields for server configuration
-        buildConfigField("String", "SERVER_IP", "\"${properties.getProperty("SERVER_IP", "192.168.1.100")}\"")
-        buildConfigField("String", "SERVER_PORT", "\"${properties.getProperty("SERVER_PORT", "8000")}\"")
+        buildConfigField("String", "SERVER_IP", "\"${localProperties.getProperty("SERVER_IP", "192.168.1.100")}\"")
+        buildConfigField("String", "SERVER_PORT", "\"${localProperties.getProperty("SERVER_PORT", "8000")}\"")
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
+            buildConfigField("String", "SERVER_SCHEME", "\"${localProperties.getProperty("SERVER_SCHEME", "http")}\"")
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            manifestPlaceholders["usesCleartextTraffic"] = "false"
+            buildConfigField("String", "SERVER_SCHEME", "\"${localProperties.getProperty("SERVER_SCHEME", "https")}\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

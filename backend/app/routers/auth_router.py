@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from sqlalchemy.orm import Session
+from app.core.limiter import limiter
 
 from app.db.session import get_db
 from app.services.user_service import UserService
@@ -19,12 +20,14 @@ user_service = UserService()
 
 
 @router.post("/register", response_model=MessageResponse)
-def register(data: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def register(request: Request, data: UserCreate, db: Session = Depends(get_db)):
     return user_service.register(db, data)
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(data: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, data: UserLogin, db: Session = Depends(get_db)):
     return user_service.login(db, data)
 
 
@@ -78,7 +81,8 @@ def update_settings(
 
 
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
-def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit("3/minute")
+def forgot_password(request: Request, data: ForgotPasswordRequest, db: Session = Depends(get_db)):
     try:
         return user_service.forgot_password(db, data)
     except ValueError as e:

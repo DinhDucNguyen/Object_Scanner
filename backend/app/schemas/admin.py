@@ -27,6 +27,15 @@ class VocabPayloadSchema(BaseModel):
     translations: List[VocabTranslationSchema] = []
 
 
+class RelatedPredictionImage(BaseModel):
+    prediction_id: int
+    scan_id: Optional[int] = None
+    user_id: Optional[int] = None
+    image_url: Optional[str] = None
+    vai_tro: Optional[str] = None
+    thoi_gian: Optional[datetime] = None
+
+
 
 
 class PredictionListItem(BaseModel):
@@ -37,6 +46,8 @@ class PredictionListItem(BaseModel):
     trang_thai: str
     thoi_gian: Optional[datetime] = None
     scan_image_url: Optional[str] = None
+    vai_tro: Optional[str] = None
+    du_doan_goc_id: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -50,6 +61,9 @@ class PredictionDetailResponse(BaseModel):
     trang_thai: str
     thoi_gian: Optional[datetime] = None
     scan_image_url: Optional[str] = None
+    vai_tro: Optional[str] = None
+    du_doan_goc_id: Optional[int] = None
+    related_images: List[RelatedPredictionImage] = []
     vocab_payload: Optional[VocabPayloadSchema] = None 
 
 
@@ -77,10 +91,37 @@ class ApproveResponse(BaseModel):
     users_enrolled: int = 0
 
 
+class AliasPredictionRequest(BaseModel):
+    doi_tuong_id: int
+    ma_bi_danh: Optional[str] = None
+    ten_hien_thi: Optional[str] = None
+    ngon_ngu: Optional[str] = "en"
+
+
+class AliasPredictionResponse(BaseModel):
+    success: bool
+    message: str
+    prediction_id: int
+    doi_tuong_id: Optional[int] = None
+    bi_danh_id: Optional[int] = None
+    ma_bi_danh: Optional[str] = None
+    ma_doi_tuong: Optional[str] = None
+    users_enrolled: int = 0
+
+
 class RejectResponse(BaseModel):
     success: bool
     message: str
     prediction_id: int
+
+
+class SplitToNewObjectResponse(BaseModel):
+    success: bool
+    message: str
+    old_prediction_id: int
+    new_prediction_id: Optional[int] = None
+    new_object_code: Optional[str] = None
+    vocab_generated: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -114,6 +155,24 @@ class CategoryUpdateRequest(BaseModel):
 # Object
 # ---------------------------------------------------------------------------
 
+class ObjectAliasItem(BaseModel):
+    id: int
+    doi_tuong_id: int
+    ma_bi_danh: str
+    ten_hien_thi: Optional[str] = None
+    ngon_ngu: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ObjectAliasUpsertRequest(BaseModel):
+    doi_tuong_id: int
+    ma_bi_danh: str
+    ten_hien_thi: Optional[str] = None
+    ngon_ngu: Optional[str] = "en"
+
+
 class ObjectListItem(BaseModel):
     id: int
     ma_doi_tuong: Optional[str] = None
@@ -122,6 +181,7 @@ class ObjectListItem(BaseModel):
     translation_count: int = 0
     pending_translation_count: int = 0
     has_image: bool = False
+    aliases: List[ObjectAliasItem] = []
 
     class Config:
         from_attributes = True
@@ -135,6 +195,7 @@ class ObjectDetailResponse(BaseModel):
     translation_count: int = 0
     pending_translation_count: int = 0
     has_image: bool = False
+    aliases: List[ObjectAliasItem] = []
 
     class Config:
         from_attributes = True

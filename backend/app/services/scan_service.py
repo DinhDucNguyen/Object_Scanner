@@ -4,13 +4,13 @@ import uuid
 
 from sqlalchemy.orm import Session
 
-from app.models.ai_feedback_report import AIPrediction, NguonAI, TrangThaiDuyet
+from app.models.ai_feedback_report import AIPrediction, NguonAI, TrangThaiDuyet, VaiTroDuDoan
 from app.models.language import Language
 from app.models.object import Object
 from app.models.scan_history import ScanHistory
 from app.models.translation import Translation, NguonDuLieu
 from app.repositories.language_repo import LanguageRepository
-from app.repositories.object_repo import ObjectRepository
+from app.repositories.object_repo import ObjectRepository, normalize_object_code
 from app.repositories.translation_repo import TranslationRepository
 from app.schemas.common import ScanRequest, ScanResponse, TranslationResponse, ViDuResponse
 from app.services.gemini_service import GeminiService
@@ -31,7 +31,7 @@ class ScanService:
         self.tts = TTSService()
 
     def process_scan(self, db: Session, request: ScanRequest) -> ScanResponse:
-        object_code = request.object_code.lower().strip()
+        object_code = normalize_object_code(request.object_code)
         obj = self.obj_repo.get_by_code(db, object_code)
 
         if obj:
@@ -68,7 +68,7 @@ class ScanService:
         if gemini_result.get("_error"):
             return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
 
-        object_code = (gemini_result.get("object_code", "unknown") or "unknown").lower().strip()
+        object_code = normalize_object_code(gemini_result.get("object_code", "unknown") or "unknown")
         translations_raw = gemini_result.get("translations", [])
         obj = self.obj_repo.get_by_code(db, object_code)
 
@@ -76,9 +76,9 @@ class ScanService:
             return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
 
         if obj:
+            object_code = obj.ma_doi_tuong
             existing_translations = self._approved_translations(db, obj.id)
             if existing_translations:
-                self._record_confirmed_scan(db, user_id, obj.id, image_bytes, base_url)
                 return ScanResponse(
                     source="internal_db",
                     object_id=obj.id,
@@ -86,6 +86,33 @@ class ScanService:
                     category_name=obj.category.ten_danh_muc if obj.category else None,
                     translations=[self._to_dto(db, t) for t in existing_translations],
                 )
+
+        existing_pending = self._find_pending_review_prediction(db, object_code)
+        if existing_pending:
+            scan, prediction, source_payload = self._create_image_only_pending_scan(
+                db=db,
+                user_id=user_id,
+                obj=obj,
+                object_code=object_code,
+                source_prediction=existing_pending,
+                image_bytes=image_bytes,
+                base_url=base_url,
+            )
+            source_translations = source_payload.get("translations") or translations_raw
+            return ScanResponse(
+                source="gemini_pending_review",
+                object_id=obj.id if obj else 0,
+                object_code=obj.ma_doi_tuong if obj else object_code,
+                category_name=obj.category.ten_danh_muc if obj and obj.category else source_payload.get("category"),
+                translations=self._pending_translation_dtos(
+                    source_translations,
+                    object_code=obj.ma_doi_tuong if obj else object_code,
+                    object_id=obj.id if obj else 0,
+                ),
+                scan_id=scan.id,
+                prediction_id=prediction.id,
+                pending_review=True,
+            )
 
         scan, prediction = self._create_pending_review(
             db=db,
@@ -172,35 +199,84 @@ class ScanService:
             do_tin_cay=1.0,
             mo_ta=json.dumps(payload, ensure_ascii=False),
             trang_thai=TrangThaiDuyet.cho_duyet,
+            vai_tro=VaiTroDuDoan.chinh,
         )
         db.add(prediction)
         db.flush()
         db.commit()
         return scan, prediction
 
-    def _record_confirmed_scan(
+    def _find_pending_review_prediction(self, db: Session, object_code: str) -> AIPrediction | None:
+        predictions = (
+            db.query(AIPrediction)
+            .filter(
+                AIPrediction.nguon_ai == NguonAI.gemini,
+                AIPrediction.nhan_du_doan == object_code,
+                AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet,
+                AIPrediction.vai_tro == VaiTroDuDoan.chinh,
+            )
+            .order_by(AIPrediction.thoi_gian.asc())
+            .all()
+        )
+        for prediction in predictions:
+            payload = self._prediction_payload(prediction)
+            if payload.get("translations"):
+                return prediction
+        return None
+
+    def _create_image_only_pending_scan(
         self,
         db: Session,
         user_id: int | None,
-        object_id: int,
+        obj: Object | None,
+        object_code: str,
+        source_prediction: AIPrediction,
         image_bytes: bytes,
         base_url: str | None,
-    ) -> None:
-        """Lưu ảnh vào ScanHistory khi object đã có trong DB.
-        Ảnh này tự động vào pool training data mà không cần admin duyệt lại."""
+    ) -> tuple[ScanHistory, AIPrediction, dict]:
+        image_url = self._save_scan_image(image_bytes, base_url)
+        source_payload = self._prediction_payload(source_prediction)
+        scan = ScanHistory(
+            user_id=user_id,
+            doi_tuong_id=obj.id if obj else None,
+            do_tin_cay=1.0,
+            url_anh=image_url,
+            thoi_gian=now_vietnam(),
+        )
+        db.add(scan)
+        db.flush()
+
+        payload = dict(source_payload)
+        payload["source"] = "scan_image_duplicate"
+        payload["review_kind"] = "image_only"
+        payload["duplicate_of_prediction_id"] = source_prediction.id
+        payload["vai_tro"] = VaiTroDuDoan.anh_bo_sung.value
+        payload["du_doan_goc_id"] = source_prediction.id
+        payload["scan_image_url"] = image_url
+        payload["object_code"] = object_code
+        if obj:
+            payload["existing_object_id"] = obj.id
+
+        prediction = AIPrediction(
+            scan_id=scan.id,
+            nguon_ai=NguonAI.gemini,
+            nhan_du_doan=object_code,
+            do_tin_cay=1.0,
+            mo_ta=json.dumps(payload, ensure_ascii=False),
+            trang_thai=TrangThaiDuyet.cho_duyet,
+            vai_tro=VaiTroDuDoan.anh_bo_sung,
+            du_doan_goc_id=source_prediction.id,
+        )
+        db.add(prediction)
+        db.flush()
+        db.commit()
+        return scan, prediction, source_payload
+
+    def _prediction_payload(self, prediction: AIPrediction) -> dict:
         try:
-            image_url = self._save_scan_image(image_bytes, base_url)
-            scan = ScanHistory(
-                user_id=user_id,
-                doi_tuong_id=object_id,
-                do_tin_cay=1.0,
-                url_anh=image_url,
-                thoi_gian=now_vietnam(),
-            )
-            db.add(scan)
-            db.commit()
+            return json.loads(prediction.mo_ta or "{}")
         except Exception:
-            db.rollback()
+            return {}
 
     def _save_scan_image(self, image_bytes: bytes, base_url: str | None) -> str | None:
         image_url = upload_image(image_bytes)
@@ -227,16 +303,23 @@ class ScanService:
 
             lang_code = t_data.get("lang_code") or "en"
             word_name = t_data.get("word_name") or object_code.replace("_", " ").title()
-            examples = [
-                ViDuResponse(
-                    id=0,
-                    cau_vi_du=str(sentence).strip(),
-                    dich_nghia=None,
-                    nguon_du_lieu="gemini",
-                )
-                for sentence in (t_data.get("example_sentences") or [])[:3]
-                if sentence and str(sentence).strip()
-            ]
+            examples = []
+            for sentence in (t_data.get("example_sentences") or [])[:3]:
+                if not sentence:
+                    continue
+                if isinstance(sentence, dict):
+                    en_text = str(sentence.get("en") or "").strip()
+                    vi_text = str(sentence.get("vi") or "").strip() or None
+                else:
+                    en_text = str(sentence).strip()
+                    vi_text = None
+                if en_text:
+                    examples.append(ViDuResponse(
+                        id=0,
+                        cau_vi_du=en_text,
+                        dich_nghia=vi_text,
+                        nguon_du_lieu="gemini",
+                    ))
             translations.append(TranslationResponse(
                 id=0,
                 object_id=object_id,

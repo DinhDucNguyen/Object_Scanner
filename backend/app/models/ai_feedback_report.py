@@ -21,6 +21,11 @@ class TrangThaiDuyet(str, enum.Enum):
     tu_choi   = "tu_choi"
 
 
+class VaiTroDuDoan(str, enum.Enum):
+    chinh = "chinh"
+    anh_bo_sung = "anh_bo_sung"
+
+
 class AIPrediction(Base):
     __tablename__ = "DuDoanAI"
 
@@ -38,6 +43,20 @@ class AIPrediction(Base):
         nullable=False,
         index=True,
     )
+    vai_tro = Column(
+        Enum(VaiTroDuDoan),
+        default=VaiTroDuDoan.chinh,
+        nullable=False,
+        index=True,
+    )
+    du_doan_goc_id = Column(
+        Integer,
+        ForeignKey("DuDoanAI.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     thoi_gian   = Column(TIMESTAMP, default=now_vietnam)
 
     scan = relationship("ScanHistory", back_populates="predictions")
+    du_doan_goc = relationship("AIPrediction", remote_side=[id], back_populates="anh_bo_sung")
+    anh_bo_sung = relationship("AIPrediction", back_populates="du_doan_goc")

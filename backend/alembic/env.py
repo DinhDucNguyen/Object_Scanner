@@ -29,6 +29,7 @@ from app.models.user_settings import UserSettings  # noqa: F401
 from app.models.language import Language  # noqa: F401
 from app.models.category import Category  # noqa: F401
 from app.models.object import Object  # noqa: F401
+from app.models.object_alias import ObjectAlias  # noqa: F401
 from app.models.translation import Translation  # noqa: F401
 from app.models.example import ViDu  # noqa: F401
 from app.models.learning_progress import LearningProgress  # noqa: F401

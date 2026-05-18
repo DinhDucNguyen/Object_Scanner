@@ -1,5 +1,6 @@
 from pydantic import field_validator
 from pydantic_settings import BaseSettings
+from pathlib import Path
 from typing import Optional
 
 
@@ -10,15 +11,15 @@ class Settings(BaseSettings):
     # App
     APP_NAME: str = "LengoLens API"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = True
-    CORS_ALLOW_ORIGINS: list[str] = ["*"]
+    DEBUG: bool = False
+    CORS_ALLOW_ORIGINS: list[str] = []
     ADMIN_ROLE_NAMES: list[str] = ["admin", "quan_tri", "quan_tri_vien"]
     ADMIN_USER_IDS: list[int] = []
-    
+
     # JWT — SECRET_KEY bắt buộc phải set trong .env
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # Gemini API
@@ -53,7 +54,7 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             value = value.strip()
             if not value:
-                return ["*"]
+                return []
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
 
@@ -78,7 +79,7 @@ class Settings(BaseSettings):
         return value
     
     class Config:
-        env_file = ".env"
+        env_file = str(Path(__file__).resolve().parents[2] / ".env")
         extra = "allow"
 
 

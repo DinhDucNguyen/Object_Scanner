@@ -200,6 +200,9 @@
     <string name="history_audio_load_error">Không tải được audio</string>
     <string name="history_audio_play_error">Không phát được audio</string>
     <string name="history_empty_vocab">Không có dữ liệu từ vựng</string>
+    <string name="history_status_pending">Chờ duyệt</string>
+    <string name="history_status_rejected">Không được duyệt</string>
+    <string name="history_status_approved">Đã duyệt</string>
 
     <!-- Streak -->
     <string name="streak_days_singular">ngày</string>

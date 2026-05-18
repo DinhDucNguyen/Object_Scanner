@@ -16,3 +16,4 @@ python-multipart>=0.0.9
 Pillow>=10.0.0  # Image processing for compression
 aiofiles>=23.0.0  # Required for FastAPI StaticFiles
 cloudinary>=1.40.0
+slowapi>=0.1.9

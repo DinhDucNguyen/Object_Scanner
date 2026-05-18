@@ -18,12 +18,14 @@ object ApiConfig {
      */
     val serverPort: String = BuildConfig.SERVER_PORT
 
+    val serverScheme: String = BuildConfig.SERVER_SCHEME
+
     /**
      * Base URL đầy đủ dùng cho Retrofit.
      * Ví dụ: "http://192.168.1.84:8000/"
      */
     val baseUrl: String
-        get() = "http://$serverIp:$serverPort/"
+        get() = "$serverScheme://$serverIp:$serverPort/"
 
     /**
      * Trả về true nếu đã cấu hình địa chỉ server.

@@ -40,10 +40,13 @@ class HistoryRepository:
                 query
                 .outerjoin(Object, ScanHistory.doi_tuong_id == Object.id)
                 .outerjoin(Translation, Translation.doi_tuong_id == Object.id)
+                .outerjoin(AIPrediction, AIPrediction.scan_id == ScanHistory.id)
                 .filter(or_(
                     func.lower(Object.ma_doi_tuong).like(pattern),
                     func.lower(Translation.tu_vung).like(pattern),
                     func.lower(Translation.dinh_nghia).like(pattern),
+                    func.lower(AIPrediction.nhan_du_doan).like(pattern),
+                    func.lower(AIPrediction.mo_ta).like(pattern),
                 ))
                 .distinct()
             )

@@ -39,6 +39,8 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
     private var lastRequestKey: String? = null
 
+    data class PronunciationTarget(val text: String, val lang: String)
+
     fun loadDefaultLangs() {
         // App chỉ hỗ trợ EN ⇌ VI
         _fromLang.value = "en"
@@ -95,14 +97,39 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun playAudio(audioUrl: String?) {
-        if (audioUrl.isNullOrEmpty()) {
-            _error.value = "Không có audio cho từ này"
+    fun pronunciationTarget(result: TranslateResponse?): PronunciationTarget? {
+        result ?: return null
+        val candidates = listOf(
+            result.translation to result.toLang,
+            result.original to result.fromLang,
+        )
+        return candidates
+            .map { (text, lang) -> text.trim() to lang.trim().lowercase() }
+            .sortedBy { (_, lang) -> if (lang == "en") 0 else 1 }
+            .firstOrNull { (text, _) -> isShortPronounceableText(text) }
+            ?.let { (text, lang) -> PronunciationTarget(text, lang.ifBlank { "en" }) }
+    }
+
+    fun playAudio(target: PronunciationTarget?) {
+        if (target == null) {
+            _error.value = "Câu quá dài nên không tạo phát âm"
             return
         }
-        audioPlayer.playUrl(audioUrl) {
-            _error.postValue("Lỗi phát audio")
+        viewModelScope.launch {
+            val bytes = repo.getTtsAudio(target.text, target.lang)
+            if (bytes == null) {
+                _error.value = "Không tải được audio"
+                return@launch
+            }
+            audioPlayer.playMp3(bytes) {
+                _error.postValue("Lỗi phát audio")
+            }
         }
+    }
+
+    private fun isShortPronounceableText(text: String): Boolean {
+        if (text.isBlank() || text.length > MAX_PRONUNCIATION_CHARS) return false
+        return text.split(Regex("\\s+")).size <= MAX_PRONUNCIATION_WORDS
     }
 
     fun clearResult() {
@@ -118,5 +145,10 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
     override fun onCleared() {
         super.onCleared()
         audioPlayer.release()
+    }
+
+    companion object {
+        private const val MAX_PRONUNCIATION_CHARS = 60
+        private const val MAX_PRONUNCIATION_WORDS = 6
     }
 }

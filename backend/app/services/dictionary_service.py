@@ -11,8 +11,10 @@ from app.models.dictionary_lookup import DictionaryLookup, NguonTraCuu
 from app.models.example import ViDu
 from app.models.language import Language
 from app.models.object import Object
+from app.models.object_alias import ObjectAlias
 from app.models.scan_history import ScanHistory
 from app.models.translation import Translation, NguonDuLieu
+from app.repositories.object_repo import ObjectRepository, normalize_object_code
 from app.services.gemini_service import GeminiService
 from app.services.tts_service import TTSService
 from app.utils.timezone import now_vietnam
@@ -106,6 +108,7 @@ class DictionaryService:
         query = (
             db.query(Object, Translation)
             .join(Translation, Translation.doi_tuong_id == Object.id)
+            .outerjoin(ObjectAlias, ObjectAlias.doi_tuong_id == Object.id)
             .outerjoin(Language, Language.id == Translation.ngon_ngu_id)
             .filter(Object.thoi_gian_xoa.is_(None))
             .filter(Translation.thoi_gian_xoa.is_(None))
@@ -150,6 +153,7 @@ class DictionaryService:
             )
         return or_(
             func.lower(Object.ma_doi_tuong) == code,
+            func.lower(ObjectAlias.ma_bi_danh) == code,
             func.lower(Translation.tu_vung) == text_lower,
         )
 
@@ -177,15 +181,14 @@ class DictionaryService:
         to_lang: str,
         user_id: Optional[int],
     ) -> dict:
-        object_code = ai_result["object_code"]
-        obj = db.query(Object).filter(
-            Object.ma_doi_tuong == object_code,
-            Object.thoi_gian_xoa.is_(None),
-        ).first()
+        object_code = normalize_object_code(ai_result["object_code"])
+        obj = ObjectRepository().get_by_code(db, object_code)
         if not obj:
             obj = Object(ma_doi_tuong=object_code, tao_boi=user_id)
             db.add(obj)
             db.flush()
+        else:
+            object_code = obj.ma_doi_tuong
 
         translations = ai_result.get("translations") or []
         first_translation = translations[0] if translations else {}
@@ -336,7 +339,7 @@ class DictionaryService:
         ))
 
     def _normalize_object_code(self, text: str) -> str:
-        return "_".join(text.lower().strip().replace("-", " ").split())
+        return normalize_object_code(text)
 
     def _get_cached(self, key: tuple[str, str, str]) -> dict | None:
         cached = self._cache.get(key)

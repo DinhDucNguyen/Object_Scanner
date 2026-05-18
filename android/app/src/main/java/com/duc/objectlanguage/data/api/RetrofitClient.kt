@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.data.api
 
+import com.duc.objectlanguage.BuildConfig
 import com.duc.objectlanguage.data.local.ApiConfig
 import com.duc.objectlanguage.data.local.TokenManager
 import okhttp3.Interceptor
@@ -60,7 +61,7 @@ object RetrofitClient {
 
     private fun buildClient(): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         }
 
         val authInterceptor = Interceptor { chain ->
@@ -114,12 +115,16 @@ object RetrofitClient {
                         .header("Authorization", "Bearer ${newTokens.accessToken}")
                         .build()
                 }
+                if (refreshResponse.code() == 401 || refreshResponse.code() == 403) {
+                    tokenManager?.clear()
+                }
+                return@Authenticator null
             }
         } catch (_: Exception) {
-            // Fall through and clear invalid credentials below.
+            // Keep credentials on transient network/server errors.
+            return@Authenticator null
         }
 
-        tokenManager?.clear()
         null
     }
 

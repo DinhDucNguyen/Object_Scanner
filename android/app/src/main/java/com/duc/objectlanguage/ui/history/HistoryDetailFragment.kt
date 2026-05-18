@@ -1,10 +1,13 @@
 package com.duc.objectlanguage.ui.history
 
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
@@ -39,6 +42,7 @@ class HistoryDetailFragment : Fragment() {
             imageUrl = imageUrl,
             scanDate = scanDate,
             confidence = null,
+            status = null,
         )
         setupObservers()
         binding.btnPlayAudioHistory.setOnClickListener {
@@ -63,6 +67,7 @@ class HistoryDetailFragment : Fragment() {
                 imageUrl = detail.imageUrl,
                 scanDate = detail.scanDate,
                 confidence = detail.confidenceScore,
+                status = detail.status ?: detail.reviewStatus,
             )
         }
 
@@ -78,9 +83,10 @@ class HistoryDetailFragment : Fragment() {
         }
     }
 
-    private fun bindHeader(title: String, imageUrl: String?, scanDate: String?, confidence: Float?) {
+    private fun bindHeader(title: String, imageUrl: String?, scanDate: String?, confidence: Float?, status: String?) {
         binding.tvObjectName.text = title.ifBlank { "---" }
         binding.tvScanDate.text = formatDate(scanDate)
+        bindReviewStatus(binding.tvReviewStatus, status)
         binding.tvConfidence.apply {
             if (confidence == null) {
                 visibility = View.GONE
@@ -94,6 +100,40 @@ class HistoryDetailFragment : Fragment() {
             .placeholder(R.drawable.ic_image_placeholder)
             .error(R.drawable.ic_image_placeholder)
             .into(binding.ivScannedImage)
+    }
+
+    private fun bindReviewStatus(view: TextView, status: String?) {
+        val (label, textColor, bgColor) = when (status) {
+            "pending_review", "cho_duyet" -> Triple(
+                getString(R.string.history_status_pending),
+                R.color.warning,
+                R.color.warning_light
+            )
+            "rejected", "tu_choi" -> Triple(
+                getString(R.string.history_status_rejected),
+                R.color.error,
+                R.color.error_light
+            )
+            "approved", "da_duyet" -> Triple(
+                getString(R.string.history_status_approved),
+                R.color.success,
+                R.color.success_light
+            )
+            else -> {
+                view.visibility = View.GONE
+                return
+            }
+        }
+
+        val radius = 999f * resources.displayMetrics.density
+        view.text = label
+        view.setTextColor(ContextCompat.getColor(requireContext(), textColor))
+        view.background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = radius
+            setColor(ContextCompat.getColor(requireContext(), bgColor))
+        }
+        view.visibility = View.VISIBLE
     }
 
     private fun bindTranslation(translations: List<TranslationResponse>) {

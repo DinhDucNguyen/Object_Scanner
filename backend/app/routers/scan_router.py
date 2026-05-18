@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query, 
 from fastapi.responses import StreamingResponse
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
+from starlette.concurrency import run_in_threadpool
 from typing import List, Optional
 import io
 import logging
@@ -36,7 +37,7 @@ def scan_object(
     db: Session = Depends(get_db),
     user_id: Optional[int] = Depends(get_optional_user_id)
 ):
-    """Scan bằng object_code (từ ML Kit/YOLOv8 on-device)."""
+    """Scan bằng object_code (từ ML Kit/YOLOv10 on-device)."""
     logger.info("Scan request: object_code=%s, confidence=%s", request.object_code, request.confidence)
     request.user_id = user_id
     result = scan_service.process_scan(db, request)
@@ -60,12 +61,13 @@ async def scan_image(
         raise HTTPException(400, "Ảnh quá lớn, tối đa 10MB")
     
     compressed_bytes = compress_image(image_bytes)
-    
-    return scan_service.process_scan_image(
+
+    return await run_in_threadpool(
+        scan_service.process_scan_image,
         db,
         compressed_bytes,
-        user_id=user_id,
-        base_url=str(request.base_url).rstrip("/"),
+        user_id,
+        str(request.base_url).rstrip("/"),
     )
 
 
@@ -94,6 +96,12 @@ def text_to_speech(
     lang: str = Query(default="en", description="Language code"),
 ):
     """Chuyển từ vựng thành audio MP3."""
+    word = word.strip()
+    if not word:
+        raise HTTPException(400, "Từ phát âm không được rỗng")
+    if len(word) > 100:
+        raise HTTPException(400, "Từ phát âm quá dài, tối đa 100 ký tự")
+
     audio_bytes = tts_service.generate_audio(word, lang)
     if not audio_bytes:
         raise HTTPException(500, "Không thể tạo audio")

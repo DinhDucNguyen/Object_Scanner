@@ -1,5 +1,6 @@
-import uuid
 import os
+import json
+import uuid
 from datetime import date as Date
 from sqlalchemy.orm import Session
 from app.repositories.history_repo import HistoryRepository
@@ -51,6 +52,14 @@ class HistoryFeedbackService:
                 for t in self.trans_repo.get_by_object_id(db, scan.object.id)
                 if getattr(t, "thoi_gian_xoa", None) is None
             ]
+        if not translations:
+            prediction = self._primary_prediction_for_scan(db, scan.id)
+            if prediction:
+                payload = self._prediction_payload(prediction)
+                translations = self._pending_translations_to_dicts(
+                    payload.get("translations") or [],
+                    payload.get("object_code") or prediction.nhan_du_doan or "",
+                )
         item["translations"] = translations
         return item
 
@@ -172,6 +181,36 @@ class HistoryFeedbackService:
         translation = self._pick_review_translation(db, obj.id) if obj else None
         object_code = obj.ma_doi_tuong if obj else None
         word_name = translation.tu_vung if translation else object_code
+        prediction = self._primary_prediction_for_scan(db, scan.id)
+
+        if not translation and prediction:
+            payload = self._prediction_payload(prediction)
+            pending_translations = self._pending_translations_to_dicts(
+                payload.get("translations") or [],
+                payload.get("object_code") or prediction.nhan_du_doan or "",
+            )
+            display_translation = self._pick_display_translation(pending_translations)
+            object_code = payload.get("object_code") or prediction.nhan_du_doan or object_code
+            word_name = (
+                display_translation.get("word_name")
+                if display_translation else (object_code.replace("_", " ").title() if object_code else None)
+            )
+            return {
+                "id": scan.id,
+                "object_code": object_code,
+                "object_name": word_name or object_code,
+                "word_name": word_name,
+                "phonetic": display_translation.get("phonetic") if display_translation else None,
+                "definition": display_translation.get("definition") if display_translation else None,
+                "translation_id": None,
+                "category_name": obj.category.ten_danh_muc if obj and obj.category else payload.get("category"),
+                "confidence_score": scan.do_tin_cay,
+                "scanned_at": scan.thoi_gian.isoformat() if scan.thoi_gian else None,
+                "image_url": scan.url_anh or payload.get("scan_image_url"),
+                "status": self._history_status(prediction),
+                "review_status": prediction.trang_thai.value if prediction.trang_thai else None,
+                "prediction_id": prediction.id,
+            }
 
         return {
             "id": scan.id,
@@ -185,7 +224,87 @@ class HistoryFeedbackService:
             "confidence_score": scan.do_tin_cay,
             "scanned_at": scan.thoi_gian.isoformat() if scan.thoi_gian else None,
             "image_url": scan.url_anh,
+            "status": "official" if obj and translation else "unknown",
+            "review_status": prediction.trang_thai.value if prediction and prediction.trang_thai else None,
+            "prediction_id": prediction.id if prediction else None,
         }
+
+    def _primary_prediction_for_scan(self, db: Session, scan_id: int) -> AIPrediction | None:
+        return (
+            db.query(AIPrediction)
+            .filter(AIPrediction.scan_id == scan_id)
+            .order_by(AIPrediction.thoi_gian.desc())
+            .first()
+        )
+
+    def _prediction_payload(self, prediction: AIPrediction) -> dict:
+        try:
+            return json.loads(prediction.mo_ta or "{}")
+        except Exception:
+            return {}
+
+    def _pending_translations_to_dicts(self, translations_raw: list, object_code: str) -> list[dict]:
+        translations = []
+        for item in translations_raw:
+            if not isinstance(item, dict):
+                continue
+            lang_code = item.get("lang_code") or "en"
+            word_name = item.get("word_name") or object_code.replace("_", " ").title()
+            translations.append({
+                "id": 0,
+                "object_id": 0,
+                "language_id": 0,
+                "language_code": lang_code,
+                "language_name": self._language_name(lang_code),
+                "word_name": word_name,
+                "phonetic": item.get("phonetic"),
+                "part_of_speech": item.get("part_of_speech"),
+                "definition": item.get("definition"),
+                "examples": self._pending_examples_to_dicts(item.get("example_sentences") or []),
+                "audio_url": None,
+                "data_source": "gemini_pending",
+            })
+        return translations
+
+    def _pending_examples_to_dicts(self, examples_raw: list) -> list[dict]:
+        examples = []
+        for example in examples_raw[:3]:
+            if not example:
+                continue
+            if isinstance(example, dict):
+                sentence = str(example.get("en") or "").strip()
+                translation = str(example.get("vi") or "").strip() or None
+            else:
+                sentence = str(example).strip()
+                translation = None
+            if sentence:
+                examples.append({
+                    "id": 0,
+                    "cau_vi_du": sentence,
+                    "dich_nghia": translation,
+                    "nguon_du_lieu": "gemini_pending",
+                })
+        return examples
+
+    def _pick_display_translation(self, translations: list[dict]) -> dict | None:
+        return next(
+            (item for item in translations if item.get("language_code") == "en"),
+            translations[0] if translations else None,
+        )
+
+    def _history_status(self, prediction: AIPrediction) -> str:
+        status = prediction.trang_thai.value if prediction.trang_thai else None
+        if status == "cho_duyet":
+            return "pending_review"
+        if status == "tu_choi":
+            return "rejected"
+        if status == "da_duyet":
+            return "approved"
+        return "unknown"
+
+    def _language_name(self, lang_code: str) -> str:
+        names = {"en": "English", "vi": "Vietnamese", "ja": "Japanese", "ko": "Korean"}
+        return names.get((lang_code or "").lower(), (lang_code or "en").upper())
 
     def _translation_to_dict(self, translation: Translation) -> dict:
         lang = translation.language

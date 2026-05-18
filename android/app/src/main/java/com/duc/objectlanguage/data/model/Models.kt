@@ -159,7 +159,10 @@ data class HistoryItem(
     @SerializedName("category_name") val categoryName: String?,
     @SerializedName("confidence_score") val confidenceScore: Float?,
     @SerializedName("scanned_at") val scanDate: String?,
-    @SerializedName("image_url") val imageUrl: String?
+    @SerializedName("image_url") val imageUrl: String?,
+    val status: String? = null,
+    @SerializedName("review_status") val reviewStatus: String? = null,
+    @SerializedName("prediction_id") val predictionId: Int? = null
 )
 
 data class HistoryDetail(
@@ -174,6 +177,9 @@ data class HistoryDetail(
     @SerializedName("confidence_score") val confidenceScore: Float?,
     @SerializedName("scanned_at") val scanDate: String?,
     @SerializedName("image_url") val imageUrl: String?,
+    val status: String? = null,
+    @SerializedName("review_status") val reviewStatus: String? = null,
+    @SerializedName("prediction_id") val predictionId: Int? = null,
     val translations: List<TranslationResponse> = emptyList()
 )
 

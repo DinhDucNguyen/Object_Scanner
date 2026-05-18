@@ -28,6 +28,9 @@ Thumbs.db
 # Logs
 *.log
 
+# Runtime uploads and generated media
+uploads/
+
 # Distribution
 dist/
 build/

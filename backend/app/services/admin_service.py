@@ -16,13 +16,15 @@ Flow:
 import json
 from typing import Optional, List
 
-from sqlalchemy.orm import Session
+from sqlalchemy import func, case, or_
+from sqlalchemy.orm import Session, joinedload
 
-from app.models.ai_feedback_report import AIPrediction, TrangThaiDuyet
+from app.models.ai_feedback_report import AIPrediction, NguonAI, TrangThaiDuyet, VaiTroDuDoan
 from app.models.category import Category
 from app.models.collection_item import CollectionItem
 from app.models.learning_progress import LearningProgress
 from app.models.object import Object
+from app.models.object_alias import ObjectAlias
 from app.models.object_media import ObjectMedia
 from app.models.scan_history import ScanHistory
 from app.models.translation import Translation, NguonDuLieu
@@ -31,14 +33,18 @@ from app.models.language import Language
 from app.models.user import User
 from app.models.review_log import ReviewLog
 from app.services.tts_service import TTSService
+from app.services.gemini_service import GeminiService
+from app.repositories.object_repo import normalize_object_code
 from app.utils.timezone import now_vietnam
 from app.utils.security import hash_password
 from app.schemas.admin import (
     ApproveRequest, ApproveResponse,
-    RejectResponse,
+    AliasPredictionRequest, AliasPredictionResponse,
+    RejectResponse, SplitToNewObjectResponse,
     PredictionDetailResponse, PredictionListItem,
     VocabPayloadSchema,
     CategoryAdminResponse, CategoryCreateRequest, CategoryUpdateRequest,
+    ObjectAliasItem, ObjectAliasUpsertRequest,
     ObjectListItem, ObjectDetailResponse, ObjectCreateRequest, ObjectUpdateRequest,
     TranslationAdminResponse, TranslationCreateRequest, TranslationUpdateRequest,
     UserAdminResponse, UserRoleUpdate, UserStatusUpdate,
@@ -50,6 +56,22 @@ from app.schemas.admin import (
 class AdminService:
     def __init__(self):
         self.tts = TTSService()
+        self.gemini = GeminiService()
+
+    def _prediction_payload(self, prediction: AIPrediction) -> dict:
+        try:
+            return json.loads(prediction.mo_ta or "{}")
+        except Exception:
+            return {}
+
+    def _is_image_only_prediction(self, prediction: AIPrediction) -> bool:
+        return prediction.vai_tro == VaiTroDuDoan.anh_bo_sung
+
+    def _visible_prediction_count(self, db: Session, status: TrangThaiDuyet) -> int:
+        return db.query(AIPrediction).filter(
+            AIPrediction.trang_thai == status,
+            AIPrediction.vai_tro == VaiTroDuDoan.chinh,
+        ).count()
 
     # ------------------------------------------------------------------
     # Truy vấn
@@ -61,17 +83,31 @@ class AdminService:
         trang_thai: Optional[str] = None,
         limit: int = 50,
         offset: int = 0,
+        search: Optional[str] = None,
     ) -> list[PredictionListItem]:
-        query = db.query(AIPrediction).order_by(AIPrediction.thoi_gian.desc())
+        query = db.query(AIPrediction).filter(
+            AIPrediction.vai_tro == VaiTroDuDoan.chinh,
+        ).order_by(AIPrediction.thoi_gian.desc())
         if trang_thai:
             try:
                 query = query.filter(AIPrediction.trang_thai == TrangThaiDuyet(trang_thai))
             except ValueError:
                 pass
+        if search:
+            pattern = f"%{search.strip()}%"
+            query = query.filter(or_(
+                AIPrediction.nhan_du_doan.ilike(pattern),
+                AIPrediction.mo_ta.ilike(pattern),
+            ))
         predictions = query.offset(offset).limit(limit).all()
+        scan_ids = [p.scan_id for p in predictions if p.scan_id]
+        scans = (
+            {s.id: s for s in db.query(ScanHistory).filter(ScanHistory.id.in_(scan_ids)).all()}
+            if scan_ids else {}
+        )
         items = []
         for p in predictions:
-            scan = db.query(ScanHistory).filter(ScanHistory.id == p.scan_id).first()
+            scan = scans.get(p.scan_id)
             item = PredictionListItem(
                 id=p.id,
                 scan_id=p.scan_id,
@@ -80,6 +116,8 @@ class AdminService:
                 trang_thai=p.trang_thai.value,
                 thoi_gian=p.thoi_gian,
                 scan_image_url=scan.url_anh if scan else None,
+                vai_tro=p.vai_tro.value if p.vai_tro else None,
+                du_doan_goc_id=p.du_doan_goc_id,
             )
             items.append(item)
         return items
@@ -106,8 +144,36 @@ class AdminService:
             trang_thai=p.trang_thai.value,
             thoi_gian=p.thoi_gian,
             scan_image_url=scan.url_anh if scan else None,
+            vai_tro=p.vai_tro.value if p.vai_tro else None,
+            du_doan_goc_id=p.du_doan_goc_id,
+            related_images=self._related_prediction_images(db, p),
             vocab_payload=vocab_payload,
         )
+
+    def _related_prediction_images(self, db: Session, prediction: AIPrediction) -> list[dict]:
+        root_id = prediction.du_doan_goc_id or prediction.id
+        related = (
+            db.query(AIPrediction, ScanHistory)
+            .join(ScanHistory, AIPrediction.scan_id == ScanHistory.id)
+            .filter(
+                (AIPrediction.id == root_id) |
+                (AIPrediction.du_doan_goc_id == root_id)
+            )
+            .order_by(AIPrediction.vai_tro.asc(), AIPrediction.thoi_gian.asc())
+            .all()
+        )
+        return [
+            {
+                "prediction_id": pred.id,
+                "scan_id": scan.id,
+                "user_id": scan.user_id,
+                "image_url": scan.url_anh,
+                "vai_tro": pred.vai_tro.value if pred.vai_tro else None,
+                "thoi_gian": scan.thoi_gian,
+            }
+            for pred, scan in related
+            if scan.url_anh
+        ]
 
     def export_training_data(self, db: Session) -> list[dict]:
         """
@@ -120,6 +186,7 @@ class AdminService:
             .filter(
                 AIPrediction.trang_thai == TrangThaiDuyet.da_duyet,
                 AIPrediction.nguon_ai == NguonAI.gemini,
+                AIPrediction.vai_tro == VaiTroDuDoan.chinh,
             )
             .order_by(AIPrediction.thoi_gian.desc())
             .all()
@@ -130,11 +197,20 @@ class AdminService:
                 payload = json.loads(p.mo_ta or "{}")
             except Exception:
                 payload = {}
+            image_url = None
+            scan = p.scan
+            if (
+                scan
+                and scan.object
+                and scan.object.ma_doi_tuong == p.nhan_du_doan
+                and scan.url_anh
+            ):
+                image_url = scan.url_anh
             records.append({
                 "prediction_id": p.id,
                 "scan_id": p.scan_id,
                 "object_code": p.nhan_du_doan,
-                "image_url": payload.get("scan_image_url"),
+                "image_url": image_url,
                 "approved_at": p.thoi_gian.isoformat() if p.thoi_gian else None,
                 "translations": payload.get("translations", []),
                 "category": payload.get("category"),
@@ -155,6 +231,7 @@ class AdminService:
             .filter(
                 AIPrediction.trang_thai == TrangThaiDuyet.da_duyet,
                 AIPrediction.nguon_ai == NguonAI.gemini,
+                AIPrediction.vai_tro == VaiTroDuDoan.chinh,
             )
             .all()
         )
@@ -198,7 +275,8 @@ class AdminService:
                     obj.category.ten_danh_muc if obj.category else None
                 )
 
-        # Ảnh từ scan đã xác nhận đúng (ScanHistory → Object.ma_doi_tuong)
+        # Training pool uses one source of truth: LichSuQuet.doi_tuong_id.
+        # If admin unlinks a scan, it must disappear even if DuDoanAI still exists.
         confirmed = (
             db.query(ScanHistory, Object)
             .join(Object, ScanHistory.doi_tuong_id == Object.id)
@@ -213,29 +291,6 @@ class AdminService:
             g = groups.get(code)
             if g and scan.url_anh not in g["_seen"]:
                 g["images"].append({"url": scan.url_anh, "source": "confirmed", "scan_id": scan.id})
-                g["_seen"].add(scan.url_anh)
-
-        # Ảnh từ mọi prediction Gemini cùng nhãn (kể cả chưa duyệt / từ chối)
-        gemini_scans = (
-            db.query(AIPrediction, ScanHistory)
-            .join(ScanHistory, AIPrediction.scan_id == ScanHistory.id)
-            .filter(
-                AIPrediction.nhan_du_doan.in_(object_codes),
-                AIPrediction.nguon_ai == NguonAI.gemini,
-                ScanHistory.url_anh.isnot(None),
-            )
-            .all()
-        )
-        for pred, scan in gemini_scans:
-            code = pred.nhan_du_doan
-            g = groups.get(code)
-            if g and scan.url_anh not in g["_seen"]:
-                g["images"].append({
-                    "url": scan.url_anh,
-                    "source": "gemini_scan",
-                    "scan_id": scan.id,
-                    "prediction_id": pred.id,
-                })
                 g["_seen"].add(scan.url_anh)
 
         records = []
@@ -283,7 +338,7 @@ class AdminService:
         except Exception:
             return ApproveResponse(success=False, message="mo_ta không phải JSON hợp lệ", prediction_id=prediction_id)
 
-        object_code = raw.get("object_code", p.nhan_du_doan or "unknown").lower()
+        object_code = normalize_object_code(raw.get("object_code", p.nhan_du_doan or "unknown"))
         image_url_suggestion = raw.get("image_url_suggestion")
         translations_raw = raw.get("translations", [])
         if not translations_raw:
@@ -316,7 +371,7 @@ class AdminService:
                 if matched_cat:
                     obj.danh_muc_id = matched_cat.id
 
-        if p.scan and p.scan.doi_tuong_id is None:
+        if p.scan:
             p.scan.doi_tuong_id = obj.id
 
         total_examples_created = 0
@@ -418,12 +473,18 @@ class AdminService:
         # Tìm các prediction khác cùng object_code còn cho_duyet → auto-resolve luôn
         related_predictions = db.query(AIPrediction).filter(
             AIPrediction.id != prediction_id,
-            AIPrediction.nhan_du_doan == object_code,
+            AIPrediction.nguon_ai == NguonAI.gemini,
             AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet,
+            or_(
+                AIPrediction.du_doan_goc_id == prediction_id,
+                AIPrediction.nhan_du_doan == object_code,
+            ),
         ).all()
         for rel in related_predictions:
-            if rel.scan and rel.scan.user_id:
-                user_ids_to_enroll.add(rel.scan.user_id)
+            if rel.scan:
+                rel.scan.doi_tuong_id = obj.id
+                if rel.scan.user_id:
+                    user_ids_to_enroll.add(rel.scan.user_id)
             rel.trang_thai = TrangThaiDuyet.da_duyet
 
         now = now_vietnam()
@@ -469,6 +530,260 @@ class AdminService:
         )
 
     # ------------------------------------------------------------------
+    # Alias
+    # ------------------------------------------------------------------
+
+    def assign_prediction_alias(
+        self,
+        db: Session,
+        prediction_id: int,
+        request: AliasPredictionRequest,
+    ) -> AliasPredictionResponse:
+        p = db.query(AIPrediction).filter(AIPrediction.id == prediction_id).first()
+        if not p:
+            return AliasPredictionResponse(success=False, message="Không tìm thấy prediction", prediction_id=prediction_id)
+
+        if p.trang_thai != TrangThaiDuyet.cho_duyet:
+            return AliasPredictionResponse(
+                success=False,
+                message=f"Prediction đã ở trạng thái '{p.trang_thai.value}'",
+                prediction_id=prediction_id,
+            )
+
+        obj = db.query(Object).filter(
+            Object.id == request.doi_tuong_id,
+            Object.thoi_gian_xoa.is_(None),
+        ).first()
+        if not obj:
+            return AliasPredictionResponse(success=False, message="Không tìm thấy đối tượng đích", prediction_id=prediction_id)
+
+        raw = self._prediction_payload(p)
+        alias_code = normalize_object_code(
+            request.ma_bi_danh
+            or raw.get("object_code")
+            or p.nhan_du_doan
+            or ""
+        )
+        if not alias_code:
+            return AliasPredictionResponse(success=False, message="Mã bí danh không hợp lệ", prediction_id=prediction_id)
+
+        canonical_conflict = db.query(Object).filter(
+            Object.id != obj.id,
+            Object.ma_doi_tuong == alias_code,
+            Object.thoi_gian_xoa.is_(None),
+        ).first()
+        if canonical_conflict:
+            return AliasPredictionResponse(
+                success=False,
+                message=f"'{alias_code}' đang là mã đối tượng chính của object khác",
+                prediction_id=prediction_id,
+            )
+
+        alias = db.query(ObjectAlias).filter(ObjectAlias.ma_bi_danh == alias_code).first()
+        if alias and alias.doi_tuong_id != obj.id:
+            return AliasPredictionResponse(
+                success=False,
+                message=f"'{alias_code}' đã là bí danh của object khác",
+                prediction_id=prediction_id,
+            )
+
+        if alias_code != obj.ma_doi_tuong and not alias:
+            alias = ObjectAlias(
+                doi_tuong_id=obj.id,
+                ma_bi_danh=alias_code,
+                ten_hien_thi=(request.ten_hien_thi or "").strip() or None,
+                ngon_ngu=(request.ngon_ngu or "").strip() or None,
+            )
+            db.add(alias)
+            db.flush()
+        elif alias:
+            if request.ten_hien_thi is not None:
+                alias.ten_hien_thi = request.ten_hien_thi.strip() or alias.ten_hien_thi
+            if request.ngon_ngu is not None:
+                alias.ngon_ngu = request.ngon_ngu.strip() or alias.ngon_ngu
+
+        root_id = p.du_doan_goc_id or p.id
+        related_predictions = db.query(AIPrediction).filter(
+            AIPrediction.nguon_ai == NguonAI.gemini,
+            AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet,
+            or_(
+                AIPrediction.id == root_id,
+                AIPrediction.du_doan_goc_id == root_id,
+                AIPrediction.nhan_du_doan == alias_code,
+            ),
+        ).all()
+        root_prediction = self._approved_root_prediction_for_object(db, obj)
+
+        review_translation = self._pick_review_translation(db, obj.id)
+        user_ids_to_enroll: set[int] = set()
+        for rel in related_predictions:
+            if rel.scan:
+                rel.scan.doi_tuong_id = obj.id
+                if rel.scan.user_id:
+                    user_ids_to_enroll.add(rel.scan.user_id)
+
+            payload = self._prediction_payload(rel)
+            payload["ma_bi_danh"] = alias_code
+            payload["ma_doi_tuong_chinh"] = obj.ma_doi_tuong
+            payload["doi_tuong_chinh_id"] = obj.id
+            rel.mo_ta = json.dumps(payload, ensure_ascii=False)
+            rel.nhan_du_doan = obj.ma_doi_tuong
+            if root_prediction and rel.id != root_prediction.id:
+                rel.vai_tro = VaiTroDuDoan.anh_bo_sung
+                rel.du_doan_goc_id = root_prediction.id
+            rel.trang_thai = TrangThaiDuyet.da_duyet
+
+        users_enrolled = 0
+        if review_translation:
+            now = now_vietnam()
+            for uid in user_ids_to_enroll:
+                already = db.query(LearningProgress).filter(
+                    LearningProgress.user_id == uid,
+                    LearningProgress.ban_dich_id == review_translation.id,
+                ).first()
+                if not already:
+                    db.add(LearningProgress(
+                        user_id=uid,
+                        ban_dich_id=review_translation.id,
+                        ngay_on_tiep=now,
+                        lan_on_cuoi=now,
+                    ))
+                    users_enrolled += 1
+
+        db.commit()
+
+        return AliasPredictionResponse(
+            success=True,
+            message=f"Đã gán '{alias_code}' làm bí danh của '{obj.ma_doi_tuong}'",
+            prediction_id=prediction_id,
+            doi_tuong_id=obj.id,
+            bi_danh_id=alias.id if alias else None,
+            ma_bi_danh=alias_code,
+            ma_doi_tuong=obj.ma_doi_tuong,
+            users_enrolled=users_enrolled,
+        )
+
+    def detach_review_image(self, db: Session, prediction_id: int) -> dict:
+        p = db.query(AIPrediction).filter(AIPrediction.id == prediction_id).first()
+        if not p:
+            return {"success": False, "message": "Không tìm thấy prediction", "prediction_id": prediction_id}
+        if p.vai_tro != VaiTroDuDoan.anh_bo_sung:
+            return {"success": False, "message": "Chỉ có thể bỏ ảnh bổ sung, không bỏ ảnh chính", "prediction_id": prediction_id}
+        if p.trang_thai != TrangThaiDuyet.cho_duyet:
+            return {"success": False, "message": "Chỉ có thể thao tác ảnh đang chờ duyệt", "prediction_id": prediction_id}
+
+        root_id = p.du_doan_goc_id
+        if p.scan:
+            p.scan.doi_tuong_id = None
+
+        payload = self._prediction_payload(p)
+        payload["review_kind"] = "detached_image"
+        payload["detached_from_prediction_id"] = root_id
+        p.mo_ta = json.dumps(payload, ensure_ascii=False)
+        p.du_doan_goc_id = None
+        p.trang_thai = TrangThaiDuyet.tu_choi
+        db.commit()
+        return {
+            "success": True,
+            "message": "Đã bỏ ảnh khỏi nhóm duyệt",
+            "prediction_id": prediction_id,
+            "root_prediction_id": root_id,
+        }
+
+    def reassign_review_image(self, db: Session, prediction_id: int, target_object_code: str) -> dict:
+        p = db.query(AIPrediction).filter(AIPrediction.id == prediction_id).first()
+        if not p:
+            return {"success": False, "message": "Không tìm thấy prediction", "prediction_id": prediction_id}
+        if p.vai_tro != VaiTroDuDoan.anh_bo_sung:
+            return {"success": False, "message": "Chỉ có thể chuyển ảnh bổ sung, không chuyển ảnh chính", "prediction_id": prediction_id}
+        if p.trang_thai != TrangThaiDuyet.cho_duyet:
+            return {"success": False, "message": "Chỉ có thể thao tác ảnh đang chờ duyệt", "prediction_id": prediction_id}
+
+        target_code = normalize_object_code(target_object_code)
+        obj = db.query(Object).filter(
+            Object.ma_doi_tuong == target_code,
+            Object.thoi_gian_xoa.is_(None),
+        ).first()
+        if not obj:
+            return {"success": False, "message": f"Không tìm thấy đối tượng '{target_object_code}'", "prediction_id": prediction_id}
+
+        root_id = p.du_doan_goc_id
+        target_root = self._approved_root_prediction_for_object(db, obj)
+        if p.scan:
+            p.scan.doi_tuong_id = obj.id
+
+        payload = self._prediction_payload(p)
+        payload["review_kind"] = "reassigned_image"
+        payload["reassigned_from_prediction_id"] = root_id
+        payload["ma_doi_tuong_chinh"] = obj.ma_doi_tuong
+        payload["doi_tuong_chinh_id"] = obj.id
+        p.mo_ta = json.dumps(payload, ensure_ascii=False)
+        p.nhan_du_doan = obj.ma_doi_tuong
+        p.du_doan_goc_id = target_root.id if target_root and target_root.id != p.id else None
+        p.trang_thai = TrangThaiDuyet.da_duyet
+
+        review_translation = self._pick_review_translation(db, obj.id)
+        users_enrolled = 0
+        if review_translation and p.scan and p.scan.user_id:
+            already = db.query(LearningProgress).filter(
+                LearningProgress.user_id == p.scan.user_id,
+                LearningProgress.ban_dich_id == review_translation.id,
+            ).first()
+            if not already:
+                now = now_vietnam()
+                db.add(LearningProgress(
+                    user_id=p.scan.user_id,
+                    ban_dich_id=review_translation.id,
+                    ngay_on_tiep=now,
+                    lan_on_cuoi=now,
+                ))
+                users_enrolled = 1
+
+        db.commit()
+        return {
+            "success": True,
+            "message": f"Đã chuyển ảnh sang '{obj.ma_doi_tuong}'",
+            "prediction_id": prediction_id,
+            "root_prediction_id": root_id,
+            "target_object_code": obj.ma_doi_tuong,
+            "users_enrolled": users_enrolled,
+        }
+
+    def _pick_review_translation(self, db: Session, object_id: int) -> Translation | None:
+        translations = (
+            db.query(Translation)
+            .outerjoin(Language, Language.id == Translation.ngon_ngu_id)
+            .filter(
+                Translation.doi_tuong_id == object_id,
+                Translation.thoi_gian_xoa.is_(None),
+                Translation.da_xac_nhan.is_(True),
+            )
+            .order_by((Language.ma_ngon_ngu == "en").desc(), Translation.id.asc())
+            .all()
+        )
+        return translations[0] if translations else None
+
+    def _approved_root_prediction_for_object(self, db: Session, obj: Object) -> AIPrediction | None:
+        predictions = (
+            db.query(AIPrediction)
+            .filter(
+                AIPrediction.nguon_ai == NguonAI.gemini,
+                AIPrediction.trang_thai == TrangThaiDuyet.da_duyet,
+                AIPrediction.vai_tro == VaiTroDuDoan.chinh,
+                AIPrediction.nhan_du_doan == obj.ma_doi_tuong,
+            )
+            .order_by(AIPrediction.thoi_gian.asc())
+            .all()
+        )
+        for prediction in predictions:
+            payload = self._prediction_payload(prediction)
+            payload_alias = normalize_object_code(payload.get("ma_bi_danh") or "")
+            payload_code = normalize_object_code(payload.get("object_code") or "")
+            if not payload_alias and (not payload_code or payload_code == obj.ma_doi_tuong):
+                return prediction
+        return predictions[0] if predictions else None
+
+    # ------------------------------------------------------------------
     # Reject
     # ------------------------------------------------------------------
 
@@ -484,6 +799,7 @@ class AdminService:
                 prediction_id=prediction_id,
             )
 
+        raw = {}
         deleted_translations = 0
         deleted_object = False
         if p.mo_ta:
@@ -516,6 +832,22 @@ class AdminService:
                         db.delete(obj)
                         deleted_object = True
 
+        object_code = (raw.get("object_code") or p.nhan_du_doan or "").lower()
+        related_rejected = 0
+        if object_code:
+            related_predictions = db.query(AIPrediction).filter(
+                AIPrediction.id != prediction_id,
+                AIPrediction.nguon_ai == NguonAI.gemini,
+                AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet,
+                or_(
+                    AIPrediction.du_doan_goc_id == prediction_id,
+                    AIPrediction.nhan_du_doan == object_code,
+                ),
+            ).all()
+            for rel in related_predictions:
+                rel.trang_thai = TrangThaiDuyet.tu_choi
+                related_rejected += 1
+
         p.trang_thai = TrangThaiDuyet.tu_choi
         db.commit()
 
@@ -524,8 +856,112 @@ class AdminService:
             details.append(f"xoa {deleted_translations} ban dich tam")
         if deleted_object:
             details.append("xoa doi tuong tam")
+        if related_rejected:
+            details.append(f"tu choi {related_rejected} prediction lien quan")
         suffix = f" ({', '.join(details)})" if details else ""
         return RejectResponse(success=True, message=f"Da tu choi prediction #{prediction_id}{suffix}", prediction_id=prediction_id)
+
+    # ------------------------------------------------------------------
+    # Split to new object
+    # ------------------------------------------------------------------
+
+    def split_to_new_object(
+        self,
+        db: Session,
+        prediction_id: int,
+        new_object_code: str,
+    ) -> SplitToNewObjectResponse:
+        """
+        Tách một ảnh ra khỏi nhóm kiểm duyệt hiện tại và tạo một prediction mới
+        với object_code do admin chỉ định.
+
+        Hữu ích khi Gemini nhận diện sai nhãn (vd: quét đậu phụ nhưng trả kết quả là cục tẩy)
+        — admin có thể cứu ảnh đó thành training data cho đối tượng đúng.
+        """
+        p = db.query(AIPrediction).filter(AIPrediction.id == prediction_id).first()
+        if not p:
+            return SplitToNewObjectResponse(
+                success=False, message="Không tìm thấy prediction", old_prediction_id=prediction_id
+            )
+        if p.trang_thai != TrangThaiDuyet.cho_duyet:
+            return SplitToNewObjectResponse(
+                success=False,
+                message=f"Prediction đã ở trạng thái '{p.trang_thai.value}', không thể tách",
+                old_prediction_id=prediction_id,
+            )
+
+        new_code = normalize_object_code(new_object_code)
+        if not new_code or new_code == "unknown":
+            return SplitToNewObjectResponse(
+                success=False, message="Mã đối tượng mới không hợp lệ", old_prediction_id=prediction_id
+            )
+
+        # Sinh vocab mới cho object_code đúng bằng Gemini (text prompt)
+        vocab_result = self.gemini.generate_vocab_for_object_code(new_code)
+        vocab_generated = "_error" not in vocab_result
+
+        if vocab_generated:
+            vocab_result["object_code"] = new_code
+            new_mo_ta = json.dumps(vocab_result, ensure_ascii=False)
+        else:
+            # Tạo payload tối thiểu để admin có thể approve sau
+            new_mo_ta = json.dumps({
+                "object_code": new_code,
+                "category": None,
+                "translations": [],
+                "_admin_split": True,
+                "_vocab_error": vocab_result.get("_message", "unknown"),
+            }, ensure_ascii=False)
+
+        # Tạo prediction mới cho object đúng
+        new_pred = AIPrediction(
+            scan_id=p.scan_id,
+            nguon_ai=NguonAI.gemini,
+            nhan_du_doan=new_code,
+            do_tin_cay=p.do_tin_cay,
+            mo_ta=new_mo_ta,
+            trang_thai=TrangThaiDuyet.cho_duyet,
+            vai_tro=VaiTroDuDoan.chinh,
+            du_doan_goc_id=None,
+        )
+        db.add(new_pred)
+        db.flush()  # lấy new_pred.id
+
+        # Nếu tách prediction chính, chuyển ảnh bổ sung sang prediction mới
+        if p.vai_tro == VaiTroDuDoan.chinh:
+            supplementary_preds = db.query(AIPrediction).filter(
+                AIPrediction.du_doan_goc_id == p.id,
+                AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet,
+            ).all()
+            for supp in supplementary_preds:
+                supp.du_doan_goc_id = new_pred.id
+                supp.nhan_du_doan = new_code
+                if supp.scan:
+                    supp.scan.doi_tuong_id = None
+
+        # Ghi audit trail vào prediction cũ rồi đánh dấu tu_choi
+        old_payload = self._prediction_payload(p)
+        old_payload["review_kind"] = "split_to_new_object"
+        old_payload["original_object_code"] = p.nhan_du_doan
+        old_payload["split_to_new_prediction_id"] = new_pred.id
+        old_payload["corrected_by_admin"] = True
+        p.mo_ta = json.dumps(old_payload, ensure_ascii=False)
+        p.trang_thai = TrangThaiDuyet.tu_choi
+        p.du_doan_goc_id = None
+
+        # Tháo liên kết scan khỏi đối tượng cũ
+        if p.scan:
+            p.scan.doi_tuong_id = None
+
+        db.commit()
+        return SplitToNewObjectResponse(
+            success=True,
+            message=f"Đã tách ảnh thành prediction mới cho '{new_code}'",
+            old_prediction_id=prediction_id,
+            new_prediction_id=new_pred.id,
+            new_object_code=new_code,
+            vocab_generated=vocab_generated,
+        )
 
     # ------------------------------------------------------------------
     # Dashboard
@@ -546,9 +982,9 @@ class AdminService:
             total_objects=db.query(Object).filter(Object.thoi_gian_xoa.is_(None)).count(),
             total_translations=db.query(Translation).filter(Translation.thoi_gian_xoa.is_(None)).count(),
             total_scans=db.query(ScanHistory).count(),
-            pending_predictions=db.query(AIPrediction).filter(AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet).count(),
-            approved_predictions=db.query(AIPrediction).filter(AIPrediction.trang_thai == TrangThaiDuyet.da_duyet).count(),
-            rejected_predictions=db.query(AIPrediction).filter(AIPrediction.trang_thai == TrangThaiDuyet.tu_choi).count(),
+            pending_predictions=self._visible_prediction_count(db, TrangThaiDuyet.cho_duyet),
+            approved_predictions=self._visible_prediction_count(db, TrangThaiDuyet.da_duyet),
+            rejected_predictions=self._visible_prediction_count(db, TrangThaiDuyet.tu_choi),
             objects_without_images=objects_without_images,
         )
 
@@ -607,9 +1043,21 @@ class AdminService:
 
     def list_objects(self, db: Session, limit: int = 50, offset: int = 0, search: Optional[str] = None, category_id: Optional[int] = None, no_image: Optional[bool] = None) -> List[ObjectListItem]:
         from sqlalchemy import exists
-        query = db.query(Object).filter(Object.thoi_gian_xoa.is_(None))
+        query = (
+            db.query(Object)
+            .options(joinedload(Object.category), joinedload(Object.aliases))
+            .filter(Object.thoi_gian_xoa.is_(None))
+        )
         if search:
-            query = query.filter(Object.ma_doi_tuong.ilike(f"%{search}%"))
+            pattern = f"%{search}%"
+            query = (
+                query.outerjoin(ObjectAlias, ObjectAlias.doi_tuong_id == Object.id)
+                .filter(or_(
+                    Object.ma_doi_tuong.ilike(pattern),
+                    ObjectAlias.ma_bi_danh.ilike(pattern),
+                ))
+                .distinct()
+            )
         if category_id is not None:
             query = query.filter(Object.danh_muc_id == category_id)
         has_media_subq = exists().where(
@@ -621,28 +1069,54 @@ class AdminService:
         elif no_image is False:
             query = query.filter(has_media_subq)
         objs = query.order_by(Object.id.desc()).offset(offset).limit(limit).all()
+        if not objs:
+            return []
+
+        obj_ids = [obj.id for obj in objs]
+
+        trans_rows = (
+            db.query(
+                Translation.doi_tuong_id,
+                func.sum(case((Translation.da_xac_nhan == True, 1), else_=0)).label("approved"),  # noqa: E712
+                func.sum(case((Translation.da_xac_nhan == False, 1), else_=0)).label("pending"),  # noqa: E712
+            )
+            .filter(Translation.doi_tuong_id.in_(obj_ids), Translation.thoi_gian_xoa.is_(None))
+            .group_by(Translation.doi_tuong_id)
+            .all()
+        )
+        trans_counts = {row.doi_tuong_id: (int(row.approved or 0), int(row.pending or 0)) for row in trans_rows}
+
+        has_img_ids = {
+            row[0]
+            for row in db.query(ObjectMedia.doi_tuong_id)
+            .filter(ObjectMedia.doi_tuong_id.in_(obj_ids), ObjectMedia.thoi_gian_xoa.is_(None))
+            .distinct()
+            .all()
+        }
+
         result = []
         for obj in objs:
-            cat_name = obj.category.ten_danh_muc if obj.category else None
-            approved_count, pending_count = self._object_translation_counts(db, obj.id)
-            has_img = db.query(exists().where(
-                (ObjectMedia.doi_tuong_id == obj.id) &
-                ObjectMedia.thoi_gian_xoa.is_(None)
-            )).scalar()
+            approved_count, pending_count = trans_counts.get(obj.id, (0, 0))
             result.append(ObjectListItem(
                 id=obj.id,
                 ma_doi_tuong=obj.ma_doi_tuong,
                 danh_muc_id=obj.danh_muc_id,
-                category_name=cat_name,
+                category_name=obj.category.ten_danh_muc if obj.category else None,
                 translation_count=approved_count,
                 pending_translation_count=pending_count,
-                has_image=bool(has_img),
+                has_image=obj.id in has_img_ids,
+                aliases=[ObjectAliasItem.model_validate(alias) for alias in (obj.aliases or [])],
             ))
         return result
 
     def get_object(self, db: Session, object_id: int) -> Optional[ObjectDetailResponse]:
         from sqlalchemy import exists
-        obj = db.query(Object).filter(Object.id == object_id, Object.thoi_gian_xoa.is_(None)).first()
+        obj = (
+            db.query(Object)
+            .options(joinedload(Object.aliases))
+            .filter(Object.id == object_id, Object.thoi_gian_xoa.is_(None))
+            .first()
+        )
         if not obj:
             return None
         cat_name = obj.category.ten_danh_muc if obj.category else None
@@ -659,6 +1133,7 @@ class AdminService:
             translation_count=approved_count,
             pending_translation_count=pending_count,
             has_image=bool(has_img),
+            aliases=[ObjectAliasItem.model_validate(alias) for alias in (obj.aliases or [])],
         )
 
     def _object_translation_counts(self, db: Session, object_id: int) -> tuple[int, int]:
@@ -671,7 +1146,7 @@ class AdminService:
         return approved_count, pending_count
 
     def create_object(self, db: Session, req: ObjectCreateRequest) -> ObjectDetailResponse:
-        obj = Object(ma_doi_tuong=req.ma_doi_tuong.lower().strip(), danh_muc_id=req.danh_muc_id)
+        obj = Object(ma_doi_tuong=normalize_object_code(req.ma_doi_tuong), danh_muc_id=req.danh_muc_id)
         db.add(obj)
         db.commit()
         db.refresh(obj)
@@ -691,6 +1166,93 @@ class AdminService:
         if not obj:
             return False
         obj.thoi_gian_xoa = now_vietnam()
+        db.commit()
+        return True
+
+    def upsert_object_alias(self, db: Session, req: ObjectAliasUpsertRequest) -> ObjectAliasItem | None:
+        obj = db.query(Object).filter(
+            Object.id == req.doi_tuong_id,
+            Object.thoi_gian_xoa.is_(None),
+        ).first()
+        if not obj:
+            return None
+
+        alias_code = normalize_object_code(req.ma_bi_danh)
+        if not alias_code:
+            return None
+        if alias_code == obj.ma_doi_tuong:
+            raise ValueError("Bí danh không được trùng mã đối tượng chính")
+
+        canonical_conflict = db.query(Object).filter(
+            Object.id != obj.id,
+            Object.ma_doi_tuong == alias_code,
+            Object.thoi_gian_xoa.is_(None),
+        ).first()
+        if canonical_conflict:
+            raise ValueError(f"'{alias_code}' đang là mã đối tượng chính của object khác")
+
+        alias = db.query(ObjectAlias).filter(ObjectAlias.ma_bi_danh == alias_code).first()
+        if alias:
+            alias.doi_tuong_id = obj.id
+            if req.ten_hien_thi is not None:
+                alias.ten_hien_thi = req.ten_hien_thi.strip() or None
+            if req.ngon_ngu is not None:
+                alias.ngon_ngu = req.ngon_ngu.strip() or None
+        else:
+            alias = ObjectAlias(
+                doi_tuong_id=obj.id,
+                ma_bi_danh=alias_code,
+                ten_hien_thi=(req.ten_hien_thi or "").strip() or None,
+                ngon_ngu=(req.ngon_ngu or "").strip() or None,
+            )
+            db.add(alias)
+
+        self._rewire_alias_predictions(db, alias_code, obj)
+        db.commit()
+        db.refresh(alias)
+        return ObjectAliasItem.model_validate(alias)
+
+    def _rewire_alias_predictions(self, db: Session, alias_code: str, obj: Object) -> int:
+        candidates = (
+            db.query(AIPrediction)
+            .filter(
+                AIPrediction.nguon_ai == NguonAI.gemini,
+                AIPrediction.mo_ta.contains(alias_code),
+            )
+            .all()
+        )
+        root_prediction = self._approved_root_prediction_for_object(db, obj)
+        changed = 0
+        for pred in candidates:
+            payload = self._prediction_payload(pred)
+            payload_alias = normalize_object_code(payload.get("ma_bi_danh") or "")
+            payload_code = normalize_object_code(payload.get("object_code") or "")
+            if payload_alias != alias_code and payload_code != alias_code:
+                continue
+
+            payload["ma_bi_danh"] = alias_code
+            payload["ma_doi_tuong_chinh"] = obj.ma_doi_tuong
+            payload["doi_tuong_chinh_id"] = obj.id
+            pred.mo_ta = json.dumps(payload, ensure_ascii=False)
+            pred.nhan_du_doan = obj.ma_doi_tuong
+            if root_prediction and pred.id != root_prediction.id:
+                pred.vai_tro = VaiTroDuDoan.anh_bo_sung
+                pred.du_doan_goc_id = root_prediction.id
+
+            scan = pred.scan or (
+                db.query(ScanHistory).filter(ScanHistory.id == pred.scan_id).first()
+                if pred.scan_id else None
+            )
+            if scan:
+                scan.doi_tuong_id = obj.id
+            changed += 1
+        return changed
+
+    def delete_object_alias(self, db: Session, alias_id: int) -> bool:
+        alias = db.query(ObjectAlias).filter(ObjectAlias.id == alias_id).first()
+        if not alias:
+            return False
+        db.delete(alias)
         db.commit()
         return True
 
@@ -913,7 +1475,16 @@ class AdminService:
         if username:
             query = query.filter(User.ten_dang_nhap.ilike(f"%{username}%"))
         if object_code:
-            query = query.filter(Object.ma_doi_tuong.ilike(f"%{object_code}%"))
+            from sqlalchemy import exists
+            pattern = f"%{object_code}%"
+            alias_match = exists().where(
+                (ObjectAlias.doi_tuong_id == Object.id) &
+                ObjectAlias.ma_bi_danh.ilike(pattern)
+            )
+            query = query.filter(or_(
+                Object.ma_doi_tuong.ilike(pattern),
+                alias_match,
+            ))
         if date_from:
             query = query.filter(ScanHistory.thoi_gian >= dt.fromisoformat(date_from))
         if date_to:

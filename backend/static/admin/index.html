@@ -1382,6 +1382,39 @@
     </div>
   </div>
 
+
+  <!-- ═══ Split to New Object Modal ═══ -->
+  <div class="modal fade" id="split-modal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-title" style="font-size:.95rem;"><i class="bi bi-scissors me-1" style="color:#7c3aed;"></i>Tách thành object mới</span>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2" style="font-size:.83rem;color:#64748b;">
+            Ảnh đang thuộc nhóm: <strong id="sm-current-code" style="color:#0f172a;">—</strong>
+          </div>
+          <div class="mb-3" style="font-size:.82rem;color:#64748b;">
+            Ảnh này thực sự là vật thể nào? Nhập mã đối tượng đúng bên dưới.
+            Gemini sẽ tự động sinh từ vựng cho vật thể mới.
+          </div>
+          <label class="form-label mb-1" style="font-size:.82rem;font-weight:600;">Mã đối tượng mới</label>
+          <input type="text" id="sm-new-code" class="form-control form-control-sm"
+            placeholder="vd: tofu, water_bottle, pencil..." autocomplete="off">
+          <div class="form-text" style="font-size:.75rem;">Chữ thường, dùng dấu gạch dưới thay khoảng trắng</div>
+          <div id="sm-error" class="text-danger mt-2" style="font-size:.8rem;display:none;"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+          <button class="btn btn-sm" id="sm-confirm" style="background:#7c3aed;color:#fff;">
+            <i class="bi bi-scissors me-1"></i>Tách
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ Confirm Modal ═══ -->
   <div class="modal fade" id="confirm-modal" tabindex="-1">
     <div class="modal-dialog modal-sm">
@@ -1559,6 +1592,10 @@
       const res = await api(path, opts);
       if (!res.ok) { const t = await res.text(); throw new Error(t); }
       return res.json();
+    }
+
+    function escHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     // ============================================================
@@ -1790,7 +1827,7 @@
     }
 
     async function openPredModal(id) {
-      const modal = new bootstrap.Modal(document.getElementById('pred-modal'));
+      const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('pred-modal'));
       document.getElementById('pm-id').textContent = id;
       document.getElementById('pm-body').innerHTML = `<div class="text-center py-4"><div class="spinner-border text-primary" style="width:1.5rem;height:1.5rem;"></div></div>`;
       document.getElementById('pm-footer').innerHTML = '';
@@ -1798,12 +1835,48 @@
       try {
         const p = await apiJSON(`/predictions/${id}`);
         const vp = p.vocab_payload;
+        const relatedImages = p.related_images || [];
+        const rootPredictionId = p.du_doan_goc_id || p.id;
+        const canEditRelatedImages = p.trang_thai === 'cho_duyet';
+        const relatedImagesHtml = relatedImages.length ? `
+      <div class="mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <p class="fw-bold mb-0" style="font-size:.85rem;">
+            <i class="bi bi-images text-primary me-1"></i>Ảnh liên quan
+          </p>
+          <span class="badge badge-neutral">${relatedImages.length} ảnh</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          ${relatedImages.map(img => `
+            <div style="width:92px;">
+              <img src="${img.image_url}"
+                   style="width:92px;height:92px;object-fit:cover;border-radius:8px;border:1px solid #dee2e6;cursor:zoom-in;"
+                   alt="Ảnh liên quan"
+                   onclick="zoomImage('${img.image_url}')"
+                   title="Scan #${img.scan_id || '—'}">
+              <div class="mt-1" style="font-size:.72rem;line-height:1.2;">
+                <span class="badge ${img.vai_tro === 'chinh' ? 'badge-approved' : 'badge-neutral'}">
+                  ${img.vai_tro === 'chinh' ? 'Chính' : 'Bổ sung'}
+                </span>
+                <div class="text-muted mt-1">Scan #${img.scan_id || '—'}</div>
+                ${canEditRelatedImages ? `
+                  <div class="d-flex gap-1 mt-1 flex-wrap">
+                    ${img.vai_tro !== 'chinh' ? `<button class="btn-act del" style="width:28px;height:26px;" onclick="detachReviewImage(${img.prediction_id}, ${rootPredictionId})" title="Bỏ khỏi nhóm duyệt"><i class="bi bi-trash3"></i></button>
+                    <button class="btn-act" style="width:28px;height:26px;" onclick="openReviewImageReassign(${img.prediction_id}, '${p.nhan_du_doan || ''}', ${rootPredictionId})" title="Chuyển sang object đã có"><i class="bi bi-arrow-left-right"></i></button>` : ''}
+                    <button class="btn-act" style="width:28px;height:26px;color:#7c3aed;" onclick="openSplitToNewObject(${img.prediction_id}, ${rootPredictionId}, '${img.vai_tro}')" title="Tách thành object mới"><i class="bi bi-scissors"></i></button>
+                  </div>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>` : '';
         const langFlags = { en: '🇬🇧', vi: '🇻🇳', ja: '🇯🇵', ko: '🇰🇷', zh: '🇨🇳', fr: '🇫🇷', de: '🇩🇪' };
         let html = `
       ${p.scan_image_url ? `
       <div class="text-center mb-3">
         <img src="${p.scan_image_url}" style="max-height:220px;max-width:100%;border-radius:8px;object-fit:contain;border:1px solid #dee2e6;cursor:zoom-in;" alt="Ảnh quét" onclick="zoomImage('${p.scan_image_url}')" title="Nhấn để xem to">
       </div>` : ''}
+      ${relatedImagesHtml}
       <div class="row g-2 mb-3">
         <div class="col-4"><div class="p-2 rounded bg-light">
           <div class="text-muted" style="font-size:.7rem;font-weight:600;text-transform:uppercase;">Nhãn</div>
@@ -1822,6 +1895,19 @@
           html += `<p class="fw-bold mb-2" style="font-size:.85rem;">
         <i class="bi bi-book text-primary me-1"></i>Vocab Payload — <code style="font-size:.82rem;">${vp.object_code}</code></p>`;
           (vp.translations || []).forEach(t => {
+            const examplesHtml = (t.example_sentences || []).map((s, idx) => {
+              const en = typeof s === 'object' ? (s.en || '') : s;
+              const vi = typeof s === 'object' ? (s.vi || '') : '';
+              return `<div class="p-2 mb-2 rounded border" style="background:#fff;font-size:.84rem;line-height:1.45;">
+                <div class="d-flex gap-2">
+                  <span class="badge badge-neutral" style="height:fit-content;">${idx + 1}</span>
+                  <div style="min-width:0;flex:1;">
+                    <div>${en || ''}</div>
+                    ${vi ? `<div class="text-muted fst-italic mt-1">${vi}</div>` : ''}
+                  </div>
+                </div>
+              </div>`;
+            }).join('');
             html += `<div class="vocab-lang-block">
           <div class="d-flex align-items-center gap-2 mb-2">
             <span>${langFlags[t.lang_code] || '🌐'}</span>
@@ -1830,12 +1916,8 @@
             ${t.phonetic ? `<span class="text-muted fst-italic" style="font-size:.82rem;">${t.phonetic}</span>` : ''}
             ${t.part_of_speech ? `<span class="badge" style="background:#e9d5ff;color:#6b21a8;">${t.part_of_speech}</span>` : ''}
           </div>
-          ${t.definition ? `<p class="mb-1" style="font-size:.84rem;">${t.definition}</p>` : ''}
-          ${(t.example_sentences || []).length ? `<ul class="mb-0 ps-3" style="font-size:.8rem;color:var(--muted);">
-            ${t.example_sentences.map(s => typeof s === 'object'
-              ? `<li>${s.en || ''}${s.vi ? `<div class="fst-italic" style="font-size:.78rem;">${s.vi}</div>` : ''}</li>`
-              : `<li>${s}</li>`).join('')}
-          </ul>` : ''}
+          ${t.definition ? `<div class="mb-3" style="font-size:.85rem;line-height:1.5;"><div class="text-muted fw-semibold mb-1" style="font-size:.72rem;text-transform:uppercase;">Định nghĩa</div>${t.definition}</div>` : ''}
+          ${examplesHtml ? `<div><div class="text-muted fw-semibold mb-2" style="font-size:.72rem;text-transform:uppercase;">Ví dụ</div>${examplesHtml}</div>` : ''}
         </div>`;
           });
         }
@@ -1845,6 +1927,9 @@
         <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
         <button class="btn btn-sm btn-danger ms-auto me-1" onclick="rejectPred(${id})">
           <i class="bi bi-x-lg me-1"></i>Từ chối
+        </button>
+        <button class="btn btn-sm btn-outline-primary me-1" onclick="showAliasForm(${id})">
+          <i class="bi bi-link-45deg me-1"></i>Gán bí danh
         </button>
         <button class="btn btn-sm btn-warning me-1" onclick="showApproveForm(${id})">
           <i class="bi bi-pencil me-1"></i>Chỉnh & Duyệt
@@ -1869,6 +1954,144 @@
       } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
     }
 
+    async function detachReviewImage(predictionId, rootPredictionId) {
+      confirmAction('Bỏ ảnh này khỏi nhóm duyệt? Ảnh vẫn được giữ trong lịch sử quét.', async () => {
+        try {
+          await apiJSON(`/predictions/${predictionId}/detach-image`, { method: 'PATCH' });
+          toast('Đã bỏ ảnh khỏi nhóm duyệt', 'warning');
+          openPredModal(rootPredictionId);
+          loadPredictions();
+          updatePendingBadge();
+        } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      }, 'Bỏ ảnh khỏi nhóm');
+    }
+
+
+    let _splitPredictionId = null;
+    let _splitRootPredictionId = null;
+    let _splitVaiTro = null;
+
+    function openSplitToNewObject(predictionId, rootPredictionId, vaiTro) {
+      _splitPredictionId = predictionId;
+      _splitRootPredictionId = rootPredictionId;
+      _splitVaiTro = vaiTro || null;
+      document.getElementById('sm-current-code').textContent = '—';
+      document.getElementById('sm-new-code').value = '';
+      document.getElementById('sm-error').style.display = 'none';
+      apiJSON(`/predictions/${rootPredictionId}`).then(p => {
+        document.getElementById('sm-current-code').textContent = p.nhan_du_doan || '—';
+      }).catch(() => {});
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('split-modal')).show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('sm-confirm').addEventListener('click', async function() {
+        const newCode = (document.getElementById('sm-new-code').value || '').trim().toLowerCase().replace(/\s+/g, '_');
+        const errEl = document.getElementById('sm-error');
+        if (!newCode) {
+          errEl.textContent = 'Vui lòng nhập mã đối tượng mới';
+          errEl.style.display = '';
+          return;
+        }
+        errEl.style.display = 'none';
+        const btn = document.getElementById('sm-confirm');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang xử lý...';
+        try {
+          const res = await apiJSON(
+            `/predictions/${_splitPredictionId}/split-to-new-object?new_object_code=${encodeURIComponent(newCode)}`,
+            { method: 'PATCH' }
+          );
+          bootstrap.Modal.getInstance(document.getElementById('split-modal')).hide();
+          const vocabMsg = res.vocab_generated
+            ? ' Gemini đã sinh từ vựng tự động.'
+            : ' (Từ vựng chưa sinh được, admin cần nhập thủ công khi duyệt)';
+          toast(`Đã tách thành prediction #${res.new_prediction_id} cho "${res.new_object_code}".${vocabMsg}`, 'success', 6000);
+          if (_splitVaiTro === 'chinh') {
+            bootstrap.Modal.getInstance(document.getElementById('pred-modal'))?.hide();
+          } else {
+            openPredModal(_splitRootPredictionId);
+          }
+          loadPredictions();
+          updatePendingBadge();
+        } catch (e) {
+          errEl.textContent = 'Lỗi: ' + e.message;
+          errEl.style.display = '';
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-scissors me-1"></i>Tách';
+        }
+      });
+    });
+
+    async function showAliasForm(id) {
+      const p = await apiJSON(`/predictions/${id}`).catch(() => null);
+      const aliasCode = (p?.vocab_payload?.object_code || p?.nhan_du_doan || '').trim();
+      let objects = [];
+      try { objects = await apiJSON('/objects?limit=200'); }
+      catch (e) { toast('Lỗi tải danh sách đối tượng: ' + e.message, 'danger'); return; }
+
+      const options = objects.map(o => {
+        const aliases = (o.aliases || []).map(a => a.ma_bi_danh).join(', ');
+        const aliasText = aliases ? ` | alias: ${aliases}` : '';
+        const categoryText = o.category_name ? ` - ${o.category_name}` : '';
+        return `<option value="${o.id}">${o.ma_doi_tuong}${categoryText}${aliasText}</option>`;
+      }).join('');
+
+      document.getElementById('pm-body').innerHTML = `
+    <p class="text-muted mb-3" style="font-size:.82rem;">
+      <i class="bi bi-info-circle me-1"></i>
+      Dùng khi Gemini gọi cùng một vật thể bằng tên khác. Prediction sẽ được duyệt, ảnh/lịch sử nối về đối tượng chính, còn tên này lưu trong <code>BiDanhDoiTuong</code>.
+    </p>
+    <div class="mb-3">
+      <label class="form-label fw-semibold" style="font-size:.8rem;">Mã bí danh</label>
+      <input id="alias-code" class="form-control form-control-sm" value="${aliasCode}" placeholder="vd: glasses">
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold" style="font-size:.8rem;">Đối tượng chính</label>
+      <select id="alias-target" class="form-select form-select-sm">${options}</select>
+    </div>
+    <div class="row g-2">
+      <div class="col-8">
+        <label class="form-label fw-semibold" style="font-size:.8rem;">Tên hiển thị</label>
+        <input id="alias-display" class="form-control form-control-sm" value="${aliasCode.replaceAll('_', ' ')}">
+      </div>
+      <div class="col-4">
+        <label class="form-label fw-semibold" style="font-size:.8rem;">Ngôn ngữ</label>
+        <input id="alias-lang" class="form-control form-control-sm" value="en">
+      </div>
+    </div>`;
+
+      document.getElementById('pm-footer').innerHTML = `
+    <button class="btn btn-sm btn-outline-secondary" onclick="openPredModal(${id})"><i class="bi bi-arrow-left me-1"></i>Quay lại</button>
+    <button class="btn btn-sm btn-primary ms-auto" onclick="confirmAlias(${id})">
+      <i class="bi bi-link-45deg me-1"></i>Gán bí danh
+    </button>`;
+    }
+
+    async function confirmAlias(id) {
+      const target = Number(document.getElementById('alias-target')?.value || 0);
+      const aliasCode = document.getElementById('alias-code')?.value.trim();
+      const display = document.getElementById('alias-display')?.value.trim();
+      const lang = document.getElementById('alias-lang')?.value.trim() || 'en';
+      if (!target) { toast('Chọn đối tượng chính', 'warning'); return; }
+      if (!aliasCode) { toast('Nhập mã bí danh', 'warning'); return; }
+      try {
+        const result = await apiJSON(`/predictions/${id}/alias`, {
+          method: 'POST',
+          body: JSON.stringify({
+            doi_tuong_id: target,
+            ma_bi_danh: aliasCode,
+            ten_hien_thi: display || null,
+            ngon_ngu: lang,
+          }),
+        });
+        toast(result.message || 'Đã gán bí danh');
+        bootstrap.Modal.getInstance(document.getElementById('pred-modal'))?.hide();
+        loadPredictions(); loadObjects(); updatePendingBadge();
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+    }
+
     async function showApproveForm(id) {
       const p = await apiJSON(`/predictions/${id}`).catch(() => null);
       const vp = p?.vocab_payload;
@@ -1878,29 +2101,47 @@
         .join('\n');
 
       document.getElementById('pm-body').innerHTML = `
-    <p class="text-muted mb-3" style="font-size:.82rem;"><i class="bi bi-info-circle me-1"></i>Chỉnh sửa trước khi duyệt. Để trống = giữ nguyên giá trị Gemini.</p>
-    <div class="row g-2">
-      <div class="col-6">
-        <label class="form-label fw-semibold" style="font-size:.8rem;">Từ vựng</label>
-        <input id="ov-word" class="form-control form-control-sm" value="${firstTrans.word_name || ''}">
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:.6rem .85rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:.5rem;">
+      <i class="bi bi-pencil-square" style="color:#0284c7;margin-top:.1rem;flex-shrink:0;"></i>
+      <span style="font-size:.82rem;color:#0369a1;line-height:1.5;">Chỉnh sửa trước khi duyệt. <strong>Để trống = giữ nguyên giá trị Gemini.</strong></span>
+    </div>
+
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:1rem;">
+      <p class="mb-2" style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;">Thông tin cơ bản</p>
+      <div class="row g-3 mb-3">
+        <div class="col-5">
+          <label class="form-label mb-1" style="font-size:.78rem;font-weight:600;color:#475569;">Từ vựng</label>
+          <input id="ov-word" class="form-control form-control-sm" placeholder="vd: Eraser" value="${escHtml(firstTrans.word_name || '')}">
+        </div>
+        <div class="col-4">
+          <label class="form-label mb-1" style="font-size:.78rem;font-weight:600;color:#475569;">Phiên âm (IPA)</label>
+          <input id="ov-phonetic" class="form-control form-control-sm" placeholder="vd: /ɪˈreɪ.zər/" value="${escHtml(firstTrans.phonetic || '')}">
+        </div>
+        <div class="col-3">
+          <label class="form-label mb-1" style="font-size:.78rem;font-weight:600;color:#475569;">Loại từ</label>
+          <input id="ov-pos" class="form-control form-control-sm" placeholder="n / v / adj" value="${escHtml(firstTrans.part_of_speech || '')}">
+        </div>
       </div>
-      <div class="col-6">
-        <label class="form-label fw-semibold" style="font-size:.8rem;">Phiên âm (IPA)</label>
-        <input id="ov-phonetic" class="form-control form-control-sm" value="${firstTrans.phonetic || ''}">
+
+      <div class="mb-3">
+        <label class="form-label mb-1" style="font-size:.78rem;font-weight:600;color:#475569;">Định nghĩa</label>
+        <textarea id="ov-def" class="form-control form-control-sm" style="resize:none;line-height:1.55;" placeholder="Nhập định nghĩa...">${escHtml(firstTrans.definition || '')}</textarea>
       </div>
-      <div class="col-6">
-        <label class="form-label fw-semibold" style="font-size:.8rem;">Loại từ</label>
-        <input id="ov-pos" class="form-control form-control-sm" value="${firstTrans.part_of_speech || ''}">
-      </div>
-      <div class="col-12">
-        <label class="form-label fw-semibold" style="font-size:.8rem;">Định nghĩa</label>
-        <textarea id="ov-def" class="form-control form-control-sm" rows="2">${firstTrans.definition || ''}</textarea>
-      </div>
-      <div class="col-12">
-        <label class="form-label fw-semibold" style="font-size:.8rem;">Ví dụ (mỗi dòng một câu)</label>
-        <textarea id="ov-ex" class="form-control form-control-sm" rows="3">${examples}</textarea>
+
+      <div>
+        <label class="form-label mb-1" style="font-size:.78rem;font-weight:600;color:#475569;">Ví dụ (mỗi dòng một câu, có thể dùng English | Vietnamese)</label>
+        <textarea id="ov-ex" class="form-control form-control-sm" style="resize:none;line-height:1.55;" placeholder="I need an eraser. | Tôi cần một cục tẩy.">${escHtml(examples)}</textarea>
       </div>
     </div>`;
+
+      // Auto-resize cả 2 textarea theo nội dung
+      ['ov-def', 'ov-ex'].forEach(tid => {
+        const ta = document.getElementById(tid);
+        if (!ta) return;
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+        ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; });
+      });
 
       document.getElementById('pm-footer').innerHTML = `
     <button class="btn btn-sm btn-outline-secondary" onclick="openPredModal(${id})"><i class="bi bi-arrow-left me-1"></i>Quay lại</button>
@@ -2077,11 +2318,15 @@
           ? data.map(o => `
           <tr data-has-image="${o.has_image ? '1' : '0'}">
             <td class="text-muted">${o.id}</td>
-            <td><code>${o.ma_doi_tuong || '—'}</code></td>
+            <td>
+              <code>${o.ma_doi_tuong || '—'}</code>
+              ${(o.aliases || []).length ? `<div class="text-muted mt-1" style="font-size:.72rem;">alias: ${(o.aliases || []).map(a => `<code>${a.ma_bi_danh}</code>`).join(', ')}</div>` : ''}
+            </td>
             <td>${o.category_name ? `<span class="badge badge-neutral">${o.category_name}</span>` : '<span class="text-muted">—</span>'}</td>
             <td>${translationBadge(o.translation_count, o.pending_translation_count)}</td>
             <td>
               <div class="btn-actions">
+                <button class="btn-act" onclick='openObjectAliasModal(${JSON.stringify(o)})' title="Bí danh"><i class="bi bi-link-45deg"></i></button>
                 <button class="btn-act" style="position:relative;" onclick="openObjMediaModal('${o.ma_doi_tuong}')" title="${!o.has_image ? 'Chưa có ảnh — Thêm ngay' : 'Quản lý ảnh'}"><i class="bi bi-image"></i>${!o.has_image ? '<span style="position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:#f59e0b;display:block;"></span>' : ''}</button>
                 <button class="btn-act" onclick='openEditObjModal(${JSON.stringify(o)})' title="Sửa"><i class="bi bi-pencil"></i></button>
                 <button class="btn-act del" onclick="deleteObj(${o.id})" title="Xoá"><i class="bi bi-trash3"></i></button>
@@ -2121,6 +2366,81 @@
         catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
       };
       new bootstrap.Modal(document.getElementById('form-modal')).show();
+    }
+
+    function openObjectAliasModal(o) {
+      document.getElementById('fm-submit').style.display = 'none';
+      document.getElementById('fm-title').textContent = 'Bí danh: ' + o.ma_doi_tuong;
+      const aliases = o.aliases || [];
+      document.getElementById('fm-body').innerHTML = `
+    <p class="text-muted mb-3" style="font-size:.82rem;">Nhập bí danh vào đây để thêm mới hoặc chuyển bí danh từ object khác sang <code>${o.ma_doi_tuong}</code>.</p>
+    <div class="mb-3">
+      <label class="form-label fw-semibold" style="font-size:.8rem;">Bí danh hiện có</label>
+      <div id="obj-alias-list">
+        ${aliases.length ? aliases.map(a => `
+          <div class="d-flex align-items-center justify-content-between border rounded px-2 py-1 mb-2">
+            <div>
+              <code>${a.ma_bi_danh}</code>
+              ${a.ten_hien_thi ? `<span class="text-muted ms-2" style="font-size:.78rem;">${a.ten_hien_thi}</span>` : ''}
+            </div>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteObjectAlias(${a.id})">
+              <i class="bi bi-trash3"></i>
+            </button>
+          </div>`).join('') : '<div class="text-muted" style="font-size:.82rem;">Chưa có bí danh</div>'}
+      </div>
+    </div>
+    <div class="row g-2">
+      <div class="col-6">
+        <label class="form-label fw-semibold" style="font-size:.8rem;">Mã bí danh</label>
+        <input id="obj-alias-code" class="form-control form-control-sm" placeholder="vd: glasses">
+      </div>
+      <div class="col-4">
+        <label class="form-label fw-semibold" style="font-size:.8rem;">Tên hiển thị</label>
+        <input id="obj-alias-display" class="form-control form-control-sm" placeholder="glasses">
+      </div>
+      <div class="col-2">
+        <label class="form-label fw-semibold" style="font-size:.8rem;">Ngôn ngữ</label>
+        <input id="obj-alias-lang" class="form-control form-control-sm" value="en">
+      </div>
+    </div>
+    <div class="d-flex justify-content-end mt-3">
+      <button class="btn btn-sm btn-primary" onclick="saveObjectAlias(${o.id})">
+        <i class="bi bi-link-45deg me-1"></i>Lưu bí danh
+      </button>
+    </div>`;
+      new bootstrap.Modal(document.getElementById('form-modal')).show();
+    }
+
+    async function saveObjectAlias(objectId) {
+      const code = document.getElementById('obj-alias-code')?.value.trim();
+      const display = document.getElementById('obj-alias-display')?.value.trim();
+      const lang = document.getElementById('obj-alias-lang')?.value.trim() || 'en';
+      if (!code) { toast('Nhập mã bí danh', 'warning'); return; }
+      try {
+        await apiJSON('/object-aliases', {
+          method: 'POST',
+          body: JSON.stringify({
+            doi_tuong_id: objectId,
+            ma_bi_danh: code,
+            ten_hien_thi: display || null,
+            ngon_ngu: lang,
+          }),
+        });
+        toast('Đã lưu bí danh');
+        bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide();
+        loadObjects();
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+    }
+
+    async function deleteObjectAlias(aliasId) {
+      confirmAction('Xóa bí danh này?', async () => {
+        try {
+          await apiJSON(`/object-aliases/${aliasId}`, { method: 'DELETE' });
+          toast('Đã xóa bí danh', 'warning');
+          bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide();
+          loadObjects();
+        } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      }, 'Xóa bí danh');
     }
 
     async function deleteObj(id) {
@@ -2366,7 +2686,7 @@
         document.getElementById('td-total-images').textContent = totalImages;
 
         grid.innerHTML = records.map(r => {
-          const thumbs = (r.images || []).slice(0, 6).map(img => `
+          const thumbs = (r.images || []).map(img => `
             <div class="td-thumb-wrap">
               <img src="${img.url}" alt="" title="${img.source}" onclick="zoomImage('${img.url}')"
                 style="border:2px solid ${img.source === 'confirmed' ? '#86efac' : '#93c5fd'};border-radius:6px;"
@@ -2414,10 +2734,31 @@
 
     let _reassignScanId = null;
     let _reassignCurrentCode = null;
+    let _reassignMode = 'training';
+    let _reassignPredictionId = null;
+    let _reassignRootPredictionId = null;
     let _cachedObjects = [];
 
     async function openReassign(scanId, currentCode) {
+      _reassignMode = 'training';
       _reassignScanId = scanId;
+      _reassignPredictionId = null;
+      _reassignRootPredictionId = null;
+      _reassignCurrentCode = currentCode;
+      document.getElementById('rm-current-code').textContent = currentCode;
+      document.getElementById('rm-search').value = '';
+      if (_cachedObjects.length === 0) {
+        try { _cachedObjects = await apiJSON('/objects?limit=500'); } catch (_) { _cachedObjects = []; }
+      }
+      _fillReassignSelect('');
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('reassign-modal')).show();
+    }
+
+    async function openReviewImageReassign(predictionId, currentCode, rootPredictionId) {
+      _reassignMode = 'review';
+      _reassignScanId = null;
+      _reassignPredictionId = predictionId;
+      _reassignRootPredictionId = rootPredictionId;
       _reassignCurrentCode = currentCode;
       document.getElementById('rm-current-code').textContent = currentCode;
       document.getElementById('rm-search').value = '';
@@ -2449,11 +2790,21 @@
         toast('Vui lòng chọn đối tượng đích', 'warning'); return;
       }
       try {
-        await apiJSON(`/training-images/${_reassignScanId}/reassign?target_object_code=${encodeURIComponent(targetCode)}`, { method: 'PATCH' });
+        if (_reassignMode === 'review') {
+          await apiJSON(`/predictions/${_reassignPredictionId}/reassign-image?target_object_code=${encodeURIComponent(targetCode)}`, { method: 'PATCH' });
+        } else {
+          await apiJSON(`/training-images/${_reassignScanId}/reassign?target_object_code=${encodeURIComponent(targetCode)}`, { method: 'PATCH' });
+        }
         bootstrap.Modal.getInstance(document.getElementById('reassign-modal')).hide();
         toast(`Đã chuyển ảnh sang "${targetCode}"`, 'success');
         _cachedObjects = [];
-        loadTrainingData();
+        if (_reassignMode === 'review') {
+          openPredModal(_reassignRootPredictionId);
+          loadPredictions();
+          updatePendingBadge();
+        } else {
+          loadTrainingData();
+        }
       } catch (e) {
         toast('Lỗi: ' + e.message, 'danger');
       }

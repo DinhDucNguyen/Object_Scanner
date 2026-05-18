@@ -24,6 +24,7 @@ from typing import List, Optional
 from app.db.session import get_db
 from app.models.object import Object
 from app.models.object_media import ObjectMedia
+from app.models.scan_history import ScanHistory
 from app.services.admin_service import AdminService
 from app.services.object_media_service import set_primary_object_image
 from app.utils.timezone import now_vietnam
@@ -34,8 +35,11 @@ from app.schemas.admin import (
     PredictionDetailResponse,
     ApproveRequest,
     ApproveResponse,
-    RejectResponse,
+    AliasPredictionRequest,
+    AliasPredictionResponse,
+    RejectResponse, SplitToNewObjectResponse,
     CategoryAdminResponse, CategoryCreateRequest, CategoryUpdateRequest,
+    ObjectAliasItem, ObjectAliasUpsertRequest,
     ObjectListItem, ObjectDetailResponse, ObjectCreateRequest, ObjectUpdateRequest,
     TranslationAdminResponse, TranslationCreateRequest, TranslationUpdateRequest,
     UserAdminResponse, UserRoleUpdate, UserStatusUpdate, UserPasswordReset,
@@ -55,21 +59,19 @@ OBJECT_UPLOAD_DIR = "uploads/objects"
 @router.get("/predictions", response_model=List[PredictionListItem])
 def list_predictions(
     trang_thai: Optional[str] = Query(default="cho_duyet", description="cho_duyet | da_duyet | tu_choi"),
+    search: Optional[str] = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
     """Danh sách predictions của Gemini, lọc theo trạng thái kiểm duyệt."""
-    return admin_service.list_predictions(db, trang_thai=trang_thai, limit=limit, offset=offset)
+    return admin_service.list_predictions(db, trang_thai=trang_thai, search=search, limit=limit, offset=offset)
 
 
 @router.get("/training-summary")
 def training_summary(db: Session = Depends(get_db)):
     """Trả JSON tóm tắt dữ liệu training — dùng cho UI dashboard."""
-    records = admin_service.export_training_data_grouped(db)
-    for r in records:
-        r["images"] = r["images"][:6]
-    return records
+    return admin_service.export_training_data_grouped(db)
 
 
 @router.get("/predictions/export-training")
@@ -155,6 +157,41 @@ def approve_prediction(
     return result
 
 
+@router.post("/predictions/{prediction_id}/alias", response_model=AliasPredictionResponse)
+def assign_prediction_alias(
+    prediction_id: int,
+    request: AliasPredictionRequest,
+    db: Session = Depends(get_db),
+):
+    """Gán prediction đang chờ duyệt thành bí danh của một đối tượng chính."""
+    result = admin_service.assign_prediction_alias(db, prediction_id, request)
+    if not result.success:
+        raise HTTPException(400, result.message)
+    return result
+
+
+@router.patch("/predictions/{prediction_id}/detach-image")
+def detach_review_image(prediction_id: int, db: Session = Depends(get_db)):
+    """Bỏ một ảnh bổ sung khỏi nhóm kiểm duyệt, không xóa ảnh khỏi lịch sử quét."""
+    result = admin_service.detach_review_image(db, prediction_id)
+    if not result.get("success"):
+        raise HTTPException(400, result.get("message", "Khong the bo anh"))
+    return result
+
+
+@router.patch("/predictions/{prediction_id}/reassign-image")
+def reassign_review_image(
+    prediction_id: int,
+    target_object_code: str = Query(..., description="Mã đối tượng đích đã có trong DB"),
+    db: Session = Depends(get_db),
+):
+    """Chuyển một ảnh bổ sung sang object chính khác đã có trong DB."""
+    result = admin_service.reassign_review_image(db, prediction_id, target_object_code)
+    if not result.get("success"):
+        raise HTTPException(400, result.get("message", "Khong the chuyen anh"))
+    return result
+
+
 @router.post("/predictions/{prediction_id}/reject", response_model=RejectResponse)
 def reject_prediction(prediction_id: int, db: Session = Depends(get_db)):
     """Từ chối prediction — không insert gì vào bảng chính."""
@@ -164,13 +201,33 @@ def reject_prediction(prediction_id: int, db: Session = Depends(get_db)):
     return result
 
 
+@router.patch("/predictions/{prediction_id}/split-to-new-object", response_model=SplitToNewObjectResponse)
+def split_to_new_object(
+    prediction_id: int,
+    new_object_code: str = Query(..., description="Mã đối tượng mới (vd: tofu, eraser)"),
+    db: Session = Depends(get_db),
+):
+    """
+    Tách ảnh ra khỏi nhóm kiểm duyệt hiện tại và tạo prediction mới với nhãn đúng.
+    Gemini sẽ tự sinh vocab cho object_code mới.
+    Prediction cũ bị đánh dấu tu_choi với audit trail.
+    """
+    result = admin_service.split_to_new_object(db, prediction_id, new_object_code)
+    if not result.success:
+        raise HTTPException(400, result.message)
+    return result
+
+
 @router.get("/stats")
 def moderation_stats(db: Session = Depends(get_db)):
     """Thống kê số lượng predictions theo từng trạng thái."""
-    from app.models.ai_feedback_report import AIPrediction, TrangThaiDuyet
+    from app.models.ai_feedback_report import AIPrediction, TrangThaiDuyet, VaiTroDuDoan
 
     counts = {
-        status.value: db.query(AIPrediction).filter(AIPrediction.trang_thai == status).count()
+        status.value: db.query(AIPrediction).filter(
+            AIPrediction.trang_thai == status,
+            AIPrediction.vai_tro == VaiTroDuDoan.chinh,
+        ).count()
         for status in TrangThaiDuyet
     }
     counts["tong"] = sum(counts.values())
@@ -390,6 +447,24 @@ def delete_object(object_id: int, db: Session = Depends(get_db)):
     if not admin_service.delete_object(db, object_id):
         raise HTTPException(404, "Không tìm thấy đối tượng")
     return {"message": "Đã xoá đối tượng"}
+
+
+@router.post("/object-aliases", response_model=ObjectAliasItem)
+def upsert_object_alias(req: ObjectAliasUpsertRequest, db: Session = Depends(get_db)):
+    try:
+        result = admin_service.upsert_object_alias(db, req)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+    if not result:
+        raise HTTPException(404, "Khong tim thay doi tuong hoac ma bi danh khong hop le")
+    return result
+
+
+@router.delete("/object-aliases/{alias_id}")
+def delete_object_alias(alias_id: int, db: Session = Depends(get_db)):
+    if not admin_service.delete_object_alias(db, alias_id):
+        raise HTTPException(404, "Khong tim thay bi danh")
+    return {"message": "Da xoa bi danh", "alias_id": alias_id}
 
 
 # ==========================================================================
