@@ -82,7 +82,7 @@ interface ApiService {
     suspend fun getCategories(): Response<List<CategoryData>>
 
     @GET("api/objects")
-    suspend fun getObjectsByCategory(@Query("category_id") categoryId: Int): Response<List<ObjectData>>
+    suspend fun getObjectsByCategory(@Query("category_id") categoryId: Int? = null): Response<List<ObjectData>>
 
     // ====== HISTORY ======
     @GET("api/history")

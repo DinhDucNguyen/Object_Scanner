@@ -1,6 +1,8 @@
 package com.duc.objectlanguage.ui.history
 
 import android.app.Application
+import android.content.Context
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,12 +11,15 @@ import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.HistoryDetail
 import com.duc.objectlanguage.data.model.TranslationResponse
+import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import kotlinx.coroutines.launch
 
 class HistoryDetailViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = (application as ObjectLanguageApp).repository
+    private val app = application as ObjectLanguageApp
+    private val repo = app.repository
+    private val collectionRepo = CollectionRepository(app.tokenManager)
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
 
     private val _translations = MutableLiveData<List<TranslationResponse>>()
@@ -28,6 +33,9 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
+
+    private val _addedMsg = MutableLiveData<String?>()
+    val addedMsg: LiveData<String?> = _addedMsg
 
     fun loadTranslations(objectCode: String) {
         viewModelScope.launch {
@@ -87,8 +95,43 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
+    fun showAddToCollectionDialog(translationId: Int, context: Context) {
+        viewModelScope.launch {
+            val result = collectionRepo.getCollections()
+            val collections = result.getOrNull()
+            if (collections.isNullOrEmpty()) {
+                _addedMsg.value = context.getString(R.string.collection_no_collections)
+                return@launch
+            }
+
+            val labels = collections.map { it.name }.toTypedArray()
+            AlertDialog.Builder(context)
+                .setTitle(context.getString(R.string.collection_add_to_title))
+                .setItems(labels) { _, which ->
+                    val collection = collections[which]
+                    viewModelScope.launch {
+                        val addResult = collectionRepo.addToCollection(collection.id, translationId)
+                        _addedMsg.value = if (addResult.isSuccess) {
+                            context.getString(R.string.collection_added_to, collection.name)
+                        } else {
+                            context.getString(
+                                R.string.review_error_format,
+                                addResult.exceptionOrNull()?.message.orEmpty(),
+                            )
+                        }
+                    }
+                }
+                .setNegativeButton(context.getString(R.string.btn_cancel), null)
+                .show()
+        }
+    }
+
     fun clearError() {
         _error.value = null
+    }
+
+    fun clearAddedMsg() {
+        _addedMsg.value = null
     }
 
     override fun onCleared() {

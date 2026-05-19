@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentReviewBinding
 
@@ -18,6 +19,9 @@ class ReviewFragment : Fragment() {
     private var _binding: FragmentReviewBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ReviewViewModel by viewModels()
+
+    private val collectionId: Int by lazy { arguments?.getInt("collectionId") ?: 0 }
+    private val collectionName: String? by lazy { arguments?.getString("collectionName") }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentReviewBinding.inflate(inflater, container, false)
@@ -41,8 +45,24 @@ class ReviewFragment : Fragment() {
             if (done) {
                 binding.cardContent.visibility = View.GONE
                 binding.buttonRow.visibility = View.GONE
-                binding.tvFinished.visibility = View.VISIBLE
+                binding.layoutFinished.visibility = View.VISIBLE
             }
+        }
+
+        binding.chipQuiz.setOnClickListener {
+            findNavController().navigate(R.id.action_review_to_quiz)
+        }
+        binding.chipTyping.setOnClickListener {
+            findNavController().navigate(R.id.action_review_to_typing)
+        }
+        binding.chipListening.setOnClickListener {
+            findNavController().navigate(R.id.action_review_to_listening)
+        }
+        binding.chipImageMatching.setOnClickListener {
+            findNavController().navigate(R.id.action_review_to_imageMatching)
+        }
+        binding.chipPronunciation.setOnClickListener {
+            findNavController().navigate(R.id.action_review_to_pronunciation)
         }
 
         viewModel.message.observe(viewLifecycleOwner) { msg ->
@@ -80,7 +100,8 @@ class ReviewFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.loadCards()
+        collectionName?.let { requireActivity().title = "Ôn tập: $it" }
+        viewModel.loadCards(collectionId)
     }
 
     private fun submitAnswer(quality: Int) {
@@ -117,7 +138,7 @@ class ReviewFragment : Fragment() {
 
         // Reset về trạng thái front
         binding.cardContent.visibility = View.VISIBLE
-        binding.tvFinished.visibility = View.GONE
+        binding.layoutFinished.visibility = View.GONE
         binding.layoutAnswer.visibility = View.GONE
         binding.btnReveal.visibility = View.VISIBLE
         binding.buttonRow.visibility = View.GONE

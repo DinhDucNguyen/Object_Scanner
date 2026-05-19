@@ -11,120 +11,195 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="18dp"
-        android:paddingTop="16dp"
-        android:paddingEnd="18dp"
-        android:paddingBottom="26dp">
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="108dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dashboard_brand_name"
+            android:textColor="@color/text_primary"
+            android:textSize="27sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardDashboardSearch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="14dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/surface"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/divider"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/text_primary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/dashboard_search_hint"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="18dp"
-            app:cardCornerRadius="26dp"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/surface"
+            app:cardCornerRadius="22dp"
             app:cardElevation="0dp"
-            app:strokeWidth="0dp">
+            app:strokeColor="@color/divider"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_gradient_header"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="22dp">
+                android:orientation="vertical"
+                android:padding="18dp">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <TextView
+                        android:id="@+id/tvMissionTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/dashboard_hunt_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="21sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvProgressPct"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_glass_pill"
-                        android:paddingStart="12dp"
+                        android:background="@drawable/bg_dashboard_mastery_pill"
+                        android:paddingStart="10dp"
                         android:paddingTop="5dp"
-                        android:paddingEnd="12dp"
+                        android:paddingEnd="10dp"
                         android:paddingBottom="5dp"
-                        android:text="@string/dashboard_plan_title"
-                        android:textColor="@color/text_on_primary"
-                        android:textSize="12sp"
+                        android:text="@string/dashboard_progress_short_initial"
+                        android:textColor="@color/primary"
+                        android:textSize="11sp"
                         android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="18dp"
-                        android:text="@string/dashboard_greeting"
-                        android:textColor="@color/text_on_primary"
-                        android:textSize="15sp"
-                        android:alpha="0.84" />
-
-                    <TextView
-                        android:id="@+id/tvWelcome"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:maxLines="1"
-                        android:text="@string/dashboard_default_user"
-                        android:textColor="@color/text_on_primary"
-                        android:textSize="31sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:lineSpacingExtra="2dp"
-                        android:text="@string/dashboard_plan_subtitle"
-                        android:textColor="@color/text_on_primary"
-                        android:textSize="14sp"
-                        android:alpha="0.88" />
                 </LinearLayout>
 
-                <FrameLayout
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    android:layout_marginStart="14dp">
+                <TextView
+                    android:id="@+id/tvMissionSubtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:lineSpacingExtra="2dp"
+                    android:text="@string/dashboard_hunt_subtitle"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
 
-                    <com.google.android.material.progressindicator.CircularProgressIndicator
-                        android:id="@+id/progressMastery"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:max="100"
-                        android:progress="0"
-                        app:indicatorColor="@color/text_on_primary"
-                        app:indicatorDirectionCircular="clockwise"
-                        app:indicatorInset="0dp"
-                        app:indicatorSize="92dp"
-                        app:trackColor="@color/glass_white"
-                        app:trackThickness="8dp" />
+                <LinearLayout
+                    android:id="@+id/tvObjectOfDayContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_dashboard_target_panel"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
+
+                    <ImageView
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_icon_warning"
+                        android:contentDescription="@null"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_camera"
+                        app:tint="@color/warning" />
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/tvProgressPct"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="0%"
-                            android:textColor="@color/text_on_primary"
-                            android:textSize="24sp"
+                            android:text="@string/dashboard_object_today_label"
+                            android:textColor="@color/warning"
+                            android:textSize="12sp"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:id="@+id/tvObjectOfDay"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/dashboard_progress_caption"
-                            android:textColor="@color/text_on_primary"
-                            android:textSize="11sp"
-                            android:alpha="0.82" />
+                            android:layout_marginTop="3dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/dashboard_object_today_placeholder"
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
-                </FrameLayout>
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnScanNow"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="14dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:text="@string/dashboard_btn_scan_now"
+                    android:textAllCaps="false"
+                    android:textColor="@color/text_on_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/primary"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_camera"
+                    app:iconGravity="textStart"
+                    app:iconTint="@color/text_on_primary" />
+
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/progressMastery"
+                    android:layout_width="match_parent"
+                    android:layout_height="7dp"
+                    android:layout_marginTop="14dp"
+                    android:max="100"
+                    android:progress="0"
+                    app:indicatorColor="@color/primary"
+                    app:trackColor="@color/primary_light"
+                    app:trackCornerRadius="4dp"
+                    app:trackThickness="7dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -132,15 +207,15 @@
             android:id="@+id/cardDashboardStreak"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="18dp"
+            android:layout_marginTop="14dp"
             android:clickable="true"
             android:contentDescription="@string/dashboard_streak_content_desc"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="22dp"
+            app:cardCornerRadius="20dp"
             app:cardElevation="0dp"
-            app:strokeColor="@color/divider"
+            app:strokeColor="@color/warning_light"
             app:strokeWidth="1dp">
 
             <LinearLayout
@@ -152,12 +227,13 @@
 
                 <ImageView
                     android:id="@+id/ivDashboardStreakIcon"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_icon_warning"
                     android:contentDescription="@null"
-                    android:padding="7dp"
+                    android:padding="8dp"
                     android:src="@drawable/ic_streak_fire"
-                    app:tint="@color/text_muted" />
+                    app:tint="@color/warning" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -188,17 +264,17 @@
                         android:id="@+id/tvDashboardStreakReviewsToday"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="1dp"
                         android:text="@string/dashboard_streak_today_count_initial"
-                        android:textColor="@color/text_muted"
+                        android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
 
                     <ProgressBar
                         android:id="@+id/progressDashboardStreak"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="7dp"
-                        android:layout_marginTop="9dp"
+                        android:layout_height="6dp"
+                        android:layout_marginTop="8dp"
                         android:indeterminate="false"
                         android:max="100"
                         android:progress="0"
@@ -208,9 +284,9 @@
                         android:id="@+id/tvDashboardStreakMilestone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
+                        android:layout_marginTop="5dp"
                         android:text="@string/dashboard_streak_next_milestone_initial"
-                        android:textColor="@color/text_muted"
+                        android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
 
@@ -218,7 +294,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:minWidth="58dp"
+                    android:minWidth="48dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -227,7 +303,7 @@
                         android:layout_height="wrap_content"
                         android:text="0"
                         android:textColor="@color/warning"
-                        android:textSize="32sp"
+                        android:textSize="30sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -244,8 +320,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
             android:layout_marginBottom="10dp"
-            android:text="@string/dashboard_stats_title"
+            android:text="@string/dashboard_suggestions_title"
             android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -253,257 +330,53 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <!-- Cột trái -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginEnd="5dp">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    app:cardBackgroundColor="@color/surface"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/divider"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/bg_icon_primary"
-                            android:padding="9dp"
-                            android:src="@drawable/ic_camera"
-                            app:tint="@color/card_scan_icon" />
-
-                        <TextView
-                            android:id="@+id/tvTotalScans"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="0"
-                            android:textColor="@color/text_primary"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dashboard_stat_scans"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@color/surface"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/divider"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/bg_icon_warning"
-                            android:padding="9dp"
-                            android:src="@drawable/ic_book"
-                            app:tint="@color/card_due_icon" />
-
-                        <TextView
-                            android:id="@+id/tvDueToday"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="0"
-                            android:textColor="@color/text_primary"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dashboard_stat_due"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-
-            <!-- Cột phải -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="5dp">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    app:cardBackgroundColor="@color/surface"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/divider"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/bg_icon_success"
-                            android:padding="9dp"
-                            android:src="@drawable/ic_dictionary"
-                            app:tint="@color/card_learned_icon" />
-
-                        <TextView
-                            android:id="@+id/tvTotalLearned"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="0"
-                            android:textColor="@color/text_primary"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dashboard_stat_learned"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@color/surface"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/divider"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/bg_icon_violet"
-                            android:padding="9dp"
-                            android:src="@drawable/ic_explore"
-                            app:tint="@color/card_mastered_icon" />
-
-                        <TextView
-                            android:id="@+id/tvMastered"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="0"
-                            android:textColor="@color/text_primary"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dashboard_stat_mastered"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:layout_marginBottom="10dp"
-            android:text="@string/dashboard_action_title"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="22dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/divider"
-            app:strokeWidth="1dp">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnStartReview"
-                    android:layout_width="match_parent"
-                    android:layout_height="58dp"
-                    android:text="@string/dashboard_btn_review"
-                    android:textColor="@color/text_on_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="@color/primary"
-                    app:cornerRadius="18dp"
-                    app:icon="@drawable/ic_book"
-                    app:iconGravity="textStart"
-                    app:iconTint="@color/text_on_primary" />
+                <include
+                    android:id="@+id/cardSuggestionOne"
+                    layout="@layout/item_dashboard_suggestion"
+                    android:layout_width="0dp"
+                    android:layout_height="86dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnExploreTopics"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="54dp"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/dashboard_btn_explore"
-                    android:textColor="@color/primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="18dp"
-                    app:icon="@drawable/ic_explore"
-                    app:iconGravity="textStart"
-                    app:iconTint="@color/primary"
-                    app:strokeColor="@color/primary" />
+                <include
+                    android:id="@+id/cardSuggestionTwo"
+                    layout="@layout/item_dashboard_suggestion"
+                    android:layout_width="0dp"
+                    android:layout_height="86dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <include
+                    android:id="@+id/cardSuggestionThree"
+                    layout="@layout/item_dashboard_suggestion"
+                    android:layout_width="0dp"
+                    android:layout_height="86dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1" />
+
+                <include
+                    android:id="@+id/cardSuggestionFour"
+                    layout="@layout/item_dashboard_suggestion"
+                    android:layout_width="0dp"
+                    android:layout_height="86dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/progressBar"

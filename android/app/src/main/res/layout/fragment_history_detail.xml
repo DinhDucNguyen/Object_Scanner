@@ -168,6 +168,19 @@
                         android:textSize="14sp"
                         android:fontStyle="italic" />
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddHistoryToCollection"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="14dp"
+                        android:text="@string/collection_add_to_title"
+                        android:textColor="@color/text_on_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        app:backgroundTint="@color/primary"
+                        app:cornerRadius="14dp" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

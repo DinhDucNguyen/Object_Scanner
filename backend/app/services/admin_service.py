@@ -1490,6 +1490,14 @@ class AdminService:
         if date_to:
             query = query.filter(ScanHistory.thoi_gian <= dt.fromisoformat(date_to + "T23:59:59"))
         rows = query.offset(offset).limit(limit).all()
+        scan_ids = [scan.id for scan, _, _ in rows]
+        pending_scan_ids = set(
+            r[0] for r in db.query(AIPrediction.scan_id)
+            .filter(
+                AIPrediction.scan_id.in_(scan_ids),
+                AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet,
+            ).all()
+        ) if scan_ids else set()
         result = []
         for scan, user, obj in rows:
             result.append(ScanHistoryAdminItem(
@@ -1501,6 +1509,7 @@ class AdminService:
                 url_anh=scan.url_anh,
                 do_tin_cay=scan.do_tin_cay,
                 thoi_gian=scan.thoi_gian,
+                has_pending_prediction=scan.id in pending_scan_ids,
             ))
         return result
 

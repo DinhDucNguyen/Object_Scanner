@@ -305,6 +305,7 @@ class ScanHistoryAdminItem(BaseModel):
     url_anh: Optional[str] = None
     do_tin_cay: Optional[float] = None
     thoi_gian: Optional[datetime] = None
+    has_pending_prediction: bool = False
 
 
 # ---------------------------------------------------------------------------

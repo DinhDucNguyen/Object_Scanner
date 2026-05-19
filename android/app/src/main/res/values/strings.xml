@@ -61,23 +61,25 @@
     <string name="confirm_password_hint">Xác nhận mật khẩu mới</string>
 
     <!-- Dashboard -->
-    <string name="dashboard_greeting">Xin chào,</string>
     <string name="dashboard_default_user">bạn</string>
-    <string name="dashboard_subtitle">Sẵn sàng học vài từ mới hôm nay?</string>
-    <string name="dashboard_plan_title">Lộ trình hôm nay</string>
-    <string name="dashboard_plan_subtitle">Ôn nhanh các từ đến hạn, rồi khám phá thêm chủ đề mới.</string>
-    <string name="dashboard_stats_title">Tổng quan học tập</string>
-    <string name="dashboard_stat_scans">Lượt quét</string>
-    <string name="dashboard_stat_learned">Đã học</string>
-    <string name="dashboard_stat_due">Cần ôn</string>
-    <string name="dashboard_stat_mastered">Thành thạo</string>
-    <string name="dashboard_btn_review">Bắt đầu ôn tập</string>
-    <string name="dashboard_btn_explore">Khám phá chủ đề</string>
-    <string name="dashboard_progress_title">Tiến độ thành thạo</string>
-    <string name="dashboard_progress_percent">%d%% thành thạo</string>
-    <string name="dashboard_progress_short">%d%%</string>
-    <string name="dashboard_progress_caption">thành thạo</string>
-    <string name="dashboard_action_title">Hành động tiếp theo</string>
+    <string name="dashboard_brand_name">LengoLens.</string>
+    <string name="dashboard_search_hint">Tra từ hoặc quét đồ vật...</string>
+    <string name="dashboard_hunt_title">Biến đồ vật thật thành từ mới</string>
+    <string name="dashboard_hunt_subtitle">Chọn một món ở gần bạn, quét bằng camera rồi lưu vào bộ từ ôn tập.</string>
+    <string name="dashboard_mission_first_scan_title">Quét vật thể đầu tiên</string>
+    <string name="dashboard_mission_first_scan_subtitle">Thử với một món trên bàn học để bắt đầu bộ từ của bạn.</string>
+    <string name="dashboard_mission_review_title">Ôn lại %d từ sắp quên</string>
+    <string name="dashboard_mission_review_subtitle">Hoàn thành ôn tập trước, rồi quét thêm đồ vật mới.</string>
+    <string name="dashboard_mission_scan_title">Tìm món này ngoài đời</string>
+    <string name="dashboard_mission_scan_subtitle">Hôm nay thử tìm một đồ vật thật, quét nó và lưu lại phát âm.</string>
+    <string name="dashboard_object_today_label">Mục tiêu hôm nay</string>
+    <string name="dashboard_object_today_placeholder">Hôm nay thử tìm một món quanh bạn</string>
+    <string name="dashboard_suggestion_scan_hint">mở camera</string>
+    <string name="dashboard_btn_scan_now">Quét ngay</string>
+    <string name="dashboard_suggestions_title">Chọn mục tiêu để quét</string>
+    <string name="dashboard_btn_review_short">Ôn ngay</string>
+    <string name="dashboard_progress_short">%d%% thành thạo</string>
+    <string name="dashboard_progress_short_initial">0% thành thạo</string>
     <string name="dashboard_streak_title">Chuỗi ngày học</string>
     <string name="dashboard_streak_content_desc">Xem chuỗi ngày học</string>
     <string name="dashboard_streak_today_done">Đã ôn hôm nay</string>
@@ -140,6 +142,7 @@
 
     <!-- Review -->
     <string name="review_finished">Hoàn thành!\nKhông còn từ nào cần ôn.</string>
+    <string name="review_try_another_mode">Thử chế độ ôn tập khác</string>
     <string name="review_no_words_none">Không còn từ nào cần ôn.</string>
     <string name="review_no_words_start">Chưa có từ nào trong danh sách ôn tập.\nHãy quét một vật thể để bắt đầu.</string>
     <string name="review_finished_today">Hôm nay đã ôn xong.\nKhông còn từ nào cần ôn.</string>

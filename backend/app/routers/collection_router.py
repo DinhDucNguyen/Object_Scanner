@@ -6,11 +6,13 @@ from typing import List
 
 from app.db.session import get_db
 from app.services.collection_service import CollectionService
-from app.schemas.common import CollectionCreate, CollectionResponse, CollectionItemAdd, CollectionDetailResponse, CollectionInsightsResponse
+from app.services.learning_service import LearningService
+from app.schemas.common import CollectionCreate, CollectionResponse, CollectionItemAdd, CollectionDetailResponse, CollectionInsightsResponse, ReviewCardResponse
 from app.dependencies.get_current_user import get_current_user_id
 
 router = APIRouter(prefix="/api/collections", tags=["Collections"])
 collection_service = CollectionService()
+learning_service = LearningService()
 
 
 @router.get("", response_model=List[CollectionResponse])
@@ -71,6 +73,15 @@ def remove_from_collection(
     """Remove item from collection using composite PK (collection_id + translation_id)"""
     collection_service.remove_from_collection(db, collection_id, translation_id, user_id)
     return {"message": "Item removed from collection"}
+
+
+@router.get("/{collection_id}/review", response_model=List[ReviewCardResponse])
+def get_collection_review(
+    collection_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id)
+):
+    return learning_service.get_collection_review_cards(db, collection_id, user_id)
 
 
 @router.get("/{collection_id}/insights", response_model=CollectionInsightsResponse)

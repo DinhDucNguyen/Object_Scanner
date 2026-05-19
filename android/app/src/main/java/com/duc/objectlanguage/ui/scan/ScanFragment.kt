@@ -47,6 +47,7 @@ class ScanFragment : Fragment() {
     private lateinit var cameraExecutor: ExecutorService
     private var detectorHelper: ObjectDetectorHelper? = null
     private var latestDetection: DetectionResult? = null
+    private var selectedModelName = ObjectDetectorHelper.CUSTOM_MODEL
 
     private val requestCameraPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -146,16 +147,20 @@ class ScanFragment : Fragment() {
                 val isPending = result.pendingReview
                 binding.resultCard.visibility = View.VISIBLE
                 binding.cameraOverlay.visibility = View.GONE
+                binding.modelSelectorContainer.visibility = View.GONE
                 binding.tvGuestCounter.visibility = View.GONE
                 binding.scanFrame.visibility = View.GONE
                 binding.cameraControls.visibility = View.GONE
                 binding.btnCapture.visibility = View.GONE
                 binding.btnGallery.visibility = View.GONE
                 binding.tvObjectName.text = result.objectCode.replaceFirstChar { it.uppercase() }
+                val source = viewModel.detectionSource.value
                 binding.tvCategory.text = if (isPending) {
-                    getString(R.string.scan_pending)
+                    val pending = getString(R.string.scan_pending)
+                    if (source != null) "$pending · $source" else pending
                 } else {
-                    result.categoryName ?: getString(R.string.scan_category_ai)
+                    val category = result.categoryName ?: getString(R.string.scan_category_ai)
+                    if (source != null) "$category · $source" else category
                 }
 
                 val enTrans = result.translations.firstOrNull { it.languageCode == "en" }
@@ -192,6 +197,7 @@ class ScanFragment : Fragment() {
             } else {
                 binding.resultCard.visibility = View.GONE
                 binding.cameraOverlay.visibility = View.VISIBLE
+                binding.modelSelectorContainer.visibility = View.VISIBLE
                 binding.scanFrame.visibility = View.VISIBLE
                 binding.cameraControls.visibility = View.VISIBLE
                 binding.btnCapture.visibility = View.VISIBLE
@@ -274,6 +280,35 @@ class ScanFragment : Fragment() {
         binding.btnRetake.setOnClickListener {
             viewModel.clearResult()
         }
+
+        binding.modelToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val modelName = selectedModelFromToggle(checkedId)
+            if (modelName != selectedModelName || detectorHelper == null) {
+                selectedModelName = modelName
+                initDetector(modelName)
+            }
+        }
+    }
+
+    private fun selectedModelFromToggle(checkedId: Int = binding.modelToggleGroup.checkedButtonId): String =
+        if (checkedId == R.id.btnCocoModel) {
+            ObjectDetectorHelper.COCO_MODEL
+        } else {
+            ObjectDetectorHelper.CUSTOM_MODEL
+        }
+
+    private fun initDetector(modelName: String) {
+        Log.d("ScanFragment", "Using detector model: ${ObjectDetectorHelper.displayNameForModel(modelName)} ($modelName)")
+        detectorHelper?.close()
+        detectorHelper = ObjectDetectorHelper(
+            context = requireContext(),
+            modelName = modelName,
+        ) { event ->
+            if (event is DetectionEvent.Failure) {
+                Log.e("ObjectDetector", "YOLO load failed: ${event.message}")
+            }
+        }
     }
 
     private fun startCamera() {
@@ -290,11 +325,8 @@ class ScanFragment : Fragment() {
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
 
-            detectorHelper = ObjectDetectorHelper(requireContext()) { event ->
-                if (event is DetectionEvent.Failure) {
-                    android.util.Log.e("ObjectDetector", "YOLO load failed: ${event.message}")
-                }
-            }
+            selectedModelName = selectedModelFromToggle()
+            initDetector(selectedModelName)
 
             try {
                 cameraProvider.unbindAll()

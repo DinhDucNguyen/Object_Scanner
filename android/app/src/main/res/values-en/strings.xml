@@ -71,23 +71,8 @@
     <string name="guest_btn_later">Maybe later</string>
 
     <!-- Dashboard -->
-    <string name="dashboard_greeting">Hello,</string>
     <string name="dashboard_default_user">there</string>
-    <string name="dashboard_subtitle">Ready to learn a few new words today?</string>
-    <string name="dashboard_plan_title">Today plan</string>
-    <string name="dashboard_plan_subtitle">Review due words first, then explore a fresh topic.</string>
-    <string name="dashboard_stats_title">Learning snapshot</string>
-    <string name="dashboard_stat_scans">Scans</string>
-    <string name="dashboard_stat_learned">Learned</string>
-    <string name="dashboard_stat_due">Due</string>
-    <string name="dashboard_stat_mastered">Mastered</string>
-    <string name="dashboard_btn_review">Start review</string>
-    <string name="dashboard_btn_explore">Explore topics</string>
-    <string name="dashboard_progress_title">Mastery progress</string>
-    <string name="dashboard_progress_percent">%d%% mastered</string>
     <string name="dashboard_progress_short">%d%%</string>
-    <string name="dashboard_progress_caption">mastered</string>
-    <string name="dashboard_action_title">Next actions</string>
     <string name="dashboard_streak_title">Daily streak</string>
     <string name="dashboard_streak_content_desc">View daily streak</string>
     <string name="dashboard_streak_today_done">Reviewed today</string>
@@ -150,6 +135,7 @@
 
     <!-- Review -->
     <string name="review_finished">All done!\nNo more words to review.</string>
+    <string name="review_try_another_mode">Try another review mode</string>
     <string name="review_no_words_none">No words left to review.</string>
     <string name="review_no_words_start">No words in your review list yet.\nScan an object to get started.</string>
     <string name="review_finished_today">All done for today!\nNo more words to review.</string>

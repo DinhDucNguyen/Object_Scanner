@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.local.StreakDataStore
 import com.duc.objectlanguage.data.model.StatsResponse
+import java.util.Calendar
+import kotlin.random.Random
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -33,6 +35,9 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
+    private val _dailySuggestions = MutableLiveData<List<DashboardSuggestion>>(emptyList())
+    val dailySuggestions: LiveData<List<DashboardSuggestion>> = _dailySuggestions
+
     fun loadStats() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -42,6 +47,31 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 onFailure = { _error.value = it.message }
             )
             _isLoading.value = false
+        }
+    }
+
+    fun loadDailySuggestions() {
+        viewModelScope.launch {
+            val objects = repo.getAllObjects().getOrNull().orEmpty()
+                .filter { it.objectCode.isNotBlank() }
+                .distinctBy { it.objectCode }
+
+            val suggestions = if (objects.isNotEmpty()) {
+                objects
+                    .shuffled(Random(todaySeed()))
+                    .take(SUGGESTION_COUNT)
+                    .map { obj ->
+                        DashboardSuggestion(
+                            objectCode = obj.objectCode,
+                            displayName = obj.wordName?.takeIf { it.isNotBlank() }
+                                ?: obj.objectCode.replace("_", " ")
+                        )
+                    }
+            } else {
+                FALLBACK_SUGGESTIONS
+            }
+
+            _dailySuggestions.value = suggestions
         }
     }
 
@@ -82,6 +112,18 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     companion object {
         private val STREAK_MILESTONES = listOf(3, 7, 14, 30, 50, 100, 365)
+        private const val SUGGESTION_COUNT = 4
+        private val FALLBACK_SUGGESTIONS = listOf(
+            DashboardSuggestion("ruler", "ruler"),
+            DashboardSuggestion("laptop", "laptop"),
+            DashboardSuggestion("book", "book"),
+            DashboardSuggestion("bottle", "bottle"),
+        )
+
+        private fun todaySeed(): Int {
+            val calendar = Calendar.getInstance()
+            return calendar.get(Calendar.YEAR) * 1000 + calendar.get(Calendar.DAY_OF_YEAR)
+        }
     }
 }
 
@@ -91,4 +133,9 @@ data class DashboardStreakSummary(
     val nextMilestone: Int,
     val daysToMilestone: Int,
     val hasReachedTopMilestone: Boolean,
+)
+
+data class DashboardSuggestion(
+    val objectCode: String,
+    val displayName: String,
 )

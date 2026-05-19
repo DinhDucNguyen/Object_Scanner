@@ -5,21 +5,46 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentDashboardBinding
+import com.google.android.material.card.MaterialCardView
 
 class DashboardFragment : Fragment() {
 
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
     private val viewModel: DashboardViewModel by viewModels()
+    private var missionOpensReview = false
+    private val suggestionSlots get() = listOf(
+        SuggestionSlot(
+            binding.cardSuggestionOne.root,
+            binding.cardSuggestionOne.tvSuggestionTitle,
+            binding.cardSuggestionOne.ivSuggestionIcon,
+        ),
+        SuggestionSlot(
+            binding.cardSuggestionTwo.root,
+            binding.cardSuggestionTwo.tvSuggestionTitle,
+            binding.cardSuggestionTwo.ivSuggestionIcon,
+        ),
+        SuggestionSlot(
+            binding.cardSuggestionThree.root,
+            binding.cardSuggestionThree.tvSuggestionTitle,
+            binding.cardSuggestionThree.ivSuggestionIcon,
+        ),
+        SuggestionSlot(
+            binding.cardSuggestionFour.root,
+            binding.cardSuggestionFour.tvSuggestionTitle,
+            binding.cardSuggestionFour.ivSuggestionIcon,
+        ),
+    )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
@@ -29,25 +54,25 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnStartReview.setOnClickListener {
-            val bottomNav = requireActivity().findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(com.duc.objectlanguage.R.id.bottomNavigation)
-            if (bottomNav != null) {
-                bottomNav.selectedItemId = com.duc.objectlanguage.R.id.reviewFragment
+        binding.btnScanNow.setOnClickListener {
+            if (missionOpensReview) {
+                openReview()
             } else {
-                findNavController().navigate(com.duc.objectlanguage.R.id.reviewFragment)
+                openScan()
             }
         }
 
-        binding.btnExploreTopics.setOnClickListener {
-            findNavController().navigate(com.duc.objectlanguage.R.id.exploreFragment)
+        binding.cardDashboardSearch.setOnClickListener {
+            openDictionary()
+        }
+
+        suggestionSlots.forEach { slot ->
+            slot.card.setOnClickListener { openScan() }
         }
 
         binding.cardDashboardStreak.setOnClickListener {
             findNavController().navigate(com.duc.objectlanguage.R.id.streakFragment)
         }
-
-        val app = requireActivity().application as ObjectLanguageApp
-        binding.tvWelcome.text = app.tokenManager.username ?: getString(R.string.dashboard_default_user)
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
@@ -55,10 +80,7 @@ class DashboardFragment : Fragment() {
 
         viewModel.stats.observe(viewLifecycleOwner) { stats ->
             if (stats != null) {
-                binding.tvTotalScans.text = "${stats.totalScans}"
-                binding.tvTotalLearned.text = "${stats.totalLearned}"
-                binding.tvDueToday.text = "${stats.dueToday}"
-                binding.tvMastered.text = "${stats.mastered}"
+                bindMission(stats.dueToday, stats.totalScans)
 
                 val total = stats.totalLearned
                 val mastered = stats.mastered
@@ -72,6 +94,10 @@ class DashboardFragment : Fragment() {
             bindStreakSummary(streak)
         }
 
+        viewModel.dailySuggestions.observe(viewLifecycleOwner) { suggestions ->
+            bindDailySuggestions(suggestions)
+        }
+
         viewModel.error.observe(viewLifecycleOwner) { err ->
             if (err != null) {
                 Toast.makeText(requireContext(), err, Toast.LENGTH_LONG).show()
@@ -80,6 +106,90 @@ class DashboardFragment : Fragment() {
 
         viewModel.loadStats()
         viewModel.loadStreak()
+        viewModel.loadDailySuggestions()
+    }
+
+    private fun openScan() {
+        selectBottomTab(R.id.scanFragment)
+    }
+
+    private fun openReview() {
+        selectBottomTab(R.id.reviewFragment)
+    }
+
+    private fun openDictionary() {
+        selectBottomTab(R.id.dictionaryFragment)
+    }
+
+    private fun selectBottomTab(itemId: Int) {
+        val bottomNav = requireActivity()
+            .findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation)
+        if (bottomNav != null) {
+            bottomNav.selectedItemId = itemId
+        } else {
+            findNavController().navigate(itemId)
+        }
+    }
+
+    private fun bindMission(dueToday: Int, totalScans: Int) {
+        missionOpensReview = dueToday > 0
+        if (dueToday > 0) {
+            binding.tvObjectOfDayContainer.visibility = View.GONE
+            binding.tvMissionTitle.text = getString(R.string.dashboard_mission_review_title, dueToday)
+            binding.tvMissionSubtitle.text = getString(R.string.dashboard_mission_review_subtitle)
+            binding.btnScanNow.text = getString(R.string.dashboard_btn_review_short)
+            binding.btnScanNow.setIconResource(R.drawable.ic_book)
+            binding.btnScanNow.backgroundTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.secondary)
+            )
+            binding.btnScanNow.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_on_primary))
+            binding.btnScanNow.iconTint = ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.text_on_primary)
+            )
+        } else {
+            binding.tvObjectOfDayContainer.visibility = View.VISIBLE
+            binding.tvMissionTitle.text = getString(
+                if (totalScans == 0) R.string.dashboard_mission_first_scan_title
+                else R.string.dashboard_mission_scan_title
+            )
+            binding.tvMissionSubtitle.text = getString(
+                if (totalScans == 0) R.string.dashboard_mission_first_scan_subtitle
+                else R.string.dashboard_mission_scan_subtitle
+            )
+            binding.btnScanNow.text = getString(R.string.dashboard_btn_scan_now)
+            binding.btnScanNow.setIconResource(R.drawable.ic_camera)
+            binding.btnScanNow.backgroundTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.primary)
+            )
+            binding.btnScanNow.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_on_primary))
+            binding.btnScanNow.iconTint = ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.text_on_primary)
+            )
+        }
+    }
+
+    private fun bindDailySuggestions(suggestions: List<DashboardSuggestion>) {
+        suggestions.firstOrNull()?.let { first ->
+            binding.tvObjectOfDay.text = first.displayName
+        }
+        suggestionSlots.forEachIndexed { index, slot ->
+            val suggestion = suggestions.getOrNull(index)
+            if (suggestion == null) {
+                slot.card.visibility = View.GONE
+            } else {
+                val accent = getSuggestionAccent(index)
+                slot.card.visibility = View.VISIBLE
+                slot.title.text = suggestion.displayName
+                slot.card.contentDescription = suggestion.objectCode
+                slot.card.setCardBackgroundColor(
+                    ContextCompat.getColor(requireContext(), accent.backgroundColorRes)
+                )
+                slot.card.setStrokeColor(ContextCompat.getColor(requireContext(), accent.backgroundColorRes))
+                slot.icon.imageTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(requireContext(), accent.iconColorRes)
+                )
+            }
+        }
     }
 
     override fun onResume() {
@@ -98,7 +208,7 @@ class DashboardFragment : Fragment() {
         val accentColor = ContextCompat.getColor(requireContext(), accent.colorRes)
         val trackColor = ContextCompat.getColor(requireContext(), accent.trackColorRes)
 
-        binding.cardDashboardStreak.setStrokeColor(accentColor)
+        binding.cardDashboardStreak.setStrokeColor(trackColor)
         binding.ivDashboardStreakIcon.imageTintList = if (streak.reviewsToday > 0) {
             null
         } else {
@@ -142,14 +252,29 @@ class DashboardFragment : Fragment() {
 
     private fun getStreakAccent(currentStreak: Int): StreakAccent = when {
         currentStreak == 0 -> StreakAccent(R.color.streak_idle, R.color.streak_idle_track)
-        currentStreak in 1..2 -> StreakAccent(R.color.streak_heat_1, R.color.streak_heat_1_track)
-        currentStreak in 3..6 -> StreakAccent(R.color.streak_heat_2, R.color.streak_heat_2_track)
-        currentStreak in 7..13 -> StreakAccent(R.color.streak_heat_3, R.color.streak_heat_3_track)
-        else -> StreakAccent(R.color.streak_heat_4, R.color.streak_heat_4_track)
+        else -> StreakAccent(R.color.warning, R.color.warning_light)
+    }
+
+    private fun getSuggestionAccent(index: Int): SuggestionAccent = when (index % 4) {
+        0 -> SuggestionAccent(R.color.primary_light, R.color.primary)
+        1 -> SuggestionAccent(R.color.success_light, R.color.success)
+        2 -> SuggestionAccent(R.color.cyan_light, R.color.cyan)
+        else -> SuggestionAccent(R.color.violet_light, R.color.violet)
     }
 
     private data class StreakAccent(
         @ColorRes val colorRes: Int,
         @ColorRes val trackColorRes: Int,
+    )
+
+    private data class SuggestionAccent(
+        @ColorRes val backgroundColorRes: Int,
+        @ColorRes val iconColorRes: Int,
+    )
+
+    private data class SuggestionSlot(
+        val card: MaterialCardView,
+        val title: TextView,
+        val icon: ImageView,
     )
 }

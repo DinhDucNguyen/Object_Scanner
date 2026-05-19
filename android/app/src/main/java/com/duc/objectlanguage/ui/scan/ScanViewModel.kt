@@ -47,6 +47,9 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
     private val _addedMsg = MutableLiveData<String?>()
     val addedMsg: LiveData<String?> = _addedMsg
 
+    private val _detectionSource = MutableLiveData<String?>()
+    val detectionSource: LiveData<String?> = _detectionSource
+
     private val _remainingScans = MutableLiveData(guestSessionManager.getRemainingScans())
     val remainingScans: LiveData<Int> = _remainingScans
 
@@ -68,7 +71,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             _error.value = null
 
             // 1. YOLO — thử DB lookup khi confidence >= 0.80
-            Log.d("ScanViewModel", "YOLO result: ${if (yoloResult != null) "${yoloResult.label} (${yoloResult.confidence})" else "null — no detection"}")
+            Log.d("ScanViewModel", "YOLO result: ${if (yoloResult != null) "${yoloResult.label} (${yoloResult.confidence}) model=${yoloResult.modelName}" else "null — no detection"}")
             if (yoloResult != null && yoloResult.confidence >= 0.80f) {
                 val objectCode = normalizeObjectCode(yoloResult.label)
                 Log.d("ScanViewModel", "YOLOv10: ${yoloResult.label} (${yoloResult.confidence})")
@@ -77,6 +80,8 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                 val dbResult = yoloScan.getOrNull()
                 Log.d("ScanViewModel", "YOLO DB result: source=${dbResult?.source} translations=${dbResult?.translations?.size}")
                 if (dbResult != null && dbResult.translations.isNotEmpty()) {
+                    val modelLabel = ObjectDetectorHelper.displayNameForModel(yoloResult.modelName)
+                    _detectionSource.value = "$modelLabel · ${(yoloResult.confidence * 100).toInt()}%"
                     _scanResult.value = dbResult
                     loadExamples(dbResult)
                     onScanSuccess(objectCode, yoloResult.confidence, imageBytes)
@@ -86,6 +91,8 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                 // DB miss — nếu YOLO rất tự tin thì skip ML Kit, dùng Gemini ngay
                 if (yoloResult.confidence >= 0.90f) {
                     Log.d("ScanViewModel", "YOLO high-conf DB miss → Gemini")
+                    val modelLabel = ObjectDetectorHelper.displayNameForModel(yoloResult.modelName)
+                    _detectionSource.value = "$modelLabel + Gemini AI · ${(yoloResult.confidence * 100).toInt()}%"
                     runGemini(imageBytes)
                     return@launch
                 }
@@ -103,7 +110,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     bitmap.recycle()
                 }
                 val topLabel = labels.maxByOrNull { it.confidence }
-                if (topLabel != null && topLabel.confidence > 0.6f) {
+                if (topLabel != null && topLabel.confidence >= 0.80f) {
                     val objectCode = normalizeObjectCode(topLabel.text)
                     Log.d("ScanViewModel", "ML Kit: ${topLabel.text} (${topLabel.confidence})")
                     val mlScan = repo.scanByCode(objectCode, topLabel.confidence)
@@ -111,6 +118,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     val dbResult = mlScan.getOrNull()
                     Log.d("ScanViewModel", "ML Kit DB result: source=${dbResult?.source} translations=${dbResult?.translations?.size}")
                     if (dbResult != null && dbResult.translations.isNotEmpty()) {
+                        _detectionSource.value = "ML Kit · ${(topLabel.confidence * 100).toInt()}%"
                         _scanResult.value = dbResult
                         loadExamples(dbResult)
                         onScanSuccess(objectCode, topLabel.confidence, imageBytes)
@@ -151,6 +159,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     it.source == "gemini_failed" || it.objectCode == "unknown" ->
                         _error.value = "Không nhận diện được vật thể. Hãy chụp rõ hơn."
                     else -> {
+                        if (_detectionSource.value == null) _detectionSource.value = "Gemini Vision AI"
                         _scanResult.value = it
                         loadExamples(it)
                         if (it.pendingReview) {
@@ -300,6 +309,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         _scanResult.value = null
         _examples.value = emptyList()
         _error.value = null
+        _detectionSource.value = null
     }
 
     fun clearGuestUpsell() { _showGuestUpsell.value = false }

@@ -577,3 +577,14 @@ def list_scan_history(
         db, user_id=user_id, username=username, object_code=object_code,
         date_from=date_from, date_to=date_to, limit=limit, offset=offset
     )
+
+
+@router.delete("/scan-history/{scan_id}")
+def delete_scan_history(scan_id: int, db: Session = Depends(get_db)):
+    """Xóa một bản ghi lịch sử quét."""
+    scan = db.query(ScanHistory).filter(ScanHistory.id == scan_id).first()
+    if not scan:
+        raise HTTPException(404, "Không tìm thấy bản ghi")
+    db.delete(scan)
+    db.commit()
+    return {"message": "Đã xóa", "scan_id": scan_id}

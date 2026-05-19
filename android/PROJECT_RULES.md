@@ -8,13 +8,13 @@
 
 ## Core Protocol
 
-**SPEC → PLAN → EXECUTE → VERIFY → COMMIT**
+**SPEC → PLAN → EXECUTE → VERIFY → RECORD/COMMIT**
 
 1. **SPEC**: Define requirements in `.gsd/SPEC.md` until status is `FINALIZED`
 2. **PLAN**: Decompose into phases in `.gsd/ROADMAP.md`, then detailed plans
-3. **EXECUTE**: Implement with atomic commits per task
+3. **EXECUTE**: Implement with atomic, reviewable changes per task
 4. **VERIFY**: Prove completion with empirical evidence
-5. **COMMIT**: One task = one commit, message format: `type(scope): description`
+5. **RECORD/COMMIT**: Update state or summaries; commit only when the active workflow or user permits it
 
 **Planning Lock**: No implementation code until SPEC.md contains "Status: FINALIZED".
 
@@ -121,6 +121,7 @@ At the end of each wave or significant work block, create a state snapshot:
 ```
 adapters/
 ├── CLAUDE.md    # Optional Claude enhancements
+├── CODEX.md     # Optional Codex enhancements
 ├── GEMINI.md    # Optional Gemini enhancements
 └── GPT_OSS.md   # Optional GPT/OSS enhancements
 ```
@@ -148,8 +149,10 @@ type(scope): description
 | `chore` | Maintenance, dependencies |
 
 **Rules:**
-- One task = one commit
+- Keep changes atomic by task
 - Verify before commit
+- Commit only when the active workflow or user explicitly asks for a commit
+- If commits are not allowed, record the suggested commit message in the response or summary
 - Scope = phase number for phase work (e.g., `feat(phase-1): ...`)
 
 ---
@@ -157,7 +160,7 @@ type(scope): description
 ## Repository Structure
 
 ```
-PROJECT_RULES.md          # ← This file (canonical rules)
+PROJECT_RULES.md          # This file (canonical rules)
 GSD-STYLE.md              # Style and conventions
 
 .agent/
@@ -166,6 +169,7 @@ GSD-STYLE.md              # Style and conventions
 
 .gemini/                  # Gemini-specific configuration
 .gsd/                     # Project state and artifacts
+├── README.md             # How this project uses GSD
 ├── SPEC.md               # Requirements (must be FINALIZED)
 ├── ROADMAP.md            # Phases and progress
 ├── STATE.md              # Session memory
@@ -173,6 +177,10 @@ GSD-STYLE.md              # Style and conventions
 └── examples/             # Usage examples
 
 adapters/                 # Optional model-specific enhancements
+├── CLAUDE.md             # Claude-specific guidance
+├── CODEX.md              # Codex-specific guidance
+├── GEMINI.md             # Gemini-specific guidance
+└── GPT_OSS.md            # GPT/OSS-specific guidance
 docs/                     # Operational documentation
 scripts/                  # Utility scripts
 ```
@@ -244,12 +252,13 @@ After understanding a file:
 ## Quick Reference
 
 ```
-Before coding    → SPEC.md must be FINALIZED
-Before file read → Search first, then targeted read
-After each task  → Commit + update STATE.md
-After each wave  → State snapshot
-After 3 failures → State dump + fresh session
-Before "Done"    → Empirical proof captured
+Before coding    -> SPEC.md must be FINALIZED
+Before file read -> Search first, then targeted read
+After each task  -> Update STATE.md when project state changes
+Commit           -> Only when requested or allowed by workflow
+After each wave  -> State snapshot
+After 3 failures -> State dump + fresh session
+Before "Done"    -> Empirical proof captured
 ```
 
 ---

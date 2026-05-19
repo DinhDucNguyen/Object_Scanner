@@ -70,11 +70,15 @@ class CollectionDetailFragment : Fragment() {
         }
 
         binding.btnReviewCollection.setOnClickListener {
-            val items = viewModel.collectionDetail.value?.items
-            if (items.isNullOrEmpty()) {
+            val detail = viewModel.collectionDetail.value
+            if (detail == null || detail.items.isEmpty()) {
                 Toast.makeText(requireContext(), "Bộ sưu tập trống, thêm từ trước nhé!", Toast.LENGTH_SHORT).show()
             } else {
-                findNavController().navigate(R.id.reviewFragment)
+                val args = Bundle().apply {
+                    putInt("collectionId", collectionId)
+                    putString("collectionName", detail.name)
+                }
+                findNavController().navigate(R.id.reviewFragment, args)
             }
         }
 

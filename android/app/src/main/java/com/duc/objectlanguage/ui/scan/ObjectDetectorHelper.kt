@@ -15,6 +15,7 @@ data class DetectionResult(
     val label: String,
     val confidence: Float,
     val boundingBox: RectF,
+    val modelName: String = "best_float32.tflite",
 )
 
 sealed interface DetectionEvent {
@@ -31,11 +32,12 @@ class ObjectDetectorHelper(
     private val context: Context,
     private val threshold: Float = 0.5f,
     private val maxResults: Int = 3,
-    private val modelName: String = "yolov10n_int8.tflite",
+    private val modelName: String = "best_float32.tflite",
     val onResult: (DetectionEvent) -> Unit,
 ) {
     private var interpreter: Interpreter? = null
     private val inputSize = 640
+    private val labels = labelsForModel(modelName)
 
     init {
         setupDetector()
@@ -51,7 +53,7 @@ class ObjectDetectorHelper(
             )
             interpreter = Interpreter(model, Interpreter.Options().apply { setNumThreads(4) })
             val outShape = interpreter!!.getOutputTensor(0).shape()
-            android.util.Log.d("ObjectDetector", "Model loaded OK. Output shape: ${outShape.toList()}")
+            android.util.Log.d("ObjectDetector", "Model loaded OK: $modelName. Output shape: ${outShape.toList()}")
         }.onFailure {
             onResult(DetectionEvent.Failure("Không load được model: ${it.message}"))
         }
@@ -102,7 +104,10 @@ class ObjectDetectorHelper(
         if (best != null) {
             val bestScore = outputBuffer[0][best][4]
             val bestClass = outputBuffer[0][best][5].toInt()
-            android.util.Log.d("ObjectDetector", "Best detection: class=$bestClass (${COCO_LABELS.getOrElse(bestClass){"?"}}) score=$bestScore")
+            android.util.Log.d(
+                "ObjectDetector",
+                "Best detection: model=$modelName class=$bestClass (${labels.getOrElse(bestClass) { "unknown" }}) score=$bestScore",
+            )
         }
 
         val results = mutableListOf<DetectionResult>()
@@ -111,7 +116,7 @@ class ObjectDetectorHelper(
             if (score < threshold) continue
 
             val classId = outputBuffer[0][i][5].toInt()
-            val label = COCO_LABELS.getOrElse(classId) { "unknown" }
+            val label = labels.getOrElse(classId) { "unknown" }
 
             // Coordinates are absolute (0–640), normalize to (0–1)
             val x1 = (outputBuffer[0][i][0] / inputSize).coerceIn(0f, 1f)
@@ -119,7 +124,14 @@ class ObjectDetectorHelper(
             val x2 = (outputBuffer[0][i][2] / inputSize).coerceIn(0f, 1f)
             val y2 = (outputBuffer[0][i][3] / inputSize).coerceIn(0f, 1f)
 
-            results.add(DetectionResult(label, score, RectF(x1, y1, x2, y2)))
+            results.add(
+                DetectionResult(
+                    label = label,
+                    confidence = score,
+                    boundingBox = RectF(x1, y1, x2, y2),
+                    modelName = modelName,
+                )
+            )
         }
 
         onResult(
@@ -158,10 +170,11 @@ class ObjectDetectorHelper(
             .maxByOrNull { it.first }
             ?.let { (score, i) ->
                 val classId = outputBuffer[0][i][5].toInt()
-                android.util.Log.d("ObjectDetector", "YOLO on captured: ${COCO_LABELS.getOrElse(classId){"?"}} score=$score")
+                android.util.Log.d("ObjectDetector", "YOLO on captured: ${labels.getOrElse(classId){"?"}} score=$score")
                 DetectionResult(
-                    label = COCO_LABELS.getOrElse(classId) { "unknown" },
+                    label = labels.getOrElse(classId) { "unknown" },
                     confidence = score,
+                    modelName = modelName,
                     boundingBox = RectF(
                         (outputBuffer[0][i][0] / inputSize).coerceIn(0f, 1f),
                         (outputBuffer[0][i][1] / inputSize).coerceIn(0f, 1f),
@@ -178,6 +191,11 @@ class ObjectDetectorHelper(
     }
 
     companion object {
+        const val CUSTOM_MODEL = "best_float32.tflite"
+        const val COCO_MODEL = "yolov10n_int8.tflite"
+
+        val SCHOOL_SUPPLIES_LABELS = listOf("ruler")
+
         val COCO_LABELS = listOf(
             "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck",
             "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench",
@@ -192,5 +210,11 @@ class ObjectDetectorHelper(
             "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier",
             "toothbrush",
         )
+
+        fun labelsForModel(modelName: String): List<String> =
+            if (modelName == COCO_MODEL) COCO_LABELS else SCHOOL_SUPPLIES_LABELS
+
+        fun displayNameForModel(modelName: String): String =
+            if (modelName == COCO_MODEL) "COCO YOLOv10n" else "YOLOv10 Custom"
     }
 }

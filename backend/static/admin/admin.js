@@ -1824,12 +1824,24 @@
             </td>
             <td>${s.object_code
               ? `<code class="cell-ellipsis code-cell" title="${escHtml(s.object_code)}">${escHtml(s.object_code)}</code>`
-              : '<span class="text-muted">—</span>'}</td>
+              : s.has_pending_prediction
+                ? '<span class="badge badge-pending">Chờ duyệt</span>'
+                : '<span class="text-muted">—</span>'}</td>
             <td>${confBar(s.do_tin_cay)}</td>
             <td class="text-muted" style="font-size:.82rem;">${fmtDate(s.thoi_gian)}</td>
+            <td><button class="btn btn-sm btn-outline-danger" style="padding:2px 7px;font-size:.75rem;" onclick="deleteScanHistory(${s.id})" title="Xóa"><i class="bi bi-trash"></i></button></td>
           </tr>`).join('')
-          : '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-camera"></i><p>Chưa có lịch sử quét</p></div></td></tr>';
+          : '<tr><td colspan="8"><div class="empty-state"><i class="bi bi-camera"></i><p>Chưa có lịch sử quét</p></div></td></tr>';
       } catch (e) { toast('Lỗi tải lịch sử quét: ' + e.message, 'danger'); }
+    }
+
+    async function deleteScanHistory(scanId) {
+      if (!confirm(`Xóa lịch sử quét #${scanId}?`)) return;
+      try {
+        await apiJSON(`/scan-history/${scanId}`, { method: 'DELETE' });
+        toast('Đã xóa lịch sử quét', 'success');
+        loadScanHistory();
+      } catch (e) { toast('Lỗi xóa: ' + e.message, 'danger'); }
     }
 
     // ============================================================

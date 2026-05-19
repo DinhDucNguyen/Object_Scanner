@@ -35,4 +35,7 @@ interface CollectionApiService {
     
     @GET("api/collections/{id}/insights")
     suspend fun getCollectionInsights(@Path("id") collectionId: Int): CollectionInsights
+
+    @GET("api/collections/{id}/review")
+    suspend fun getCollectionReviewCards(@Path("id") collectionId: Int): List<ReviewCardResponse>
 }

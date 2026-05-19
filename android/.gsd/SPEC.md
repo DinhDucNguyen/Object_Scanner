@@ -3,6 +3,14 @@
 > **Status**: `FINALIZED`
 > **Created**: 2026-03-10
 
+## Current GSD Note
+
+This original spec is historical context. For the current demo scope, use `.gsd/phases/8/DEMO_READINESS.md` as source of truth.
+
+- Admin dashboard is treated as an internal tool and out of the mobile demo scope.
+- Phase 6 extension checklists are historical unless a newer Phase 8 doc marks an item active.
+- Current guided demo scope is learning/review/collections/backend readiness, with actual scan detection, listening TTS, and pronunciation scoring kept as residual risks until rehearsed.
+
 ## Vision
 
 Object Language App — ứng dụng học ngôn ngữ thông qua nhận diện vật thể bằng camera. Người dùng chụp ảnh một đối tượng bất kỳ, ứng dụng nhận diện và hiển thị từ vựng đa ngôn ngữ kèm phiên âm, phát âm, ví dụ. Hỗ trợ ôn tập từ vựng qua thuật toán SM-2 (Spaced Repetition). Đây là đồ án tốt nghiệp, yêu cầu chất lượng gần sản phẩm thật nhất có thể.

@@ -8,7 +8,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.ReviewCardResponse
+import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import com.duc.objectlanguage.utils.LocaleHelper
 import kotlinx.coroutines.launch
@@ -16,6 +18,7 @@ import kotlinx.coroutines.launch
 class ReviewViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repo = (application as ObjectLanguageApp).repository
+    private val collectionRepo = CollectionRepository(TokenManager(application))
 
     private val _cards = MutableLiveData<List<ReviewCardResponse>>()
     val cards: LiveData<List<ReviewCardResponse>> = _cards
@@ -37,21 +40,29 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
 
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
 
-    fun loadCards() {
+    fun loadCards(collectionId: Int = 0) {
         viewModelScope.launch {
             _isLoading.value = true
             _finished.value = false
             _currentIndex.value = 0
-            val result = repo.getDueReviews()
+            val result = if (collectionId > 0) {
+                collectionRepo.getCollectionReviewCards(collectionId)
+            } else {
+                repo.getDueReviews()
+            }
             result.fold(
                 onSuccess = { cards ->
                     _cards.value = cards
                     if (cards.isEmpty()) {
-                        val stats = repo.getStats().getOrNull()
-                        _finishedMessage.value = when {
-                            stats == null -> localizedString(R.string.review_no_words_none)
-                            stats.totalLearned == 0 -> localizedString(R.string.review_no_words_start)
-                            else -> localizedString(R.string.review_finished_today)
+                        _finishedMessage.value = if (collectionId > 0) {
+                            "Bộ sưu tập này chưa có từ để ôn"
+                        } else {
+                            val stats = repo.getStats().getOrNull()
+                            when {
+                                stats == null -> localizedString(R.string.review_no_words_none)
+                                stats.totalLearned == 0 -> localizedString(R.string.review_no_words_start)
+                                else -> localizedString(R.string.review_finished_today)
+                            }
                         }
                         _finished.value = true
                     }

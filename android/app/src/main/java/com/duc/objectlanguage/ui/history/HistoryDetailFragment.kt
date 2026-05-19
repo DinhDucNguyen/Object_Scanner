@@ -23,6 +23,7 @@ class HistoryDetailFragment : Fragment() {
     private var currentAudioUrl: String? = null
     private var currentWord: String? = null
     private var currentLanguage: String = "en"
+    private var currentTranslationId: Int? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHistoryDetailBinding.inflate(inflater, container, false)
@@ -47,6 +48,11 @@ class HistoryDetailFragment : Fragment() {
         setupObservers()
         binding.btnPlayAudioHistory.setOnClickListener {
             viewModel.playAudio(currentAudioUrl, currentWord, currentLanguage)
+        }
+        binding.btnAddHistoryToCollection.setOnClickListener {
+            currentTranslationId?.let { translationId ->
+                viewModel.showAddToCollectionDialog(translationId, requireContext())
+            }
         }
         viewModel.loadDetail(scanId, objectCode)
     }
@@ -79,6 +85,13 @@ class HistoryDetailFragment : Fragment() {
             if (error != null) {
                 Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
                 viewModel.clearError()
+            }
+        }
+
+        viewModel.addedMsg.observe(viewLifecycleOwner) { message ->
+            if (message != null) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                viewModel.clearAddedMsg()
             }
         }
     }
@@ -146,7 +159,9 @@ class HistoryDetailFragment : Fragment() {
             currentAudioUrl = null
             currentWord = null
             currentLanguage = "en"
+            currentTranslationId = null
             binding.btnPlayAudioHistory.visibility = View.GONE
+            binding.btnAddHistoryToCollection.visibility = View.GONE
             return
         }
 
@@ -155,6 +170,7 @@ class HistoryDetailFragment : Fragment() {
         currentAudioUrl = translation.audioUrl
         currentWord = translation.wordName
         currentLanguage = translation.languageCode ?: "en"
+        currentTranslationId = translation.id
 
         binding.tvWord.text = translation.wordName
         binding.tvPhonetic.apply {
@@ -173,6 +189,7 @@ class HistoryDetailFragment : Fragment() {
         binding.btnPlayAudioHistory.visibility = if (
             translation.audioUrl.isNullOrBlank() && translation.wordName.isBlank()
         ) View.GONE else View.VISIBLE
+        binding.btnAddHistoryToCollection.visibility = View.VISIBLE
     }
 
     private fun formatDate(raw: String?): String {

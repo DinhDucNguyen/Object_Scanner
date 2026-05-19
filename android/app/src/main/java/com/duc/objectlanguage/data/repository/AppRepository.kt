@@ -228,6 +228,16 @@ class AppRepository(private val tokenManager: TokenManager) {
         }
     }
 
+    suspend fun getAllObjects(): Result<List<ObjectData>> {
+        return try {
+            val response = api.getObjectsByCategory()
+            if (response.isSuccessful) Result.success(response.body() ?: emptyList())
+            else Result.failure(Exception("Loi tai danh sach object: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Loi tai danh sach object: ${e.message}"))
+        }
+    }
+
     // ====== HISTORY ======
 
     suspend fun getHistory(

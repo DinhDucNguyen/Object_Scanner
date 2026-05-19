@@ -89,6 +89,78 @@ class LearningService:
             db.commit()
         return results
 
+    def get_collection_review_cards(self, db: Session, collection_id: int, user_id: int):
+        from app.models.user_collection import UserCollection
+
+        collection = db.query(UserCollection).filter(
+            UserCollection.id == collection_id,
+            UserCollection.thoi_gian_xoa.is_(None)
+        ).first()
+
+        if not collection:
+            raise HTTPException(404, "Collection not found")
+        if collection.user_id != user_id and not collection.cong_khai:
+            raise HTTPException(403, "Access denied")
+
+        items = collection.items
+        if not items:
+            return []
+
+        now = now_vietnam()
+        audio_url_updated = False
+        cards_with_sort = []
+
+        for item in items:
+            t = item.translation
+            if not t:
+                continue
+
+            progress, created = self.ensure_in_learning(db, t.id, user_id)
+            if created:
+                db.flush()
+
+            lang = self.lang_repo.get_by_id(db, t.ngon_ngu_id)
+            lang_code = lang.ma_ngon_ngu if lang else "en"
+            audio_url = t.am_thanh_url
+            if not audio_url:
+                audio_url = self.tts.get_audio_url(t.tu_vung, lang_code)
+                if audio_url:
+                    t.am_thanh_url = audio_url
+                    audio_url_updated = True
+
+            examples = [
+                ViDuResponse(id=e.id, cau_vi_du=e.cau_vi_du, dich_nghia=e.dich_nghia, nguon_du_lieu=e.nguon_du_lieu)
+                for e in sorted((t.examples or []), key=lambda x: x.id or 0)[:3]
+            ]
+
+            if progress.ngay_on_tiep and progress.ngay_on_tiep <= now:
+                sort_order = 0  # quá hạn
+            elif progress.so_lan_lap == 0:
+                sort_order = 1  # từ mới
+            else:
+                sort_order = 2  # đã học
+
+            cards_with_sort.append((sort_order, ReviewCardResponse(
+                progress_id=progress.id,
+                translation_id=t.id,
+                object_code=t.object.ma_doi_tuong if t.object else "",
+                word_name=t.tu_vung,
+                phonetic=t.phien_am,
+                definition=t.dinh_nghia,
+                examples=examples,
+                language_code=lang.ma_ngon_ngu if lang else "",
+                language_name=lang.ten_ngon_ngu if lang else "",
+                easiness_factor=float(progress.do_de_nho),
+                interval=progress.khoang_lap,
+                repetitions=progress.so_lan_lap,
+                image_url=pick_primary_object_image(t.object),
+                audio_url=audio_url,
+            )))
+
+        db.commit()
+        cards_with_sort.sort(key=lambda x: x[0])
+        return [card for _, card in cards_with_sort]
+
     def get_analytics(self, db: Session, user_id: int) -> dict:
         weekly = self.repo.get_weekly_review_counts(db, user_id)
         mastery = self.repo.get_mastery_distribution(db, user_id)
