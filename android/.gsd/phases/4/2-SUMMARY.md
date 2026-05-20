@@ -1,1 +1,0 @@
-> Execute 2-PLAN.md: Done. Verified `ReviewFragment.kt` accurately hides/shows answers via `btnReveal`, toggles the 4 SM-2 buttons correctly, and shows exactly the `tvFinished` label when no cards are left.

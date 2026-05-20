@@ -1,1 +1,0 @@
-> Execute 1-PLAN.md: Done. Verified `ReviewViewModel.kt` handles fetching review cards, processing empty states (`_finished.value = true`), submitting qualities, advancing slots, and triggering error toasts appropriately.
