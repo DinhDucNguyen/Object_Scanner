@@ -357,6 +357,26 @@
       if (sel) { sel.value = status; reloadPagedTable('predictions'); }
     }
 
+    async function cleanupKnownClassPredictions() {
+      confirmAction(
+        'Dọn prediction đang chờ duyệt của các class YOLO custom (10 class) và COCO (80 class)?\nPrediction có object chính thức sẽ được liên kết scan rồi xóa khỏi hàng chờ; prediction thiếu object sẽ được giữ lại.',
+        async () => {
+          try {
+            const res = await apiJSON('/predictions/cleanup-known-classes', { method: 'DELETE' });
+            const matched = res.matched ?? 0;
+            const resolved = res.resolved ?? res.count ?? 0;
+            const skipped = Array.isArray(res.skipped_missing_object) ? res.skipped_missing_object.length : 0;
+            const skippedMsg = skipped ? `, giữ lại ${skipped} prediction thiếu object` : '';
+            toast(`Đã xử lý ${resolved}/${matched} prediction YOLO/COCO${skippedMsg}`, 'warning');
+            loadPredictions();
+          } catch (e) {
+            toast('Lỗi: ' + e.message, 'danger');
+          }
+        },
+        'Dọn dẹp YOLO/COCO'
+      );
+    }
+
     async function exportTrainingData() {
       const btn = document.getElementById('btn-export-training');
       if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Đang xuất...'; }
@@ -369,7 +389,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'gemini_training_data.jsonl';
+        a.download = 'yolo_training_data.jsonl';
         a.click();
         URL.revokeObjectURL(url);
       } catch (e) {
@@ -391,7 +411,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'gemini_training_grouped.jsonl';
+        a.download = 'yolo_training_grouped.jsonl';
         a.click();
         URL.revokeObjectURL(url);
       } catch (e) {
@@ -942,12 +962,21 @@
       document.getElementById('fm-submit').style.display = '';
       document.getElementById('fm-title').textContent = 'Thêm danh mục mới';
       document.getElementById('fm-body').innerHTML = `
-    <div class="mb-3"><label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
-      <input id="cat-name" class="form-control form-control-sm" placeholder="Ví dụ: Trái cây" /></div>
-    <div class="mb-3"><label class="form-label">Danh mục cha</label>
-      <select id="cat-parent" class="form-select form-select-sm">${catOptions(null)}</select></div>
-    <div class="mb-3"><label class="form-label">Mô tả</label>
-      <textarea id="cat-desc" class="form-control form-control-sm" rows="2"></textarea></div>`;
+    <div class="approve-card">
+      <p class="approve-card-title">Thông tin danh mục</p>
+      <div class="mb-3">
+        <label class="form-label mb-1">Tên danh mục <span class="text-danger">*</span></label>
+        <input id="cat-name" class="form-control form-control-sm" placeholder="Ví dụ: Trái cây" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label mb-1">Danh mục cha</label>
+        <select id="cat-parent" class="form-select form-select-sm">${catOptions(null)}</select>
+      </div>
+      <div>
+        <label class="form-label mb-1">Mô tả</label>
+        <textarea id="cat-desc" class="form-control form-control-sm" rows="2" style="resize:none;line-height:1.55;"></textarea>
+      </div>
+    </div>`;
       document.getElementById('fm-submit').onclick = async () => {
         const body = { ten_danh_muc: document.getElementById('cat-name').value.trim(), danh_muc_cha: document.getElementById('cat-parent').value || null, mo_ta: document.getElementById('cat-desc').value.trim() || null };
         if (!body.ten_danh_muc) { toast('Nhập tên danh mục', 'warning'); return; }
@@ -961,12 +990,25 @@
       document.getElementById('fm-submit').style.display = '';
       document.getElementById('fm-title').textContent = 'Sửa danh mục #' + c.id;
       document.getElementById('fm-body').innerHTML = `
-    <div class="mb-3"><label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
-      <input id="cat-name" class="form-control form-control-sm" value="${c.ten_danh_muc || ''}" /></div>
-    <div class="mb-3"><label class="form-label">Danh mục cha</label>
-      <select id="cat-parent" class="form-select form-select-sm">${catOptions(c.danh_muc_cha)}</select></div>
-    <div class="mb-3"><label class="form-label">Mô tả</label>
-      <textarea id="cat-desc" class="form-control form-control-sm" rows="2">${c.mo_ta || ''}</textarea></div>`;
+    <div class="approve-note">
+      <i class="bi bi-pencil-square"></i>
+      <span>Chỉnh sửa danh mục <strong>#${c.id}</strong></span>
+    </div>
+    <div class="approve-card">
+      <p class="approve-card-title">Thông tin danh mục</p>
+      <div class="mb-3">
+        <label class="form-label mb-1">Tên danh mục <span class="text-danger">*</span></label>
+        <input id="cat-name" class="form-control form-control-sm" value="${c.ten_danh_muc || ''}" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label mb-1">Danh mục cha</label>
+        <select id="cat-parent" class="form-select form-select-sm">${catOptions(c.danh_muc_cha)}</select>
+      </div>
+      <div>
+        <label class="form-label mb-1">Mô tả</label>
+        <textarea id="cat-desc" class="form-control form-control-sm" rows="2" style="resize:none;line-height:1.55;">${c.mo_ta || ''}</textarea>
+      </div>
+    </div>`;
       document.getElementById('fm-submit').onclick = async () => {
         const body = { ten_danh_muc: document.getElementById('cat-name').value.trim(), danh_muc_cha: document.getElementById('cat-parent').value || null, mo_ta: document.getElementById('cat-desc').value.trim() || null };
         try { await apiJSON(`/categories/${c.id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Đã cập nhật danh mục'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadCategories(); }
@@ -1065,10 +1107,17 @@
       document.getElementById('fm-submit').style.display = '';
       document.getElementById('fm-title').textContent = 'Thêm đối tượng mới';
       document.getElementById('fm-body').innerHTML = `
-    <div class="mb-3"><label class="form-label">Mã đối tượng <span class="text-danger">*</span></label>
-      <input id="obj-code" class="form-control form-control-sm" placeholder="vd: apple, dog, car..." /></div>
-    <div class="mb-3"><label class="form-label">Danh mục</label>
-      <select id="obj-cat" class="form-select form-select-sm">${catOptions(null)}</select></div>`;
+    <div class="approve-card">
+      <p class="approve-card-title">Thông tin đối tượng</p>
+      <div class="mb-3">
+        <label class="form-label mb-1">Mã đối tượng <span class="text-danger">*</span></label>
+        <input id="obj-code" class="form-control form-control-sm" placeholder="vd: apple, dog, car..." />
+      </div>
+      <div>
+        <label class="form-label mb-1">Danh mục</label>
+        <select id="obj-cat" class="form-select form-select-sm">${catOptions(null)}</select>
+      </div>
+    </div>`;
       document.getElementById('fm-submit').onclick = async () => {
         const body = { ma_doi_tuong: document.getElementById('obj-code').value.trim(), danh_muc_id: document.getElementById('obj-cat').value || null };
         if (!body.ma_doi_tuong) { toast('Nhập mã đối tượng', 'warning'); return; }
@@ -1082,8 +1131,17 @@
       document.getElementById('fm-submit').style.display = '';
       document.getElementById('fm-title').textContent = 'Sửa đối tượng: ' + o.ma_doi_tuong;
       document.getElementById('fm-body').innerHTML = `
-    <div class="mb-3"><label class="form-label">Danh mục</label>
-      <select id="obj-cat" class="form-select form-select-sm">${catOptions(o.danh_muc_id)}</select></div>`;
+    <div class="approve-note">
+      <i class="bi bi-pencil-square"></i>
+      <span>Chỉnh sửa đối tượng <code>${escHtml(o.ma_doi_tuong || '')}</code></span>
+    </div>
+    <div class="approve-card">
+      <p class="approve-card-title">Thông tin đối tượng</p>
+      <div>
+        <label class="form-label mb-1">Danh mục</label>
+        <select id="obj-cat" class="form-select form-select-sm">${catOptions(o.danh_muc_id)}</select>
+      </div>
+    </div>`;
       document.getElementById('fm-submit').onclick = async () => {
         const body = { danh_muc_id: document.getElementById('obj-cat').value || null };
         try { await apiJSON(`/objects/${o.id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Đã cập nhật'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadObjects(); }
@@ -1341,31 +1399,61 @@
       } catch (e) { toast('Lỗi tải bản dịch: ' + e.message, 'danger'); }
     }
 
+    function initTransFormTextareas(defId) {
+      const ids = [defId, ...Array.from(document.querySelectorAll('.approve-example-row textarea')).map(ta => ta.id)];
+      ids.forEach(tid => {
+        const ta = document.getElementById(tid);
+        if (!ta) return;
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+        ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; });
+      });
+    }
+
     function openCreateTransModal() {
       document.getElementById('fm-submit').style.display = '';
       document.getElementById('fm-title').textContent = 'Thêm bản dịch mới';
       document.getElementById('fm-body').innerHTML = `
-    <div class="row g-2 mb-2">
-      <div class="col-6"><label class="form-label">Object ID <span class="text-danger">*</span></label>
-        <input id="t-oid" type="number" class="form-control form-control-sm" /></div>
-      <div class="col-6"><label class="form-label">Ngôn ngữ <span class="text-danger">*</span></label>
-        <select id="t-lang" class="form-select form-select-sm">
-          <option value="en">English</option>
-          <option value="vi">Tiếng Việt</option>
-        </select></div>
+    <div class="approve-card">
+      <p class="approve-card-title">Thông tin cơ bản</p>
+      <div class="approve-basic-grid mb-3">
+        <div>
+          <label class="form-label mb-1">Từ vựng <span class="text-danger">*</span></label>
+          <input id="t-word" class="form-control form-control-sm" />
+        </div>
+        <div>
+          <label class="form-label mb-1">Phiên âm</label>
+          <input id="t-phon" class="form-control form-control-sm" placeholder="/ˈæp.əl/" />
+        </div>
+        <div>
+          <label class="form-label mb-1">Loại từ</label>
+          <input id="t-pos" class="form-control form-control-sm" placeholder="n. / v. / adj." />
+        </div>
+      </div>
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="form-label mb-1">Object ID <span class="text-danger">*</span></label>
+          <input id="t-oid" type="number" class="form-control form-control-sm" />
+        </div>
+        <div class="col-6">
+          <label class="form-label mb-1">Ngôn ngữ <span class="text-danger">*</span></label>
+          <select id="t-lang" class="form-select form-select-sm">
+            <option value="en">English</option>
+            <option value="vi">Tiếng Việt</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="form-label mb-1">Định nghĩa</label>
+        <textarea id="t-def" class="form-control form-control-sm" rows="2" style="resize:none;line-height:1.55;"></textarea>
+      </div>
     </div>
-    <div class="mb-2"><label class="form-label">Từ vựng <span class="text-danger">*</span></label>
-      <input id="t-word" class="form-control form-control-sm" /></div>
-    <div class="row g-2 mb-2">
-      <div class="col-6"><label class="form-label">Phiên âm</label>
-        <input id="t-phon" class="form-control form-control-sm" placeholder="/ˈæp.əl/" /></div>
-      <div class="col-6"><label class="form-label">Loại từ</label>
-        <input id="t-pos" class="form-control form-control-sm" placeholder="n. / v. / adj." /></div>
-    </div>
-    <div class="mb-2"><label class="form-label">Định nghĩa</label>
-      <textarea id="t-def" class="form-control form-control-sm" rows="2"></textarea></div>
-    <div class="mb-2"><label class="form-label">Ví dụ <small class="text-muted">(mỗi dòng 1 câu)</small></label>
-      <textarea id="t-ex" class="form-control form-control-sm" rows="3" placeholder="A red apple is on the table. | Một quả táo đỏ ở trên bàn.&#10;She ate an apple every morning."></textarea></div>`;
+    <div class="approve-card">
+      <p class="approve-card-title">Ví dụ</p>
+      <div class="approve-examples-hint">Mỗi dòng là một ví dụ. Có thể chỉ nhập English nếu chưa có nghĩa tiếng Việt.</div>
+      <div class="approve-examples">${renderApproveExampleEditors([])}</div>
+    </div>`;
+      initTransFormTextareas('t-def');
       document.getElementById('fm-submit').onclick = async () => {
         const body = {
           doi_tuong_id: parseInt(document.getElementById('t-oid').value),
@@ -1374,7 +1462,7 @@
           phien_am: document.getElementById('t-phon').value.trim() || null,
           loai_tu: document.getElementById('t-pos').value.trim() || null,
           dinh_nghia: document.getElementById('t-def').value.trim() || null,
-          example_sentences: document.getElementById('t-ex').value.split('\n').map(s => s.trim()).filter(Boolean),
+          example_sentences: collectApproveExamples(),
         };
         if (!body.doi_tuong_id || !body.tu_vung) { toast('Thiếu thông tin bắt buộc', 'warning'); return; }
         try { await apiJSON('/translations', { method: 'POST', body: JSON.stringify(body) }); toast('Đã thêm bản dịch'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadTranslations(); }
@@ -1413,36 +1501,55 @@
       document.getElementById('fm-submit').style.display = '';
       document.getElementById('fm-title').textContent = 'Sửa bản dịch #' + t.id;
       document.getElementById('fm-body').innerHTML = `
-    <div class="mb-2 p-2 rounded bg-light" style="font-size:.82rem;">
-      Object: <code>${t.object_code || t.doi_tuong_id}</code>
-      <span class="badge badge-lang ms-1">${(t.lang_code || '').toUpperCase()}</span>
+    <div class="approve-note">
+      <i class="bi bi-pencil-square"></i>
+      <span>Object: <code>${t.object_code || t.doi_tuong_id}</code>
+        <span class="badge badge-lang ms-1">${(t.lang_code || '').toUpperCase()}</span>
+        ${t.da_xac_nhan ? '<span class="badge badge-approved ms-1"><i class="bi bi-check-lg me-1"></i>Đã xác nhận</span>' : '<span class="badge badge-neutral ms-1">Chưa xác nhận</span>'}
+      </span>
     </div>
-    <div class="mb-2"><label class="form-label">Từ vựng</label>
-      <input id="t-word" class="form-control form-control-sm" value="${t.tu_vung || ''}" /></div>
-    <div class="row g-2 mb-2">
-      <div class="col-6"><label class="form-label">Phiên âm</label>
-        <input id="t-phon" class="form-control form-control-sm" value="${t.phien_am || ''}" /></div>
-      <div class="col-6"><label class="form-label">Loại từ</label>
-        <input id="t-pos" class="form-control form-control-sm" value="${t.loai_tu || ''}" /></div>
+    <div class="approve-card">
+      <p class="approve-card-title">Thông tin cơ bản</p>
+      <div class="approve-basic-grid mb-3">
+        <div>
+          <label class="form-label mb-1">Từ vựng</label>
+          <input id="t-word" class="form-control form-control-sm" value="${escHtml(t.tu_vung || '')}" />
+        </div>
+        <div>
+          <label class="form-label mb-1">Phiên âm (IPA)</label>
+          <input id="t-phon" class="form-control form-control-sm" value="${escHtml(t.phien_am || '')}" />
+        </div>
+        <div>
+          <label class="form-label mb-1">Loại từ</label>
+          <input id="t-pos" class="form-control form-control-sm" value="${escHtml(t.loai_tu || '')}" />
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label mb-1">Định nghĩa</label>
+        <textarea id="t-def" class="form-control form-control-sm" style="resize:none;line-height:1.55;" rows="2">${escHtml(t.dinh_nghia || '')}</textarea>
+      </div>
+      <div>
+        <label class="form-label mb-1">Trạng thái xác nhận</label>
+        <select id="t-confirmed" class="form-select form-select-sm">
+          <option value="true" ${t.da_xac_nhan ? 'selected' : ''}>Đã xác nhận</option>
+          <option value="false" ${!t.da_xac_nhan ? 'selected' : ''}>Chưa xác nhận</option>
+        </select>
+      </div>
     </div>
-    <div class="mb-2"><label class="form-label">Định nghĩa</label>
-      <textarea id="t-def" class="form-control form-control-sm" rows="2">${t.dinh_nghia || ''}</textarea></div>
-    <div class="mb-2"><label class="form-label">Trạng thái xác nhận</label>
-      <select id="t-confirmed" class="form-select form-select-sm">
-        <option value="true" ${t.da_xac_nhan ? 'selected' : ''}>Đã xác nhận</option>
-        <option value="false" ${!t.da_xac_nhan ? 'selected' : ''}>Chưa xác nhận</option>
-      </select></div>
-    <div class="mb-2"><label class="form-label">Ví dụ <small class="text-muted">(mỗi dòng 1 câu, có thể thêm <code>| dịch nghĩa</code>)</small></label>
-      <textarea id="t-ex" class="form-control form-control-sm" rows="4" placeholder="A red apple. | Một quả táo đỏ.&#10;She reads books.">${(t.examples||[]).map(e => e.dich_nghia ? e.cau_vi_du + ' | ' + e.dich_nghia : e.cau_vi_du||'').join('\n')}</textarea></div>`;
+    <div class="approve-card">
+      <p class="approve-card-title">Ví dụ</p>
+      <div class="approve-examples-hint">Mỗi dòng là một ví dụ. Có thể chỉ nhập English nếu chưa có nghĩa tiếng Việt.</div>
+      <div class="approve-examples">${renderApproveExampleEditors(t.examples || [])}</div>
+    </div>`;
+      initTransFormTextareas('t-def');
       document.getElementById('fm-submit').onclick = async () => {
-        const exRaw = document.getElementById('t-ex')?.value.trim();
         const body = {
           tu_vung: document.getElementById('t-word').value.trim() || null,
           phien_am: document.getElementById('t-phon').value.trim() || null,
           loai_tu: document.getElementById('t-pos').value.trim() || null,
           dinh_nghia: document.getElementById('t-def').value.trim() || null,
           da_xac_nhan: document.getElementById('t-confirmed').value === 'true',
-          example_sentences: exRaw ? exRaw.split('\n').map(s => s.trim()).filter(Boolean) : [],
+          example_sentences: collectApproveExamples(),
         };
         try { await apiJSON(`/translations/${t.id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Đã cập nhật bản dịch'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadTranslations(); }
         catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
@@ -1460,6 +1567,26 @@
     // ============================================================
     // Training Data
     // ============================================================
+    function trainingStatusLabel(status) {
+      return {
+        cho_duyet: 'Chờ duyệt',
+        da_duyet: 'Đã duyệt',
+        tu_choi: 'Từ chối',
+      }[status] || status || 'Chưa rõ';
+    }
+
+    function trainingStatusColor(status) {
+      return {
+        cho_duyet: '#f59e0b',
+        da_duyet: '#22c55e',
+        tu_choi: '#ef4444',
+      }[status] || '#94a3b8';
+    }
+
+    function trainingSourceLabel(source) {
+      return { yolo: 'YOLO', gemini: 'Gemini', admin: 'Admin' }[source] || source || '—';
+    }
+
     async function loadTrainingData() {
       const grid = document.getElementById('td-grid');
       const empty = document.getElementById('td-empty');
@@ -1472,37 +1599,69 @@
           empty.style.display = '';
           document.getElementById('td-total-objects').textContent = '0';
           document.getElementById('td-total-images').textContent = '0';
+          const pendingEl = document.getElementById('td-pending-images');
+          const approvedEl = document.getElementById('td-approved-images');
+          const rejectedEl = document.getElementById('td-rejected-images');
+          if (pendingEl) pendingEl.textContent = '0';
+          if (approvedEl) approvedEl.textContent = '0';
+          if (rejectedEl) rejectedEl.textContent = '0';
           return;
         }
         const totalImages = records.reduce((s, r) => s + (r.total_images || 0), 0);
+        const totalPending = records.reduce((s, r) => s + ((r.status_counts || {}).cho_duyet || 0), 0);
+        const totalApproved = records.reduce((s, r) => s + ((r.status_counts || {}).da_duyet || 0), 0);
+        const totalRejected = records.reduce((s, r) => s + ((r.status_counts || {}).tu_choi || 0), 0);
         document.getElementById('td-total-objects').textContent = records.length;
         document.getElementById('td-total-images').textContent = totalImages;
+        const pendingEl = document.getElementById('td-pending-images');
+        const approvedEl = document.getElementById('td-approved-images');
+        const rejectedEl = document.getElementById('td-rejected-images');
+        if (pendingEl) pendingEl.textContent = totalPending;
+        if (approvedEl) approvedEl.textContent = totalApproved;
+        if (rejectedEl) rejectedEl.textContent = totalRejected;
 
         grid.innerHTML = records.map(r => {
+          const counts = r.status_counts || {};
           const thumbs = (r.images || []).map(img => `
             <div class="td-thumb-wrap">
-              <img src="${img.url}" alt="" title="${img.source}" onclick="zoomImage('${img.url}')"
-                style="border:2px solid ${img.source === 'confirmed' ? '#86efac' : '#93c5fd'};border-radius:6px;"
+              <img src="${img.url}" alt="" title="${trainingSourceLabel(img.source)} • ${trainingStatusLabel(img.status)}" onclick="zoomImage('${img.url}')"
+                style="border:2px solid ${trainingStatusColor(img.status)};border-radius:6px;"
                 onerror="this.parentElement.style.display='none'">
+              <div style="position:absolute;left:4px;top:60px;background:rgba(15,23,42,.78);color:#fff;border-radius:4px;padding:1px 5px;font-size:.62rem;">
+                ${trainingSourceLabel(img.source)}
+              </div>
               <div class="td-thumb-actions">
-                <button class="btn-act del" onclick="unlinkScan(${img.scan_id},'${r.object_code}')" title="Xoá khỏi pool"><i class="bi bi-trash3"></i></button>
-                <button class="btn-act" onclick="openReassign(${img.scan_id},'${r.object_code}')" title="Chuyển đối tượng"><i class="bi bi-arrow-left-right"></i></button>
+                ${img.scan_id && img.status !== 'da_duyet'
+                  ? `<button class="btn-act" onclick="approveTrainingImage(${img.scan_id},'${r.object_code}')" title="Duyệt ảnh"><i class="bi bi-check-lg"></i></button>` : ''}
+                ${img.scan_id && img.status !== 'tu_choi'
+                  ? `<button class="btn-act del" onclick="unlinkScan(${img.scan_id},'${r.object_code}')" title="Từ chối ảnh"><i class="bi bi-x-lg"></i></button>` : ''}
+                ${img.scan_id
+                  ? `<button class="btn-act" onclick="openReassign(${img.scan_id},'${r.object_code}')" title="Chuyển đối tượng"><i class="bi bi-arrow-left-right"></i></button>` : ''}
               </div>
             </div>`
           ).join('');
           const translations = (r.translations || []).slice(0, 3).map(t =>
             `<span class="badge bg-light text-dark border" title="${escHtml(t.word || '')}" style="font-size:.72rem;">${escHtml(t.language_code || '')}: ${escHtml(t.word || '')}</span>`
           ).join('');
-          const badgeColor = r.total_images >= 5 ? '#22c55e' : r.total_images >= 2 ? '#f59e0b' : '#94a3b8';
+          const badgeColor = counts.da_duyet >= 5 ? '#22c55e' : counts.da_duyet >= 2 ? '#f59e0b' : '#94a3b8';
           return `
           <div class="panel" style="padding:0;overflow:hidden;">
             <div style="padding:.75rem 1rem .5rem;display:flex;align-items:center;gap:.5rem;">
               <span class="cell-ellipsis code-cell" style="font-weight:600;font-size:.92rem;flex:1;" title="${escHtml(r.object_code || '')}">${escHtml(r.object_code || '')}</span>
               <span style="background:${badgeColor};color:#fff;border-radius:99px;padding:2px 10px;font-size:.75rem;font-weight:600;">
-                ${r.total_images} ảnh
+                ${counts.da_duyet || 0}/${r.total_images} duyệt
               </span>
+              <button class="btn-act del" onclick="unlinkAllScans('${escHtml(r.object_code || '')}')" title="Từ chối tất cả ảnh training" style="flex-shrink:0;">
+                <i class="bi bi-x-lg"></i>
+              </button>
             </div>
             ${r.category ? `<div style="padding:0 1rem .4rem;font-size:.75rem;color:#64748b;">${escHtml(r.category)}</div>` : ''}
+            <div style="padding:0 1rem .4rem;display:flex;gap:5px;flex-wrap:wrap;font-size:.72rem;">
+              <span class="badge text-bg-warning">Chờ: ${counts.cho_duyet || 0}</span>
+              <span class="badge text-bg-success">Duyệt: ${counts.da_duyet || 0}</span>
+              <span class="badge text-bg-danger">Từ chối: ${counts.tu_choi || 0}</span>
+              ${(r.dataset_versions || []).length ? `<span class="badge text-bg-light border">Dataset: ${(r.dataset_versions || []).map(escHtml).join(', ')}</span>` : ''}
+            </div>
             ${translations ? `<div class="td-card-translations">${translations}</div>` : ''}
             <div style="padding:.25rem .75rem .8rem;display:flex;flex-wrap:wrap;gap:5px;min-height:60px;">
               ${thumbs || '<span class="text-muted" style="font-size:.8rem;">Chưa có ảnh</span>'}
@@ -1515,11 +1674,50 @@
     }
 
     // Training image management
+    async function approveTrainingImage(scanId, objectCode) {
+      try {
+        await apiJSON(`/training-images/${scanId}/approve`, { method: 'PATCH' });
+        toast(`Đã duyệt ảnh cho "${objectCode}"`, 'success');
+        loadTrainingData();
+      } catch (e) {
+        toast('Lỗi: ' + e.message, 'danger');
+      }
+    }
+
     async function unlinkScan(scanId, objectCode) {
-      if (!confirm(`Bỏ ảnh này khỏi pool training của "${objectCode}"?\n(Ảnh vẫn được giữ trong lịch sử quét, chỉ không dùng để train)`)) return;
+      if (!confirm(`Từ chối ảnh này khỏi tập training của "${objectCode}"?\n(Ảnh vẫn được giữ trong lịch sử quét, chỉ không dùng để train)`)) return;
       try {
         await apiJSON(`/training-images/${scanId}/unlink`, { method: 'PATCH' });
-        toast('Đã bỏ liên kết ảnh', 'success');
+        toast('Đã từ chối ảnh training', 'success');
+        loadTrainingData();
+      } catch (e) {
+        toast('Lỗi: ' + e.message, 'danger');
+      }
+    }
+
+    async function unlinkAllScans(objectCode) {
+      confirmAction(
+        `Từ chối toàn bộ ảnh training của "${objectCode}"?\n(Ảnh vẫn giữ trong lịch sử quét, chỉ không dùng để train)`,
+        async () => {
+          try {
+            const res = await apiJSON(`/training-images/unlink-all?object_code=${encodeURIComponent(objectCode)}`, { method: 'DELETE' });
+            toast(`Đã từ chối ${res.count} ảnh của "${objectCode}"`, 'warning');
+            loadTrainingData();
+          } catch (e) {
+            toast('Lỗi: ' + e.message, 'danger');
+          }
+        },
+        'Từ chối tất cả'
+      );
+    }
+
+    async function createDatasetVersion() {
+      const version = prompt('Nhập mã phiên bản dataset', 'v1');
+      if (!version || !version.trim()) return;
+      const note = prompt('Ghi chú cho phiên bản này (có thể bỏ trống)', '') || '';
+      try {
+        const res = await apiJSON(`/training-datasets?ma_phien_ban=${encodeURIComponent(version.trim())}&ghi_chu=${encodeURIComponent(note.trim())}`, { method: 'POST' });
+        toast(`Đã tạo dataset ${res.ma_phien_ban}: ${res.tong_anh} ảnh, ${res.tong_nhan} nhãn`, 'success');
         loadTrainingData();
       } catch (e) {
         toast('Lỗi: ' + e.message, 'danger');
@@ -1810,9 +2008,13 @@
         renderTablePagination('scanHistory', pageData);
         const countEl = document.querySelector('#section-scan-history .result-count');
         if (countEl) countEl.textContent = data.length ? `${data.length} lượt quét` : '';
+        const checkAll = document.getElementById('sh-check-all');
+        if (checkAll) checkAll.checked = false;
+        updateScanHistoryBulkBtn();
         document.getElementById('sh-body').innerHTML = data.length
           ? pageData.rows.map((s, idx) => `
           <tr>
+            <td><input type="checkbox" class="sh-row-check" value="${s.id}" onchange="updateScanHistoryBulkBtn()" /></td>
             <td class="stt-cell">${pageData.start + idx + 1}</td>
             <td class="text-muted">${s.id}</td>
             <td>${s.url_anh
@@ -1831,7 +2033,7 @@
             <td class="text-muted" style="font-size:.82rem;">${fmtDate(s.thoi_gian)}</td>
             <td><button class="btn btn-sm btn-outline-danger" style="padding:2px 7px;font-size:.75rem;" onclick="deleteScanHistory(${s.id})" title="Xóa"><i class="bi bi-trash"></i></button></td>
           </tr>`).join('')
-          : '<tr><td colspan="8"><div class="empty-state"><i class="bi bi-camera"></i><p>Chưa có lịch sử quét</p></div></td></tr>';
+          : '<tr><td colspan="9"><div class="empty-state"><i class="bi bi-camera"></i><p>Chưa có lịch sử quét</p></div></td></tr>';
       } catch (e) { toast('Lỗi tải lịch sử quét: ' + e.message, 'danger'); }
     }
 
@@ -1842,6 +2044,41 @@
         toast('Đã xóa lịch sử quét', 'success');
         loadScanHistory();
       } catch (e) { toast('Lỗi xóa: ' + e.message, 'danger'); }
+    }
+
+    function getSelectedScanIds() {
+      return Array.from(document.querySelectorAll('.sh-row-check:checked')).map(cb => parseInt(cb.value));
+    }
+
+    function updateScanHistoryBulkBtn() {
+      const ids = getSelectedScanIds();
+      const btn = document.getElementById('sh-bulk-delete-btn');
+      const countEl = document.getElementById('sh-selected-count');
+      if (!btn) return;
+      if (ids.length > 0) {
+        btn.style.display = '';
+        if (countEl) countEl.textContent = ids.length;
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+
+    function toggleAllScanHistory(checkbox) {
+      document.querySelectorAll('.sh-row-check').forEach(cb => cb.checked = checkbox.checked);
+      updateScanHistoryBulkBtn();
+    }
+
+    async function bulkDeleteScanHistory() {
+      const ids = getSelectedScanIds();
+      if (!ids.length) return;
+      confirmAction(`Xóa ${ids.length} lịch sử quét đã chọn?`, async () => {
+        try {
+          const params = ids.map(id => `ids=${id}`).join('&');
+          await apiJSON(`/scan-history/bulk?${params}`, { method: 'DELETE' });
+          toast(`Đã xóa ${ids.length} lịch sử quét`, 'warning');
+          loadScanHistory();
+        } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      }, 'Xóa hàng loạt');
     }
 
     // ============================================================

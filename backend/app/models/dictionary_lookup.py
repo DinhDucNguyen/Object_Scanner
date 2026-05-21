@@ -21,3 +21,6 @@ class DictionaryLookup(Base):
     doi_tuong_id = Column(Integer, ForeignKey("DoiTuong.id", ondelete="SET NULL"), nullable=True)
     nguon_du_lieu = Column(Enum(NguonTraCuu), nullable=True)
     lan_tra_cuoi = Column(TIMESTAMP, default=now_vietnam)
+    ket_qua_dich = Column(String(500), nullable=True)
+    phien_am = Column(String(100), nullable=True)
+    den_ngon_ngu = Column(String(10), nullable=True)

@@ -11,8 +11,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.data.model.DictionaryHistoryItem
 import com.duc.objectlanguage.databinding.FragmentDictionaryBinding
 import com.duc.objectlanguage.ui.collection.SaveToCollectionBottomSheet
+import com.google.android.material.chip.Chip
 
 class DictionaryFragment : Fragment() {
 
@@ -35,6 +37,7 @@ class DictionaryFragment : Fragment() {
         viewModel.loadDefaultLangs()
         setupListeners()
         setupObservers()
+        viewModel.loadHistory()
         arguments?.getString("initialText")?.takeIf { it.isNotBlank() }?.let {
             binding.etInput.setText(it)
             binding.etInput.setSelection(binding.etInput.text?.length ?: 0)
@@ -58,7 +61,11 @@ class DictionaryFragment : Fragment() {
                     viewModel.clearResult()
                     binding.cardResult.visibility = View.GONE
                     binding.groupEmptyState.visibility = View.VISIBLE
+                    binding.layoutRecentChips.visibility =
+                        if (binding.chipGroupRecent.childCount > 0) View.VISIBLE else View.GONE
                 } else {
+                    binding.layoutRecentChips.visibility = View.GONE
+                    binding.groupEmptyState.visibility = View.GONE
                     viewModel.translate(text)
                 }
             }
@@ -81,6 +88,19 @@ class DictionaryFragment : Fragment() {
 
         binding.btnPlayAudio.setOnClickListener {
             viewModel.playAudio(viewModel.pronunciationTarget(viewModel.result.value))
+        }
+
+        binding.btnPlayAudioResult.setOnClickListener {
+            viewModel.playAudio(viewModel.pronunciationTarget(viewModel.result.value))
+        }
+
+        binding.btnShowHistory.setOnClickListener {
+            val items = viewModel.history.value ?: return@setOnClickListener
+            val listSheet = DictionaryHistoryListBottomSheet.newInstance(items)
+            listSheet.setOnItemDeletedListener { id ->
+                viewModel.deleteHistoryItem(id)
+            }
+            listSheet.show(childFragmentManager, "dict_history_list")
         }
     }
 
@@ -107,6 +127,7 @@ class DictionaryFragment : Fragment() {
             if (result != null) {
                 binding.groupEmptyState.visibility = View.GONE
                 binding.cardResult.visibility = View.VISIBLE
+                viewModel.loadHistory()
 
                 binding.tvTranslation.text = result.translation
                 binding.tvToLang.text = langLabel(result.toLang)
@@ -138,11 +159,12 @@ class DictionaryFragment : Fragment() {
                     binding.containerDefinitions.visibility = View.GONE
                 }
 
-                binding.btnPlayAudio.visibility = if (viewModel.pronunciationTarget(result) != null) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
+                val hasPronunciation = viewModel.pronunciationTarget(result) != null
+                val enIsSource = result.fromLang.lowercase() == "en"
+                binding.btnPlayAudio.visibility =
+                    if (hasPronunciation && enIsSource) View.VISIBLE else View.GONE
+                binding.btnPlayAudioResult.visibility =
+                    if (hasPronunciation && !enIsSource) View.VISIBLE else View.GONE
                 binding.btnSaveWord.visibility = if (result.canSave && result.translationId != null) {
                     View.VISIBLE
                 } else {
@@ -151,6 +173,7 @@ class DictionaryFragment : Fragment() {
             } else if (viewModel.isLoading.value != true) {
                 binding.cardResult.visibility = View.GONE
                 binding.btnPlayAudio.visibility = View.GONE
+                binding.btnPlayAudioResult.visibility = View.GONE
                 binding.btnSaveWord.visibility = View.GONE
                 if (binding.etInput.text.isNullOrEmpty()) {
                     binding.groupEmptyState.visibility = View.VISIBLE
@@ -171,6 +194,10 @@ class DictionaryFragment : Fragment() {
                 viewModel.clearMessage()
             }
         }
+
+        viewModel.history.observe(viewLifecycleOwner) { items ->
+            updateRecentChips(items)
+        }
     }
 
     private fun updateLanguageLabels(from: String, to: String) {
@@ -187,6 +214,46 @@ class DictionaryFragment : Fragment() {
         "vi" -> "VI"
         "en" -> "EN"
         else -> code.uppercase()
+    }
+
+    private fun updateRecentChips(items: List<DictionaryHistoryItem>) {
+        binding.chipGroupRecent.removeAllViews()
+        if (items.isEmpty()) {
+            binding.layoutRecentChips.visibility = View.GONE
+            return
+        }
+        items.take(3).forEach { item ->
+            val chip = Chip(requireContext()).apply {
+                text = item.tuTra
+                isClickable = true
+                isCheckable = false
+                isCloseIconVisible = true
+                chipBackgroundColor = requireContext().getColorStateList(R.color.surface)
+                setTextColor(requireContext().getColor(R.color.text_primary))
+                chipStrokeWidth = 1f
+                setChipStrokeColorResource(R.color.divider)
+                chipCornerRadius = 20f
+            }
+            chip.setOnClickListener {
+                DictionaryHistoryDetailBottomSheet.newInstance(item).apply {
+                    setOnDeletedListener { id -> viewModel.deleteHistoryItem(id) }
+                }.show(childFragmentManager, "dict_history_detail_${item.id}")
+            }
+            chip.setOnCloseIconClickListener {
+                viewModel.deleteHistoryItem(item.id)
+            }
+            binding.chipGroupRecent.addView(chip)
+        }
+        if (binding.etInput.text.isNullOrEmpty()) {
+            binding.layoutRecentChips.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (binding.etInput.text.isNullOrEmpty()) {
+            viewModel.loadHistory()
+        }
     }
 
     override fun onDestroyView() {

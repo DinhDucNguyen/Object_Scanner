@@ -44,6 +44,7 @@ class ScanFragment : Fragment() {
     private val viewModel: ScanViewModel by viewModels()
 
     private var imageCapture: ImageCapture? = null
+    private var cameraProvider: ProcessCameraProvider? = null
     private lateinit var cameraExecutor: ExecutorService
     private var detectorHelper: ObjectDetectorHelper? = null
     private var latestDetection: DetectionResult? = null
@@ -66,24 +67,34 @@ class ScanFragment : Fragment() {
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
-        uri ?: return@registerForActivityResult
-        try {
-            val inputStream = requireContext().contentResolver.openInputStream(uri)
-            val imageBytes = inputStream?.readBytes()
-            inputStream?.close()
-            if (imageBytes == null || imageBytes.isEmpty()) {
-                Toast.makeText(requireContext(), getString(R.string.scan_error_read_image), Toast.LENGTH_SHORT).show()
-                return@registerForActivityResult
+        if (uri == null) {
+            restartCameraIfPermitted()
+            return@registerForActivityResult
+        }
+        lifecycleScope.launch {
+            try {
+                val imageBytes = withContext(Dispatchers.IO) {
+                    requireContext().contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                }
+                if (imageBytes == null || imageBytes.isEmpty()) {
+                    Toast.makeText(requireContext(), getString(R.string.scan_error_read_image), Toast.LENGTH_SHORT).show()
+                    restartCameraIfPermitted()
+                    return@launch
+                }
+                val bitmap = withContext(Dispatchers.Default) {
+                    BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                }
+                if (bitmap == null) {
+                    Toast.makeText(requireContext(), getString(R.string.scan_error_invalid_image), Toast.LENGTH_SHORT).show()
+                    restartCameraIfPermitted()
+                    return@launch
+                }
+                showPreviewDialog(imageBytes, bitmap)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), getString(R.string.scan_error_read_image_detail, e.message), Toast.LENGTH_LONG).show()
+                Log.e("ScanFragment", "Gallery read error", e)
+                restartCameraIfPermitted()
             }
-            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-            if (bitmap == null) {
-                Toast.makeText(requireContext(), getString(R.string.scan_error_invalid_image), Toast.LENGTH_SHORT).show()
-                return@registerForActivityResult
-            }
-            showPreviewDialog(imageBytes, bitmap)
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), getString(R.string.scan_error_read_image_detail, e.message), Toast.LENGTH_LONG).show()
-            Log.e("ScanFragment", "Gallery read error", e)
         }
     }
 
@@ -102,7 +113,10 @@ class ScanFragment : Fragment() {
                 }
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), getString(R.string.scan_error_read_cropped_image, e.message), Toast.LENGTH_SHORT).show()
+                restartCameraIfPermitted()
             }
+        } else {
+            restartCameraIfPermitted()
         }
     }
 
@@ -234,6 +248,7 @@ class ScanFragment : Fragment() {
         viewModel.error.observe(viewLifecycleOwner) { err ->
             if (err != null) {
                 Toast.makeText(requireContext(), err, Toast.LENGTH_LONG).show()
+                if (viewModel.scanResult.value == null) restartCameraIfPermitted()
             }
         }
 
@@ -279,6 +294,7 @@ class ScanFragment : Fragment() {
 
         binding.btnRetake.setOnClickListener {
             viewModel.clearResult()
+            restartCameraIfPermitted()
         }
 
         binding.modelToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -315,7 +331,8 @@ class ScanFragment : Fragment() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
             if (_binding == null) return@addListener
-            val cameraProvider = cameraProviderFuture.get()
+            val provider = cameraProviderFuture.get()
+            cameraProvider = provider
 
             val preview = Preview.Builder().build().also {
                 it.setSurfaceProvider(binding.previewView.surfaceProvider)
@@ -329,8 +346,8 @@ class ScanFragment : Fragment() {
             initDetector(selectedModelName)
 
             try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
+                provider.unbindAll()
+                provider.bindToLifecycle(
                     viewLifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA,
                     preview, imageCapture
                 )
@@ -435,8 +452,9 @@ class ScanFragment : Fragment() {
             }
             .setNegativeButton(getString(R.string.scan_preview_retake)) { dialog, _ ->
                 dialog.dismiss()
-                // The user returns to the camera preview.
+                restartCameraIfPermitted()
             }
+            .setOnCancelListener { restartCameraIfPermitted() }
             .setCancelable(true)
             .show()
     }
@@ -457,7 +475,21 @@ class ScanFragment : Fragment() {
     }
 
     private fun openGallery() {
+        stopCamera()
         pickImageLauncher.launch("image/*")
+    }
+
+    private fun stopCamera() {
+        runCatching { cameraProvider?.unbindAll() }
+        imageCapture = null
+    }
+
+    private fun restartCameraIfPermitted() {
+        if (_binding == null) return
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+            == PackageManager.PERMISSION_GRANTED) {
+            startCamera()
+        }
     }
 
     private fun launchCrop(imageBytes: ByteArray) {

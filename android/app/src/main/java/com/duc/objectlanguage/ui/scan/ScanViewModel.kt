@@ -221,7 +221,6 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             "pc mouse" to "mouse",
             "laptop computer" to "laptop",
             "notebook computer" to "laptop",
-            "notebook" to "laptop",
             "table" to "dining_table",
             "desk" to "dining_table",
             "tv" to "television",

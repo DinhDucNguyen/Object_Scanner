@@ -194,7 +194,10 @@ class ObjectDetectorHelper(
         const val CUSTOM_MODEL = "best_float32.tflite"
         const val COCO_MODEL = "yolov10n_int8.tflite"
 
-        val SCHOOL_SUPPLIES_LABELS = listOf("ruler")
+        val SCHOOL_SUPPLIES_LABELS = listOf(
+            "backpack", "calculator", "eraser", "notebook", "pen",
+            "pencil", "ruler", "scissors", "sharpener", "water_bottle",
+        )
 
         val COCO_LABELS = listOf(
             "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck",

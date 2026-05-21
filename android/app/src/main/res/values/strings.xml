@@ -131,6 +131,12 @@
     <string name="dictionary_empty_prompt">Nhập văn bản để bắt đầu</string>
     <string name="dictionary_save_word">Lưu vào danh sách học</string>
     <string name="dictionary_swap_format">%1$s &lt;-&gt; %2$s</string>
+    <string name="dictionary_history_title">Lịch sử tra từ</string>
+    <string name="dictionary_recent_label">Gần đây</string>
+    <string name="dictionary_history_empty">Chưa có lịch sử tra từ</string>
+    <string name="dictionary_object_code_label">Mã đối tượng:</string>
+    <string name="dictionary_play_audio">Nghe phát âm</string>
+    <string name="dictionary_history_delete">Xóa khỏi lịch sử</string>
 
     <!-- Explore -->
     <string name="explore_title">Khám phá</string>

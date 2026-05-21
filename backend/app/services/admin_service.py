@@ -27,6 +27,12 @@ from app.models.object import Object
 from app.models.object_alias import ObjectAlias
 from app.models.object_media import ObjectMedia
 from app.models.scan_history import ScanHistory
+from app.models.training_image import (
+    TrainingDatasetImage,
+    TrainingDatasetVersion,
+    TrainingImage,
+    TrangThaiAnhHuanLuyen,
+)
 from app.models.translation import Translation, NguonDuLieu
 from app.models.example import ViDu
 from app.models.language import Language
@@ -34,6 +40,7 @@ from app.models.user import User
 from app.models.review_log import ReviewLog
 from app.services.tts_service import TTSService
 from app.services.gemini_service import GeminiService
+from app.services.training_image_service import TrainingImageService
 from app.repositories.object_repo import normalize_object_code
 from app.utils.timezone import now_vietnam
 from app.utils.security import hash_password
@@ -57,6 +64,7 @@ class AdminService:
     def __init__(self):
         self.tts = TTSService()
         self.gemini = GeminiService()
+        self.training_images = TrainingImageService()
 
     def _prediction_payload(self, prediction: AIPrediction) -> dict:
         try:
@@ -176,131 +184,318 @@ class AdminService:
         ]
 
     def export_training_data(self, db: Session) -> list[dict]:
-        """
-        Xuất toàn bộ predictions đã duyệt (da_duyet, nguon_ai=gemini)
-        dưới dạng list dict — mỗi phần tử là 1 record training.
-        """
-        from app.models.ai_feedback_report import NguonAI
-        predictions = (
-            db.query(AIPrediction)
-            .filter(
-                AIPrediction.trang_thai == TrangThaiDuyet.da_duyet,
-                AIPrediction.nguon_ai == NguonAI.gemini,
-                AIPrediction.vai_tro == VaiTroDuDoan.chinh,
-            )
-            .order_by(AIPrediction.thoi_gian.desc())
-            .all()
-        )
-        records = []
-        for p in predictions:
-            try:
-                payload = json.loads(p.mo_ta or "{}")
-            except Exception:
-                payload = {}
-            image_url = None
-            scan = p.scan
-            if (
-                scan
-                and scan.object
-                and scan.object.ma_doi_tuong == p.nhan_du_doan
-                and scan.url_anh
-            ):
-                image_url = scan.url_anh
-            records.append({
-                "prediction_id": p.id,
-                "scan_id": p.scan_id,
-                "object_code": p.nhan_du_doan,
-                "image_url": image_url,
-                "approved_at": p.thoi_gian.isoformat() if p.thoi_gian else None,
-                "translations": payload.get("translations", []),
-                "category": payload.get("category"),
-            })
-        return records
+        """Export approved training images as flat JSONL records."""
+        return [
+            self._training_image_record(item)
+            for item in self._approved_training_images(db)
+        ]
 
     def export_training_data_grouped(self, db: Session) -> list[dict]:
-        """
-        Xuất training data gom nhóm theo object_code.
-        Mỗi record chứa danh sách ảnh từ nhiều nguồn (confirmed + mọi scan Gemini cùng nhãn),
-        giúp tập training có đa dạng góc độ cho cùng một vật thể.
-        """
-        from collections import defaultdict
-        from app.models.ai_feedback_report import NguonAI
+        """Export approved training images grouped by label/object code."""
+        return [
+            self._training_group_for_export(group)
+            for group in self.training_summary(db, only_approved=True)
+        ]
 
-        approved = (
-            db.query(AIPrediction)
-            .filter(
-                AIPrediction.trang_thai == TrangThaiDuyet.da_duyet,
-                AIPrediction.nguon_ai == NguonAI.gemini,
-                AIPrediction.vai_tro == VaiTroDuDoan.chinh,
+    def training_summary(self, db: Session, only_approved: bool = False) -> list[dict]:
+        """Return training images grouped by label for the admin Training Data tab."""
+        query = (
+            db.query(TrainingImage)
+            .options(
+                joinedload(TrainingImage.object).joinedload(Object.category),
+                joinedload(TrainingImage.dataset_links).joinedload(TrainingDatasetImage.dataset),
             )
-            .all()
+            .filter(TrainingImage.thoi_gian_xoa.is_(None))
+            .order_by(TrainingImage.thoi_gian_tao.desc(), TrainingImage.id.desc())
         )
-        if not approved:
-            return []
+        if only_approved:
+            query = query.filter(TrainingImage.trang_thai == TrangThaiAnhHuanLuyen.da_duyet)
 
         groups: dict[str, dict] = {}
-        for p in approved:
-            code = p.nhan_du_doan
+        for item in query.all():
+            code = self._training_label(item)
             if not code:
                 continue
+
             if code not in groups:
-                try:
-                    payload = json.loads(p.mo_ta or "{}")
-                except Exception:
-                    payload = {}
                 groups[code] = {
                     "object_code": code,
-                    "approved_prediction_ids": [],
-                    "translations": payload.get("translations", []),
-                    "category": None,
+                    "label": code,
+                    "category": item.object.category.ten_danh_muc if item.object and item.object.category else None,
+                    "translations": self._training_group_translations(item.object),
                     "images": [],
-                    "_seen": set(),
+                    "status_counts": {"cho_duyet": 0, "da_duyet": 0, "tu_choi": 0},
+                    "dataset_versions": set(),
                 }
-            groups[code]["approved_prediction_ids"].append(p.id)
 
-        object_codes = list(groups.keys())
-
-        # Lấy danh mục thật từ DB thay vì dùng Gemini's suggestion
-        objs_with_cat = (
-            db.query(Object)
-            .filter(
-                Object.ma_doi_tuong.in_(object_codes),
-                Object.thoi_gian_xoa.is_(None),
-            )
-            .all()
-        )
-        for obj in objs_with_cat:
-            if obj.ma_doi_tuong in groups:
-                groups[obj.ma_doi_tuong]["category"] = (
-                    obj.category.ten_danh_muc if obj.category else None
-                )
-
-        # Training pool uses one source of truth: LichSuQuet.doi_tuong_id.
-        # If admin unlinks a scan, it must disappear even if DuDoanAI still exists.
-        confirmed = (
-            db.query(ScanHistory, Object)
-            .join(Object, ScanHistory.doi_tuong_id == Object.id)
-            .filter(
-                Object.ma_doi_tuong.in_(object_codes),
-                ScanHistory.url_anh.isnot(None),
-            )
-            .all()
-        )
-        for scan, obj in confirmed:
-            code = obj.ma_doi_tuong
-            g = groups.get(code)
-            if g and scan.url_anh not in g["_seen"]:
-                g["images"].append({"url": scan.url_anh, "source": "confirmed", "scan_id": scan.id})
-                g["_seen"].add(scan.url_anh)
+            status = self._training_status(item)
+            groups[code]["status_counts"][status] = groups[code]["status_counts"].get(status, 0) + 1
+            versions = self._dataset_versions(item)
+            groups[code]["dataset_versions"].update(versions)
+            groups[code]["images"].append(self._training_image_record(item, dataset_versions=versions))
 
         records = []
-        for g in groups.values():
-            g.pop("_seen")
-            g["total_images"] = len(g["images"])
-            records.append(g)
+        for group in groups.values():
+            group["dataset_versions"] = sorted(group["dataset_versions"])
+            group["total_images"] = len(group["images"])
+            records.append(group)
 
-        records.sort(key=lambda r: r["total_images"], reverse=True)
+        records.sort(
+            key=lambda r: (
+                r["status_counts"].get("da_duyet", 0),
+                r["total_images"],
+                r["object_code"],
+            ),
+            reverse=True,
+        )
         return records
+
+    def approve_training_image_by_scan(
+        self,
+        db: Session,
+        scan_id: int,
+        admin_id: int | None = None,
+    ) -> TrainingImage | None:
+        item = self._training_image_for_scan(db, scan_id)
+        if not item:
+            return None
+
+        if item.scan and item.scan.doi_tuong_id and not item.doi_tuong_id:
+            item.doi_tuong_id = item.scan.doi_tuong_id
+        if item.object:
+            item.nhan = item.object.ma_doi_tuong
+
+        item.trang_thai = TrangThaiAnhHuanLuyen.da_duyet
+        item.nguoi_duyet_id = admin_id
+        item.thoi_gian_duyet = now_vietnam()
+        db.commit()
+        db.refresh(item)
+        return item
+
+    def reject_training_image_by_scan(
+        self,
+        db: Session,
+        scan_id: int,
+        admin_id: int | None = None,
+        note: str | None = None,
+    ) -> TrainingImage | None:
+        item = self._training_image_for_scan(db, scan_id)
+        if not item:
+            return None
+
+        item.trang_thai = TrangThaiAnhHuanLuyen.tu_choi
+        item.nguoi_duyet_id = admin_id
+        item.thoi_gian_duyet = now_vietnam()
+        if note:
+            item.ghi_chu = note
+        db.commit()
+        db.refresh(item)
+        return item
+
+    def reject_training_images_for_object(
+        self,
+        db: Session,
+        object_code: str,
+        admin_id: int | None = None,
+    ) -> int:
+        code = normalize_object_code(object_code)
+        now = now_vietnam()
+        items = (
+            db.query(TrainingImage)
+            .outerjoin(Object, TrainingImage.doi_tuong_id == Object.id)
+            .filter(
+                TrainingImage.thoi_gian_xoa.is_(None),
+                TrainingImage.trang_thai != TrangThaiAnhHuanLuyen.tu_choi,
+                or_(
+                    Object.ma_doi_tuong == code,
+                    TrainingImage.nhan == code,
+                ),
+            )
+            .all()
+        )
+        for item in items:
+            item.trang_thai = TrangThaiAnhHuanLuyen.tu_choi
+            item.nguoi_duyet_id = admin_id
+            item.thoi_gian_duyet = now
+        db.commit()
+        return len(items)
+
+    def reassign_training_image_by_scan(
+        self,
+        db: Session,
+        scan_id: int,
+        target_object_code: str,
+    ) -> tuple[TrainingImage | None, Object | None]:
+        scan = db.query(ScanHistory).filter(ScanHistory.id == scan_id).first()
+        if not scan:
+            return None, None
+
+        code = normalize_object_code(target_object_code)
+        obj = db.query(Object).filter(
+            Object.ma_doi_tuong == code,
+            Object.thoi_gian_xoa.is_(None),
+        ).first()
+        if not obj:
+            return None, None
+
+        scan.doi_tuong_id = obj.id
+        item = self._training_image_for_scan(db, scan_id)
+        if not item and scan.url_anh:
+            item = self.training_images.create_candidate(
+                db,
+                scan_id=scan.id,
+                url_anh=scan.url_anh,
+                nhan=obj.ma_doi_tuong,
+                nguon_du_lieu="admin",
+                doi_tuong_id=obj.id,
+                do_tin_cay=scan.do_tin_cay,
+                ghi_chu="Created when admin reassigned scan image",
+            )
+        elif item:
+            item.doi_tuong_id = obj.id
+            item.nhan = obj.ma_doi_tuong
+            if item.trang_thai == TrangThaiAnhHuanLuyen.tu_choi:
+                item.trang_thai = TrangThaiAnhHuanLuyen.cho_duyet
+                item.thoi_gian_duyet = None
+                item.nguoi_duyet_id = None
+
+        db.commit()
+        if item:
+            db.refresh(item)
+        return item, obj
+
+    def create_dataset_version(
+        self,
+        db: Session,
+        ma_phien_ban: str,
+        ghi_chu: str | None = None,
+    ) -> TrainingDatasetVersion:
+        code = ma_phien_ban.strip()
+        if not code:
+            raise ValueError("ma_phien_ban is required")
+        exists = db.query(TrainingDatasetVersion).filter(
+            TrainingDatasetVersion.ma_phien_ban == code,
+        ).first()
+        if exists:
+            raise ValueError(f"Dataset version '{code}' already exists")
+
+        approved = self._approved_training_images(db)
+        label_count = len({self._training_label(item) for item in approved if self._training_label(item)})
+        dataset = TrainingDatasetVersion(
+            ma_phien_ban=code,
+            tong_anh=len(approved),
+            tong_nhan=label_count,
+            ghi_chu=ghi_chu,
+        )
+        db.add(dataset)
+        db.flush()
+        for item in approved:
+            db.add(TrainingDatasetImage(dataset_id=dataset.id, anh_huan_luyen_id=item.id))
+        db.commit()
+        db.refresh(dataset)
+        return dataset
+
+    def _approved_training_images(self, db: Session) -> list[TrainingImage]:
+        return (
+            db.query(TrainingImage)
+            .options(
+                joinedload(TrainingImage.object).joinedload(Object.category),
+                joinedload(TrainingImage.dataset_links).joinedload(TrainingDatasetImage.dataset),
+            )
+            .filter(
+                TrainingImage.thoi_gian_xoa.is_(None),
+                TrainingImage.trang_thai == TrangThaiAnhHuanLuyen.da_duyet,
+            )
+            .order_by(TrainingImage.thoi_gian_tao.desc(), TrainingImage.id.desc())
+            .all()
+        )
+
+    def _training_image_for_scan(self, db: Session, scan_id: int) -> TrainingImage | None:
+        return (
+            db.query(TrainingImage)
+            .options(joinedload(TrainingImage.scan), joinedload(TrainingImage.object))
+            .filter(
+                TrainingImage.scan_id == scan_id,
+                TrainingImage.thoi_gian_xoa.is_(None),
+            )
+            .first()
+        )
+
+    def _training_label(self, item: TrainingImage) -> str | None:
+        if item.object and item.object.ma_doi_tuong:
+            return item.object.ma_doi_tuong
+        if item.nhan:
+            return normalize_object_code(item.nhan)
+        return None
+
+    def _training_status(self, item: TrainingImage) -> str:
+        if hasattr(item.trang_thai, "value"):
+            return item.trang_thai.value
+        return str(item.trang_thai) if item.trang_thai else "cho_duyet"
+
+    def _dataset_versions(self, item: TrainingImage) -> list[str]:
+        return [
+            link.dataset.ma_phien_ban
+            for link in item.dataset_links or []
+            if link.dataset
+        ]
+
+    def _training_group_translations(self, obj: Object | None) -> list[dict]:
+        if not obj:
+            return []
+        return [
+            {
+                "language_code": tr.language.ma_ngon_ngu if tr.language else None,
+                "word": tr.tu_vung,
+            }
+            for tr in obj.translations or []
+            if tr.thoi_gian_xoa is None
+        ]
+
+    def _training_image_record(
+        self,
+        item: TrainingImage,
+        *,
+        dataset_versions: list[str] | None = None,
+    ) -> dict:
+        return {
+            "id": item.id,
+            "scan_id": item.scan_id,
+            "prediction_id": item.du_doan_id,
+            "object_code": self._training_label(item),
+            "label": item.nhan,
+            "image_url": item.url_anh,
+            "url": item.url_anh,
+            "source": item.nguon_du_lieu.value if hasattr(item.nguon_du_lieu, "value") else (str(item.nguon_du_lieu) if item.nguon_du_lieu else None),
+            "status": self._training_status(item),
+            "confidence": item.do_tin_cay,
+            "quality_score": item.diem_chat_luong,
+            "dataset_versions": dataset_versions if dataset_versions is not None else self._dataset_versions(item),
+            "created_at": item.thoi_gian_tao.isoformat() if item.thoi_gian_tao else None,
+            "reviewed_at": item.thoi_gian_duyet.isoformat() if item.thoi_gian_duyet else None,
+            "note": item.ghi_chu,
+        }
+
+    def _training_group_for_export(self, group: dict) -> dict:
+        return {
+            "object_code": group["object_code"],
+            "category": group.get("category"),
+            "total_images": group.get("total_images", 0),
+            "dataset_versions": group.get("dataset_versions", []),
+            "translations": group.get("translations", []),
+            "images": [
+                {
+                    "id": img["id"],
+                    "scan_id": img["scan_id"],
+                    "prediction_id": img["prediction_id"],
+                    "url": img["url"],
+                    "source": img["source"],
+                    "confidence": img["confidence"],
+                }
+                for img in group.get("images", [])
+                if img.get("status") == TrangThaiAnhHuanLuyen.da_duyet.value
+            ],
+        }
 
     # ------------------------------------------------------------------
     # Approve — Insert vào bảng chính
@@ -371,8 +566,10 @@ class AdminService:
                 if matched_cat:
                     obj.danh_muc_id = matched_cat.id
 
+        training_scan_ids: set[int] = set()
         if p.scan:
             p.scan.doi_tuong_id = obj.id
+            training_scan_ids.add(p.scan.id)
 
         total_examples_created = 0
         first_translation_id = None
@@ -483,11 +680,23 @@ class AdminService:
         for rel in related_predictions:
             if rel.scan:
                 rel.scan.doi_tuong_id = obj.id
+                training_scan_ids.add(rel.scan.id)
                 if rel.scan.user_id:
                     user_ids_to_enroll.add(rel.scan.user_id)
             rel.trang_thai = TrangThaiDuyet.da_duyet
 
         now = now_vietnam()
+        if training_scan_ids:
+            training_images = db.query(TrainingImage).filter(
+                TrainingImage.scan_id.in_(training_scan_ids),
+                TrainingImage.thoi_gian_xoa.is_(None),
+            ).all()
+            for image in training_images:
+                image.doi_tuong_id = obj.id
+                image.nhan = obj.ma_doi_tuong
+                image.trang_thai = TrangThaiAnhHuanLuyen.da_duyet
+                image.thoi_gian_duyet = now
+
         for uid in user_ids_to_enroll:
             already = db.query(LearningProgress).filter(
                 LearningProgress.user_id == uid,
@@ -616,9 +825,11 @@ class AdminService:
 
         review_translation = self._pick_review_translation(db, obj.id)
         user_ids_to_enroll: set[int] = set()
+        training_scan_ids: set[int] = set()
         for rel in related_predictions:
             if rel.scan:
                 rel.scan.doi_tuong_id = obj.id
+                training_scan_ids.add(rel.scan.id)
                 if rel.scan.user_id:
                     user_ids_to_enroll.add(rel.scan.user_id)
 
@@ -634,8 +845,19 @@ class AdminService:
             rel.trang_thai = TrangThaiDuyet.da_duyet
 
         users_enrolled = 0
+        now = now_vietnam()
+        if training_scan_ids:
+            training_images = db.query(TrainingImage).filter(
+                TrainingImage.scan_id.in_(training_scan_ids),
+                TrainingImage.thoi_gian_xoa.is_(None),
+            ).all()
+            for image in training_images:
+                image.doi_tuong_id = obj.id
+                image.nhan = obj.ma_doi_tuong
+                image.trang_thai = TrangThaiAnhHuanLuyen.da_duyet
+                image.thoi_gian_duyet = now
+
         if review_translation:
-            now = now_vietnam()
             for uid in user_ids_to_enroll:
                 already = db.query(LearningProgress).filter(
                     LearningProgress.user_id == uid,
@@ -834,6 +1056,9 @@ class AdminService:
 
         object_code = (raw.get("object_code") or p.nhan_du_doan or "").lower()
         related_rejected = 0
+        rejected_scan_ids: set[int] = set()
+        if p.scan_id:
+            rejected_scan_ids.add(p.scan_id)
         if object_code:
             related_predictions = db.query(AIPrediction).filter(
                 AIPrediction.id != prediction_id,
@@ -846,9 +1071,20 @@ class AdminService:
             ).all()
             for rel in related_predictions:
                 rel.trang_thai = TrangThaiDuyet.tu_choi
+                if rel.scan_id:
+                    rejected_scan_ids.add(rel.scan_id)
                 related_rejected += 1
 
         p.trang_thai = TrangThaiDuyet.tu_choi
+        if rejected_scan_ids:
+            now = now_vietnam()
+            training_images = db.query(TrainingImage).filter(
+                TrainingImage.scan_id.in_(rejected_scan_ids),
+                TrainingImage.thoi_gian_xoa.is_(None),
+            ).all()
+            for image in training_images:
+                image.trang_thai = TrangThaiAnhHuanLuyen.tu_choi
+                image.thoi_gian_duyet = now
         db.commit()
 
         details = []

@@ -40,10 +40,21 @@
                 android:textSize="14sp" />
         </LinearLayout>
 
+        <ImageButton
+            android:id="@+id/btnShowHistory"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_history"
+            android:contentDescription="@string/dictionary_history_title"
+            app:tint="@color/text_secondary" />
+
         <ImageView
             android:layout_width="46dp"
             android:layout_height="46dp"
-            android:layout_marginStart="14dp"
+            android:layout_marginStart="6dp"
             android:background="@drawable/bg_icon_primary"
             android:padding="11dp"
             android:src="@drawable/ic_dictionary"
@@ -141,21 +152,43 @@
                         android:layout_marginTop="10dp"
                         android:background="@color/divider" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSwapLang"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="38dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:layout_gravity="start"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:text="EN &lt;-&gt; VI"
-                        android:textColor="@color/primary"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        app:cornerRadius="19dp"
-                        app:strokeColor="@color/primary" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSwapLang"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="38dp"
+                            android:layout_weight="0"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:text="EN &lt;-&gt; VI"
+                            android:textColor="@color/primary"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="19dp"
+                            app:strokeColor="@color/primary" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="1" />
+
+                        <ImageButton
+                            android:id="@+id/btnPlayAudio"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@android:drawable/ic_lock_silent_mode_off"
+                            android:contentDescription="@string/dictionary_play_audio"
+                            android:visibility="gone"
+                            app:tint="@color/primary" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -230,13 +263,15 @@
                             android:textStyle="bold" />
 
                         <ImageButton
-                            android:id="@+id/btnPlayAudio"
+                            android:id="@+id/btnPlayAudioResult"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:src="@android:drawable/ic_lock_silent_mode_off"
+                            android:contentDescription="@string/dictionary_play_audio"
                             android:visibility="gone"
                             app:tint="@color/primary" />
+
                     </LinearLayout>
 
                     <TextView
@@ -286,6 +321,40 @@
                         app:cornerRadius="16dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Recent chips — hiện khi input rỗng -->
+            <LinearLayout
+                android:id="@+id/layoutRecentChips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/dictionary_recent_label"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.06"
+                    android:textAllCaps="true" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupRecent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleLine="true"
+                        app:chipSpacingHorizontal="8dp" />
+                </HorizontalScrollView>
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/groupEmptyState"

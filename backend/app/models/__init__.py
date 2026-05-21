@@ -18,3 +18,4 @@ from app.models.collection_item import CollectionItem
 from app.models.scan_history import ScanHistory
 from app.models.ai_feedback_report import AIPrediction
 from app.models.dictionary_lookup import DictionaryLookup
+from app.models.training_image import TrainingDatasetImage, TrainingDatasetVersion, TrainingImage

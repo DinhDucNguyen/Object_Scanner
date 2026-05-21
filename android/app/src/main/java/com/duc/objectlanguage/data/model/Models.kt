@@ -236,6 +236,18 @@ data class TranslateResponse(
     @SerializedName("pending_review") val pendingReview: Boolean = false
 )
 
+data class DictionaryHistoryItem(
+    val id: Int,
+    @SerializedName("tu_tra") val tuTra: String,
+    @SerializedName("ket_qua_dich") val ketQuaDich: String?,
+    @SerializedName("phien_am") val phienAm: String?,
+    @SerializedName("lan_tra_cuoi") val lanTraCuoi: String?,
+    @SerializedName("doi_tuong_id") val doiTuongId: Int?,
+    @SerializedName("object_code") val objectCode: String?,
+    @SerializedName("image_url") val imageUrl: String?,
+    @SerializedName("den_ngon_ngu") val denNgonNgu: String = "vi"
+)
+
 // ====== EXPLORE / CATEGORY ======
 
 data class CategoryData(

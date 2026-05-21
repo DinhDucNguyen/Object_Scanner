@@ -179,6 +179,41 @@ class LearningService:
         old_easiness_factor = float(progress.do_de_nho or 2.5)
         old_interval = progress.khoang_lap or 0
 
+        # Bỏ qua nếu đã ôn đúng hôm nay — tránh spam tăng interval vô lý.
+        # Nếu lần trước sai (reps=0), vẫn cho tính lại để ghi nhận tiến bộ.
+        already_reviewed_correctly_today = (
+            progress.lan_on_cuoi is not None
+            and progress.lan_on_cuoi.date() == reviewed_at.date()
+            and (progress.so_lan_lap or 0) > 0
+        )
+        if already_reviewed_correctly_today:
+            self.repo.create_review_log(
+                db,
+                ReviewLog(
+                    user_id=user_id,
+                    tien_do_hoc_id=progress.id,
+                    ban_dich_id=progress.ban_dich_id,
+                    chat_luong=request.quality,
+                    thoi_diem_on=reviewed_at,
+                    khoang_lap_cu=old_interval,
+                    khoang_lap_moi=old_interval,
+                    do_de_nho_cu=old_easiness_factor,
+                    do_de_nho_moi=old_easiness_factor,
+                    so_lan_lap_cu=old_repetitions,
+                    so_lan_lap_moi=old_repetitions,
+                    ngay_on_tiep=progress.ngay_on_tiep,
+                    thoi_gian_tao=reviewed_at,
+                ),
+            )
+            db.commit()
+            next_date = progress.ngay_on_tiep.strftime("%Y-%m-%d") if progress.ngay_on_tiep else reviewed_at.strftime("%Y-%m-%d")
+            return ReviewResult(
+                success=True,
+                new_interval=old_interval,
+                new_ef=old_easiness_factor,
+                next_review_date=next_date,
+            )
+
         result = calculate_sm2(
             quality=request.quality,
             repetitions=old_repetitions,

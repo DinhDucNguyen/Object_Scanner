@@ -115,6 +115,14 @@ interface ApiService {
     @POST("api/dictionary/translate")
     suspend fun translate(@Body req: TranslateRequest): Response<TranslateResponse>
 
+    @GET("api/dictionary/history")
+    suspend fun getDictionaryHistory(
+        @Query("limit") limit: Int = 30
+    ): Response<List<DictionaryHistoryItem>>
+
+    @DELETE("api/dictionary/history/{id}")
+    suspend fun deleteHistoryItem(@Path("id") id: Int): Response<Void>
+
     // ====== USER PROFILE / SETTINGS ======
     @GET("api/auth/profile")
     suspend fun getProfile(): Response<ProfileData>
@@ -143,6 +151,7 @@ interface ApiService {
     suspend fun saveLichSuQue(
         @Part("object_code") objectCode: RequestBody,
         @Part("confidence") confidence: RequestBody,
+        @Part("training_source") trainingSource: RequestBody,
         @Part image: MultipartBody.Part?,
     ): Response<LichSuQuetResponse>
 

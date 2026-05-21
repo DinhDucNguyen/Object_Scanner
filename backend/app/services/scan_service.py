@@ -14,12 +14,37 @@ from app.repositories.object_repo import ObjectRepository, normalize_object_code
 from app.repositories.translation_repo import TranslationRepository
 from app.schemas.common import ScanRequest, ScanResponse, TranslationResponse, ViDuResponse
 from app.services.gemini_service import GeminiService
+from app.services.training_image_service import TrainingImageService
 from app.services.tts_service import TTSService
 from app.utils.cloudinary_helper import upload_image
 from app.utils.timezone import now_vietnam
 
 
 UPLOAD_DIR = "uploads/scans"
+
+# Các class YOLO custom đã train — không cần thêm training data
+YOLO_CUSTOM_CLASSES = {
+    "backpack", "calculator", "eraser", "notebook", "pen",
+    "pencil", "ruler", "scissors", "sharpener", "water_bottle",
+}
+
+# Các class COCO model đã biết — không cần thêm training data
+COCO_CLASSES = {
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck",
+    "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench",
+    "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra",
+    "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
+    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove",
+    "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup",
+    "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange",
+    "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
+    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse",
+    "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink",
+    "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier",
+    "toothbrush",
+}
+
+YOLO_KNOWN_CLASSES = YOLO_CUSTOM_CLASSES | COCO_CLASSES
 
 
 class ScanService:
@@ -29,6 +54,7 @@ class ScanService:
         self.lang_repo = LanguageRepository()
         self.gemini = GeminiService()
         self.tts = TTSService()
+        self.training_images = TrainingImageService()
 
     def process_scan(self, db: Session, request: ScanRequest) -> ScanResponse:
         object_code = normalize_object_code(request.object_code)
@@ -203,6 +229,16 @@ class ScanService:
         )
         db.add(prediction)
         db.flush()
+        self.training_images.create_candidate(
+            db,
+            scan_id=scan.id,
+            du_doan_id=prediction.id,
+            doi_tuong_id=obj.id if obj else None,
+            url_anh=image_url,
+            nhan=object_code,
+            nguon_du_lieu="gemini",
+            do_tin_cay=1.0,
+        )
         db.commit()
         return scan, prediction
 
@@ -269,6 +305,17 @@ class ScanService:
         )
         db.add(prediction)
         db.flush()
+        self.training_images.create_candidate(
+            db,
+            scan_id=scan.id,
+            du_doan_id=prediction.id,
+            doi_tuong_id=obj.id if obj else None,
+            url_anh=image_url,
+            nhan=object_code,
+            nguon_du_lieu="gemini",
+            do_tin_cay=1.0,
+            ghi_chu="Additional image for pending review",
+        )
         db.commit()
         return scan, prediction, source_payload
 

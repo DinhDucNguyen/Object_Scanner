@@ -170,7 +170,7 @@ class HistoryDetailFragment : Fragment() {
         currentAudioUrl = translation.audioUrl
         currentWord = translation.wordName
         currentLanguage = translation.languageCode ?: "en"
-        currentTranslationId = translation.id
+        currentTranslationId = translation.id.takeIf { it > 0 }
 
         binding.tvWord.text = translation.wordName
         binding.tvPhonetic.apply {
@@ -189,7 +189,8 @@ class HistoryDetailFragment : Fragment() {
         binding.btnPlayAudioHistory.visibility = if (
             translation.audioUrl.isNullOrBlank() && translation.wordName.isBlank()
         ) View.GONE else View.VISIBLE
-        binding.btnAddHistoryToCollection.visibility = View.VISIBLE
+        binding.btnAddHistoryToCollection.visibility =
+            if (currentTranslationId != null) View.VISIBLE else View.GONE
     }
 
     private fun formatDate(raw: String?): String {

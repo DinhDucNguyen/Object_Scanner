@@ -1,7 +1,7 @@
 # pyrefly: ignore [missing-import]
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query, Request
 # pyrefly: ignore [missing-import]
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
@@ -106,8 +106,8 @@ def text_to_speech(
     if not audio_bytes:
         raise HTTPException(500, "Không thể tạo audio")
     
-    return StreamingResponse(
-        io.BytesIO(audio_bytes),
+    return Response(
+        content=audio_bytes,
         media_type="audio/mpeg",
-        headers={"Content-Disposition": f"inline; filename={word}.mp3"}
+        headers={"Content-Disposition": f"inline; filename={word}.mp3"},
     )

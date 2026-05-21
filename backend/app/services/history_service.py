@@ -11,6 +11,7 @@ from app.models.ai_feedback_report import AIPrediction
 from app.models.translation import Translation
 from app.schemas.common import AIPredictionCreate, LichSuQuetResponse
 from app.services.learning_service import LearningService
+from app.services.training_image_service import TrainingImageService
 from app.utils.cloudinary_helper import upload_image
 from app.utils.timezone import now_vietnam
 
@@ -22,6 +23,7 @@ class HistoryFeedbackService:
         self.hist_repo = HistoryRepository()
         self.trans_repo = TranslationRepository()
         self.learning_service = LearningService()
+        self.training_images = TrainingImageService()
 
     def get_history(
         self,
@@ -110,6 +112,7 @@ class HistoryFeedbackService:
         confidence: float,
         image_bytes: bytes | None,
         base_url: str,
+        training_source: str = "yolo",
     ) -> LichSuQuetResponse:
         obj_repo = ObjectRepository()
         obj = obj_repo.get_by_code(db, object_code)
@@ -148,6 +151,16 @@ class HistoryFeedbackService:
             thoi_gian=now_vietnam(),
         )
         saved = self.hist_repo.create_scan(db, scan)
+        if image_url:
+            self.training_images.create_candidate(
+                db,
+                scan_id=saved.id,
+                doi_tuong_id=obj.id if obj else None,
+                url_anh=image_url,
+                nhan=obj.ma_doi_tuong if obj else object_code,
+                nguon_du_lieu=training_source,
+                do_tin_cay=confidence,
+            )
         db.commit()
 
         return LichSuQuetResponse(

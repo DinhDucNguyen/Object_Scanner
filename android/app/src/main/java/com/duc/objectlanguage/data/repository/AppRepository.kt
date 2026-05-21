@@ -1,9 +1,12 @@
 package com.duc.objectlanguage.data.repository
 
+import android.util.Log
 import com.google.gson.JsonParser
 import com.duc.objectlanguage.data.api.RetrofitClient
 import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -134,7 +137,7 @@ class AppRepository(private val tokenManager: TokenManager) {
     suspend fun getTtsAudio(word: String, lang: String = "en"): ByteArray? {
         return try {
             val response = api.getTts(word, lang)
-            if (response.isSuccessful) response.body()?.bytes() else null
+            if (response.isSuccessful) withContext(Dispatchers.IO) { response.body()?.bytes() } else null
         } catch (e: Exception) {
             null
         }
@@ -143,7 +146,7 @@ class AppRepository(private val tokenManager: TokenManager) {
     suspend fun getAudioByUrl(audioUrl: String): ByteArray? {
         return try {
             val response = api.getAudioByUrl(normalizeAudioUrl(audioUrl))
-            if (response.isSuccessful) response.body()?.bytes() else null
+            if (response.isSuccessful) withContext(Dispatchers.IO) { response.body()?.bytes() } else null
         } catch (e: Exception) {
             null
         }
@@ -310,6 +313,26 @@ class AppRepository(private val tokenManager: TokenManager) {
         }
     }
 
+    suspend fun getDictionaryHistory(limit: Int = 30): Result<List<DictionaryHistoryItem>> {
+        return try {
+            val response = api.getDictionaryHistory(limit)
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception(response.errorBody()?.string() ?: "Lỗi tải lịch sử"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Lỗi tải lịch sử: ${e.message}"))
+        }
+    }
+
+    suspend fun deleteHistoryItem(id: Int): Result<Unit> {
+        return try {
+            val response = api.deleteHistoryItem(id)
+            if (response.isSuccessful) Result.success(Unit)
+            else Result.failure(Exception("Lỗi xóa lịch sử"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Lỗi xóa: ${e.message}"))
+        }
+    }
+
     // ====== USER PROFILE / SETTINGS ======
 
     suspend fun getProfile(): Result<ProfileData> {
@@ -382,15 +405,17 @@ class AppRepository(private val tokenManager: TokenManager) {
         objectCode: String,
         confidence: Float,
         imageBytes: ByteArray?,
+        trainingSource: String = "yolo",
     ): Result<LichSuQuetResponse> {
         return try {
             val codePart = objectCode.toRequestBody("text/plain".toMediaTypeOrNull())
             val confidencePart = confidence.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val trainingSourcePart = trainingSource.toRequestBody("text/plain".toMediaTypeOrNull())
             val imagePart = imageBytes?.let {
                 val body = it.toRequestBody("image/jpeg".toMediaTypeOrNull())
                 MultipartBody.Part.createFormData("image", "scan.jpg", body)
             }
-            val response = api.saveLichSuQue(codePart, confidencePart, imagePart)
+            val response = api.saveLichSuQue(codePart, confidencePart, trainingSourcePart, imagePart)
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {

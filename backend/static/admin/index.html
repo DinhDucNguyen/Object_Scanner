@@ -365,6 +365,9 @@
         <input id="sh-date-to" type="date" class="form-control form-control-sm ms-1" style="width:145px;"
           onchange="reloadPagedTable('scanHistory')" title="Đến ngày" />
         <div class="spacer"></div>
+        <button id="sh-bulk-delete-btn" class="btn btn-sm btn-danger" style="display:none;" onclick="bulkDeleteScanHistory()">
+          <i class="bi bi-trash3 me-1"></i>Xóa đã chọn (<span id="sh-selected-count">0</span>)
+        </button>
         <button class="btn btn-sm btn-outline-secondary" onclick="loadScanHistory()"><i
             class="bi bi-arrow-clockwise"></i></button>
       </div>
@@ -377,6 +380,7 @@
           <table class="table table-hover">
             <thead>
               <tr>
+                <th style="width:36px;"><input type="checkbox" id="sh-check-all" onchange="toggleAllScanHistory(this)" /></th>
                 <th style="width:54px;">STT</th>
                 <th style="width:60px;">ID</th>
                 <th style="width:52px;">Ảnh</th>
@@ -446,10 +450,13 @@
     <!-- Training Data -->
     <div id="section-training-data" class="section">
       <div class="section-toolbar">
-        <span class="fw-semibold" style="font-size:.9rem;">Dữ liệu training từ Gemini</span>
+        <span class="fw-semibold" style="font-size:.9rem;">Dữ liệu huấn luyện YOLO</span>
         <div class="spacer"></div>
         <button class="btn btn-sm btn-outline-secondary" onclick="loadTrainingData()">
           <i class="bi bi-arrow-clockwise"></i> Làm mới
+        </button>
+        <button class="btn btn-sm btn-outline-primary" onclick="createDatasetVersion()">
+          <i class="bi bi-bookmark-check me-1"></i>Tạo dataset
         </button>
         <button class="btn btn-sm btn-success" onclick="exportTrainingGrouped()">
           <i class="bi bi-collection me-1"></i>Export grouped
@@ -459,6 +466,9 @@
         style="background:#f0fdf4;border:1px solid #bbf7d0;font-size:.83rem;">
         <span><i class="bi bi-boxes text-success me-1"></i>Objects: <strong id="td-total-objects">—</strong></span>
         <span><i class="bi bi-images text-primary me-1"></i>Tổng ảnh: <strong id="td-total-images">—</strong></span>
+        <span><i class="bi bi-hourglass-split text-warning me-1"></i>Chờ duyệt: <strong id="td-pending-images">—</strong></span>
+        <span><i class="bi bi-check-circle text-success me-1"></i>Đã duyệt: <strong id="td-approved-images">—</strong></span>
+        <span><i class="bi bi-x-circle text-danger me-1"></i>Từ chối: <strong id="td-rejected-images">—</strong></span>
       </div>
       <div id="td-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;"></div>
       <div id="td-empty" class="text-center text-muted py-5" style="display:none;">
@@ -564,7 +574,7 @@
 
   <!-- ═══ Form Modal ═══ -->
   <div class="modal fade" id="form-modal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <span class="modal-title" id="fm-title"></span>

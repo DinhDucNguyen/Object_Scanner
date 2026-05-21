@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.data.model.DictionaryHistoryItem
 import com.duc.objectlanguage.data.model.TranslateResponse
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +35,9 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
 
     private val _toLang = MutableLiveData("vi")
     val toLang: LiveData<String> = _toLang
+
+    private val _history = MutableLiveData<List<DictionaryHistoryItem>>(emptyList())
+    val history: LiveData<List<DictionaryHistoryItem>> = _history
 
     private var translateJob: Job? = null
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
@@ -130,6 +134,28 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
     private fun isShortPronounceableText(text: String): Boolean {
         if (text.isBlank() || text.length > MAX_PRONUNCIATION_CHARS) return false
         return text.split(Regex("\\s+")).size <= MAX_PRONUNCIATION_WORDS
+    }
+
+    fun loadHistory() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = repo.getDictionaryHistory()
+            if (result.isSuccess) {
+                _history.postValue(result.getOrNull() ?: emptyList())
+            }
+        }
+    }
+
+    fun deleteHistoryItem(id: Int) {
+        _history.value = (_history.value ?: emptyList()).filter { it.id != id }
+        viewModelScope.launch(Dispatchers.IO) {
+            val deleted = repo.deleteHistoryItem(id)
+            if (!deleted.isSuccess) {
+                val result = repo.getDictionaryHistory()
+                if (result.isSuccess) {
+                    _history.postValue(result.getOrNull() ?: emptyList())
+                }
+            }
+        }
     }
 
     fun clearResult() {

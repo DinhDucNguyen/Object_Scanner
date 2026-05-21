@@ -69,10 +69,19 @@ async def save_lich_su_quet(
     request: Request,
     object_code: str = Form(...),
     confidence: float = Form(0.0),
+    training_source: str = Form("yolo"),
     image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
     image_bytes = await image.read() if image else None
     base_url = str(request.base_url).rstrip("/")
-    return history_service.save_with_image(db, user_id, object_code, confidence, image_bytes, base_url)
+    return history_service.save_with_image(
+        db,
+        user_id,
+        object_code,
+        confidence,
+        image_bytes,
+        base_url,
+        training_source,
+    )

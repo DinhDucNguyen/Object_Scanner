@@ -72,7 +72,24 @@
 
     <!-- Dashboard -->
     <string name="dashboard_default_user">there</string>
-    <string name="dashboard_progress_short">%d%%</string>
+    <string name="dashboard_brand_name">LengoLens.</string>
+    <string name="dashboard_search_hint">Search or scan an object…</string>
+    <string name="dashboard_hunt_title">Turn real objects into new words</string>
+    <string name="dashboard_hunt_subtitle">Pick something nearby, scan it with the camera, and save it to your review set.</string>
+    <string name="dashboard_mission_first_scan_title">Scan your first object</string>
+    <string name="dashboard_mission_first_scan_subtitle">Try something on your desk to start your word list.</string>
+    <string name="dashboard_mission_review_title">Review %d words before they fade</string>
+    <string name="dashboard_mission_review_subtitle">Finish your reviews first, then scan more objects.</string>
+    <string name="dashboard_mission_scan_title">Find this object in real life</string>
+    <string name="dashboard_mission_scan_subtitle">Today, find a real object, scan it, and record its pronunciation.</string>
+    <string name="dashboard_object_today_label">Today\'s goal</string>
+    <string name="dashboard_object_today_placeholder">Today, try finding an object near you</string>
+    <string name="dashboard_suggestion_scan_hint">open camera</string>
+    <string name="dashboard_btn_scan_now">Scan now</string>
+    <string name="dashboard_suggestions_title">Choose a target to scan</string>
+    <string name="dashboard_btn_review_short">Review now</string>
+    <string name="dashboard_progress_short">%d%% mastery</string>
+    <string name="dashboard_progress_short_initial">0% mastery</string>
     <string name="dashboard_streak_title">Daily streak</string>
     <string name="dashboard_streak_content_desc">View daily streak</string>
     <string name="dashboard_streak_today_done">Reviewed today</string>
@@ -124,6 +141,12 @@
     <string name="dictionary_empty_prompt">Enter text to get started</string>
     <string name="dictionary_save_word">Save to learning list</string>
     <string name="dictionary_swap_format">%1$s &lt;-&gt; %2$s</string>
+    <string name="dictionary_history_title">Search history</string>
+    <string name="dictionary_recent_label">Recent</string>
+    <string name="dictionary_history_empty">No search history yet</string>
+    <string name="dictionary_object_code_label">Object code:</string>
+    <string name="dictionary_play_audio">Play pronunciation</string>
+    <string name="dictionary_history_delete">Remove from history</string>
 
     <!-- Explore -->
     <string name="explore_title">Explore</string>
@@ -196,6 +219,9 @@
     <string name="history_audio_load_error">Could not load audio</string>
     <string name="history_audio_play_error">Could not play audio</string>
     <string name="history_empty_vocab">No vocabulary data</string>
+    <string name="history_status_pending">Pending</string>
+    <string name="history_status_rejected">Rejected</string>
+    <string name="history_status_approved">Approved</string>
 
     <!-- Streak -->
     <string name="streak_days_singular">day</string>

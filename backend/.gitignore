@@ -31,6 +31,9 @@ Thumbs.db
 # Runtime uploads and generated media
 uploads/
 
+# Local DB cleanup backups
+backups/*.json
+
 # Distribution
 dist/
 build/

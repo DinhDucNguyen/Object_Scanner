@@ -6,7 +6,7 @@ import logging
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.dependencies.get_current_user import get_optional_user_id
+from app.dependencies.get_current_user import get_current_user_id, get_optional_user_id
 from app.services.dictionary_service import DictionaryService
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class TranslateResponse(BaseModel):
     definitions: List[str] = []
     from_lang: str
     to_lang: str
-    source: str = "gemini"
+    source: str = "internal_db"
     is_physical_object: bool = False
     object_id: Optional[int] = None
     object_code: Optional[str] = None
@@ -51,13 +51,25 @@ class TranslateResponse(BaseModel):
     pending_review: bool = False
 
 
+class DictionaryHistoryItem(BaseModel):
+    id: int
+    tu_tra: str
+    ket_qua_dich: Optional[str] = None
+    phien_am: Optional[str] = None
+    lan_tra_cuoi: Optional[str] = None
+    doi_tuong_id: Optional[int] = None
+    object_code: Optional[str] = None
+    image_url: Optional[str] = None
+    den_ngon_ngu: str = "vi"
+
+
 @router.post("/translate", response_model=TranslateResponse)
 def translate(
     req: TranslateRequest,
     db: Session = Depends(get_db),
     user_id: Optional[int] = Depends(get_optional_user_id),
 ):
-    """DB-first dictionary lookup, then Gemini fallback with physical-object moderation."""
+    """DB-first dictionary lookup, then MyMemory fallback for plain translation."""
     if not req.text.strip():
         raise HTTPException(400, "Text cannot be empty")
 
@@ -69,16 +81,37 @@ def translate(
         user_id,
     )
     if result is None:
-        raise HTTPException(503, "Translation service unavailable")
+        raise HTTPException(503, "Translation service temporarily unavailable")
     if result.get("_error") == "quota_exceeded":
         return TranslateResponse(
             original=req.text.strip(),
-            translation="AI tạm hết quota, vui lòng thử lại sau.",
+            translation="Dịch tự động tạm thời không khả dụng, vui lòng thử lại sau.",
             from_lang=req.from_lang,
             to_lang=req.to_lang,
-            source="gemini_unavailable",
+            source="external_unavailable",
         )
     return TranslateResponse(**result)
+
+
+@router.get("/history", response_model=List[DictionaryHistoryItem])
+def get_history(
+    limit: int = Query(default=30, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    items = dictionary_service.get_history(db, user_id, limit)
+    return [DictionaryHistoryItem(**item) for item in items]
+
+
+@router.delete("/history/{item_id}", status_code=204)
+def delete_history_item(
+    item_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    if not dictionary_service.delete_history_item(db, user_id, item_id):
+        raise HTTPException(status_code=404, detail="Item not found")
+
 
 
 @router.get("/lookup", response_model=DictionaryResponse)

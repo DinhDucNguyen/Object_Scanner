@@ -49,23 +49,7 @@ class ReviewFragment : Fragment() {
             }
         }
 
-        binding.chipQuiz.setOnClickListener {
-            findNavController().navigate(R.id.action_review_to_quiz)
-        }
-        binding.chipTyping.setOnClickListener {
-            findNavController().navigate(R.id.action_review_to_typing)
-        }
-        binding.chipListening.setOnClickListener {
-            findNavController().navigate(R.id.action_review_to_listening)
-        }
-        binding.chipImageMatching.setOnClickListener {
-            findNavController().navigate(R.id.action_review_to_imageMatching)
-        }
-        binding.chipPronunciation.setOnClickListener {
-            findNavController().navigate(R.id.action_review_to_pronunciation)
-        }
-
-        viewModel.message.observe(viewLifecycleOwner) { msg ->
+viewModel.message.observe(viewLifecycleOwner) { msg ->
             if (msg != null) {
                 Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
                 viewModel.clearMessage()

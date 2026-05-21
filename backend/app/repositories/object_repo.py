@@ -31,15 +31,6 @@ class ObjectRepository:
         )
         return alias.object if alias else None
 
-    def get_by_canonical_code(self, db: Session, object_code: str):
-        code = normalize_object_code(object_code)
-        if not code:
-            return None
-        return db.query(Object).filter(
-            Object.ma_doi_tuong == code,
-            Object.thoi_gian_xoa.is_(None)
-        ).first()
-
     def get_all(self, db: Session, category_id: int = None):
         query = db.query(Object).filter(Object.thoi_gian_xoa.is_(None))
         if category_id:

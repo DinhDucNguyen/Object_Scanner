@@ -71,7 +71,7 @@ def list_predictions(
 @router.get("/training-summary")
 def training_summary(db: Session = Depends(get_db)):
     """Trả JSON tóm tắt dữ liệu training — dùng cho UI dashboard."""
-    return admin_service.export_training_data_grouped(db)
+    return admin_service.training_summary(db)
 
 
 @router.get("/predictions/export-training")
@@ -83,7 +83,7 @@ def export_training_data(db: Session = Depends(get_db)):
     return Response(
         content=content,
         media_type="application/x-ndjson",
-        headers={"Content-Disposition": "attachment; filename=gemini_training_data.jsonl"},
+        headers={"Content-Disposition": "attachment; filename=yolo_training_data.jsonl"},
     )
 
 
@@ -96,19 +96,127 @@ def export_training_grouped(db: Session = Depends(get_db)):
     return Response(
         content=content,
         media_type="application/x-ndjson",
-        headers={"Content-Disposition": "attachment; filename=gemini_training_grouped.jsonl"},
+        headers={"Content-Disposition": "attachment; filename=yolo_training_grouped.jsonl"},
     )
 
 
+@router.patch("/training-images/{scan_id}/approve")
+def approve_training_image(
+    scan_id: int,
+    db: Session = Depends(get_db),
+    admin_id: int = Depends(require_admin_user_id),
+):
+    """Duyet anh training ma khong thay doi logic lich su quet."""
+    item = admin_service.approve_training_image_by_scan(db, scan_id, admin_id=admin_id)
+    if not item:
+        raise HTTPException(404, "Khong tim thay anh training")
+    return {"message": "Da duyet anh training", "scan_id": scan_id, "training_image_id": item.id}
+
+
 @router.patch("/training-images/{scan_id}/unlink")
-def unlink_training_image(scan_id: int, db: Session = Depends(get_db)):
-    """Bỏ liên kết ảnh scan khỏi pool training (không xoá ảnh, chỉ set doi_tuong_id = null)."""
-    scan = db.query(ScanHistory).filter(ScanHistory.id == scan_id).first()
-    if not scan:
-        raise HTTPException(404, "Không tìm thấy scan")
-    scan.doi_tuong_id = None
+def unlink_training_image(
+    scan_id: int,
+    db: Session = Depends(get_db),
+    admin_id: int = Depends(require_admin_user_id),
+):
+    """Từ chối ảnh training; lịch sử quét vẫn giữ đối tượng."""
+    item = admin_service.reject_training_image_by_scan(db, scan_id, admin_id=admin_id)
+    if not item:
+        raise HTTPException(404, "Khong tim thay anh training")
+    return {"message": "Da tu choi anh training", "scan_id": scan_id, "training_image_id": item.id}
+
+
+@router.delete("/training-images/unlink-all")
+def unlink_all_training_images(
+    object_code: str = Query(..., description="Mã đối tượng cần xoá toàn bộ ảnh training"),
+    db: Session = Depends(get_db),
+    admin_id: int = Depends(require_admin_user_id),
+):
+    """Từ chối toàn bộ ảnh training của một nhãn; không sửa lịch sử quét."""
+    count = admin_service.reject_training_images_for_object(db, object_code, admin_id=admin_id)
+    return {"message": f"Da loai {count} anh khoi pool training cua '{object_code}'", "count": count}
+
+
+@router.post("/training-datasets")
+def create_training_dataset(
+    ma_phien_ban: str = Query(..., description="Ma phien ban dataset, vi du v1"),
+    ghi_chu: Optional[str] = Query(default=None),
+    db: Session = Depends(get_db),
+):
+    """Chot mot phien ban dataset gom toan bo anh training da duyet hien tai."""
+    try:
+        dataset = admin_service.create_dataset_version(db, ma_phien_ban=ma_phien_ban, ghi_chu=ghi_chu)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+    return {
+        "message": f"Da tao dataset {dataset.ma_phien_ban}",
+        "id": dataset.id,
+        "ma_phien_ban": dataset.ma_phien_ban,
+        "tong_anh": dataset.tong_anh,
+        "tong_nhan": dataset.tong_nhan,
+    }
+
+
+@router.delete("/predictions/cleanup-known-classes")
+def cleanup_known_class_predictions(db: Session = Depends(get_db)):
+    """Resolve pending predictions for known YOLO/COCO classes without leaving scan-history junk."""
+    from app.models.ai_feedback_report import AIPrediction, TrangThaiDuyet
+    from app.services.scan_service import YOLO_KNOWN_CLASSES
+    from app.repositories.object_repo import ObjectRepository, normalize_object_code
+
+    known_codes = {normalize_object_code(code) for code in YOLO_KNOWN_CLASSES}
+    predictions = db.query(AIPrediction).filter(
+        AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet,
+    ).all()
+
+    obj_repo = ObjectRepository()
+    matched = 0
+    resolved = 0
+    skipped_missing_object = []
+    linked_scan_ids = []
+    deleted_prediction_ids = []
+
+    for p in predictions:
+        normalized_label = normalize_object_code(p.nhan_du_doan)
+        if normalized_label not in known_codes:
+            continue
+
+        matched += 1
+        obj = obj_repo.get_by_code(db, normalized_label)
+        if not obj:
+            skipped_missing_object.append({
+                "prediction_id": p.id,
+                "label": p.nhan_du_doan,
+            })
+            continue
+
+        if p.scan:
+            p.scan.doi_tuong_id = obj.id
+            admin_service.training_images.create_candidate(
+                db,
+                scan_id=p.scan.id,
+                url_anh=p.scan.url_anh,
+                doi_tuong_id=obj.id,
+                nhan=obj.ma_doi_tuong,
+                nguon_du_lieu="gemini",
+                do_tin_cay=p.do_tin_cay,
+                ghi_chu="Resolved known YOLO/COCO class",
+            )
+            linked_scan_ids.append(p.scan.id)
+
+        deleted_prediction_ids.append(p.id)
+        db.delete(p)
+        resolved += 1
+
     db.commit()
-    return {"message": "Đã bỏ liên kết ảnh khỏi pool training", "scan_id": scan_id}
+    return {
+        "message": "Da resolve pending predictions cua cac class YOLO/COCO da co object chinh thuc",
+        "matched": matched,
+        "resolved": resolved,
+        "linked_scan_ids": linked_scan_ids,
+        "deleted_prediction_ids": deleted_prediction_ids,
+        "skipped_missing_object": skipped_missing_object,
+    }
 
 
 @router.patch("/training-images/{scan_id}/reassign")
@@ -118,18 +226,18 @@ def reassign_training_image(
     db: Session = Depends(get_db),
 ):
     """Chuyển ảnh scan sang đối tượng khác trong pool training."""
-    scan = db.query(ScanHistory).filter(ScanHistory.id == scan_id).first()
-    if not scan:
-        raise HTTPException(404, "Không tìm thấy scan")
-    obj = db.query(Object).filter(
-        Object.ma_doi_tuong == target_object_code.lower().strip(),
-        Object.thoi_gian_xoa.is_(None),
-    ).first()
-    if not obj:
-        raise HTTPException(404, f"Không tìm thấy đối tượng '{target_object_code}'")
-    scan.doi_tuong_id = obj.id
-    db.commit()
-    return {"message": f"Đã chuyển ảnh sang '{target_object_code}'", "scan_id": scan_id, "new_object_id": obj.id}
+    item, target_obj = admin_service.reassign_training_image_by_scan(db, scan_id, target_object_code)
+    if not target_obj:
+        scan_exists = db.query(ScanHistory.id).filter(ScanHistory.id == scan_id).first()
+        if not scan_exists:
+            raise HTTPException(404, "Khong tim thay scan")
+        raise HTTPException(404, f"Khong tim thay doi tuong '{target_object_code}'")
+    return {
+        "message": f"Da chuyen anh sang '{target_object_code}'",
+        "scan_id": scan_id,
+        "training_image_id": item.id if item else None,
+        "new_object_id": target_obj.id,
+    }
 
 
 @router.get("/predictions/{prediction_id}", response_model=PredictionDetailResponse)
@@ -577,6 +685,14 @@ def list_scan_history(
         db, user_id=user_id, username=username, object_code=object_code,
         date_from=date_from, date_to=date_to, limit=limit, offset=offset
     )
+
+
+@router.delete("/scan-history/bulk")
+def bulk_delete_scan_history(ids: List[int] = Query(...), db: Session = Depends(get_db)):
+    """Xóa nhiều bản ghi lịch sử quét cùng lúc."""
+    count = db.query(ScanHistory).filter(ScanHistory.id.in_(ids)).delete(synchronize_session=False)
+    db.commit()
+    return {"message": f"Da xoa {count} ban ghi", "count": count}
 
 
 @router.delete("/scan-history/{scan_id}")
