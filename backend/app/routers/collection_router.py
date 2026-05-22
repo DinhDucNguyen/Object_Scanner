@@ -1,5 +1,5 @@
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 from typing import List
@@ -42,6 +42,14 @@ def add_to_collection(
     return collection_service.add_to_collection(db, collection_id, data, user_id)
 
 
+@router.get("/explore", response_model=List[CollectionResponse])
+def get_public_collections(
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id)
+):
+    return collection_service.get_public_collections(db, user_id)
+
+
 @router.get("/{collection_id}", response_model=CollectionDetailResponse)
 def get_collection_detail(
     collection_id: int,
@@ -78,10 +86,11 @@ def remove_from_collection(
 @router.get("/{collection_id}/review", response_model=List[ReviewCardResponse])
 def get_collection_review(
     collection_id: int,
+    practice: bool = Query(False),
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id)
 ):
-    return learning_service.get_collection_review_cards(db, collection_id, user_id)
+    return learning_service.get_collection_review_cards(db, collection_id, user_id, practice=practice)
 
 
 @router.get("/{collection_id}/insights", response_model=CollectionInsightsResponse)

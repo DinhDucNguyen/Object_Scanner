@@ -2,3 +2,6 @@
 .gsd/
 android/.gsd/
 backend/.gsd/
+
+# Local database recovery/export backups
+db_backups/

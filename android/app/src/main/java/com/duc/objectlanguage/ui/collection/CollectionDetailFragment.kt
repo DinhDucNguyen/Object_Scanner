@@ -18,9 +18,8 @@ class CollectionDetailFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: CollectionViewModel by viewModels()
 
-    private val collectionId: Int by lazy {
-        arguments?.getInt("collectionId") ?: 0
-    }
+    private val collectionId: Int by lazy { arguments?.getInt("collectionId") ?: 0 }
+    private val isPractice: Boolean by lazy { arguments?.getBoolean("isPractice") ?: false }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentCollectionDetailBinding.inflate(inflater, container, false)
@@ -77,6 +76,7 @@ class CollectionDetailFragment : Fragment() {
                 val args = Bundle().apply {
                     putInt("collectionId", collectionId)
                     putString("collectionName", detail.name)
+                    putBoolean("isPractice", isPractice)
                 }
                 findNavController().navigate(R.id.reviewFragment, args)
             }

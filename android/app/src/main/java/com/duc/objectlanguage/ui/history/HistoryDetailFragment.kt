@@ -108,7 +108,8 @@ class HistoryDetailFragment : Fragment() {
                 visibility = View.VISIBLE
             }
         }
-        Glide.with(this)
+        if (!isAdded || context == null) return
+        Glide.with(requireContext())
             .load(imageUrl)
             .placeholder(R.drawable.ic_image_placeholder)
             .error(R.drawable.ic_image_placeholder)

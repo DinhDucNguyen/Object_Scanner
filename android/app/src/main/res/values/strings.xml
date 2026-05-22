@@ -62,8 +62,12 @@
 
     <!-- Dashboard -->
     <string name="dashboard_default_user">bạn</string>
+    <string name="dashboard_greeting">Chào bạn!</string>
+    <string name="dashboard_greeting_subtitle">Sẵn sàng học từ vựng mới chưa?</string>
     <string name="dashboard_brand_name">LengoLens.</string>
     <string name="dashboard_search_hint">Tra từ hoặc quét đồ vật...</string>
+    <string name="dashboard_mastery_label">Mức độ thành thạo</string>
+    <string name="dashboard_goal_title">Mục tiêu hôm nay</string>
     <string name="dashboard_hunt_title">Biến đồ vật thật thành từ mới</string>
     <string name="dashboard_hunt_subtitle">Chọn một món ở gần bạn, quét bằng camera rồi lưu vào bộ từ ôn tập.</string>
     <string name="dashboard_mission_first_scan_title">Quét vật thể đầu tiên</string>
@@ -269,6 +273,13 @@
     <string name="collection_name_empty">Tên bộ sưu tập không được để trống</string>
     <string name="collection_added">Đã thêm vào bộ sưu tập</string>
     <string name="collection_removed">Đã xóa khỏi bộ sưu tập</string>
+    <string name="collection_tab_mine">Của tôi</string>
+    <string name="collection_tab_community">Cộng đồng</string>
+    <string name="collection_dialog_public_label">Chia sẻ với mọi người</string>
+    <string name="collection_dialog_public_hint">Người khác có thể xem bộ sưu tập này</string>
+    <string name="collection_by_owner">bởi %s</string>
+    <string name="collection_community_empty_title">Chưa có bộ sưu tập công khai</string>
+    <string name="collection_community_empty_subtitle">Hãy là người đầu tiên chia sẻ!</string>
     <string name="collection_added_to">Đã thêm vào \"%s\"</string>
 
     <!-- Collection insights -->

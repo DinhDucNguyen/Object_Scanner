@@ -22,6 +22,7 @@ class ReviewFragment : Fragment() {
 
     private val collectionId: Int by lazy { arguments?.getInt("collectionId") ?: 0 }
     private val collectionName: String? by lazy { arguments?.getString("collectionName") }
+    private val isPractice: Boolean by lazy { arguments?.getBoolean("isPractice") ?: false }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentReviewBinding.inflate(inflater, container, false)
@@ -85,7 +86,7 @@ viewModel.message.observe(viewLifecycleOwner) { msg ->
     override fun onResume() {
         super.onResume()
         collectionName?.let { requireActivity().title = "Ôn tập: $it" }
-        viewModel.loadCards(collectionId)
+        viewModel.loadCards(collectionId, isPractice)
     }
 
     private fun submitAnswer(quality: Int) {

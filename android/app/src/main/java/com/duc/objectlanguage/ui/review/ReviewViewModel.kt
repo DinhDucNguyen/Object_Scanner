@@ -40,13 +40,14 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
 
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
 
-    fun loadCards(collectionId: Int = 0) {
+    fun loadCards(collectionId: Int = 0, practice: Boolean = false) {
         viewModelScope.launch {
             _isLoading.value = true
             _finished.value = false
             _currentIndex.value = 0
             val result = if (collectionId > 0) {
-                collectionRepo.getCollectionReviewCards(collectionId)
+                if (practice) collectionRepo.getCollectionReviewCardsPractice(collectionId)
+                else collectionRepo.getCollectionReviewCards(collectionId)
             } else {
                 repo.getDueReviews()
             }

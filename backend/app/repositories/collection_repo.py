@@ -34,6 +34,13 @@ class CollectionRepository:
         db.flush()
         return item
 
+    def get_public(self, db: Session, user_id: int):
+        return db.query(UserCollection).filter(
+            UserCollection.cong_khai == True,
+            UserCollection.user_id != user_id,
+            UserCollection.thoi_gian_xoa.is_(None)
+        ).all()
+
     def remove_item(self, db: Session, collection_id: int, translation_id: int):
         db.query(CollectionItem).filter(
             CollectionItem.bo_suu_tap_id == collection_id,

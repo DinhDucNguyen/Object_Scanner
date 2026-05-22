@@ -7,7 +7,8 @@ data class Collection(
     val name: String,
     @SerializedName("is_public") val isPublic: Boolean,
     @SerializedName("item_count") val itemCount: Int,
-    @SerializedName("created_at") val createdAt: String?
+    @SerializedName("created_at") val createdAt: String?,
+    @SerializedName("owner_name") val ownerName: String? = null
 )
 
 data class CollectionDetail(

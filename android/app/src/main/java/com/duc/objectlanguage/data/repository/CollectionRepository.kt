@@ -90,4 +90,18 @@ class CollectionRepository(private val tokenManager: TokenManager) {
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    suspend fun getCollectionReviewCardsPractice(collectionId: Int): Result<List<ReviewCardResponse>> = try {
+        val cards = api.getCollectionReviewCards(collectionId, practice = true)
+        Result.success(cards)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun getPublicCollections(): Result<List<Collection>> = try {
+        val collections = api.getPublicCollections()
+        Result.success(collections)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }

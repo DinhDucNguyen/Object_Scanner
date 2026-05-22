@@ -47,9 +47,24 @@ class CollectionService:
         db.commit()
         return {"message": "Đã thêm vào bộ sưu tập"}
 
+    def get_public_collections(self, db: Session, user_id: int):
+        collections = self.repo.get_public(db, user_id)
+        return [
+            CollectionResponse(
+                id=c.id, name=c.ten_bo_suu_tap, is_public=c.cong_khai,
+                item_count=len(c.items),
+                created_at=c.ngay_tao,
+                owner_name=(
+                    c.user.profile.ho_ten
+                    if c.user.profile and c.user.profile.ho_ten
+                    else c.user.ten_dang_nhap
+                )
+            ) for c in collections
+        ]
+
     def get_collection_detail(self, db: Session, collection_id: int, user_id: int):
         collection = self.repo.get_by_id(db, collection_id)
-        if not collection or collection.user_id != user_id:
+        if not collection or (collection.user_id != user_id and not collection.cong_khai):
             raise HTTPException(status_code=404, detail="Collection not found")
 
         item_responses = []

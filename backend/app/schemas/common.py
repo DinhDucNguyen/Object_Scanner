@@ -101,6 +101,7 @@ class CollectionResponse(BaseModel):
     is_public: bool
     item_count: int = 0
     created_at: Optional[datetime] = None
+    owner_name: Optional[str] = None
 
     class Config:
         from_attributes = True

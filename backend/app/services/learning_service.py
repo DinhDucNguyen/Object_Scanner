@@ -89,7 +89,7 @@ class LearningService:
             db.commit()
         return results
 
-    def get_collection_review_cards(self, db: Session, collection_id: int, user_id: int):
+    def get_collection_review_cards(self, db: Session, collection_id: int, user_id: int, practice: bool = False):
         from app.models.user_collection import UserCollection
 
         collection = db.query(UserCollection).filter(
@@ -115,9 +115,24 @@ class LearningService:
             if not t:
                 continue
 
-            progress, created = self.ensure_in_learning(db, t.id, user_id)
-            if created:
-                db.flush()
+            if practice:
+                progress_id = 0
+                ef, interval, reps = 2.5, 0, 0
+                sort_order = 1
+            else:
+                progress, created = self.ensure_in_learning(db, t.id, user_id)
+                if created:
+                    db.flush()
+                progress_id = progress.id
+                ef = float(progress.do_de_nho)
+                interval = progress.khoang_lap
+                reps = progress.so_lan_lap
+                if progress.ngay_on_tiep and progress.ngay_on_tiep <= now:
+                    sort_order = 0
+                elif reps == 0:
+                    sort_order = 1
+                else:
+                    sort_order = 2
 
             lang = self.lang_repo.get_by_id(db, t.ngon_ngu_id)
             lang_code = lang.ma_ngon_ngu if lang else "en"
@@ -133,15 +148,8 @@ class LearningService:
                 for e in sorted((t.examples or []), key=lambda x: x.id or 0)[:3]
             ]
 
-            if progress.ngay_on_tiep and progress.ngay_on_tiep <= now:
-                sort_order = 0  # quá hạn
-            elif progress.so_lan_lap == 0:
-                sort_order = 1  # từ mới
-            else:
-                sort_order = 2  # đã học
-
             cards_with_sort.append((sort_order, ReviewCardResponse(
-                progress_id=progress.id,
+                progress_id=progress_id,
                 translation_id=t.id,
                 object_code=t.object.ma_doi_tuong if t.object else "",
                 word_name=t.tu_vung,
@@ -150,9 +158,9 @@ class LearningService:
                 examples=examples,
                 language_code=lang.ma_ngon_ngu if lang else "",
                 language_name=lang.ten_ngon_ngu if lang else "",
-                easiness_factor=float(progress.do_de_nho),
-                interval=progress.khoang_lap,
-                repetitions=progress.so_lan_lap,
+                easiness_factor=ef,
+                interval=interval,
+                repetitions=reps,
                 image_url=pick_primary_object_image(t.object),
                 audio_url=audio_url,
             )))
@@ -170,6 +178,9 @@ class LearningService:
         }
 
     def submit_review(self, db: Session, progress_id: int, request: ReviewRequest, user_id: int):
+        if progress_id == 0:
+            return ReviewResult(success=True, new_interval=0, new_ef=2.5, next_review_date=now_vietnam().strftime("%Y-%m-%d"))
+
         progress = self.repo.get_by_id(db, progress_id)
         if not progress or progress.user_id != user_id:
             raise HTTPException(404, "Progress not found")
@@ -202,7 +213,6 @@ class LearningService:
                     so_lan_lap_cu=old_repetitions,
                     so_lan_lap_moi=old_repetitions,
                     ngay_on_tiep=progress.ngay_on_tiep,
-                    thoi_gian_tao=reviewed_at,
                 ),
             )
             db.commit()
@@ -243,7 +253,6 @@ class LearningService:
                 so_lan_lap_cu=old_repetitions,
                 so_lan_lap_moi=result["repetitions"],
                 ngay_on_tiep=result["next_review_date"],
-                thoi_gian_tao=reviewed_at,
             ),
         )
         db.commit()

@@ -11,6 +11,9 @@ interface CollectionApiService {
     
     @GET("api/collections")
     suspend fun getCollections(): List<Collection>
+
+    @GET("api/collections/explore")
+    suspend fun getPublicCollections(): List<Collection>
     
     @GET("api/collections/{id}")
     suspend fun getCollectionDetail(@Path("id") collectionId: Int): CollectionDetail
@@ -37,5 +40,8 @@ interface CollectionApiService {
     suspend fun getCollectionInsights(@Path("id") collectionId: Int): CollectionInsights
 
     @GET("api/collections/{id}/review")
-    suspend fun getCollectionReviewCards(@Path("id") collectionId: Int): List<ReviewCardResponse>
+    suspend fun getCollectionReviewCards(
+        @Path("id") collectionId: Int,
+        @Query("practice") practice: Boolean = false
+    ): List<ReviewCardResponse>
 }

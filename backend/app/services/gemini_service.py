@@ -1,9 +1,8 @@
 import json
 import logging
 import re
-# TODO: Migrate to google.genai package (google-generativeai is deprecated)
-# See: https://github.com/google-gemini/deprecated-generative-ai-python
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from google.api_core.exceptions import ResourceExhausted
 from app.core.config import settings
 
@@ -13,35 +12,64 @@ logger = logging.getLogger(__name__)
 class GeminiService:
     def __init__(self):
         self.models_to_try = [
-            "gemini-2.5-flash",      # Stable, mid-size multimodal (RECOMMENDED)
-            "gemini-2.0-flash",      # Fast, versatile alternative
-            "gemini-flash-latest",   # Always latest stable release
+            "gemini-2.5-flash",
+            "gemini-2.0-flash",
+            "gemini-flash-latest",
         ]
+        self.client: genai.Client | None = None
+
         if settings.GEMINI_API_KEY:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-
-            self.model = None
-            for model_name in self.models_to_try:
-                try:
-                    self.model = genai.GenerativeModel(model_name)
-                    logger.info("Using %s", model_name)
-                    break
-                except Exception as e:
-                    logger.warning("%s not available: %s", model_name, e)
-                    continue
-
-            if not self.model:
-                logger.error("No Gemini model available!")
+            self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            logger.info("Gemini client initialized")
         else:
-            self.model = None
+            logger.warning("No GEMINI_API_KEY configured — Gemini disabled")
+
+    def _generate(self, contents: list) -> str | None:
+        """Gọi Gemini với fallback qua từng model, trả về response.text."""
+        if not self.client:
+            return None
+        last_error: Exception | None = None
+        for model_name in self.models_to_try:
+            try:
+                response = self.client.models.generate_content(
+                    model=model_name,
+                    contents=contents,
+                )
+                return response.text
+            except ResourceExhausted as e:
+                logger.warning("Model %s quota exhausted", model_name)
+                last_error = e
+            except Exception as e:
+                logger.warning("Model %s error: %s", model_name, e)
+                last_error = e
+        if last_error:
+            raise last_error
+        return None
+
+    def _parse_json(self, text: str) -> dict | list | None:
+        """Strip markdown fences và parse JSON."""
+        text = text.strip()
+        if text.startswith("```"):
+            text = text.split("\n", 1)[1] if "\n" in text else text
+            text = text.rsplit("```", 1)[0].strip()
+        first, last = text.find("{"), text.rfind("}")
+        if first != -1 and last != -1 and last > first:
+            try:
+                return json.loads(text[first:last + 1])
+            except Exception:
+                pass
+        first, last = text.find("["), text.rfind("]")
+        if first != -1 and last != -1 and last > first:
+            try:
+                return json.loads(text[first:last + 1])
+            except Exception:
+                pass
+        return None
 
     def identify_object(self, image_bytes: bytes) -> dict:
-        """
-        Gọi Gemini Vision API để nhận diện vật thể từ ảnh.
-        """
-        if not self.model:
-            logger.warning("Gemini model not initialized!")
-            return {"_error": "model_not_initialized", "_message": "Gemini model not initialized"}
+        """Gọi Gemini Vision API để nhận diện vật thể từ ảnh."""
+        if not self.client:
+            return {"_error": "model_not_initialized", "_message": "Gemini not configured"}
 
         logger.info("Calling Gemini API with image size: %d bytes", len(image_bytes))
 
@@ -75,77 +103,42 @@ Rules:
 - Return ONLY valid JSON, no markdown, no extra text"""
 
         try:
-            response = None
-            last_quota_error = None
-            for model_name in self.models_to_try:
-                try:
-                    model = genai.GenerativeModel(model_name)
-                    response = model.generate_content([
-                        prompt,
-                        {"mime_type": "image/jpeg", "data": image_bytes}
-                    ])
-                    if model_name != "gemini-2.5-flash":
-                        logger.info("Fallback model succeeded: %s", model_name)
-                    break
-                except ResourceExhausted as e:
-                    logger.warning("Model quota exhausted: %s", model_name)
-                    last_quota_error = e
-                    continue
-            else:
-                print(f"[Gemini] Model used for scan: {model_name}")
-
-            if response is None:
-                if last_quota_error is not None:
-                    raise last_quota_error
-                raise RuntimeError("No Gemini model produced a response")
-
-            text = (response.text or "").strip()
-            if text.startswith("```"):
-                # Handle markdown-wrapped JSON responses.
-                text = text.split("\n", 1)[1] if "\n" in text else text
-                text = text.rsplit("```", 1)[0].strip()
+            image_part = types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+            text = self._generate([prompt, image_part])
 
             if not text:
-                logger.error("Gemini returned empty text response")
                 return {"_error": "empty_response", "_message": "Gemini returned empty response"}
 
             logger.info("Gemini response: %s...", text[:200])
+            result = self._parse_json(text)
 
-            # Trích JSON block chắc chắn hơn (lấy từ { đầu tiên tới } cuối cùng)
-            json_str = text
-            first = text.find("{")
-            last = text.rfind("}")
-            if first != -1 and last != -1 and last > first:
-                json_str = text[first:last + 1]
-
-            try:
-                result = json.loads(json_str)
+            if isinstance(result, dict):
                 result = self._sanitize_result(result)
-                logger.info("Parsed object_code: %s", result.get('object_code', 'N/A'))
+                logger.info("Parsed object_code: %s", result.get("object_code", "N/A"))
                 return result
-            except Exception:
-                # Fallback parse khi model trả text gần-JSON nhưng sai format.
-                object_code_match = re.search(r'"object_code"\s*:\s*"([^"]+)"', text)
-                word_name_match = re.search(r'"word_name"\s*:\s*"([^"]+)"', text)
-                object_code = self._normalize_object_code(
-                    object_code_match.group(1) if object_code_match else (
-                        word_name_match.group(1) if word_name_match else "unknown"
-                    )
+
+            # Fallback regex parse
+            object_code_match = re.search(r'"object_code"\s*:\s*"([^"]+)"', text)
+            word_name_match = re.search(r'"word_name"\s*:\s*"([^"]+)"', text)
+            object_code = self._normalize_object_code(
+                object_code_match.group(1) if object_code_match else (
+                    word_name_match.group(1) if word_name_match else "unknown"
                 )
-                fallback = {
-                    "object_code": object_code,
-                    "category": "unknown",
-                    "translations": [{
-                        "lang_code": "en",
-                        "word_name": word_name_match.group(1) if word_name_match else object_code.replace("_", " ").title(),
-                        "phonetic": None,
-                        "definition": None,
-                        "example_sentences": []
-                    }]
-                }
-                fallback = self._sanitize_result(fallback)
-                logger.warning("Fallback parsed object_code: %s", fallback.get('object_code', 'N/A'))
-                return fallback
+            )
+            fallback = {
+                "object_code": object_code,
+                "category": "unknown",
+                "translations": [{
+                    "lang_code": "en",
+                    "word_name": word_name_match.group(1) if word_name_match else object_code.replace("_", " ").title(),
+                    "phonetic": None,
+                    "definition": None,
+                    "example_sentences": [],
+                }],
+            }
+            logger.warning("Fallback parsed object_code: %s", object_code)
+            return self._sanitize_result(fallback)
+
         except ResourceExhausted as e:
             logger.error("Gemini quota exceeded: %s", e)
             return {"_error": "quota_exceeded", "_message": str(e)}
@@ -154,12 +147,9 @@ Rules:
             return {"_error": "api_error", "_message": str(e)}
 
     def generate_vocab_for_object_code(self, object_code: str) -> dict:
-        """
-        Sinh dữ liệu từ vựng cho object_code bằng text prompt (không cần ảnh).
-        Trả về cùng format với identify_object.
-        """
-        if not self.model:
-            return {"_error": "no_model", "_message": "Gemini model not initialized"}
+        """Sinh dữ liệu từ vựng cho object_code bằng text prompt (không cần ảnh)."""
+        if not self.client:
+            return {"_error": "no_model", "_message": "Gemini not configured"}
 
         display_name = object_code.replace("_", " ")
         prompt = f"""Generate vocabulary data for the object: "{display_name}"
@@ -201,18 +191,16 @@ Rules:
 - category: choose EXACTLY one from: Con nguoi, Phuong tien, Dong vat, Phu kien, The thao, Nha bep, Thuc pham, Noi that, Dien tu, Do gia dung, Do dung hoc tap, Bien bao & do thi
 - phonetic: IPA format with slashes (e.g., /ap.el/), null if unknown
 - part_of_speech: n/v/adj/adv only
-- definition: "Vietnamese word: brief Vietnamese explanation"
 - example_sentences: EXACTLY 3 per language
 Return ONLY valid JSON, no markdown."""
 
         try:
-            response = self.model.generate_content(prompt)
-            text = response.text.strip()
-            first = text.find("{")
-            last = text.rfind("}")
-            if first == -1 or last == -1:
+            text = self._generate([prompt])
+            if not text:
+                return {"_error": "empty_response", "_message": "Empty response"}
+            result = self._parse_json(text)
+            if not isinstance(result, dict):
                 return {"_error": "parse_error", "_message": "No JSON in response"}
-            result = json.loads(text[first:last + 1])
             result = self._sanitize_result(result)
             result["object_code"] = object_code
             return result
@@ -222,39 +210,13 @@ Return ONLY valid JSON, no markdown."""
             logger.error("Error generating vocab for %s: %s", object_code, e)
             return {"_error": "api_error", "_message": str(e)}
 
-    def _normalize_object_code(self, raw: str) -> str:
-        if not raw:
-            return "unknown"
-        code = raw.lower().strip()
-        code = re.sub(r"[^a-z0-9\s_-]", "", code)
-        code = re.sub(r"[\s-]+", "_", code)
-        code = re.sub(r"_+", "_", code).strip("_")
-        return code or "unknown"
-
-    def _sanitize_result(self, result: dict) -> dict:
-        if not isinstance(result, dict):
-            return {"object_code": "unknown", "category": "unknown", "translations": []}
-
-        translations = result.get("translations")
-        if not isinstance(translations, list):
-            translations = []
-
-        object_code = self._normalize_object_code(result.get("object_code", ""))
-        if object_code == "unknown" and translations:
-            first_word = translations[0].get("word_name") if isinstance(translations[0], dict) else None
-            object_code = self._normalize_object_code(first_word or "")
-
-        result["object_code"] = object_code
-        result["translations"] = translations
-        return result
-
     def translate_text(self, text: str, from_lang: str = "en", to_lang: str = "vi") -> dict | None:
-        if not self.model:
+        if not self.client:
             return None
         lang_names = {
             "vi": "Vietnamese", "en": "English",
             "ja": "Japanese", "ko": "Korean",
-            "zh": "Chinese", "fr": "French"
+            "zh": "Chinese", "fr": "French",
         }
         from_name = lang_names.get(from_lang, from_lang.upper())
         to_name = lang_names.get(to_lang, to_lang.upper())
@@ -270,19 +232,16 @@ Return ONLY valid JSON:
 Text: {text}"""
 
         try:
-            response = self.model.generate_content(prompt)
-            raw = (response.text or "").strip()
-            if raw.startswith("```"):
-                raw = raw.split("\n", 1)[1] if "\n" in raw else raw
-                raw = raw.rsplit("```", 1)[0].strip()
-            first, last = raw.find("{"), raw.rfind("}")
-            if first != -1 and last != -1:
-                raw = raw[first:last + 1]
-            result = json.loads(raw)
+            raw = self._generate([prompt])
+            if not raw:
+                return None
+            result = self._parse_json(raw)
+            if not isinstance(result, dict):
+                return None
             return {
                 "translation": result.get("translation", ""),
                 "phonetic": result.get("phonetic"),
-                "definitions": result.get("definitions", [])
+                "definitions": result.get("definitions", []),
             }
         except ResourceExhausted:
             return {"_error": "quota_exceeded"}
@@ -291,13 +250,13 @@ Text: {text}"""
             return None
 
     def analyze_dictionary_text(self, text: str, from_lang: str = "en", to_lang: str = "vi") -> dict | None:
-        if not self.model:
+        if not self.client:
             return None
 
         lang_names = {
             "vi": "Vietnamese", "en": "English",
             "ja": "Japanese", "ko": "Korean",
-            "zh": "Chinese", "fr": "French"
+            "zh": "Chinese", "fr": "French",
         }
         from_name = lang_names.get(from_lang, from_lang.upper())
         to_name = lang_names.get(to_lang, to_lang.upper())
@@ -336,23 +295,16 @@ Target language: {to_name}
 Input: {text}"""
 
         try:
-            response = self.model.generate_content(prompt)
-            raw = (response.text or "").strip()
-            if raw.startswith("```"):
-                raw = raw.split("\n", 1)[1] if "\n" in raw else raw
-                raw = raw.rsplit("```", 1)[0].strip()
-            first, last = raw.find("{"), raw.rfind("}")
-            if first != -1 and last != -1 and last > first:
-                raw = raw[first:last + 1]
-            result = json.loads(raw)
+            raw = self._generate([prompt])
+            if not raw:
+                return None
+            result = self._parse_json(raw)
             if not isinstance(result, dict):
                 return None
-
             result["object_code"] = self._normalize_object_code(result.get("object_code") or "")
             if result["object_code"] == "unknown":
                 result["object_code"] = None
-            translations = result.get("translations")
-            result["translations"] = translations if isinstance(translations, list) else []
+            result["translations"] = result.get("translations") if isinstance(result.get("translations"), list) else []
             result["definitions"] = result.get("definitions") if isinstance(result.get("definitions"), list) else []
             result["is_physical_object"] = bool(result.get("is_physical_object"))
             return result
@@ -363,10 +315,8 @@ Input: {text}"""
             return None
 
     def get_example_sentences(self, word: str, lang_code: str = "en", count: int = 3) -> list:
-        """
-        Sinh câu ví dụ cho một từ vựng.
-        """
-        if not self.model:
+        """Sinh câu ví dụ cho một từ vựng."""
+        if not self.client:
             return []
 
         prompt = f"""Generate exactly {count} example sentences using the word "{word}" in English.
@@ -375,15 +325,36 @@ Return a JSON array of strings, like: ["sentence 1", "sentence 2", "sentence 3"]
 Return ONLY valid JSON, no markdown or extra text."""
 
         try:
-            response = self.model.generate_content(prompt)
-            text = response.text.strip()
-            if text.startswith("```"):
-                text = text.split("\n", 1)[1]
-                text = text.rsplit("```", 1)[0]
-            sentences = json.loads(text)
-            if not isinstance(sentences, list):
+            text = self._generate([prompt])
+            if not text:
                 return []
-            return [str(sentence).strip() for sentence in sentences if str(sentence).strip()][:count]
+            result = self._parse_json(text)
+            if not isinstance(result, list):
+                return []
+            return [str(s).strip() for s in result if str(s).strip()][:count]
         except Exception as e:
             logger.error("Gemini example sentences error: %s", e)
             return []
+
+    def _normalize_object_code(self, raw: str) -> str:
+        if not raw:
+            return "unknown"
+        code = raw.lower().strip()
+        code = re.sub(r"[^a-z0-9\s_-]", "", code)
+        code = re.sub(r"[\s-]+", "_", code)
+        code = re.sub(r"_+", "_", code).strip("_")
+        return code or "unknown"
+
+    def _sanitize_result(self, result: dict) -> dict:
+        if not isinstance(result, dict):
+            return {"object_code": "unknown", "category": "unknown", "translations": []}
+        translations = result.get("translations")
+        if not isinstance(translations, list):
+            translations = []
+        object_code = self._normalize_object_code(result.get("object_code", ""))
+        if object_code == "unknown" and translations:
+            first_word = translations[0].get("word_name") if isinstance(translations[0], dict) else None
+            object_code = self._normalize_object_code(first_word or "")
+        result["object_code"] = object_code
+        result["translations"] = translations
+        return result

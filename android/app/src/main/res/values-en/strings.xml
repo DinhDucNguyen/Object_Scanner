@@ -72,8 +72,12 @@
 
     <!-- Dashboard -->
     <string name="dashboard_default_user">there</string>
+    <string name="dashboard_greeting">Good morning!</string>
+    <string name="dashboard_greeting_subtitle">Ready to learn a new word?</string>
     <string name="dashboard_brand_name">LengoLens.</string>
     <string name="dashboard_search_hint">Search or scan an object…</string>
+    <string name="dashboard_mastery_label">Mastery level</string>
+    <string name="dashboard_goal_title">Today\'s goal</string>
     <string name="dashboard_hunt_title">Turn real objects into new words</string>
     <string name="dashboard_hunt_subtitle">Pick something nearby, scan it with the camera, and save it to your review set.</string>
     <string name="dashboard_mission_first_scan_title">Scan your first object</string>
@@ -279,6 +283,13 @@
     <string name="collection_name_empty">Collection name cannot be empty</string>
     <string name="collection_added">Added to collection</string>
     <string name="collection_removed">Removed from collection</string>
+    <string name="collection_tab_mine">Mine</string>
+    <string name="collection_tab_community">Community</string>
+    <string name="collection_dialog_public_label">Share with everyone</string>
+    <string name="collection_dialog_public_hint">Others will be able to see this collection</string>
+    <string name="collection_by_owner">by %s</string>
+    <string name="collection_community_empty_title">No public collections yet</string>
+    <string name="collection_community_empty_subtitle">Be the first to share your collection!</string>
     <string name="collection_added_to">Added to \"%s\"</string>
 
     <!-- Collection insights -->

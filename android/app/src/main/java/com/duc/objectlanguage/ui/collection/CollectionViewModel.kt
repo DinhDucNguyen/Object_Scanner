@@ -40,6 +40,10 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
     private val _successMessage = MutableLiveData<String?>()
     val successMessage: LiveData<String?> = _successMessage
     
+    // Public collections (community tab)
+    private val _publicCollections = MutableLiveData<List<Collection>>()
+    val publicCollections: LiveData<List<Collection>> = _publicCollections
+
     // Filter state
     private val _filterQuery = MutableLiveData<String>("")
     val filterQuery: LiveData<String> = _filterQuery
@@ -189,6 +193,16 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
     
+    fun loadPublicCollections() {
+        viewModelScope.launch {
+            val result = repo.getPublicCollections()
+            result.fold(
+                onSuccess = { _publicCollections.value = it },
+                onFailure = { _error.value = it.message }
+            )
+        }
+    }
+
     /**
      * Update filter query
      */

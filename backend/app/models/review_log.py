@@ -21,7 +21,6 @@ class ReviewLog(Base):
     so_lan_lap_cu = Column(Integer, nullable=True)
     so_lan_lap_moi = Column(Integer, nullable=True)
     ngay_on_tiep = Column(DateTime, nullable=True)
-    thoi_gian_tao = Column(DateTime, default=now_vietnam, nullable=False)
 
     user = relationship("User")
     progress = relationship("LearningProgress")
