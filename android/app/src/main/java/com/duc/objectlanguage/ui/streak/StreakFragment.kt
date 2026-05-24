@@ -73,6 +73,7 @@ class StreakFragment : Fragment() {
             nextMilestoneText.text = getString(R.string.streak_milestone_label, data.nextMilestone)
             milestoneProgressBar.max      = data.nextMilestone
             milestoneProgressBar.progress = data.currentStreak
+            milestoneProgressBar.progressTintList = ColorStateList.valueOf(accentColor)
             daysToMilestoneText.text = getString(R.string.streak_days_to_go, data.daysToMilestone)
 
             // Flame icon theo cường độ chuỗi
@@ -84,11 +85,13 @@ class StreakFragment : Fragment() {
 
             // Trạng thái hôm nay
             if (data.reviewsToday > 0) {
-                todayStatusIcon.text = "✅"
+                todayStatusIcon.text = "OK"
                 todayStatusText.text = getString(R.string.streak_today_done)
+                todayStatusIcon.setTextColor(ContextCompat.getColor(requireContext(), R.color.success))
             } else {
-                todayStatusIcon.text = "⏰"
+                todayStatusIcon.text = "!"
                 todayStatusText.text = getString(R.string.streak_today_pending)
+                todayStatusIcon.setTextColor(accentColor)
             }
             todayStatusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
         }

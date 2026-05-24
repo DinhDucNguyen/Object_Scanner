@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.databinding.ItemCollectionBinding
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class CollectionAdapter(
     private val onCollectionClick: (Collection) -> Unit,
@@ -37,11 +39,30 @@ class CollectionAdapter(
             binding.itemCount.text = ctx.getString(R.string.collection_item_count, collection.itemCount)
             binding.createdDate.text = ctx.getString(
                 R.string.collection_created_date,
-                collection.createdAt?.take(10) ?: "--"
+                formatCollectionDate(collection.createdAt)
             )
+            val progress = collectionProgressPercent(collection.itemCount)
+            binding.collectionProgress.progress = progress
+            binding.progressPercent.text = ctx.getString(R.string.collection_progress_percent, progress)
 
             binding.root.setOnClickListener { onCollectionClick(collection) }
             binding.deleteButton.setOnClickListener { onDeleteClick(collection) }
+        }
+
+        private fun formatCollectionDate(rawDate: String?): String {
+            val normalized = rawDate?.take(10) ?: return "--"
+            return try {
+                val parser = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val date = parser.parse(normalized)
+                if (date != null) formatter.format(date) else normalized
+            } catch (_: Exception) {
+                normalized
+            }
+        }
+
+        private fun collectionProgressPercent(itemCount: Int): Int {
+            return itemCount.coerceIn(0, 4) * 25
         }
     }
     

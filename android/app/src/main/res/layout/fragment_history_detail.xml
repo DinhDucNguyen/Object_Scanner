@@ -19,7 +19,7 @@
             android:adjustViewBounds="true"
             android:minHeight="220dp"
             android:scaleType="fitCenter"
-            android:background="#F0F0F0"
+            android:background="@color/surface"
             android:contentDescription="@string/history_scanned_image" />
 
         <LinearLayout
@@ -85,7 +85,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="2dp"
                 app:strokeColor="@color/divider"
@@ -162,7 +162,7 @@
                         android:id="@+id/tvExample"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="#F5F5F5"
+                        android:background="@color/surface"
                         android:padding="10dp"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp"

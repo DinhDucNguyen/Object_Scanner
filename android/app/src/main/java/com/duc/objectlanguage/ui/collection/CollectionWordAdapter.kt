@@ -1,13 +1,13 @@
 package com.duc.objectlanguage.ui.collection
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.duc.objectlanguage.data.model.CollectionItem
 import com.duc.objectlanguage.databinding.ItemCollectionWordBinding
+import java.util.Locale
 
 class CollectionWordAdapter(
     private val onRemove: (translationId: Int) -> Unit
@@ -18,9 +18,8 @@ class CollectionWordAdapter(
 
         fun bind(item: CollectionItem) {
             binding.tvWord.text = item.translation
-            binding.tvDefinition.text = "${item.objectName} · ${item.category}"
-            binding.tvPhonetic.visibility = View.GONE
-            binding.tvPos.visibility = View.GONE
+            binding.tvDefinition.text = item.objectName
+            binding.tvCategory.text = item.category.uppercase(Locale.getDefault())
             binding.btnRemove.setOnClickListener { onRemove(item.translationId) }
         }
     }

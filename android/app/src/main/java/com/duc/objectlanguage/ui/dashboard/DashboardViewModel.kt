@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.local.StreakDataStore
 import com.duc.objectlanguage.data.model.StatsResponse
+import com.duc.objectlanguage.data.repository.CollectionRepository
 import java.util.Calendar
 import kotlin.random.Random
 import kotlinx.coroutines.flow.combine
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repo = (application as ObjectLanguageApp).repository
+    private val collectionRepo = CollectionRepository((application as ObjectLanguageApp).tokenManager)
     private val streakStore = StreakDataStore(application)
 
     private val _stats = MutableLiveData<StatsResponse?>()
@@ -37,6 +39,9 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val _dailySuggestions = MutableLiveData<List<DashboardSuggestion>>(emptyList())
     val dailySuggestions: LiveData<List<DashboardSuggestion>> = _dailySuggestions
+
+    private val _topCollections = MutableLiveData<List<CollectionHighlight>>(emptyList())
+    val topCollections: LiveData<List<CollectionHighlight>> = _topCollections
 
     fun loadStats() {
         viewModelScope.launch {
@@ -72,6 +77,16 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             }
 
             _dailySuggestions.value = suggestions
+        }
+    }
+
+    fun loadTopCollections() {
+        viewModelScope.launch {
+            collectionRepo.getCollections().getOrNull()
+                ?.sortedByDescending { it.itemCount }
+                ?.take(3)
+                ?.map { CollectionHighlight(it.id, it.name, it.itemCount) }
+                ?.let { _topCollections.value = it }
         }
     }
 
@@ -138,4 +153,10 @@ data class DashboardStreakSummary(
 data class DashboardSuggestion(
     val objectCode: String,
     val displayName: String,
+)
+
+data class CollectionHighlight(
+    val id: Int,
+    val name: String,
+    val itemCount: Int,
 )

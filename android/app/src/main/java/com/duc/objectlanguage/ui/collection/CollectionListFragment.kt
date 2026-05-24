@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentCollectionListBinding
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.tabs.TabLayout
@@ -144,16 +145,21 @@ class CollectionListFragment : Fragment() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_create_collection, null)
         val nameInput = dialogView.findViewById<TextInputEditText>(R.id.collectionNameInput)
         val switchPublic = dialogView.findViewById<SwitchMaterial>(R.id.switchPublic)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancelDialog)
+        val btnCreate = dialogView.findViewById<MaterialButton>(R.id.btnCreateDialog)
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.collection_dialog_create_title)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(dialogView)
-            .setPositiveButton(R.string.btn_create) { _, _ ->
-                val name = nameInput.text?.toString() ?: ""
-                viewModel.createCollection(name, isPublic = switchPublic.isChecked)
-            }
-            .setNegativeButton(R.string.btn_cancel, null)
-            .show()
+            .create()
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnCreate.setOnClickListener {
+            val name = nameInput.text?.toString() ?: ""
+            viewModel.createCollection(name, isPublic = switchPublic.isChecked)
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun showDeleteConfirmation(collectionId: Int, collectionName: String) {

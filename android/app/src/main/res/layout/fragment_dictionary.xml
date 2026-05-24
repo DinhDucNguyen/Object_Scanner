@@ -42,23 +42,15 @@
 
         <ImageButton
             android:id="@+id/btnShowHistory"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="10dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            android:src="@drawable/ic_history"
-            android:contentDescription="@string/dictionary_history_title"
-            app:tint="@color/text_secondary" />
-
-        <ImageView
             android:layout_width="46dp"
             android:layout_height="46dp"
-            android:layout_marginStart="6dp"
+            android:layout_marginStart="10dp"
             android:background="@drawable/bg_icon_primary"
             android:padding="11dp"
-            android:src="@drawable/ic_dictionary"
+            android:src="@drawable/ic_history"
+            android:contentDescription="@string/dictionary_history_title"
             app:tint="@color/primary" />
+
     </LinearLayout>
 
     <ScrollView

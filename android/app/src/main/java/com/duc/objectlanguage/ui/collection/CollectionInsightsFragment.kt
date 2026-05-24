@@ -5,15 +5,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentCollectionInsightsBinding
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.*
-import com.github.mikephil.charting.utils.ColorTemplate
 
 /**
  * Fragment showing collection analytics and smart suggestions
@@ -124,25 +126,45 @@ class CollectionInsightsFragment : Fragment() {
     private fun setupProgressPieChart(insights: com.duc.objectlanguage.data.model.CollectionInsights) {
         val pieChart: PieChart = binding.progressPieChart
         
-        val reviewed = insights.reviewedItems
-        val unreviewed = insights.totalItems - insights.reviewedItems
+        val reviewed = insights.reviewedItems.coerceAtLeast(0)
+        val unreviewed = (insights.totalItems - insights.reviewedItems).coerceAtLeast(0)
         
-        val entries = listOf(
-            PieEntry(reviewed.toFloat(), "Reviewed"),
-            PieEntry(unreviewed.toFloat(), "Not Reviewed")
-        )
+        val entries = if (insights.totalItems > 0) {
+            listOf(
+                PieEntry(reviewed.toFloat(), "Đã ôn"),
+                PieEntry(unreviewed.toFloat(), "Chưa ôn")
+            )
+        } else {
+            listOf(PieEntry(1f, "Chưa có dữ liệu"))
+        }
         
-        val dataSet = PieDataSet(entries, "Review Progress")
-        dataSet.colors = listOf(
-            ColorTemplate.rgb("#4CAF50"),
-            ColorTemplate.rgb("#E0E0E0")
+        val textColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
+        val mutedColor = ContextCompat.getColor(requireContext(), R.color.text_secondary)
+
+        val dataSet = PieDataSet(entries, "")
+        dataSet.colors = if (insights.totalItems > 0) listOf(
+            ContextCompat.getColor(requireContext(), R.color.primary),
+            ContextCompat.getColor(requireContext(), R.color.surface_variant)
+        ) else listOf(
+            ContextCompat.getColor(requireContext(), R.color.surface_variant)
         )
-        dataSet.valueTextSize = 14f
+        dataSet.sliceSpace = 2f
+        dataSet.valueTextColor = textColor
+        dataSet.valueTextSize = 12f
+        dataSet.setDrawValues(insights.totalItems > 0)
         
         val data = PieData(dataSet)
         pieChart.data = data
         pieChart.description.isEnabled = false
-        pieChart.centerText = "Progress"
+        pieChart.setUsePercentValues(false)
+        pieChart.setDrawEntryLabels(false)
+        pieChart.legend.textColor = mutedColor
+        pieChart.legend.textSize = 12f
+        pieChart.centerText = getString(R.string.ci_progress_chart)
+        pieChart.setCenterTextColor(textColor)
+        pieChart.setCenterTextSize(13f)
+        pieChart.holeRadius = 60f
+        pieChart.transparentCircleRadius = 64f
         pieChart.animateY(1000)
         pieChart.invalidate()
     }
@@ -150,9 +172,9 @@ class CollectionInsightsFragment : Fragment() {
     private fun setupMasteryBarChart(insights: com.duc.objectlanguage.data.model.CollectionInsights) {
         val barChart: BarChart = binding.masteryBarChart
         
-        val mastered = insights.masteredItems
-        val reviewed = insights.reviewedItems - insights.masteredItems
-        val unreviewed = insights.totalItems - insights.reviewedItems
+        val mastered = insights.masteredItems.coerceAtLeast(0)
+        val reviewed = (insights.reviewedItems - insights.masteredItems).coerceAtLeast(0)
+        val unreviewed = (insights.totalItems - insights.reviewedItems).coerceAtLeast(0)
         
         val entries = listOf(
             BarEntry(0f, mastered.toFloat()),
@@ -160,18 +182,30 @@ class CollectionInsightsFragment : Fragment() {
             BarEntry(2f, unreviewed.toFloat())
         )
         
-        val dataSet = BarDataSet(entries, "Mastery Level")
+        val textColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
+        val mutedColor = ContextCompat.getColor(requireContext(), R.color.text_secondary)
+
+        val dataSet = BarDataSet(entries, "")
         dataSet.colors = listOf(
-            ColorTemplate.rgb("#4CAF50"), // Mastered - Green
-            ColorTemplate.rgb("#FF9800"), // Reviewed - Orange
-            ColorTemplate.rgb("#E0E0E0")  // Unreviewed - Gray
+            ContextCompat.getColor(requireContext(), R.color.success),
+            ContextCompat.getColor(requireContext(), R.color.warning),
+            ContextCompat.getColor(requireContext(), R.color.surface_variant)
         )
+        dataSet.valueTextColor = textColor
         dataSet.valueTextSize = 12f
         
         val data = BarData(dataSet)
+        data.barWidth = 0.56f
         barChart.data = data
         barChart.description.isEnabled = false
-        barChart.xAxis.isEnabled = false
+        barChart.legend.isEnabled = false
+        barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+        barChart.xAxis.textColor = mutedColor
+        barChart.xAxis.setDrawGridLines(false)
+        barChart.xAxis.granularity = 1f
+        barChart.axisLeft.textColor = mutedColor
+        barChart.axisLeft.setDrawGridLines(true)
+        barChart.axisRight.isEnabled = false
         barChart.animateY(1000)
         barChart.invalidate()
     }
@@ -182,13 +216,14 @@ class CollectionInsightsFragment : Fragment() {
         
         // Add each suggestion as a card
         suggestions.forEach { suggestion ->
-            val textView = layoutInflater.inflate(
+            val itemView = layoutInflater.inflate(
                 R.layout.item_suggestion,
                 binding.suggestionsContainer,
                 false
-            ) as android.widget.TextView
+            )
+            val textView = itemView.findViewById<TextView>(R.id.suggestionText)
             textView.text = suggestion
-            binding.suggestionsContainer.addView(textView)
+            binding.suggestionsContainer.addView(itemView)
         }
     }
     

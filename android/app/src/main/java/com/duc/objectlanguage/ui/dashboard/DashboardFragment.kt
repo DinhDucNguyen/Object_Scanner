@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
@@ -15,7 +13,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentDashboardBinding
-import com.google.android.material.card.MaterialCardView
 
 class DashboardFragment : Fragment() {
 
@@ -23,28 +20,6 @@ class DashboardFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: DashboardViewModel by viewModels()
     private var missionOpensReview = false
-    private val suggestionSlots get() = listOf(
-        SuggestionSlot(
-            binding.cardSuggestionOne.root,
-            binding.cardSuggestionOne.tvSuggestionTitle,
-            binding.cardSuggestionOne.ivSuggestionIcon,
-        ),
-        SuggestionSlot(
-            binding.cardSuggestionTwo.root,
-            binding.cardSuggestionTwo.tvSuggestionTitle,
-            binding.cardSuggestionTwo.ivSuggestionIcon,
-        ),
-        SuggestionSlot(
-            binding.cardSuggestionThree.root,
-            binding.cardSuggestionThree.tvSuggestionTitle,
-            binding.cardSuggestionThree.ivSuggestionIcon,
-        ),
-        SuggestionSlot(
-            binding.cardSuggestionFour.root,
-            binding.cardSuggestionFour.tvSuggestionTitle,
-            binding.cardSuggestionFour.ivSuggestionIcon,
-        ),
-    )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
@@ -54,24 +29,22 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnScanNow.setOnClickListener {
-            if (missionOpensReview) {
-                openReview()
-            } else {
-                openScan()
-            }
-        }
-
         binding.cardDashboardSearch.setOnClickListener {
             openDictionary()
         }
 
-        suggestionSlots.forEach { slot ->
-            slot.card.setOnClickListener { openScan() }
+        binding.btnScanNow.setOnClickListener {
+            if (missionOpensReview) openReview() else openScan()
         }
 
         binding.cardDashboardStreak.setOnClickListener {
             findNavController().navigate(com.duc.objectlanguage.R.id.streakFragment)
+        }
+        binding.cardExploreBanner.setOnClickListener {
+            findNavController().navigate(R.id.action_dashboard_to_explore)
+        }
+        binding.btnSeeAllCollections.setOnClickListener {
+            findNavController().navigate(R.id.action_dashboard_to_collectionList)
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
@@ -80,13 +53,12 @@ class DashboardFragment : Fragment() {
 
         viewModel.stats.observe(viewLifecycleOwner) { stats ->
             if (stats != null) {
-                bindMission(stats.dueToday, stats.totalScans)
-
                 val total = stats.totalLearned
                 val mastered = stats.mastered
                 val pct = if (total > 0) (mastered * 100 / total) else 0
                 binding.progressMastery.progress = pct
                 binding.tvProgressPct.text = getString(R.string.dashboard_progress_short, pct)
+                bindMission(stats.dueToday, stats.totalScans)
             }
         }
 
@@ -94,8 +66,8 @@ class DashboardFragment : Fragment() {
             bindStreakSummary(streak)
         }
 
-        viewModel.dailySuggestions.observe(viewLifecycleOwner) { suggestions ->
-            bindDailySuggestions(suggestions)
+        viewModel.topCollections.observe(viewLifecycleOwner) { collections ->
+            bindTopCollections(collections)
         }
 
         viewModel.error.observe(viewLifecycleOwner) { err ->
@@ -106,7 +78,7 @@ class DashboardFragment : Fragment() {
 
         viewModel.loadStats()
         viewModel.loadStreak()
-        viewModel.loadDailySuggestions()
+        viewModel.loadTopCollections()
     }
 
     private fun openScan() {
@@ -131,63 +103,58 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    private fun bindMission(dueToday: Int, totalScans: Int) {
-        missionOpensReview = dueToday > 0
-        if (dueToday > 0) {
-            binding.tvObjectOfDayContainer.visibility = View.GONE
-            binding.tvMissionTitle.text = getString(R.string.dashboard_mission_review_title, dueToday)
-            binding.tvMissionSubtitle.text = getString(R.string.dashboard_mission_review_subtitle)
-            binding.btnScanNow.text = getString(R.string.dashboard_btn_review_short)
-            binding.btnScanNow.setIconResource(R.drawable.ic_book)
-            binding.btnScanNow.backgroundTintList = ColorStateList.valueOf(
-                ContextCompat.getColor(requireContext(), R.color.secondary)
-            )
-            binding.btnScanNow.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_on_primary))
-            binding.btnScanNow.iconTint = ColorStateList.valueOf(
-                ContextCompat.getColor(requireContext(), R.color.text_on_primary)
-            )
-        } else {
-            binding.tvObjectOfDayContainer.visibility = View.VISIBLE
-            binding.tvMissionTitle.text = getString(
-                if (totalScans == 0) R.string.dashboard_mission_first_scan_title
-                else R.string.dashboard_mission_scan_title
-            )
-            binding.tvMissionSubtitle.text = getString(
-                if (totalScans == 0) R.string.dashboard_mission_first_scan_subtitle
-                else R.string.dashboard_mission_scan_subtitle
-            )
-            binding.btnScanNow.text = getString(R.string.dashboard_btn_scan_now)
-            binding.btnScanNow.setIconResource(R.drawable.ic_camera)
-            binding.btnScanNow.backgroundTintList = ColorStateList.valueOf(
-                ContextCompat.getColor(requireContext(), R.color.primary)
-            )
-            binding.btnScanNow.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_on_primary))
-            binding.btnScanNow.iconTint = ColorStateList.valueOf(
-                ContextCompat.getColor(requireContext(), R.color.text_on_primary)
-            )
+    private fun bindTopCollections(collections: List<CollectionHighlight>) {
+        if (collections.isEmpty()) {
+            binding.sectionTopCollections.visibility = View.GONE
+            return
+        }
+        binding.sectionTopCollections.visibility = View.VISIBLE
+        val cards = listOf(
+            Triple(binding.cardHighlight1, binding.tvHighlightName1, binding.tvHighlightCount1),
+            Triple(binding.cardHighlight2, binding.tvHighlightName2, binding.tvHighlightCount2),
+            Triple(binding.cardHighlight3, binding.tvHighlightName3, binding.tvHighlightCount3),
+        )
+        cards.forEachIndexed { index, (card, name, count) ->
+            val item = collections.getOrNull(index)
+            if (item == null) {
+                card.visibility = View.GONE
+            } else {
+                card.visibility = View.VISIBLE
+                name.text = item.name
+                count.text = getString(R.string.collection_item_count, item.itemCount)
+                card.setOnClickListener {
+                    val bundle = android.os.Bundle().apply { putInt("collectionId", item.id) }
+                    findNavController().navigate(R.id.action_dashboard_to_collectionDetail, bundle)
+                }
+            }
         }
     }
 
-    private fun bindDailySuggestions(suggestions: List<DashboardSuggestion>) {
-        suggestions.firstOrNull()?.let { first ->
-            binding.tvObjectOfDay.text = first.displayName
-        }
-        suggestionSlots.forEachIndexed { index, slot ->
-            val suggestion = suggestions.getOrNull(index)
-            if (suggestion == null) {
-                slot.card.visibility = View.GONE
-            } else {
-                val accent = getSuggestionAccent(index)
-                slot.card.visibility = View.VISIBLE
-                slot.title.text = suggestion.displayName
-                slot.card.contentDescription = suggestion.objectCode
-                slot.card.setCardBackgroundColor(
-                    ContextCompat.getColor(requireContext(), accent.backgroundColorRes)
-                )
-                slot.card.setStrokeColor(ContextCompat.getColor(requireContext(), accent.backgroundColorRes))
-                slot.icon.imageTintList = ColorStateList.valueOf(
-                    ContextCompat.getColor(requireContext(), accent.iconColorRes)
-                )
+    private fun bindMission(dueToday: Int, totalScans: Int) {
+        when {
+            totalScans == 0 -> {
+                binding.tvObjectOfDayContainer.visibility = View.GONE
+                binding.tvMissionTitle.text = getString(R.string.dashboard_mission_first_scan_title)
+                binding.tvMissionSubtitle.text = getString(R.string.dashboard_mission_first_scan_subtitle)
+                binding.btnScanNow.text = getString(R.string.dashboard_btn_scan_now)
+                binding.btnScanNow.setIconResource(R.drawable.ic_camera)
+                missionOpensReview = false
+            }
+            dueToday > 0 -> {
+                binding.tvObjectOfDayContainer.visibility = View.GONE
+                binding.tvMissionTitle.text = getString(R.string.dashboard_mission_review_title, dueToday)
+                binding.tvMissionSubtitle.text = getString(R.string.dashboard_mission_review_subtitle)
+                binding.btnScanNow.text = getString(R.string.dashboard_btn_review_short)
+                binding.btnScanNow.setIconResource(R.drawable.ic_book)
+                missionOpensReview = true
+            }
+            else -> {
+                binding.tvObjectOfDayContainer.visibility = View.GONE
+                binding.tvMissionTitle.text = getString(R.string.dashboard_mission_scan_title)
+                binding.tvMissionSubtitle.text = getString(R.string.dashboard_mission_scan_subtitle)
+                binding.btnScanNow.text = getString(R.string.dashboard_btn_scan_now)
+                binding.btnScanNow.setIconResource(R.drawable.ic_camera)
+                missionOpensReview = false
             }
         }
     }
@@ -196,6 +163,7 @@ class DashboardFragment : Fragment() {
         super.onResume()
         viewModel.loadStats()
         viewModel.loadStreak()
+        viewModel.loadTopCollections()
     }
 
     override fun onDestroyView() {
@@ -255,26 +223,8 @@ class DashboardFragment : Fragment() {
         else -> StreakAccent(R.color.warning, R.color.warning_light)
     }
 
-    private fun getSuggestionAccent(index: Int): SuggestionAccent = when (index % 4) {
-        0 -> SuggestionAccent(R.color.primary_light, R.color.primary)
-        1 -> SuggestionAccent(R.color.success_light, R.color.success)
-        2 -> SuggestionAccent(R.color.cyan_light, R.color.cyan)
-        else -> SuggestionAccent(R.color.violet_light, R.color.violet)
-    }
-
     private data class StreakAccent(
         @ColorRes val colorRes: Int,
         @ColorRes val trackColorRes: Int,
-    )
-
-    private data class SuggestionAccent(
-        @ColorRes val backgroundColorRes: Int,
-        @ColorRes val iconColorRes: Int,
-    )
-
-    private data class SuggestionSlot(
-        val card: MaterialCardView,
-        val title: TextView,
-        val icon: ImageView,
     )
 }

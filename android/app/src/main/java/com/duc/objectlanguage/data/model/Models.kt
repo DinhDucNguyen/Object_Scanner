@@ -72,7 +72,8 @@ data class ScanResponse(
     val translations: List<TranslationResponse>,
     @SerializedName("scan_id") val scanId: Int? = null,
     @SerializedName("prediction_id") val predictionId: Int? = null,
-    @SerializedName("pending_review") val pendingReview: Boolean = false
+    @SerializedName("pending_review") val pendingReview: Boolean = false,
+    val aliases: List<String> = emptyList()
 )
 
 data class ViDuResponse(

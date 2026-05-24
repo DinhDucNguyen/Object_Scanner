@@ -60,7 +60,7 @@ OBJECT_UPLOAD_DIR = "uploads/objects"
 def list_predictions(
     trang_thai: Optional[str] = Query(default="cho_duyet", description="cho_duyet | da_duyet | tu_choi"),
     search: Optional[str] = Query(default=None),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=50, ge=1),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
@@ -522,7 +522,7 @@ def list_objects(
     search: Optional[str] = Query(default=None),
     category_id: Optional[int] = Query(default=None),
     no_image: Optional[bool] = Query(default=None, description="true = chỉ hiện đối tượng chưa có ảnh"),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=50, ge=1),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
@@ -585,7 +585,7 @@ def list_translations(
     search: Optional[str] = Query(default=None),
     lang_code: Optional[str] = Query(default=None),
     approved: Optional[bool] = Query(default=None),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=50, ge=1),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
@@ -621,7 +621,7 @@ def delete_translation(translation_id: int, db: Session = Depends(get_db)):
 @router.get("/users", response_model=List[UserAdminResponse])
 def list_users(
     search: Optional[str] = Query(default=None),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=50, ge=1),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
@@ -676,7 +676,7 @@ def list_scan_history(
     object_code: Optional[str] = Query(default=None),
     date_from: Optional[str] = Query(default=None),
     date_to: Optional[str] = Query(default=None),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=50, ge=1),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):

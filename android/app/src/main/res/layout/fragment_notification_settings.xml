@@ -81,7 +81,9 @@
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/dailyReminderSwitch"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        app:trackTint="@color/switch_track_tint"
+                        app:thumbTint="@color/switch_thumb_tint" />
                 </LinearLayout>
 
                 <View
@@ -255,7 +257,9 @@
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/streakAlertSwitch"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        app:trackTint="@color/switch_track_tint"
+                        app:thumbTint="@color/switch_thumb_tint" />
                 </LinearLayout>
 
                 <View
@@ -297,7 +301,9 @@
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/milestoneCelebrationSwitch"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        app:trackTint="@color/switch_track_tint"
+                        app:thumbTint="@color/switch_thumb_tint" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

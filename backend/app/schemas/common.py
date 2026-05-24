@@ -61,6 +61,7 @@ class ScanResponse(BaseModel):
     scan_id: Optional[int] = None
     prediction_id: Optional[int] = None
     pending_review: bool = False
+    aliases: List[str] = []
 
 # ====== Review ======
 

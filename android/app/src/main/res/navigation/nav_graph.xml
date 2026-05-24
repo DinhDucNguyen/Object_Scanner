@@ -65,7 +65,17 @@
     <fragment
         android:id="@+id/dashboardFragment"
         android:name="com.duc.objectlanguage.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard" />
+        android:label="@string/title_dashboard">
+        <action
+            android:id="@+id/action_dashboard_to_explore"
+            app:destination="@id/exploreFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_collectionList"
+            app:destination="@id/collectionListFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_collectionDetail"
+            app:destination="@id/collectionDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/scanFragment"

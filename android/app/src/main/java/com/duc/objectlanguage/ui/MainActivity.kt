@@ -5,9 +5,10 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
@@ -20,6 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var isApplyingAccountLanguage = false
+    private var isSyncingBottomNavigation = false
 
     // Áp dụng locale đúng cho Activity context (fix ngôn ngữ hệ thống chưa chuyển)
     override fun attachBaseContext(newBase: Context) {
@@ -47,10 +49,13 @@ class MainActivity : AppCompatActivity() {
         )
 
         binding.toolbar.setupWithNavController(navController, appBarConfiguration)
-        binding.bottomNavigation.setupWithNavController(navController)
 
         // Tab guard: guest chỉ được dùng tab Scan
         binding.bottomNavigation.setOnItemSelectedListener { item ->
+            if (isSyncingBottomNavigation) {
+                return@setOnItemSelectedListener true
+            }
+
             val app = application as ObjectLanguageApp
             if (!app.tokenManager.isLoggedIn && item.itemId != R.id.scanFragment) {
                 GuestUpsellDialog.show(
@@ -61,7 +66,10 @@ class MainActivity : AppCompatActivity() {
                 )
                 return@setOnItemSelectedListener false
             }
-            NavigationUI.onNavDestinationSelected(item, navController)
+            navigateToBottomDestination(item.itemId, navController)
+        }
+        binding.bottomNavigation.setOnItemReselectedListener { item ->
+            navigateToBottomDestination(item.itemId, navController)
         }
 
         val hideToolbarDests = setOf(
@@ -80,9 +88,7 @@ class MainActivity : AppCompatActivity() {
                 if (dest.id in hideToolbarDests) View.GONE else View.VISIBLE
             binding.bottomNavigation.visibility =
                 if (dest.id in hideBottomNavDests) View.GONE else View.VISIBLE
-            bottomNavItemForDestination(dest.id)?.let { itemId ->
-                binding.bottomNavigation.menu.findItem(itemId)?.isChecked = true
-            }
+            bottomNavItemForDestination(dest.id)?.let(::syncBottomNavigationSelection)
         }
 
         // Khi app khởi động: đã đăng nhập → dashboard, chưa đăng nhập → ở lại scanFragment (guest).
@@ -136,6 +142,38 @@ class MainActivity : AppCompatActivity() {
             R.id.notificationSettingsFragment -> R.id.profileFragment
 
             else -> null
+        }
+    }
+
+    private fun syncBottomNavigationSelection(itemId: Int) {
+        if (binding.bottomNavigation.selectedItemId == itemId) return
+        binding.bottomNavigation.post {
+            if (binding.bottomNavigation.selectedItemId == itemId) return@post
+            isSyncingBottomNavigation = true
+            try {
+                binding.bottomNavigation.selectedItemId = itemId
+            } finally {
+                isSyncingBottomNavigation = false
+            }
+        }
+    }
+
+    private fun navigateToBottomDestination(itemId: Int, navController: NavController): Boolean {
+        if (navController.currentDestination?.id == itemId) return true
+
+        if (navController.popBackStack(itemId, false)) {
+            return true
+        }
+
+        return try {
+            val options = NavOptions.Builder()
+                .setLaunchSingleTop(true)
+                .setPopUpTo(navController.graph.startDestinationId, false)
+                .build()
+            navController.navigate(itemId, null, options)
+            true
+        } catch (_: IllegalArgumentException) {
+            false
         }
     }
 

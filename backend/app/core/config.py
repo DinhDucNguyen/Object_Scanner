@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     # JWT — SECRET_KEY bắt buộc phải set trong .env
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # Gemini API

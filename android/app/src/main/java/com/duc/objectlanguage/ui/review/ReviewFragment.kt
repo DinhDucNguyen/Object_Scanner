@@ -34,6 +34,11 @@ class ReviewFragment : Fragment() {
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            if (loading) {
+                binding.cardContent.visibility = View.GONE
+                binding.buttonRow.visibility = View.GONE
+                binding.layoutFinished.visibility = View.GONE
+            }
         }
 
         viewModel.cards.observe(viewLifecycleOwner) { updateCard() }
@@ -50,7 +55,7 @@ class ReviewFragment : Fragment() {
             }
         }
 
-viewModel.message.observe(viewLifecycleOwner) { msg ->
+        viewModel.message.observe(viewLifecycleOwner) { msg ->
             if (msg != null) {
                 Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
                 viewModel.clearMessage()
@@ -58,8 +63,8 @@ viewModel.message.observe(viewLifecycleOwner) { msg ->
         }
 
         binding.btnReveal.setOnClickListener {
-            val flipOut = ObjectAnimator.ofFloat(binding.cardContent, "rotationY", 0f, 90f).apply { duration = 200 }
-            val flipIn  = ObjectAnimator.ofFloat(binding.cardContent, "rotationY", -90f, 0f).apply { duration = 200 }
+            val flipOut = ObjectAnimator.ofFloat(binding.cardFlashcard, "rotationY", 0f, 90f).apply { duration = 200 }
+            val flipIn  = ObjectAnimator.ofFloat(binding.cardFlashcard, "rotationY", -90f, 0f).apply { duration = 200 }
             flipOut.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     binding.layoutAnswer.visibility = View.VISIBLE
@@ -79,6 +84,12 @@ viewModel.message.observe(viewLifecycleOwner) { msg ->
             currentCard()?.let { card ->
                 viewModel.playAudio(card.audioUrl, card.wordName, card.languageCode.ifBlank { "en" })
             }
+        }
+        binding.btnScanMore.setOnClickListener {
+            findNavController().navigate(R.id.scanFragment)
+        }
+        binding.btnGoToCollections.setOnClickListener {
+            findNavController().navigate(R.id.collectionListFragment)
         }
 
     }
@@ -127,7 +138,7 @@ viewModel.message.observe(viewLifecycleOwner) { msg ->
         binding.layoutAnswer.visibility = View.GONE
         binding.btnReveal.visibility = View.VISIBLE
         binding.buttonRow.visibility = View.GONE
-        binding.cardContent.rotationY = 0f
+        binding.cardFlashcard.rotationY = 0f
     }
 
     private fun currentCard() =

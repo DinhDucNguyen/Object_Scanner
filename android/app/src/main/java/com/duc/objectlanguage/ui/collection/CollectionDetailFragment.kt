@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentCollectionDetailBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class CollectionDetailFragment : Fragment() {
 
@@ -34,6 +35,8 @@ class CollectionDetailFragment : Fragment() {
         }
         binding.recyclerWords.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerWords.adapter = adapter
+        binding.cardAddWord.setOnClickListener { openAddWordSource() }
+        binding.fabAddWord.setOnClickListener { openAddWordSource() }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
@@ -42,15 +45,10 @@ class CollectionDetailFragment : Fragment() {
         viewModel.collectionDetail.observe(viewLifecycleOwner) { detail ->
             if (detail == null) return@observe
             binding.tvCollectionName.text = detail.name
-            binding.tvWordCount.text = "${detail.items.size} từ"
-            if (detail.items.isEmpty()) {
-                binding.layoutEmpty.visibility = View.VISIBLE
-                binding.recyclerWords.visibility = View.GONE
-            } else {
-                binding.layoutEmpty.visibility = View.GONE
-                binding.recyclerWords.visibility = View.VISIBLE
-                adapter.submitList(detail.items)
-            }
+            binding.tvWordCount.text = getString(R.string.collection_item_count_in_detail, detail.items.size)
+            adapter.submitList(detail.items)
+            binding.recyclerWords.visibility = View.VISIBLE
+            binding.layoutEmpty.visibility = if (detail.items.isEmpty()) View.VISIBLE else View.GONE
         }
 
         viewModel.error.observe(viewLifecycleOwner) { err ->
@@ -71,7 +69,7 @@ class CollectionDetailFragment : Fragment() {
         binding.btnReviewCollection.setOnClickListener {
             val detail = viewModel.collectionDetail.value
             if (detail == null || detail.items.isEmpty()) {
-                Toast.makeText(requireContext(), "Bộ sưu tập trống, thêm từ trước nhé!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.collection_empty_words, Toast.LENGTH_SHORT).show()
             } else {
                 val args = Bundle().apply {
                     putInt("collectionId", collectionId)
@@ -83,6 +81,16 @@ class CollectionDetailFragment : Fragment() {
         }
 
         viewModel.loadCollectionDetail(collectionId)
+    }
+
+    private fun openAddWordSource() {
+        Toast.makeText(requireContext(), R.string.collection_add_word_toast, Toast.LENGTH_SHORT).show()
+        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        if (bottomNav != null) {
+            bottomNav.selectedItemId = R.id.scanFragment
+        } else {
+            findNavController().navigate(R.id.scanFragment)
+        }
     }
 
     override fun onDestroyView() {

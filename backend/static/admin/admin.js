@@ -442,7 +442,7 @@
       const status = document.getElementById('pred-filter')?.value || 'cho_duyet';
       try {
         const search = document.getElementById('pred-search')?.value.trim() || '';
-        let predUrl = `/predictions?trang_thai=${status}&limit=100`;
+        let predUrl = `/predictions?trang_thai=${status}&limit=9999`;
         if (search) predUrl += `&search=${encodeURIComponent(search)}`;
         const data = await apiJSON(predUrl);
         const pageData = getPagedRows('predictions', data);
@@ -685,7 +685,7 @@
       const p = await apiJSON(`/predictions/${id}`).catch(() => null);
       const aliasCode = (p?.vocab_payload?.object_code || p?.nhan_du_doan || '').trim();
       let objects = [];
-      try { objects = await apiJSON('/objects?limit=200'); }
+      try { objects = await apiJSON('/objects?limit=9999'); }
       catch (e) { toast('Lỗi tải danh sách đối tượng: ' + e.message, 'danger'); return; }
 
       const options = objects.map(o => {
@@ -1031,7 +1031,7 @@
       const search = document.getElementById('obj-search')?.value || '';
       const catId = document.getElementById('obj-cat-filter')?.value || '';
       try {
-        let url = `/objects?limit=100&offset=0`;
+        let url = `/objects?limit=9999&offset=0`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
         if (catId) url += `&category_id=${catId}`;
         const rawData = await apiJSON(url);
@@ -1362,7 +1362,7 @@
       const lang = document.getElementById('trans-lang-filter')?.value || '';
       const approved = document.getElementById('trans-approved-filter')?.value || '';
       try {
-        let url = `/translations?limit=100`;
+        let url = `/translations?limit=9999`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
         if (lang) url += `&lang_code=${lang}`;
         if (approved !== '') url += `&approved=${approved}`;
@@ -1740,7 +1740,7 @@
       document.getElementById('rm-current-code').textContent = currentCode;
       document.getElementById('rm-search').value = '';
       if (_cachedObjects.length === 0) {
-        try { _cachedObjects = await apiJSON('/objects?limit=500'); } catch (_) { _cachedObjects = []; }
+        try { _cachedObjects = await apiJSON('/objects?limit=9999'); } catch (_) { _cachedObjects = []; }
       }
       _fillReassignSelect('');
       bootstrap.Modal.getOrCreateInstance(document.getElementById('reassign-modal')).show();
@@ -1755,7 +1755,7 @@
       document.getElementById('rm-current-code').textContent = currentCode;
       document.getElementById('rm-search').value = '';
       if (_cachedObjects.length === 0) {
-        try { _cachedObjects = await apiJSON('/objects?limit=500'); } catch (_) { _cachedObjects = []; }
+        try { _cachedObjects = await apiJSON('/objects?limit=9999'); } catch (_) { _cachedObjects = []; }
       }
       _fillReassignSelect('');
       bootstrap.Modal.getOrCreateInstance(document.getElementById('reassign-modal')).show();
@@ -1809,7 +1809,7 @@
       const roleFilter = document.getElementById('user-role-filter')?.value || '';
       const statusFilter = document.getElementById('user-status-filter')?.value || '';
       try {
-        let data = await apiJSON(`/users?limit=200${search ? '&search=' + encodeURIComponent(search) : ''}`);
+        let data = await apiJSON(`/users?limit=9999${search ? '&search=' + encodeURIComponent(search) : ''}`);
         if (roleFilter) data = data.filter(u => (u.vai_tro || '').toLowerCase().includes(roleFilter));
         if (statusFilter === 'active') data = data.filter(u => (u.trang_thai || '').toLowerCase().includes('hoat') || u.trang_thai === 'active');
         if (statusFilter === 'locked') data = data.filter(u => !((u.trang_thai || '').toLowerCase().includes('hoat') || u.trang_thai === 'active'));
@@ -1998,7 +1998,7 @@
       const dateFrom = document.getElementById('sh-date-from')?.value || '';
       const dateTo = document.getElementById('sh-date-to')?.value || '';
       try {
-        let url = `/scan-history?limit=100`;
+        let url = `/scan-history?limit=9999`;
         if (objCode) url += `&object_code=${encodeURIComponent(objCode)}`;
         if (username) url += `&username=${encodeURIComponent(username)}`;
         if (dateFrom) url += `&date_from=${dateFrom}`;
@@ -2161,6 +2161,7 @@
         }).then(async r => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
         toast('Đã thêm ảnh');
         if (window._renderMediaModal) await window._renderMediaModal();
+        loadObjects();
       } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
     }
 
@@ -2169,6 +2170,7 @@
         await apiJSON(`/objects/media/${mediaId}/primary`, { method: 'POST' });
         toast('Đã đặt ảnh chính');
         if (window._renderMediaModal) await window._renderMediaModal();
+        loadObjects();
       } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
     }
 
@@ -2178,6 +2180,7 @@
         await apiJSON(`/objects/media/${mediaId}`, { method: 'DELETE' });
         toast('Đã xoá ảnh', 'warning');
         if (window._renderMediaModal) await window._renderMediaModal();
+        loadObjects();
       } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
     }
 

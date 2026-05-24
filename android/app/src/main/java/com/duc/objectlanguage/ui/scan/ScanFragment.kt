@@ -168,6 +168,12 @@ class ScanFragment : Fragment() {
                 binding.btnCapture.visibility = View.GONE
                 binding.btnGallery.visibility = View.GONE
                 binding.tvObjectName.text = result.objectCode.replaceFirstChar { it.uppercase() }
+                if (result.aliases.isNotEmpty()) {
+                    binding.tvAliases.text = getString(R.string.scan_also_known_as, result.aliases.joinToString(", "))
+                    binding.tvAliases.visibility = View.VISIBLE
+                } else {
+                    binding.tvAliases.visibility = View.GONE
+                }
                 val source = viewModel.detectionSource.value
                 binding.tvCategory.text = if (isPending) {
                     val pending = getString(R.string.scan_pending)

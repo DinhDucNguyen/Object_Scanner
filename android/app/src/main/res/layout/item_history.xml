@@ -103,7 +103,7 @@
                 android:layout_marginTop="4dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/btn_delete"
-                android:src="@android:drawable/ic_menu_delete"
+                android:src="@drawable/ic_delete"
                 app:tint="@color/text_secondary" />
         </LinearLayout>
     </LinearLayout>

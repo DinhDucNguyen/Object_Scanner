@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.ai_feedback_report import AIPrediction, NguonAI, TrangThaiDuyet, VaiTroDuDoan
 from app.models.language import Language
 from app.models.object import Object
+from app.models.object_alias import ObjectAlias
 from app.models.scan_history import ScanHistory
 from app.models.translation import Translation, NguonDuLieu
 from app.repositories.language_repo import LanguageRepository
@@ -56,6 +57,10 @@ class ScanService:
         self.tts = TTSService()
         self.training_images = TrainingImageService()
 
+    def _get_aliases(self, db: Session, object_id: int) -> list[str]:
+        rows = db.query(ObjectAlias).filter(ObjectAlias.doi_tuong_id == object_id).all()
+        return [a.ten_hien_thi or a.ma_bi_danh for a in rows]
+
     def process_scan(self, db: Session, request: ScanRequest) -> ScanResponse:
         object_code = normalize_object_code(request.object_code)
         obj = self.obj_repo.get_by_code(db, object_code)
@@ -68,6 +73,7 @@ class ScanService:
                 object_code=obj.ma_doi_tuong,
                 category_name=obj.category.ten_danh_muc if obj.category else None,
                 translations=[self._to_dto(db, t) for t in translations],
+                aliases=self._get_aliases(db, obj.id),
             )
 
         return ScanResponse(
@@ -111,6 +117,7 @@ class ScanService:
                     object_code=obj.ma_doi_tuong,
                     category_name=obj.category.ten_danh_muc if obj.category else None,
                     translations=[self._to_dto(db, t) for t in existing_translations],
+                    aliases=self._get_aliases(db, obj.id),
                 )
 
         existing_pending = self._find_pending_review_prediction(db, object_code)

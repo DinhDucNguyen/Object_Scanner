@@ -20,6 +20,7 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.HistoryItem
 import com.duc.objectlanguage.databinding.FragmentHistoryBinding
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -94,11 +95,11 @@ class HistoryFragment : Fragment() {
                 selectedFromDate = null
                 selectedToDate = null
                 updateDateButtons()
-                updateFilterButtons()
+                updateFilterChips()
                 viewModel.setPeriod(period)
             }
         }
-        updateFilterButtons()
+        updateFilterChips()
     }
 
     private fun setupDateRange() {
@@ -107,7 +108,7 @@ class HistoryFragment : Fragment() {
                 selectedFromDate = date
                 currentPeriod = "custom"
                 updateDateButtons()
-                updateFilterButtons()
+                updateFilterChips()
                 viewModel.setDateRange(selectedFromDate, selectedToDate)
             }
         }
@@ -116,7 +117,7 @@ class HistoryFragment : Fragment() {
                 selectedToDate = date
                 currentPeriod = "custom"
                 updateDateButtons()
-                updateFilterButtons()
+                updateFilterChips()
                 viewModel.setDateRange(selectedFromDate, selectedToDate)
             }
         }
@@ -125,7 +126,7 @@ class HistoryFragment : Fragment() {
             selectedToDate = null
             currentPeriod = "all"
             updateDateButtons()
-            updateFilterButtons()
+            updateFilterChips()
             viewModel.clearDateRange()
         }
         updateDateButtons()
@@ -158,15 +159,24 @@ class HistoryFragment : Fragment() {
         }
     }
 
-    private fun updateFilterButtons() {
+    private fun updateFilterChips() {
         listOf(
             binding.btnFilterAll to "all",
             binding.btnFilterToday to "today",
             binding.btnFilterWeek to "week",
             binding.btnFilterMonth to "month",
-        ).forEach { (button, period) ->
-            styleFilterButton(button, period == currentPeriod)
+        ).forEach { (chip, period) ->
+            styleFilterChip(chip, period == currentPeriod)
         }
+    }
+
+    private fun styleFilterChip(chip: Chip, active: Boolean) {
+        val primary = ContextCompat.getColor(requireContext(), R.color.primary)
+        val surface = ContextCompat.getColor(requireContext(), R.color.surface)
+        val textPrimary = ContextCompat.getColor(requireContext(), R.color.text_primary)
+        chip.chipBackgroundColor = ColorStateList.valueOf(if (active) primary else surface)
+        chip.setTextColor(if (active) android.graphics.Color.WHITE else textPrimary)
+        chip.chipStrokeColor = ColorStateList.valueOf(primary)
     }
 
     private fun updateDateButtons() {
