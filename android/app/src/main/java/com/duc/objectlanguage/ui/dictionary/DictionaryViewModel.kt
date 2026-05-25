@@ -11,7 +11,6 @@ import com.duc.objectlanguage.data.model.TranslateResponse
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class DictionaryViewModel(application: Application) : AndroidViewModel(application) {
@@ -51,11 +50,10 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
         _toLang.value = "vi"
     }
 
-    fun swapLanguages(currentText: String) {
+    fun swapLanguages() {
         val tmp = _fromLang.value ?: "en"
         _fromLang.value = _toLang.value ?: "vi"
         _toLang.value = tmp
-        if (currentText.isNotBlank()) translate(currentText)
     }
 
     fun translate(text: String) {
@@ -69,7 +67,6 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
             val to = _toLang.value ?: "vi"
             val normalized = text.trim()
             val requestKey = "${from}:${to}:${normalized.lowercase()}"
-            delay(800)
             if (requestKey == lastRequestKey && _result.value != null) return@launch
             lastRequestKey = requestKey
             _isLoading.postValue(true)

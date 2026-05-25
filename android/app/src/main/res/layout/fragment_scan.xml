@@ -226,6 +226,20 @@
         app:maxImageSize="22dp"
         app:tint="@color/text_primary" />
 
+    <!-- Shutter flash overlay — hiện trắng nháy khi chụp -->
+    <View
+        android:id="@+id/shutterFlash"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#FFFFFFFF"
+        android:alpha="0"
+        android:visibility="invisible"
+        android:clickable="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/resultCard"
         android:layout_width="0dp"

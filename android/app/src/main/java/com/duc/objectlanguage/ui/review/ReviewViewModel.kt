@@ -38,21 +38,17 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     private val _finishedMessage = MutableLiveData<String>()
     val finishedMessage: LiveData<String> = _finishedMessage
 
+    private val _activeCollectionId = MutableLiveData(0)
+    val activeCollectionId: LiveData<Int> = _activeCollectionId
+
+    private val _activeCollectionName = MutableLiveData<String?>(null)
+    val activeCollectionName: LiveData<String?> = _activeCollectionName
+
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
 
-    private var lastCollectionId: Int = -1
-    private var lastPractice: Boolean = false
-
-    fun loadCards(collectionId: Int = 0, practice: Boolean = false) {
-        val hasActiveSession = _cards.value?.isNotEmpty() == true
-            && _finished.value != true
-            && lastCollectionId == collectionId
-            && lastPractice == practice
-        if (hasActiveSession) return
-
-        lastCollectionId = collectionId
-        lastPractice = practice
-
+    fun loadCards(collectionId: Int = 0, practice: Boolean = false, collectionName: String? = null) {
+        _activeCollectionId.value = collectionId
+        _activeCollectionName.value = collectionName
         viewModelScope.launch {
             _isLoading.value = true
             _finished.value = false

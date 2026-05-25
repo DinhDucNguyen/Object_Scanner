@@ -2,14 +2,17 @@ package com.duc.objectlanguage.ui.review
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentReviewBinding
@@ -21,7 +24,7 @@ class ReviewFragment : Fragment() {
 
     private var _binding: FragmentReviewBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: ReviewViewModel by activityViewModels()
+    private val viewModel: ReviewViewModel by viewModels()
 
     private val collectionId: Int by lazy { arguments?.getInt("collectionId") ?: 0 }
     private val collectionName: String? by lazy { arguments?.getString("collectionName") }
@@ -55,6 +58,8 @@ class ReviewFragment : Fragment() {
                 binding.cardContent.visibility = View.GONE
                 binding.buttonRow.visibility = View.GONE
                 binding.layoutFinished.visibility = View.VISIBLE
+                updateFinishedButtons()
+                animateFinished()
             }
         }
 
@@ -101,13 +106,60 @@ class ReviewFragment : Fragment() {
         binding.btnGoToCollections.setOnClickListener {
             findNavController().navigate(R.id.collectionListFragment)
         }
+        binding.btnBackToCollection.setOnClickListener {
+            findNavController().popBackStack()
+        }
+        binding.btnRetryCollection.setOnClickListener {
+            viewModel.loadCards(collectionId, practice = true, collectionName)
+        }
 
+        animateEntrance()
+    }
+
+    private fun animateEntrance() {
+        binding.cardContent.apply {
+            alpha = 0f; translationY = 40f
+            animate().alpha(1f).translationY(0f)
+                .setDuration(380).setInterpolator(DecelerateInterpolator(1.8f)).setStartDelay(80).start()
+        }
+    }
+
+    private fun animateFinished() {
+        binding.layoutFinished.apply {
+            scaleX = 0.85f; scaleY = 0.85f; alpha = 0f
+            animate().scaleX(1f).scaleY(1f).alpha(1f)
+                .setDuration(420).setInterpolator(OvershootInterpolator(1.4f)).start()
+        }
     }
 
     override fun onResume() {
         super.onResume()
         collectionName?.let { requireActivity().title = "Ôn tập: $it" }
-        viewModel.loadCards(collectionId, isPractice)
+        if (viewModel.cards.value.isNullOrEmpty() && viewModel.finished.value != true) {
+            viewModel.loadCards(collectionId, isPractice, collectionName)
+        }
+    }
+
+    private fun updateFinishedButtons() {
+        val isCollection = (viewModel.activeCollectionId.value ?: 0) > 0
+        val name = viewModel.activeCollectionName.value
+
+        if (isCollection) {
+            // Hiện nút collection, ẩn nút general
+            binding.btnScanMore.visibility = View.GONE
+            binding.btnGoToCollections.visibility = View.GONE
+            binding.btnBackToCollection.visibility = View.VISIBLE
+            binding.btnRetryCollection.visibility = View.VISIBLE
+            // Cập nhật text finished với tên collection
+            if (!name.isNullOrBlank()) {
+                binding.tvFinished.text = getString(R.string.review_finished_collection, name)
+            }
+        } else {
+            binding.btnScanMore.visibility = View.VISIBLE
+            binding.btnGoToCollections.visibility = View.VISIBLE
+            binding.btnBackToCollection.visibility = View.GONE
+            binding.btnRetryCollection.visibility = View.GONE
+        }
     }
 
     private fun submitAnswer(quality: Int) {

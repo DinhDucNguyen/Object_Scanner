@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -54,6 +55,7 @@ class AnalyticsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         prepareEmptyCharts()
         setupObservers()
+        animateEntrance()
     }
 
     override fun onResume() {
@@ -112,6 +114,15 @@ class AnalyticsFragment : Fragment() {
         binding.tvLongestStreak.text = streak.streakDaiNhat.toString()
         binding.tvReviewsToday.text = streak.luotOnHomNay.toString()
         binding.tvTotalReviews.text = streak.tongLuotOn.toString()
+    }
+
+    private fun animateEntrance() {
+        val interp = DecelerateInterpolator(1.6f)
+        binding.contentAnalytics.apply {
+            alpha = 0f
+            translationY = 28f
+            animate().alpha(1f).translationY(0f).setDuration(340).setInterpolator(interp).start()
+        }
     }
 
     private fun prepareEmptyCharts() {

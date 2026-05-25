@@ -249,12 +249,22 @@
                         android:orientation="vertical"
                         android:padding="15dp">
 
+                        <ImageView
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:background="@drawable/bg_icon_cyan"
+                            android:contentDescription="@null"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_history"
+                            app:tint="@color/streak_heat_1" />
+
                         <TextView
                             android:id="@+id/tvReviewsToday"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="9dp"
                             android:text="0"
-                            android:textColor="@color/streak_heat_1"
+                            android:textColor="@color/text_primary"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             tools:text="9" />
@@ -286,12 +296,22 @@
                         android:orientation="vertical"
                         android:padding="15dp">
 
+                        <ImageView
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:background="@drawable/bg_icon_warning"
+                            android:contentDescription="@null"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_award"
+                            app:tint="@color/streak_heat_3" />
+
                         <TextView
                             android:id="@+id/tvLongestStreak"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="9dp"
                             android:text="0"
-                            android:textColor="@color/streak_heat_3"
+                            android:textColor="@color/text_primary"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             tools:text="12" />
@@ -322,12 +342,22 @@
                         android:orientation="vertical"
                         android:padding="15dp">
 
+                        <ImageView
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:background="@drawable/bg_icon_primary"
+                            android:contentDescription="@null"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_target"
+                            app:tint="@color/primary" />
+
                         <TextView
                             android:id="@+id/tvTotalReviews"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="9dp"
                             android:text="0"
-                            android:textColor="@color/primary"
+                            android:textColor="@color/text_primary"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             tools:text="84" />

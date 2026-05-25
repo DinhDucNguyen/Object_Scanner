@@ -1,7 +1,9 @@
 package com.duc.objectlanguage.ui.collection
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -27,6 +29,17 @@ class CollectionAdapter(
     
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position))
+        holder.itemView.apply {
+            alpha = 0f
+            translationY = 32f
+            animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay(position * 60L)
+                .setDuration(280)
+                .setInterpolator(DecelerateInterpolator(1.6f))
+                .start()
+        }
     }
     
     inner class ViewHolder(

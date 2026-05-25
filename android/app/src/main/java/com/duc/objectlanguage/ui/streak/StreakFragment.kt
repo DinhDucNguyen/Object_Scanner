@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -36,7 +38,7 @@ class StreakFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         observeViewModel()
         setupButtons()
-        // Đồng bộ streak từ server về để DB là nguồn dữ liệu chuẩn
+        animateEntrance()
         viewModel.loadFromServer()
     }
 
@@ -65,7 +67,7 @@ class StreakFragment : Fragment() {
             ).uppercase()
 
             // Thống kê
-            longestStreakText.text = "${data.longestStreak} ngày"
+            longestStreakText.text = getString(R.string.streak_days_count, data.longestStreak)
             totalReviewsText.text  = data.totalReviews.toString()
             reviewsTodayText.text  = data.reviewsToday.toString()
 
@@ -89,7 +91,7 @@ class StreakFragment : Fragment() {
             motivationText.text = buildMotivationMessage(data.currentStreak, data.reviewsToday)
 
             // Mốc tiếp theo
-            nextMilestoneText.text = "${data.nextMilestone} Ngày Chuỗi"
+            nextMilestoneText.text = getString(R.string.streak_next_milestone_title, data.nextMilestone)
             milestoneProgressBar.max      = data.nextMilestone
             milestoneProgressBar.progress = data.currentStreak
             daysToMilestoneText.text = getString(R.string.streak_days_to_go, data.daysToMilestone)
@@ -104,13 +106,13 @@ class StreakFragment : Fragment() {
             // Trạng thái hôm nay
             if (data.reviewsToday > 0) {
                 todayStatusIcon.text = "✓"
-                todayStatusText.text = "ĐÃ HOÀN THÀNH HÔM NAY"
+                todayStatusText.text = getString(R.string.streak_today_done).uppercase()
                 todayStatusContainer.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.success_light))
                 todayStatusIcon.setTextColor(ContextCompat.getColor(requireContext(), R.color.success))
                 todayStatusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.success))
             } else {
                 todayStatusIcon.text = "✕"
-                todayStatusText.text = "CHƯA HOÀN THÀNH HÔM NAY"
+                todayStatusText.text = getString(R.string.streak_today_pending).uppercase()
                 todayStatusContainer.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.warning_light))
                 todayStatusIcon.setTextColor(ContextCompat.getColor(requireContext(), R.color.warning))
                 todayStatusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.warning))
@@ -213,6 +215,36 @@ class StreakFragment : Fragment() {
         }
     }
 
+    private fun animateEntrance() {
+        // Hero circle: scale + fade bounce
+        binding.streakCircleContainer.apply {
+            scaleX = 0.7f; scaleY = 0.7f; alpha = 0f
+            animate().scaleX(1f).scaleY(1f).alpha(1f)
+                .setDuration(500).setInterpolator(OvershootInterpolator(1.3f))
+                .setStartDelay(80).start()
+        }
+        // Motivation text: fade in
+        binding.motivationText.apply {
+            alpha = 0f; translationY = 16f
+            animate().alpha(1f).translationY(0f)
+                .setDuration(300).setInterpolator(DecelerateInterpolator())
+                .setStartDelay(300).start()
+        }
+        // Achievement cards: stagger vào từ dưới
+        listOf(
+            binding.achievement1Bg,
+            binding.achievement2Bg,
+            binding.achievement3Bg,
+            binding.achievement4Bg,
+        ).forEachIndexed { i, card ->
+            card.alpha = 0f; card.translationY = 24f
+            card.animate().alpha(1f).translationY(0f)
+                .setDuration(260).setStartDelay(420L + i * 70L)
+                .setInterpolator(DecelerateInterpolator(1.5f))
+                .start()
+        }
+    }
+
     private fun animateStreakCircle(currentStreak: Int, nextMilestone: Int) {
         binding.streakProgressCircle.max = nextMilestone
         
@@ -228,21 +260,17 @@ class StreakFragment : Fragment() {
     }
 
     private fun selectBottomTab(itemId: Int) {
-        val bottomNav = requireActivity()
-            .findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation)
-        if (bottomNav != null) {
-            bottomNav.selectedItemId = itemId
-        } else {
-            findNavController().navigate(itemId)
-        }
+        findNavController().navigate(itemId)
     }
 
     private fun showMilestoneInfo() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.streak_milestone_title))
-            .setMessage(getString(R.string.streak_milestone_content))
-            .setPositiveButton(getString(R.string.streak_milestone_btn_ok), null)
-            .show()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_streak_milestone, null)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+        dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnMilestoneOk)
+            .setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     fun celebrateMilestone(milestone: Int) {
@@ -257,11 +285,15 @@ class StreakFragment : Fragment() {
         )
         binding.konfettiView.start(party)
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.streak_celebrate_title))
-            .setMessage(getString(R.string.streak_celebrate_msg, milestone))
-            .setPositiveButton(getString(R.string.streak_celebrate_btn), null)
-            .show()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_streak_celebrate, null)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+        dialogView.findViewById<android.widget.TextView>(R.id.tvCelebrateMsg)
+            .text = getString(R.string.streak_celebrate_msg, milestone)
+        dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCelebrateOk)
+            .setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     override fun onDestroyView() {

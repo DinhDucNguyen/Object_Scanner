@@ -72,7 +72,7 @@
 
     <!-- Dashboard -->
     <string name="dashboard_default_user">there</string>
-    <string name="dashboard_greeting">Good morning!</string>
+    <string name="dashboard_greeting">Hello!</string>
     <string name="dashboard_greeting_subtitle">Ready to learn a new word?</string>
     <string name="dashboard_brand_name">LengoLens.</string>
     <string name="dashboard_search_hint">Search or scan an object…</string>
@@ -148,10 +148,12 @@
     <string name="dictionary_result_label">Translation result</string>
     <string name="dictionary_input_hint">Enter text to translate...</string>
     <string name="dictionary_loading">Translating...</string>
+    <string name="dictionary_translate_button">Translate</string>
     <string name="dictionary_empty_prompt">Enter text to get started</string>
     <string name="dictionary_save_word">Save to learning list</string>
     <string name="dictionary_swap_format">%1$s &lt;-&gt; %2$s</string>
     <string name="dictionary_history_title">Search history</string>
+    <string name="dictionary_history_subtitle">Words you\'ve recently looked up</string>
     <string name="dictionary_recent_label">Recent</string>
     <string name="dictionary_history_empty">No search history yet</string>
     <string name="dictionary_object_code_label">Object code:</string>
@@ -182,6 +184,10 @@
     <string name="review_btn_scan_more">Scan more words</string>
     <string name="review_btn_go_to_collections">Practice a collection</string>
     <string name="review_answer_label">Meaning and example</string>
+    <string name="review_finished_collection">All done!\n%1$s</string>
+    <string name="review_finished_collection_hint">You\'ve reviewed all words in this collection.</string>
+    <string name="review_btn_back_to_collection">Back to collection</string>
+    <string name="review_btn_retry_collection">Review again</string>
     <string name="review_btn_reveal">Show answer</string>
     <string name="review_btn_wrong">Wrong</string>
     <string name="review_btn_correct">Correct</string>
@@ -249,6 +255,8 @@
     <string name="streak_today_pending">Review pending today</string>
     <string name="streak_milestone_label">Next milestone: %d days</string>
     <string name="streak_days_to_go">%d days to go</string>
+    <string name="streak_days_count">%d days</string>
+    <string name="streak_next_milestone_title">%d-Day Streak</string>
     <string name="streak_milestone_reached">Milestone reached!</string>
     <string name="streak_msg_start">Start your learning journey today!</string>
     <string name="streak_msg_dont_break">Do not break your %d-day streak!</string>
@@ -266,6 +274,18 @@
     <string name="streak_celebrate_title">Milestone achieved!</string>
     <string name="streak_celebrate_msg">Congratulations! You reached a %d-day streak!\n\nYour dedication is inspiring. Keep it up!</string>
     <string name="streak_celebrate_btn">Awesome</string>
+    <string name="streak_section_activity">ACTIVITY STATS</string>
+    <string name="streak_section_achievements">ACHIEVEMENTS</string>
+    <string name="streak_view_all">View all</string>
+    <string name="streak_achievement_1_label">Beginner</string>
+    <string name="streak_achievement_2_label">7 Days</string>
+    <string name="streak_achievement_3_label">30 Days</string>
+    <string name="streak_achievement_4_label">Dedicated</string>
+    <string name="streak_next_milestone_banner">NEXT MILESTONE</string>
+    <string name="streak_learn_now">Learn now</string>
+    <string name="streak_stat_best_label">Best streak</string>
+    <string name="streak_stat_total_reviews_label">Total reviews</string>
+    <string name="streak_stat_today_label">Reviews today</string>
 
     <!-- Collections -->
     <string name="collection_search_hint">Search collections...</string>
@@ -296,6 +316,9 @@
     <string name="collection_dialog_delete_msg">Are you sure you want to delete \"%s\"?</string>
     <string name="collection_add_to_title">Add to collection</string>
     <string name="collection_no_collections">No collections yet. Create one in Profile!</string>
+    <string name="collection_save_title">Save to collection</string>
+    <string name="collection_save_subtitle">Choose a collection for this word</string>
+    <string name="collection_save_empty_hint">Create a collection in the Collections tab first</string>
     <string name="collection_empty_words">Collection is empty. Add words first!</string>
     <string name="collection_created">Created \"%s\"!</string>
     <string name="collection_deleted">Deleted \"%s\"</string>
@@ -405,9 +428,13 @@
     <string name="profile_menu_streak">Daily streak</string>
     <string name="profile_menu_collection">Collections</string>
     <string name="profile_btn_logout">Log out</string>
+    <string name="profile_logout_confirm_title">Log out</string>
+    <string name="profile_logout_confirm_msg">Are you sure you want to log out?</string>
+    <string name="profile_logout_confirm_yes">Log out</string>
     <string name="profile_bio_placeholder">Tap to add a bio...</string>
     <string name="profile_bio_dialog_title">About you</string>
     <string name="profile_bio_hint">Write a few lines about yourself...</string>
+    <string name="profile_edit_bio_title">Edit bio</string>
     <string name="profile_menu_change_password">Change password</string>
     <string name="profile_menu_notifications">Notification settings</string>
     <string name="profile_change_password_title">Change password</string>

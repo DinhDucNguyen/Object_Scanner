@@ -72,6 +72,7 @@
                         android:text="@string/review_finished_hint"
                         android:textAppearance="@style/TextAppearance.App.BodyMedium" />
 
+                    <!-- General review buttons (collectionId == 0) -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnScanMore"
                         android:layout_width="match_parent"
@@ -99,6 +100,41 @@
                         android:textStyle="bold"
                         app:cornerRadius="18dp"
                         app:icon="@drawable/ic_folder_outline"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/primary"
+                        app:strokeColor="@color/primary"
+                        app:strokeWidth="1dp" />
+
+                    <!-- Collection review buttons (collectionId > 0) -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnBackToCollection"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_marginTop="22dp"
+                        android:text="@string/review_btn_back_to_collection"
+                        android:textColor="@color/text_on_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        app:backgroundTint="@color/primary"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_folder_outline"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/text_on_primary" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRetryCollection"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/review_btn_retry_collection"
+                        android:textColor="@color/primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_play_circle"
                         app:iconGravity="textStart"
                         app:iconTint="@color/primary"
                         app:strokeColor="@color/primary"

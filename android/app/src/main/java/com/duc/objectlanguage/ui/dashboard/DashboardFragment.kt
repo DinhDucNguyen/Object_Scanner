@@ -134,13 +134,7 @@ class DashboardFragment : Fragment() {
     }
 
     private fun selectBottomTab(itemId: Int) {
-        val bottomNav = requireActivity()
-            .findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation)
-        if (bottomNav != null) {
-            bottomNav.selectedItemId = itemId
-        } else {
-            findNavController().navigate(itemId)
-        }
+        findNavController().navigate(itemId)
     }
 
     private fun bindTopCollections(collections: List<CollectionHighlight>) {
@@ -148,7 +142,18 @@ class DashboardFragment : Fragment() {
             binding.sectionTopCollections.visibility = View.GONE
             return
         }
+        val wasGone = binding.sectionTopCollections.visibility != View.VISIBLE
         binding.sectionTopCollections.visibility = View.VISIBLE
+        if (wasGone) {
+            binding.sectionTopCollections.alpha = 0f
+            binding.sectionTopCollections.translationY = 32f
+            binding.sectionTopCollections.animate()
+                .alpha(1f).translationY(0f)
+                .setDuration(340)
+                .setStartDelay(260)
+                .setInterpolator(DecelerateInterpolator(1.6f))
+                .start()
+        }
         val cards = listOf(
             Triple(binding.cardHighlight1, binding.tvHighlightName1, binding.tvHighlightCount1),
             Triple(binding.cardHighlight2, binding.tvHighlightName2, binding.tvHighlightCount2),
@@ -162,6 +167,17 @@ class DashboardFragment : Fragment() {
                 card.visibility = View.VISIBLE
                 name.text = item.name
                 count.text = getString(R.string.collection_item_count, item.itemCount)
+                if (wasGone) {
+                    card.alpha = 0f
+                    card.scaleX = 0.88f
+                    card.scaleY = 0.88f
+                    card.animate()
+                        .alpha(1f).scaleX(1f).scaleY(1f)
+                        .setDuration(260)
+                        .setStartDelay(320L + index * 70L)
+                        .setInterpolator(android.view.animation.OvershootInterpolator(1.3f))
+                        .start()
+                }
                 card.setOnClickListener {
                     val bundle = android.os.Bundle().apply { putInt("collectionId", item.id) }
                     findNavController().navigate(R.id.action_dashboard_to_collectionDetail, bundle)
@@ -233,17 +249,19 @@ class DashboardFragment : Fragment() {
     private fun animateDashboardEntrance() {
         val sections = listOf(
             binding.cardDashboardSearch,
+            binding.statsRow,
             binding.cardExploreBanner,
+            binding.cardDailyGoal,
         )
         sections.forEachIndexed { i, view ->
             view.alpha = 0f
-            view.translationY = 40f
+            view.translationY = 48f
             view.animate()
                 .alpha(1f)
                 .translationY(0f)
-                .setDuration(350)
-                .setStartDelay(100L + i * 80L)
-                .setInterpolator(DecelerateInterpolator())
+                .setDuration(380)
+                .setStartDelay(80L + i * 90L)
+                .setInterpolator(DecelerateInterpolator(1.8f))
                 .start()
         }
     }

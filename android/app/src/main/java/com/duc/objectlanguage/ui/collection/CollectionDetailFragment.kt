@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -11,8 +13,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentCollectionDetailBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 
 class CollectionDetailFragment : Fragment() {
 
@@ -75,39 +77,59 @@ class CollectionDetailFragment : Fragment() {
                 val args = Bundle().apply {
                     putInt("collectionId", collectionId)
                     putString("collectionName", detail.name)
-                    putBoolean("isPractice", isPractice)
+                    putBoolean("isPractice", true)
                 }
                 findNavController().navigate(R.id.reviewFragment, args)
             }
         }
 
         viewModel.loadCollectionDetail(collectionId)
+        animateEntrance()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadCollectionDetail(collectionId)
+    }
+
+    private fun animateEntrance() {
+        val interp = DecelerateInterpolator(1.6f)
+        binding.tvCollectionName.apply {
+            alpha = 0f; translationY = -20f
+            animate().alpha(1f).translationY(0f).setDuration(320).setInterpolator(OvershootInterpolator(1.2f)).setStartDelay(40).start()
+        }
+        binding.btnReviewCollection.apply {
+            alpha = 0f; translationX = 30f
+            animate().alpha(1f).translationX(0f).setDuration(300).setInterpolator(interp).setStartDelay(100).start()
+        }
+        binding.recyclerWords.apply {
+            alpha = 0f; translationY = 32f
+            animate().alpha(1f).translationY(0f).setDuration(360).setInterpolator(interp).setStartDelay(160).start()
+        }
     }
 
     private fun openAddWordSource() {
         val collectionName = viewModel.collectionDetail.value?.name ?: ""
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.collection_add_word_title)
-            .setItems(arrayOf(
-                getString(R.string.collection_add_source_scan),
-                getString(R.string.collection_add_source_history),
-            )) { _, which ->
-                when (which) {
-                    0 -> {
-                        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigation)
-                        if (bottomNav != null) bottomNav.selectedItemId = R.id.scanFragment
-                        else findNavController().navigate(R.id.scanFragment)
-                    }
-                    1 -> {
-                        val args = Bundle().apply {
-                            putInt("targetCollectionId", collectionId)
-                            putString("targetCollectionName", collectionName)
-                        }
-                        findNavController().navigate(R.id.action_collectionDetail_to_history, args)
-                    }
-                }
+        val sheet = BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.dialog_add_word_source, null)
+        sheet.setContentView(view)
+
+        view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardScan)
+            .setOnClickListener {
+                sheet.dismiss()
+                findNavController().navigate(R.id.scanFragment)
             }
-            .show()
+        view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardHistory)
+            .setOnClickListener {
+                sheet.dismiss()
+                val args = Bundle().apply {
+                    putInt("targetCollectionId", collectionId)
+                    putString("targetCollectionName", collectionName)
+                }
+                findNavController().navigate(R.id.action_collectionDetail_to_history, args)
+            }
+
+        sheet.show()
     }
 
     override fun onDestroyView() {

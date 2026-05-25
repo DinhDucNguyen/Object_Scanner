@@ -306,10 +306,18 @@ class AppRepository(private val tokenManager: TokenManager) {
     suspend fun translate(text: String, fromLang: String, toLang: String): Result<TranslateResponse> {
         return try {
             val response = api.translate(TranslateRequest(text, fromLang, toLang))
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-            else Result.failure(Exception(response.errorBody()?.string() ?: "Lỗi dịch"))
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                val rawError = response.errorBody()?.string()
+                val message = runCatching {
+                    org.json.JSONObject(rawError ?: "").optString("detail")
+                        .takeIf { it.isNotBlank() }
+                }.getOrNull() ?: rawError ?: "Không thể dịch lúc này"
+                Result.failure(Exception(message))
+            }
         } catch (e: Exception) {
-            Result.failure(Exception("Lỗi dịch: ${e.message}"))
+            Result.failure(Exception("Không thể kết nối tới server"))
         }
     }
 

@@ -5,6 +5,8 @@ import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -27,6 +29,7 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        animateEntrance()
 
         val repo = (requireActivity().application as ObjectLanguageApp).repository
 
@@ -86,6 +89,26 @@ class RegisterFragment : Fragment() {
         binding.tvGoLogin.setOnClickListener {
             findNavController().navigate(R.id.action_register_to_login)
         }
+    }
+
+    private fun animateEntrance() {
+        val container = binding.root.getChildAt(0) as? android.view.ViewGroup ?: return
+        val logoZone = container.getChildAt(0) ?: return
+        val formCard = container.getChildAt(1) ?: return
+
+        logoZone.alpha = 0f
+        logoZone.translationY = -40f
+        logoZone.animate()
+            .alpha(1f).translationY(0f)
+            .setDuration(420).setInterpolator(OvershootInterpolator(1.2f))
+            .setStartDelay(60).start()
+
+        formCard.alpha = 0f
+        formCard.translationY = 60f
+        formCard.animate()
+            .alpha(1f).translationY(0f)
+            .setDuration(380).setInterpolator(DecelerateInterpolator(1.8f))
+            .setStartDelay(160).start()
     }
 
     override fun onDestroyView() {

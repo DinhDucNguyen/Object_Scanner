@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -43,6 +44,21 @@ class CollectionListFragment : Fragment() {
         setupTabs()
         setupFab()
         observeViewModel()
+        animateEntrance()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadCollections()
+    }
+
+    private fun animateEntrance() {
+        val interp = DecelerateInterpolator(1.6f)
+        val container = binding.root.getChildAt(0) as? android.view.ViewGroup ?: return
+        container.alpha = 0f
+        container.translationY = 32f
+        container.animate().alpha(1f).translationY(0f)
+            .setDuration(360).setInterpolator(interp).start()
     }
 
     private fun setupRecyclerViews() {
@@ -169,14 +185,22 @@ class CollectionListFragment : Fragment() {
     }
 
     private fun showDeleteConfirmation(collectionId: Int, collectionName: String) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.collection_dialog_delete_title)
-            .setMessage(getString(R.string.collection_dialog_delete_msg, collectionName))
-            .setPositiveButton(R.string.btn_delete) { _, _ ->
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_confirm, null)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+        dialogView.findViewById<android.widget.TextView>(R.id.tvDeleteTitle)
+            .text = getString(R.string.collection_dialog_delete_title)
+        dialogView.findViewById<android.widget.TextView>(R.id.tvDeleteMessage)
+            .text = getString(R.string.collection_dialog_delete_msg, collectionName)
+        dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDelete)
+            .setOnClickListener {
+                dialog.dismiss()
                 viewModel.deleteCollection(collectionId, collectionName)
             }
-            .setNegativeButton(R.string.btn_cancel, null)
-            .show()
+        dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelDelete)
+            .setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     override fun onDestroyView() {

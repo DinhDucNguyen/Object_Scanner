@@ -8,6 +8,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -58,6 +59,19 @@ class HistoryFragment : Fragment() {
         setupObservers()
         viewModel.load()
         viewModel.loadAvatarUrl()
+        animateEntrance()
+    }
+
+    private fun animateEntrance() {
+        val interp = DecelerateInterpolator(1.6f)
+        binding.customToolbar.apply {
+            alpha = 0f; translationY = -20f
+            animate().alpha(1f).translationY(0f).setDuration(300).setInterpolator(interp).start()
+        }
+        binding.recyclerView.apply {
+            alpha = 0f; translationY = 40f
+            animate().alpha(1f).translationY(0f).setDuration(360).setInterpolator(interp).setStartDelay(120).start()
+        }
     }
 
     private fun setupList() {

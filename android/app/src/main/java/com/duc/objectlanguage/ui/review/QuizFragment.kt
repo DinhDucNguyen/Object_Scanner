@@ -1,10 +1,15 @@
 package com.duc.objectlanguage.ui.review
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.OvershootInterpolator
+import android.widget.RadioButton
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -160,7 +165,6 @@ class QuizFragment : Fragment() {
     }
 
     private fun highlightAnswer(result: AnswerResult) {
-        // Disable all options
         binding.option1.isEnabled = false
         binding.option2.isEnabled = false
         binding.option3.isEnabled = false
@@ -168,36 +172,54 @@ class QuizFragment : Fragment() {
         binding.btnSubmit.isEnabled = false
 
         val options = listOf(binding.option1, binding.option2, binding.option3, binding.option4)
+        val correctView = options[result.correctIndex]
 
-        // Highlight correct answer
-        options[result.correctIndex].setBackgroundColor(
-            ContextCompat.getColor(requireContext(), android.R.color.holo_green_light)
-        )
+        tintOption(correctView, R.color.success_light, R.color.success)
+        bounceView(correctView)
 
-        // Highlight wrong answer if selected
         if (!result.isCorrect && result.selectedIndex >= 0) {
-            options[result.selectedIndex].setBackgroundColor(
-                ContextCompat.getColor(requireContext(), android.R.color.holo_red_light)
-            )
+            val wrongView = options[result.selectedIndex]
+            tintOption(wrongView, R.color.error_light, R.color.error)
+            shakeView(wrongView)
         }
 
-        // Show feedback
-        val feedback = if (result.isCorrect) "✅ Correct!" else "❌ Wrong!"
-        Toast.makeText(requireContext(), feedback, Toast.LENGTH_SHORT).show()
-
-        // Move to next question after delay
         binding.root.postDelayed({
-            viewModel.moveToNext()
-            resetOptionColors()
-        }, 2000)
+            if (_binding != null) {
+                viewModel.moveToNext()
+                resetOptionColors()
+            }
+        }, 1800)
+    }
+
+    private fun tintOption(view: RadioButton, bgColorRes: Int, textColorRes: Int) {
+        view.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), textColorRes))
+        view.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), bgColorRes))
+        view.setTextColor(ContextCompat.getColor(requireContext(), textColorRes))
+    }
+
+    private fun bounceView(view: View) {
+        AnimatorSet().apply {
+            playTogether(
+                ObjectAnimator.ofFloat(view, "scaleX", 1f, 1.08f, 1f),
+                ObjectAnimator.ofFloat(view, "scaleY", 1f, 1.08f, 1f),
+            )
+            duration = 320
+            interpolator = OvershootInterpolator(2f)
+            start()
+        }
+    }
+
+    private fun shakeView(view: View) {
+        ObjectAnimator.ofFloat(view, "translationX", 0f, -10f, 10f, -8f, 8f, -5f, 5f, 0f)
+            .apply { duration = 380; start() }
     }
 
     private fun resetOptionColors() {
-        val defaultColor = ContextCompat.getColor(requireContext(), android.R.color.transparent)
-        binding.option1.setBackgroundColor(defaultColor)
-        binding.option2.setBackgroundColor(defaultColor)
-        binding.option3.setBackgroundColor(defaultColor)
-        binding.option4.setBackgroundColor(defaultColor)
+        listOf(binding.option1, binding.option2, binding.option3, binding.option4).forEach { rb ->
+            rb.backgroundTintList = null
+            rb.buttonTintList = null
+            rb.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+        }
     }
 
     private fun showResultDialog() {

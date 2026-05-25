@@ -195,6 +195,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="24dp"
         android:contentDescription="@string/collection_add_word_title"
+        android:visibility="gone"
         app:backgroundTint="@color/primary_dark"
         app:srcCompat="@android:drawable/ic_input_add"
         app:tint="@color/text_on_primary" />

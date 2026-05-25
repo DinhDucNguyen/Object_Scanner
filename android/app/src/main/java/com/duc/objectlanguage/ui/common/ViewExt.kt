@@ -2,11 +2,15 @@ package com.duc.objectlanguage.ui.common
 
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import com.duc.objectlanguage.R
 
 fun View.addScaleFeedback(scale: Float = 0.93f, duration: Long = 100) {
@@ -69,5 +73,39 @@ private fun View.startPulseRing() {
         .setDuration(500)
         .setInterpolator(DecelerateInterpolator())
         .withEndAction { overlay.remove(pulseView) }
+        .start()
+}
+
+// Navigate với slide animation — dùng khi push screen mới vào back stack
+fun NavController.navigateWithSlide(destinationId: Int, args: android.os.Bundle? = null) {
+    val options = NavOptions.Builder()
+        .setEnterAnim(R.anim.nav_slide_in_right)
+        .setExitAnim(R.anim.nav_slide_out_left)
+        .setPopEnterAnim(R.anim.nav_slide_in_left)
+        .setPopExitAnim(R.anim.nav_slide_out_right)
+        .build()
+    navigate(destinationId, args, options)
+}
+
+// Haptic rung nhẹ — dùng cho nút Capture
+fun View.performLightHaptic() {
+    performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+}
+
+// Animation "tick" xác nhận — scale bounce sau khi nhấn Lưu
+fun View.playSuccessBounce() {
+    animate().cancel()
+    scaleX = 1f; scaleY = 1f
+    animate()
+        .scaleX(1.18f).scaleY(1.18f)
+        .setDuration(120)
+        .setInterpolator(DecelerateInterpolator())
+        .withEndAction {
+            animate()
+                .scaleX(1f).scaleY(1f)
+                .setDuration(200)
+                .setInterpolator(OvershootInterpolator(2.5f))
+                .start()
+        }
         .start()
 }

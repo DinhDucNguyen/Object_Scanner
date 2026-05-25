@@ -2,6 +2,17 @@
 <resources>
     <string name="app_name">LengoLens</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_btn_next">Tiếp theo</string>
+    <string name="onboarding_btn_skip">Bỏ qua</string>
+    <string name="onboarding_btn_start">Bắt đầu thôi!</string>
+    <string name="onboarding_slide1_title">Chụp là biết nghĩa</string>
+    <string name="onboarding_slide1_desc">Hướng camera vào bất kỳ vật thể nào — AI sẽ nhận diện và cho bạn biết tên tiếng Anh, phiên âm và nghĩa ngay lập tức.</string>
+    <string name="onboarding_slide2_title">Lưu từ, xây bộ sưu tập</string>
+    <string name="onboarding_slide2_desc">Thêm từ bạn học được vào các bộ sưu tập cá nhân. Sắp xếp theo chủ đề, theo ngày — học từ đúng lúc đúng chỗ.</string>
+    <string name="onboarding_slide3_title">Ôn tập thông minh</string>
+    <string name="onboarding_slide3_desc">Hệ thống lặp lại cách quãng (spaced repetition) nhắc đúng từ vào đúng thời điểm bạn sắp quên — giúp nhớ lâu hơn với ít nỗ lực hơn.</string>
+
     <!-- Bottom navigation -->
     <string name="nav_home">Trang chủ</string>
     <string name="nav_scan">Quét</string>
@@ -139,10 +150,12 @@
     <string name="dictionary_result_label">Kết quả dịch</string>
     <string name="dictionary_input_hint">Nhập văn bản để dịch...</string>
     <string name="dictionary_loading">Đang dịch...</string>
+    <string name="dictionary_translate_button">Dịch</string>
     <string name="dictionary_empty_prompt">Nhập văn bản để bắt đầu</string>
     <string name="dictionary_save_word">Lưu vào danh sách học</string>
     <string name="dictionary_swap_format">%1$s &lt;-&gt; %2$s</string>
     <string name="dictionary_history_title">Lịch sử tra từ</string>
+    <string name="dictionary_history_subtitle">Các từ bạn đã tra gần đây</string>
     <string name="dictionary_recent_label">Gần đây</string>
     <string name="dictionary_history_empty">Chưa có lịch sử tra từ</string>
     <string name="dictionary_object_code_label">Mã đối tượng:</string>
@@ -173,6 +186,10 @@
     <string name="review_btn_scan_more">Quét thêm từ mới</string>
     <string name="review_btn_go_to_collections">Ôn tập bộ sưu tập</string>
     <string name="review_answer_label">Nghĩa và ví dụ</string>
+    <string name="review_finished_collection">Hoàn thành!\n%1$s</string>
+    <string name="review_finished_collection_hint">Bạn đã ôn xong tất cả các từ trong bộ sưu tập này.</string>
+    <string name="review_btn_back_to_collection">Quay lại bộ sưu tập</string>
+    <string name="review_btn_retry_collection">Ôn lại</string>
     <string name="review_btn_reveal">Xem đáp án</string>
     <string name="review_btn_wrong">Sai</string>
     <string name="review_btn_correct">Đúng</string>
@@ -240,6 +257,8 @@
     <string name="streak_today_pending">Chưa ôn tập hôm nay</string>
     <string name="streak_milestone_label">Mốc tiếp theo: %d ngày</string>
     <string name="streak_days_to_go">Còn %d ngày nữa</string>
+    <string name="streak_days_count">%d ngày</string>
+    <string name="streak_next_milestone_title">%d Ngày Chuỗi</string>
     <string name="streak_milestone_reached">Đã đạt mốc!</string>
     <string name="streak_msg_start">Bắt đầu hành trình học của bạn hôm nay!</string>
     <string name="streak_msg_dont_break">Đừng để mất chuỗi %d ngày của bạn!</string>
@@ -257,6 +276,18 @@
     <string name="streak_celebrate_title">Đạt mốc thành tích!</string>
     <string name="streak_celebrate_msg">Chúc mừng! Bạn đã đạt chuỗi %d ngày!\n\nSự kiên trì của bạn thật đáng tự hào. Tiếp tục phát huy nhé!</string>
     <string name="streak_celebrate_btn">Tuyệt vời</string>
+    <string name="streak_section_activity">THỐNG KÊ HOẠT ĐỘNG</string>
+    <string name="streak_section_achievements">THÀNH TỰU</string>
+    <string name="streak_view_all">Xem tất cả</string>
+    <string name="streak_achievement_1_label">Mới bắt đầu</string>
+    <string name="streak_achievement_2_label">7 Ngày</string>
+    <string name="streak_achievement_3_label">30 Ngày</string>
+    <string name="streak_achievement_4_label">Chuyên cần</string>
+    <string name="streak_next_milestone_banner">MỐC TIẾP THEO</string>
+    <string name="streak_learn_now">Học ngay</string>
+    <string name="streak_stat_best_label">Kỳ lục chuỗi</string>
+    <string name="streak_stat_total_reviews_label">Tổng lượt ôn tập</string>
+    <string name="streak_stat_today_label">Lượt ôn hôm nay</string>
 
     <!-- Collections -->
     <string name="collection_search_hint">Tìm kiếm bộ sưu tập...</string>
@@ -287,6 +318,9 @@
     <string name="collection_dialog_delete_msg">Bạn có chắc muốn xóa \"%s\"?</string>
     <string name="collection_add_to_title">Thêm vào bộ sưu tập</string>
     <string name="collection_no_collections">Chưa có bộ sưu tập nào. Tạo trong mục Cá nhân nhé!</string>
+    <string name="collection_save_title">Lưu vào bộ sưu tập</string>
+    <string name="collection_save_subtitle">Chọn bộ sưu tập để lưu từ này</string>
+    <string name="collection_save_empty_hint">Hãy tạo bộ sưu tập trong mục Bộ Sưu Tập</string>
     <string name="collection_empty_words">Bộ sưu tập trống, hãy thêm từ trước nhé!</string>
     <string name="collection_created">Đã tạo \"%s\"!</string>
     <string name="collection_deleted">Đã xóa \"%s\"</string>
@@ -399,9 +433,13 @@
     <string name="profile_menu_streak">Chuỗi ngày học</string>
     <string name="profile_menu_collection">Bộ sưu tập</string>
     <string name="profile_btn_logout">Đăng xuất</string>
+    <string name="profile_logout_confirm_title">Đăng xuất</string>
+    <string name="profile_logout_confirm_msg">Bạn có chắc muốn đăng xuất không?</string>
+    <string name="profile_logout_confirm_yes">Đăng xuất</string>
     <string name="profile_bio_placeholder">Nhấn để thêm giới thiệu...</string>
     <string name="profile_bio_dialog_title">Giới thiệu bản thân</string>
     <string name="profile_bio_hint">Viết vài dòng về bạn...</string>
+    <string name="profile_edit_bio_title">Chỉnh sửa giới thiệu</string>
     <string name="profile_menu_change_password">Đổi mật khẩu</string>
     <string name="profile_menu_notifications">Cài đặt thông báo</string>
     <string name="profile_change_password_title">Đổi mật khẩu</string>
@@ -449,4 +487,7 @@
     <string name="btn_back">Quay lại</string>
     <string name="arrow">›</string>
     <string name="content_description_avatar">Ảnh đại diện</string>
+    <string name="collection_add_word_pick_source">Chọn nguồn để thêm từ vào bộ sưu tập</string>
+    <string name="collection_add_source_scan_desc">Quét vật thể mới để nhận diện và thêm từ vựng</string>
+    <string name="collection_add_source_history_desc">Chọn từ lịch sử quét đã lưu trước đó</string>
 </resources>

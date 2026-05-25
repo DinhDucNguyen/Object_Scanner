@@ -6,6 +6,8 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -15,6 +17,7 @@ import com.duc.objectlanguage.data.model.DictionaryHistoryItem
 import com.duc.objectlanguage.databinding.FragmentDictionaryBinding
 import com.duc.objectlanguage.ui.common.addPulseFeedback
 import com.duc.objectlanguage.ui.common.addScaleFeedback
+import com.duc.objectlanguage.ui.common.playSuccessBounce
 import com.duc.objectlanguage.ui.collection.SaveToCollectionBottomSheet
 import com.google.android.material.chip.Chip
 import com.duc.objectlanguage.utils.DefinitionFormatter
@@ -59,17 +62,19 @@ class DictionaryFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {
                 val text = s?.toString() ?: ""
-                binding.btnClearInput.visibility = if (text.isNotEmpty()) View.VISIBLE else View.GONE
-                if (text.isEmpty()) {
+                val hasText = text.isNotBlank()
+                binding.btnClearInput.visibility = if (hasText) View.VISIBLE else View.GONE
+                binding.btnTranslate.visibility = if (hasText) View.VISIBLE else View.GONE
+                if (!hasText) {
                     viewModel.clearResult()
                     binding.cardResult.visibility = View.GONE
                     binding.groupEmptyState.visibility = View.VISIBLE
                     binding.layoutRecentChips.visibility =
                         if (binding.chipGroupRecent.childCount > 0) View.VISIBLE else View.GONE
                 } else {
+                    viewModel.clearResult()
                     binding.layoutRecentChips.visibility = View.GONE
                     binding.groupEmptyState.visibility = View.GONE
-                    viewModel.translate(text)
                 }
             }
         })
@@ -80,11 +85,23 @@ class DictionaryFragment : Fragment() {
 
         binding.btnSwapLang.setOnClickListener {
             val currentText = binding.etInput.text?.toString() ?: ""
-            viewModel.swapLanguages(currentText)
+            viewModel.swapLanguages()
+            if (currentText.isNotBlank()) {
+                viewModel.clearResult()
+            }
+        }
+
+        binding.btnTranslate.addScaleFeedback()
+        binding.btnTranslate.setOnClickListener {
+            val text = binding.etInput.text?.toString()?.trim().orEmpty()
+            if (text.isNotEmpty()) {
+                viewModel.translate(text)
+            }
         }
 
         binding.btnSaveWord.setOnClickListener {
             val translationId = viewModel.result.value?.translationId ?: return@setOnClickListener
+            binding.btnSaveWord.playSuccessBounce()
             SaveToCollectionBottomSheet.newInstance(translationId)
                 .show(childFragmentManager, "save_to_collection")
         }
@@ -121,18 +138,41 @@ class DictionaryFragment : Fragment() {
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
-            binding.loadingRow.visibility = if (loading) View.VISIBLE else View.GONE
             if (loading) {
                 binding.cardResult.visibility = View.GONE
                 binding.groupEmptyState.visibility = View.GONE
+                binding.loadingRow.alpha = 0f
+                binding.loadingRow.translationY = 12f
+                binding.loadingRow.visibility = View.VISIBLE
+                binding.loadingRow.animate()
+                    .alpha(1f).translationY(0f)
+                    .setDuration(220)
+                    .setInterpolator(DecelerateInterpolator())
+                    .start()
+            } else {
+                binding.loadingRow.animate()
+                    .alpha(0f)
+                    .setDuration(150)
+                    .withEndAction { binding.loadingRow.visibility = View.GONE }
+                    .start()
             }
         }
 
         viewModel.result.observe(viewLifecycleOwner) { result ->
             if (result != null) {
                 binding.groupEmptyState.visibility = View.GONE
-                binding.cardResult.visibility = View.VISIBLE
                 viewModel.loadHistory()
+                // Animate card vào nếu đang ẩn
+                if (binding.cardResult.visibility != View.VISIBLE) {
+                    binding.cardResult.alpha = 0f
+                    binding.cardResult.translationY = 28f
+                    binding.cardResult.visibility = View.VISIBLE
+                    binding.cardResult.animate()
+                        .alpha(1f).translationY(0f)
+                        .setDuration(300)
+                        .setInterpolator(OvershootInterpolator(1.2f))
+                        .start()
+                }
 
                 binding.tvTranslation.text = result.translation
                 binding.tvToLang.text = langLabel(result.toLang)

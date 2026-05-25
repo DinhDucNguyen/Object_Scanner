@@ -1,9 +1,10 @@
 package com.duc.objectlanguage.ui.history
 
 import android.graphics.drawable.GradientDrawable
-import android.view.View
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -34,7 +35,7 @@ class HistoryAdapter(
             ?: item.objectCode?.replace("_", " ")
             ?: "---"
         holder.binding.tvObjectCode.text = displayName.replaceFirstChar { it.uppercase() }
-        
+
         val rawDef = item.definition ?: item.categoryName ?: ""
         holder.binding.tvDefinition.text = DefinitionFormatter.formatDefinition(holder.itemView.context, rawDef)
 
@@ -47,6 +48,16 @@ class HistoryAdapter(
             .into(holder.binding.ivThumbnail)
         holder.binding.root.setOnClickListener { onItemClick(item) }
         holder.binding.btnDeleteHistory.setOnClickListener { onDeleteClick(item) }
+
+        holder.itemView.apply {
+            alpha = 0f
+            translationY = 28f
+            animate()
+                .alpha(1f).translationY(0f)
+                .setDuration(260).setStartDelay(position.coerceAtMost(8) * 50L)
+                .setInterpolator(DecelerateInterpolator(1.6f))
+                .start()
+        }
     }
 
     companion object {

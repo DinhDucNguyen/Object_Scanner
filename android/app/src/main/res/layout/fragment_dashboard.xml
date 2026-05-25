@@ -59,8 +59,7 @@
                     android:text="@string/dashboard_greeting_subtitle"
                     android:textColor="@color/text_secondary"
                     android:textSize="15sp"
-                    android:fontWeight="700"
-                    android:textStyle="bold" />
+                    android:fontWeight="400" />
             </LinearLayout>
 
             <LinearLayout
@@ -613,6 +612,7 @@
 
         <!-- ── DAILY GOAL CARD ───────────────────────────────────── -->
         <LinearLayout
+            android:id="@+id/cardDailyGoal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"

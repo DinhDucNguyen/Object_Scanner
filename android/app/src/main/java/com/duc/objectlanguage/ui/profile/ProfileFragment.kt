@@ -11,6 +11,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.duc.objectlanguage.ui.common.navigateWithSlide
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.duc.objectlanguage.ObjectLanguageApp
@@ -65,6 +68,29 @@ class ProfileFragment : Fragment() {
         setupClicks()
         observeViewModel()
         viewModel.loadProfile()
+        animateEntrance()
+    }
+
+    private fun animateEntrance() {
+        val interp = DecelerateInterpolator(1.6f)
+        val container = (binding.root as? android.view.ViewGroup)?.getChildAt(0) as? android.view.ViewGroup
+        container?.getChildAt(0)?.apply {
+            alpha = 0f; translationY = -30f
+            animate().alpha(1f).translationY(0f)
+                .setDuration(380).setInterpolator(OvershootInterpolator(1.2f)).setStartDelay(40).start()
+        }
+        val cards = listOf(
+            binding.cardHistory,
+            binding.cardAnalytics,
+            binding.cardStreak,
+            binding.cardCollection,
+        )
+        cards.forEachIndexed { i, card ->
+            card.alpha = 0f; card.translationY = 36f
+            card.animate().alpha(1f).translationY(0f)
+                .setDuration(300).setStartDelay(140L + i * 70L)
+                .setInterpolator(interp).start()
+        }
     }
 
     private fun observeViewModel() {
@@ -95,27 +121,49 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupClicks() {
-        binding.cardHistory.setOnClickListener { findNavController().navigate(R.id.historyFragment) }
-        binding.cardAnalytics.setOnClickListener { findNavController().navigate(R.id.analyticsFragment) }
-        binding.cardStreak.setOnClickListener { findNavController().navigate(R.id.streakFragment) }
-        binding.cardCollection.setOnClickListener { findNavController().navigate(R.id.collectionListFragment) }
+        binding.cardHistory.setOnClickListener { findNavController().navigateWithSlide(R.id.historyFragment) }
+        binding.cardAnalytics.setOnClickListener { findNavController().navigateWithSlide(R.id.analyticsFragment) }
+        binding.cardStreak.setOnClickListener { findNavController().navigateWithSlide(R.id.streakFragment) }
+        binding.cardCollection.setOnClickListener { findNavController().navigateWithSlide(R.id.collectionListFragment) }
         binding.btnLangVI.setOnClickListener { setDisplayLanguage("vi") }
         binding.btnLangEN.setOnClickListener { setDisplayLanguage("en") }
         binding.frameAvatar.setOnClickListener { pickImage.launch("image/*") }
         binding.tvBio.setOnClickListener { showBioDialog() }
         binding.btnMenu.setOnClickListener { showOverflowMenu() }
         binding.btnLogout.setOnClickListener {
-            val app = requireActivity().application as ObjectLanguageApp
-            app.repository.logout()
-            resetGraphToGuestScan()
+            val dialogView = layoutInflater.inflate(R.layout.dialog_logout_confirm, null)
+            val dialog = MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create()
+            dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmLogout)
+                .setOnClickListener {
+                    dialog.dismiss()
+                    val app = requireActivity().application as ObjectLanguageApp
+                    app.repository.logout()
+                    resetGraphToGuestScan()
+                }
+            dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelLogout)
+                .setOnClickListener { dialog.dismiss() }
+            dialog.show()
         }
     }
 
     private fun resetGraphToGuestScan() {
         val navController = findNavController()
-        val graph = navController.navInflater.inflate(R.navigation.nav_graph)
-        graph.setStartDestination(R.id.scanFragment)
-        navController.graph = graph
+        // Pop toàn bộ back stack về graph root, rồi navigate tới scanFragment
+        // Dùng cách này thay vì reset graph để tránh IllegalStateException khi Fragment đang transition
+        try {
+            val options = androidx.navigation.NavOptions.Builder()
+                .setPopUpTo(navController.graph.id, true)
+                .setLaunchSingleTop(true)
+                .build()
+            navController.navigate(R.id.scanFragment, null, options)
+        } catch (_: Exception) {
+            // Fallback: reset graph nếu navigate thất bại
+            val graph = navController.navInflater.inflate(R.navigation.nav_graph)
+            graph.setStartDestination(R.id.scanFragment)
+            navController.graph = graph
+        }
     }
 
     private fun uploadSelectedAvatar(uri: Uri) {
@@ -169,7 +217,6 @@ class ProfileFragment : Fragment() {
         etBio.setText(currentBio)
         etBio.setSelection(currentBio.length)
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.profile_bio_dialog_title))
             .setView(dialogView)
             .setPositiveButton(getString(R.string.btn_save)) { _, _ ->
                 viewModel.updateBio(etBio.text?.toString()?.trim() ?: "")
@@ -235,7 +282,7 @@ class ProfileFragment : Fragment() {
                     true
                 }
                 2 -> {
-                    findNavController().navigate(R.id.notificationSettingsFragment)
+                    findNavController().navigateWithSlide(R.id.notificationSettingsFragment)
                     true
                 }
                 else -> false

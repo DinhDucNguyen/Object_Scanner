@@ -6,6 +6,19 @@
     app:startDestination="@id/scanFragment">
 
     <fragment
+        android:id="@+id/onboardingFragment"
+        android:name="com.duc.objectlanguage.ui.onboarding.OnboardingFragment"
+        android:label="@string/app_name">
+        <action
+            android:id="@+id/action_onboarding_to_scan"
+            app:destination="@id/scanFragment"
+            app:popUpTo="@id/onboardingFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/nav_slide_in_right"
+            app:exitAnim="@anim/nav_slide_out_left" />
+    </fragment>
+
+    <fragment
         android:id="@+id/loginFragment"
         android:name="com.duc.objectlanguage.ui.auth.LoginFragment"
         android:label="@string/app_name">

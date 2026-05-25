@@ -14,6 +14,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,6 +34,8 @@ import com.duc.objectlanguage.databinding.FragmentScanBinding
 import com.duc.objectlanguage.ui.common.GuestUpsellDialog
 import com.duc.objectlanguage.ui.common.addPulseFeedback
 import com.duc.objectlanguage.ui.common.addScaleFeedback
+import com.duc.objectlanguage.ui.common.performLightHaptic
+import com.duc.objectlanguage.ui.common.playSuccessBounce
 import com.duc.objectlanguage.utils.DefinitionFormatter
 import com.yalantis.ucrop.UCrop
 import java.io.ByteArrayOutputStream
@@ -144,8 +148,29 @@ class ScanFragment : Fragment() {
         // ===== Observers =====
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
-            binding.loadingContainer.visibility = if (loading) View.VISIBLE else View.GONE
             binding.btnCapture.isEnabled = !loading
+            if (loading) {
+                binding.loadingContainer.alpha = 0f
+                binding.loadingContainer.scaleX = 0.82f
+                binding.loadingContainer.scaleY = 0.82f
+                binding.loadingContainer.visibility = View.VISIBLE
+                binding.loadingContainer.animate()
+                    .alpha(1f).scaleX(1f).scaleY(1f)
+                    .setDuration(260)
+                    .setInterpolator(android.view.animation.OvershootInterpolator(1.4f))
+                    .start()
+            } else {
+                binding.loadingContainer.animate()
+                    .alpha(0f).scaleX(0.88f).scaleY(0.88f)
+                    .setDuration(180)
+                    .withEndAction {
+                        binding.loadingContainer.visibility = View.GONE
+                        binding.loadingContainer.scaleX = 1f
+                        binding.loadingContainer.scaleY = 1f
+                        binding.loadingContainer.alpha = 1f
+                    }
+                    .start()
+            }
         }
 
         viewModel.scanResult.observe(viewLifecycleOwner) { result ->
@@ -163,16 +188,9 @@ class ScanFragment : Fragment() {
                 }
 
                 val isPending = result.pendingReview
-                binding.resultCard.visibility = View.VISIBLE
-                binding.cameraOverlay.visibility = View.GONE
-                binding.modelSelectorContainer.visibility = View.GONE
-                binding.tvGuestCounter.visibility = View.GONE
-                binding.scanFrame.visibility = View.GONE
-                binding.cameraControls.visibility = View.GONE
-                binding.btnCapture.visibility = View.GONE
-                binding.btnGallery.visibility = View.GONE
 
-                // 1. Scanned Image
+                // ── Bước 1: set data & visibility trước (view còn ẩn) ──
+
                 if (lastScannedBitmap != null) {
                     binding.ivScannedImage.setImageBitmap(lastScannedBitmap)
                     binding.ivScannedImage.visibility = View.VISIBLE
@@ -180,7 +198,6 @@ class ScanFragment : Fragment() {
                     binding.ivScannedImage.visibility = View.GONE
                 }
 
-                // 2. Detection source chip
                 val source = viewModel.detectionSource.value
                 binding.tvDetectionSource.apply {
                     text = if (isPending) {
@@ -196,10 +213,7 @@ class ScanFragment : Fragment() {
                     ?: result.translations.firstOrNull()
 
                 if (enTrans != null) {
-                    // 3. Word Name
                     binding.tvObjectName.text = enTrans.wordName.replaceFirstChar { it.uppercase() }
-
-                    // 4. Phonetic & Part of speech
                     binding.tvPhonetic.apply {
                         text = enTrans.phonetic ?: ""
                         visibility = if (enTrans.phonetic.isNullOrEmpty()) View.GONE else View.VISIBLE
@@ -208,8 +222,6 @@ class ScanFragment : Fragment() {
                         text = if (!enTrans.partOfSpeech.isNullOrEmpty()) "(${enTrans.partOfSpeech})" else ""
                         visibility = if (enTrans.partOfSpeech.isNullOrEmpty()) View.GONE else View.VISIBLE
                     }
-
-                    // 5. Definition Card
                     val def = enTrans.definition ?: ""
                     if (def.isNotEmpty()) {
                         binding.cardDefinition.visibility = View.VISIBLE
@@ -227,7 +239,6 @@ class ScanFragment : Fragment() {
                     } else {
                         binding.cardDefinition.visibility = View.GONE
                     }
-
                     if (!viewModel.isGuest) {
                         binding.btnPlayAudio.visibility = View.VISIBLE
                         binding.btnPlayAudio.addPulseFeedback()
@@ -239,6 +250,7 @@ class ScanFragment : Fragment() {
                         } else {
                             binding.btnAddToCollection.visibility = View.VISIBLE
                             binding.btnAddToCollection.setOnClickListener {
+                                binding.btnAddToCollection.playSuccessBounce()
                                 viewModel.showAddToCollectionDialog(enTrans.id, requireContext())
                             }
                         }
@@ -247,7 +259,6 @@ class ScanFragment : Fragment() {
                         binding.btnAddToCollection.visibility = View.GONE
                     }
                 } else {
-                    // Fallback if no translation found
                     binding.tvObjectName.text = result.objectCode.replaceFirstChar { it.uppercase() }
                     binding.tvPhonetic.visibility = View.GONE
                     binding.tvPartOfSpeech.visibility = View.GONE
@@ -255,17 +266,12 @@ class ScanFragment : Fragment() {
                     binding.btnPlayAudio.visibility = View.GONE
                     binding.btnAddToCollection.visibility = View.GONE
                 }
+
+                // ── Bước 2: animate SAU khi data đã set xong ──
+                hideCameraControls()
+                showResultWithAnimation()
             } else {
-                binding.resultCard.visibility = View.GONE
-                binding.cameraOverlay.visibility = View.VISIBLE
-                binding.modelSelectorContainer.visibility = View.VISIBLE
-                binding.scanFrame.visibility = View.VISIBLE
-                binding.cameraControls.visibility = View.VISIBLE
-                binding.btnCapture.visibility = View.VISIBLE
-                binding.btnGallery.visibility = View.VISIBLE
-                if (viewModel.isGuest) {
-                    binding.tvGuestCounter.visibility = View.VISIBLE
-                }
+                hideResultAndShowCamera()
             }
         }
 
@@ -338,7 +344,10 @@ class ScanFragment : Fragment() {
 
         // ===== Buttons =====
 
+        binding.btnCapture.addScaleFeedback(scale = 0.88f)
         binding.btnCapture.setOnClickListener {
+            binding.btnCapture.performLightHaptic()
+            playShutterFlash()
             captureImage()
         }
 
@@ -566,6 +575,115 @@ class ScanFragment : Fragment() {
             Toast.makeText(requireContext(), getString(R.string.scan_error_open_crop, e.message), Toast.LENGTH_SHORT).show()
             viewModel.scanWithDetection(null, imageBytes)
         }
+    }
+
+    private fun showResultWithAnimation() {
+        binding.resultCard.apply {
+            visibility = View.VISIBLE
+            alpha = 0f
+            translationY = 180f
+            animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(380)
+                .setInterpolator(DecelerateInterpolator(2.2f))
+                .start()
+        }
+
+        // Ảnh: scale từ nhỏ + fade in, có overshoot nhẹ
+        binding.ivScannedImage.apply {
+            scaleX = 0.82f
+            scaleY = 0.82f
+            alpha = 0f
+            animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .alpha(1f)
+                .setStartDelay(160)
+                .setDuration(320)
+                .setInterpolator(OvershootInterpolator(1.1f))
+                .start()
+        }
+
+        // Tên từ: slide lên + fade
+        binding.tvObjectName.apply {
+            alpha = 0f
+            translationY = 24f
+            animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay(260)
+                .setDuration(280)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
+        }
+
+        // Phonetic + definition card: stagger thêm 80ms
+        listOf(binding.tvPhonetic, binding.tvPartOfSpeech, binding.cardDefinition).forEachIndexed { i, v ->
+            v.apply {
+                alpha = 0f
+                translationY = 16f
+                animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setStartDelay(340L + i * 80L)
+                    .setDuration(240)
+                    .setInterpolator(DecelerateInterpolator())
+                    .start()
+            }
+        }
+    }
+
+    private fun hideCameraControls() {
+        val cameraViews = listOf(
+            binding.cameraOverlay, binding.modelSelectorContainer,
+            binding.scanFrame, binding.cameraControls,
+            binding.btnCapture, binding.btnGallery, binding.tvGuestCounter
+        )
+        cameraViews.forEach { v ->
+            v.animate()
+                .alpha(0f)
+                .setDuration(180)
+                .withEndAction { v.visibility = View.GONE; v.alpha = 1f }
+                .start()
+        }
+    }
+
+    private fun hideResultAndShowCamera() {
+        binding.resultCard.animate()
+            .alpha(0f)
+            .translationY(120f)
+            .setDuration(240)
+            .setInterpolator(DecelerateInterpolator())
+            .withEndAction {
+                binding.resultCard.visibility = View.GONE
+                binding.resultCard.translationY = 0f
+                binding.resultCard.alpha = 1f
+
+                val cameraViews = mutableListOf(
+                    binding.cameraOverlay, binding.modelSelectorContainer,
+                    binding.scanFrame, binding.cameraControls,
+                    binding.btnCapture, binding.btnGallery
+                )
+                if (viewModel.isGuest) cameraViews.add(binding.tvGuestCounter)
+                cameraViews.forEach { v ->
+                    v.alpha = 0f
+                    v.visibility = View.VISIBLE
+                    v.animate().alpha(1f).setDuration(260).start()
+                }
+            }
+            .start()
+    }
+
+    private fun playShutterFlash() {
+        val flash = binding.shutterFlash
+        flash.visibility = View.VISIBLE
+        flash.alpha = 0.85f
+        flash.animate()
+            .alpha(0f)
+            .setDuration(220)
+            .withEndAction { flash.visibility = View.INVISIBLE }
+            .start()
     }
 
     override fun onDestroyView() {
