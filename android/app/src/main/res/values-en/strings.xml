@@ -96,8 +96,10 @@
     <string name="dashboard_explore_title">Explore by category</string>
     <string name="dashboard_explore_subtitle">Learn vocabulary organized by topic</string>
     <string name="dashboard_btn_review_short">Review now</string>
-    <string name="dashboard_progress_short">%d%% mastery</string>
-    <string name="dashboard_progress_short_initial">0% mastery</string>
+    <string name="dashboard_progress_short">%d%%</string>
+    <string name="dashboard_progress_short_initial">0%</string>
+    <string name="dashboard_mastery_short">Mastery</string>
+    <string name="dashboard_mastery_hint">Keep it up, almost there!</string>
     <string name="dashboard_streak_title">Daily streak</string>
     <string name="dashboard_streak_content_desc">View daily streak</string>
     <string name="dashboard_streak_today_done">Reviewed today</string>
@@ -440,6 +442,7 @@
     <string name="btn_cancel">Cancel</string>
     <string name="btn_delete">Delete</string>
     <string name="btn_close">Close</string>
+    <string name="btn_back">Back</string>
     <string name="arrow">›</string>
     <string name="content_description_avatar">Avatar</string>
 </resources>

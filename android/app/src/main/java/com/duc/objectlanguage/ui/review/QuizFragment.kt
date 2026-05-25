@@ -84,12 +84,20 @@ class QuizFragment : Fragment() {
 
         viewModel.currentIndex.observe(viewLifecycleOwner) { index ->
             val total = viewModel.getTotalQuestions()
-            binding.tvProgress.text = "Question ${index + 1}/$total"
+            if (total > 0) {
+                binding.tvProgress.text = "Question ${index + 1}/$total"
+            } else {
+                binding.tvProgress.text = ""
+            }
         }
 
         viewModel.score.observe(viewLifecycleOwner) { score ->
             val total = viewModel.getTotalQuestions()
-            binding.tvScore.text = "Score: $score/$total"
+            if (total > 0) {
+                binding.tvScore.text = "Score: $score/$total"
+            } else {
+                binding.tvScore.text = ""
+            }
         }
 
         viewModel.finished.observe(viewLifecycleOwner) { finished ->

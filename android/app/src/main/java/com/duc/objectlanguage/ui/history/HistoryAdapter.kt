@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.HistoryItem
 import com.duc.objectlanguage.databinding.ItemHistoryBinding
+import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class HistoryAdapter(
     private val onItemClick: (HistoryItem) -> Unit,
@@ -33,10 +34,12 @@ class HistoryAdapter(
             ?: item.objectCode?.replace("_", " ")
             ?: "---"
         holder.binding.tvObjectCode.text = displayName.replaceFirstChar { it.uppercase() }
-        holder.binding.tvDefinition.text = item.definition ?: item.categoryName ?: ""
+        
+        val rawDef = item.definition ?: item.categoryName ?: ""
+        holder.binding.tvDefinition.text = DefinitionFormatter.formatDefinition(holder.itemView.context, rawDef)
+
         holder.binding.tvConfidence.text = item.confidenceScore?.let { "${(it * 100).toInt()}%" } ?: ""
         holder.binding.tvDate.text = formatDate(item.scanDate)
-        bindReviewStatus(holder.binding.tvReviewStatus, item.status ?: item.reviewStatus)
         Glide.with(holder.binding.ivThumbnail)
             .load(item.imageUrl)
             .placeholder(R.drawable.ic_image_placeholder)
@@ -55,41 +58,6 @@ class HistoryAdapter(
         private fun formatDate(raw: String?): String {
             if (raw.isNullOrEmpty()) return ""
             return raw.replace("T", " ").substringBefore(".")
-        }
-
-        private fun bindReviewStatus(view: TextView, status: String?) {
-            val context = view.context
-            val (label, textColor, bgColor) = when (status) {
-                "pending_review", "cho_duyet" -> Triple(
-                    context.getString(R.string.history_status_pending),
-                    R.color.warning,
-                    R.color.warning_light
-                )
-                "rejected", "tu_choi" -> Triple(
-                    context.getString(R.string.history_status_rejected),
-                    R.color.error,
-                    R.color.error_light
-                )
-                "approved", "da_duyet" -> Triple(
-                    context.getString(R.string.history_status_approved),
-                    R.color.success,
-                    R.color.success_light
-                )
-                else -> {
-                    view.visibility = View.GONE
-                    return
-                }
-            }
-
-            val radius = 999f * context.resources.displayMetrics.density
-            view.text = label
-            view.setTextColor(ContextCompat.getColor(context, textColor))
-            view.background = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                cornerRadius = radius
-                setColor(ContextCompat.getColor(context, bgColor))
-            }
-            view.visibility = View.VISIBLE
         }
     }
 }

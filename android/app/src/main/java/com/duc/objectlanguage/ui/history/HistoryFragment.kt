@@ -24,6 +24,9 @@ import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.duc.objectlanguage.data.local.ApiConfig
 
 class HistoryFragment : Fragment() {
 
@@ -44,12 +47,17 @@ class HistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         setupList()
         setupFilters()
         setupDateRange()
         setupSearch()
         setupObservers()
         viewModel.load()
+        viewModel.loadAvatarUrl()
     }
 
     private fun setupList() {
@@ -138,7 +146,10 @@ class HistoryFragment : Fragment() {
         }
 
         viewModel.items.observe(viewLifecycleOwner) { items ->
-            adapter.submitList(items)
+            val wasEmpty = adapter.itemCount == 0
+            adapter.submitList(items) {
+                if (wasEmpty && items.isNotEmpty()) binding.recyclerView.scheduleLayoutAnimation()
+            }
             val empty = items.isEmpty() && viewModel.isLoading.value != true
             binding.tvEmpty.visibility = if (empty) View.VISIBLE else View.GONE
             binding.recyclerView.visibility = if (empty) View.GONE else View.VISIBLE
@@ -157,6 +168,29 @@ class HistoryFragment : Fragment() {
                 viewModel.clearError()
             }
         }
+
+        viewModel.streakValue.observe(viewLifecycleOwner) { streak ->
+            binding.tvStreakBadgeValue.text = (streak ?: 0).toString()
+        }
+
+        viewModel.avatarUrl.observe(viewLifecycleOwner) { url ->
+            if (!url.isNullOrBlank()) {
+                Glide.with(this)
+                    .load(resolveMediaUrl(url))
+                    .transform(CircleCrop())
+                    .placeholder(R.drawable.ic_person)
+                    .error(R.drawable.ic_person)
+                    .into(binding.ivAvatar)
+                binding.ivAvatar.setPadding(0, 0, 0, 0)
+                binding.ivAvatar.imageTintList = null
+            }
+        }
+    }
+
+    private fun resolveMediaUrl(path: String): String {
+        val trimmed = path.trim()
+        return if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) trimmed
+        else "${ApiConfig.baseUrl.trimEnd('/')}/${trimmed.trimStart('/')}"
     }
 
     private fun updateFilterChips() {
@@ -172,11 +206,11 @@ class HistoryFragment : Fragment() {
 
     private fun styleFilterChip(chip: Chip, active: Boolean) {
         val primary = ContextCompat.getColor(requireContext(), R.color.primary)
-        val surface = ContextCompat.getColor(requireContext(), R.color.surface)
-        val textPrimary = ContextCompat.getColor(requireContext(), R.color.text_primary)
-        chip.chipBackgroundColor = ColorStateList.valueOf(if (active) primary else surface)
-        chip.setTextColor(if (active) android.graphics.Color.WHITE else textPrimary)
-        chip.chipStrokeColor = ColorStateList.valueOf(primary)
+        val surfaceSoft = ContextCompat.getColor(requireContext(), R.color.surface_soft)
+        val textSecondary = ContextCompat.getColor(requireContext(), R.color.text_secondary)
+        chip.chipBackgroundColor = ColorStateList.valueOf(if (active) primary else surfaceSoft)
+        chip.setTextColor(if (active) android.graphics.Color.WHITE else textSecondary)
+        chip.chipStrokeWidth = 0f
     }
 
     private fun updateDateButtons() {
@@ -189,12 +223,12 @@ class HistoryFragment : Fragment() {
     }
 
     private fun styleFilterButton(button: MaterialButton, active: Boolean) {
-        val primary = ContextCompat.getColor(requireContext(), R.color.primary)
+        val secondary = ContextCompat.getColor(requireContext(), R.color.secondary)
         val surface = ContextCompat.getColor(requireContext(), R.color.surface)
-        val textPrimary = ContextCompat.getColor(requireContext(), R.color.text_primary)
-        button.backgroundTintList = ColorStateList.valueOf(if (active) primary else surface)
-        button.setTextColor(if (active) android.graphics.Color.WHITE else textPrimary)
-        button.strokeColor = ColorStateList.valueOf(primary)
+        button.backgroundTintList = ColorStateList.valueOf(if (active) secondary else surface)
+        button.setTextColor(if (active) android.graphics.Color.WHITE else secondary)
+        button.strokeColor = ColorStateList.valueOf(secondary)
+        button.iconTint = ColorStateList.valueOf(if (active) android.graphics.Color.WHITE else secondary)
     }
 
     private fun showDatePicker(currentValue: String?, onSelected: (String) -> Unit) {
@@ -227,12 +261,16 @@ class HistoryFragment : Fragment() {
     }
 
     private fun openDetail(item: HistoryItem) {
+        val targetCollectionId = arguments?.getInt("targetCollectionId") ?: 0
+        val targetCollectionName = arguments?.getString("targetCollectionName")
         val bundle = Bundle().apply {
             putInt("scanId", item.id)
             putString("objectCode", item.objectCode ?: "")
             putString("imageUrl", item.imageUrl)
             putString("scanDate", item.scanDate)
             putInt("translationId", item.translationId ?: 0)
+            putInt("targetCollectionId", targetCollectionId)
+            if (targetCollectionName != null) putString("targetCollectionName", targetCollectionName)
         }
         findNavController().navigate(R.id.action_history_to_historyDetail, bundle)
     }

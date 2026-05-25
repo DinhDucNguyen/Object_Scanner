@@ -49,8 +49,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="by username"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
+                android:textAppearance="@style/TextAppearance.App.BodySmall" />
 
             <TextView
                 android:id="@+id/itemCount"

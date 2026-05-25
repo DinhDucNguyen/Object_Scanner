@@ -79,7 +79,7 @@ class DictionaryService:
         # 3. Không có trong DB → dịch bằng MyMemory
         translation = self._translate_mymemory(normalized, from_lang, to_lang)
         if not translation:
-            return None
+            return {"_error": "service_unavailable"}
 
         # Nếu dịch sang EN, thử tìm dạng số ít trong DB để lấy canonical form
         if to_lang == "en":
@@ -325,7 +325,7 @@ class DictionaryService:
     def _translate_mymemory(self, text: str, from_lang: str, to_lang: str) -> str | None:
         import html, re
         try:
-            with httpx.Client(timeout=5.0) as client:
+            with httpx.Client(timeout=10.0) as client:
                 params = {
                     "q": text,
                     "langpair": f"{from_lang}|{to_lang}",

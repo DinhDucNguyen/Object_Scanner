@@ -40,7 +40,19 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
 
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
 
+    private var lastCollectionId: Int = -1
+    private var lastPractice: Boolean = false
+
     fun loadCards(collectionId: Int = 0, practice: Boolean = false) {
+        val hasActiveSession = _cards.value?.isNotEmpty() == true
+            && _finished.value != true
+            && lastCollectionId == collectionId
+            && lastPractice == practice
+        if (hasActiveSession) return
+
+        lastCollectionId = collectionId
+        lastPractice = practice
+
         viewModelScope.launch {
             _isLoading.value = true
             _finished.value = false

@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.duc.objectlanguage.data.model.DictionaryMeaning
 import com.duc.objectlanguage.databinding.ItemDictionaryMeaningBinding
+import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class DictionaryAdapter : ListAdapter<DictionaryMeaning, DictionaryAdapter.MeaningViewHolder>(DiffCallback) {
 
@@ -16,7 +17,7 @@ class DictionaryAdapter : ListAdapter<DictionaryMeaning, DictionaryAdapter.Meani
 
         fun bind(meaning: DictionaryMeaning) {
             binding.tvPartOfSpeech.text = meaning.partOfSpeech
-            binding.tvDefinition.text = meaning.definition
+            binding.tvDefinition.text = DefinitionFormatter.formatDefinition(binding.root.context, meaning.definition)
             
             if (meaning.example != null) {
                 binding.tvExample.visibility = View.VISIBLE

@@ -111,13 +111,19 @@ class CollectionListFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.filteredCollections.observe(viewLifecycleOwner) { collections ->
-            adapter.submitList(collections)
+            val wasEmpty = adapter.itemCount == 0
+            adapter.submitList(collections) {
+                if (wasEmpty && collections.isNotEmpty()) binding.recyclerViewCollections.scheduleLayoutAnimation()
+            }
             binding.recyclerViewCollections.visibility = if (collections.isEmpty()) View.GONE else View.VISIBLE
             binding.emptyStateLayout.visibility = if (collections.isEmpty()) View.VISIBLE else View.GONE
         }
 
         viewModel.publicCollections.observe(viewLifecycleOwner) { collections ->
-            publicAdapter.submitList(collections)
+            val wasEmpty = publicAdapter.itemCount == 0
+            publicAdapter.submitList(collections) {
+                if (wasEmpty && collections.isNotEmpty()) binding.recyclerViewPublicCollections.scheduleLayoutAnimation()
+            }
             binding.recyclerViewPublicCollections.visibility = if (collections.isEmpty()) View.GONE else View.VISIBLE
             binding.communityEmptyState.visibility = if (collections.isEmpty()) View.VISIBLE else View.GONE
         }

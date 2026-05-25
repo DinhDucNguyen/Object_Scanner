@@ -71,8 +71,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_lock_silent_mode_off"
-                app:tint="@color/primary" />
+                android:src="@drawable/ic_speaker" />
         </LinearLayout>
 
         <!-- Phonetic -->
@@ -95,8 +94,7 @@
             android:background="#F5F5F5"
             android:padding="8dp"
             android:text="Tôi dùng máy tính xách tay để làm việc."
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp"
+            android:textAppearance="@style/TextAppearance.App.BodySmall"
             android:fontStyle="italic" />
 
         <!-- Add to Learn Button -->

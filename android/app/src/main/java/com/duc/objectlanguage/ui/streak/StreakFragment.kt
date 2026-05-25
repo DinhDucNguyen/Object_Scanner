@@ -15,6 +15,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import nl.dionsegijn.konfetti.core.Party
 import nl.dionsegijn.konfetti.core.Position
 import nl.dionsegijn.konfetti.core.emitter.Emitter
+import androidx.navigation.fragment.findNavController
 import java.util.concurrent.TimeUnit
 
 class StreakFragment : Fragment() {
@@ -22,6 +23,7 @@ class StreakFragment : Fragment() {
     private var _binding: FragmentStreakBinding? = null
     private val binding get() = _binding!!
     private val viewModel: StreakViewModel by viewModels()
+    private var hasAnimatedProgress = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -60,20 +62,36 @@ class StreakFragment : Fragment() {
             currentStreakLabel.text = getString(
                 if (data.currentStreak == 1) R.string.streak_days_singular
                 else R.string.streak_days_plural
-            )
+            ).uppercase()
 
             // Thống kê
-            longestStreakText.text = data.longestStreak.toString()
+            longestStreakText.text = "${data.longestStreak} ngày"
             totalReviewsText.text  = data.totalReviews.toString()
             reviewsTodayText.text  = data.reviewsToday.toString()
+
+            pbLongestStreak.max = maxOf(data.longestStreak, 30)
+            pbLongestStreak.progress = data.longestStreak
+            pbTotalReviews.max = maxOf(data.totalReviews, 200)
+            pbTotalReviews.progress = data.totalReviews
+            pbReviewsToday.max = 10
+            pbReviewsToday.progress = minOf(data.reviewsToday, 10)
+
+            // Tiến trình hình tròn
+            streakProgressCircle.max = data.nextMilestone
+            if (!hasAnimatedProgress) {
+                hasAnimatedProgress = true
+                animateStreakCircle(data.currentStreak, data.nextMilestone)
+            } else {
+                streakProgressCircle.progress = data.currentStreak
+            }
+            streakProgressCircle.setIndicatorColor(ContextCompat.getColor(requireContext(), R.color.warning))
 
             motivationText.text = buildMotivationMessage(data.currentStreak, data.reviewsToday)
 
             // Mốc tiếp theo
-            nextMilestoneText.text = getString(R.string.streak_milestone_label, data.nextMilestone)
+            nextMilestoneText.text = "${data.nextMilestone} Ngày Chuỗi"
             milestoneProgressBar.max      = data.nextMilestone
             milestoneProgressBar.progress = data.currentStreak
-            milestoneProgressBar.progressTintList = ColorStateList.valueOf(accentColor)
             daysToMilestoneText.text = getString(R.string.streak_days_to_go, data.daysToMilestone)
 
             // Flame icon theo cường độ chuỗi
@@ -85,15 +103,73 @@ class StreakFragment : Fragment() {
 
             // Trạng thái hôm nay
             if (data.reviewsToday > 0) {
-                todayStatusIcon.text = "OK"
-                todayStatusText.text = getString(R.string.streak_today_done)
+                todayStatusIcon.text = "✓"
+                todayStatusText.text = "ĐÃ HOÀN THÀNH HÔM NAY"
+                todayStatusContainer.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.success_light))
                 todayStatusIcon.setTextColor(ContextCompat.getColor(requireContext(), R.color.success))
+                todayStatusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.success))
             } else {
-                todayStatusIcon.text = "!"
-                todayStatusText.text = getString(R.string.streak_today_pending)
-                todayStatusIcon.setTextColor(accentColor)
+                todayStatusIcon.text = "✕"
+                todayStatusText.text = "CHƯA HOÀN THÀNH HÔM NAY"
+                todayStatusContainer.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.warning_light))
+                todayStatusIcon.setTextColor(ContextCompat.getColor(requireContext(), R.color.warning))
+                todayStatusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.warning))
             }
-            todayStatusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+
+            // Thành tựu
+            val streak = data.currentStreak
+            
+            // Achievement 1: Mới bắt đầu (3 ngày)
+            if (streak >= 3) {
+                achievement1Bg.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.warning_light))
+                achievement1Icon.setImageResource(R.drawable.ic_award)
+                achievement1Icon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.warning))
+                achievement1Label.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+            } else {
+                achievement1Bg.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.surface_soft))
+                achievement1Icon.setImageResource(R.drawable.ic_lock)
+                achievement1Icon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.text_muted))
+                achievement1Label.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_muted))
+            }
+
+            // Achievement 2: 7 Ngày
+            if (streak >= 7) {
+                achievement2Bg.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.primary_light))
+                achievement2Icon.setImageResource(R.drawable.ic_verified)
+                achievement2Icon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary))
+                achievement2Label.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+            } else {
+                achievement2Bg.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.surface_soft))
+                achievement2Icon.setImageResource(R.drawable.ic_lock)
+                achievement2Icon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.text_muted))
+                achievement2Label.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_muted))
+            }
+
+            // Achievement 3: 30 Ngày
+            if (streak >= 30) {
+                achievement3Bg.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.violet_light))
+                achievement3Icon.setImageResource(R.drawable.ic_award)
+                achievement3Icon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.violet))
+                achievement3Label.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+            } else {
+                achievement3Bg.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.surface_soft))
+                achievement3Icon.setImageResource(R.drawable.ic_lock)
+                achievement3Icon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.text_muted))
+                achievement3Label.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_muted))
+            }
+
+            // Achievement 4: Chuyên cần (Mốc 50 ngày)
+            if (streak >= 50) {
+                achievement4Bg.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.cyan_light))
+                achievement4Icon.setImageResource(R.drawable.ic_star)
+                achievement4Icon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.cyan))
+                achievement4Label.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+            } else {
+                achievement4Bg.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.surface_soft))
+                achievement4Icon.setImageResource(R.drawable.ic_lock)
+                achievement4Icon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.text_muted))
+                achievement4Label.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_muted))
+            }
         }
     }
 
@@ -123,7 +199,42 @@ class StreakFragment : Fragment() {
     )
 
     private fun setupButtons() {
+        binding.btnBack.setOnClickListener {
+            findNavController().navigateUp()
+        }
         binding.milestoneInfoButton.setOnClickListener { showMilestoneInfo() }
+        binding.btnLearnNow.setOnClickListener {
+            selectBottomTab(R.id.reviewFragment)
+        }
+        binding.streakCircleContainer.setOnClickListener {
+            viewModel.streakData.value?.let { data ->
+                animateStreakCircle(data.currentStreak, data.nextMilestone)
+            }
+        }
+    }
+
+    private fun animateStreakCircle(currentStreak: Int, nextMilestone: Int) {
+        binding.streakProgressCircle.max = nextMilestone
+        
+        val animator = android.animation.ValueAnimator.ofInt(0, currentStreak)
+        animator.duration = 1200 // 1.2s
+        animator.interpolator = android.view.animation.DecelerateInterpolator()
+        animator.addUpdateListener { animation ->
+            if (_binding != null) {
+                binding.streakProgressCircle.setProgressCompat(animation.animatedValue as Int, false)
+            }
+        }
+        animator.start()
+    }
+
+    private fun selectBottomTab(itemId: Int) {
+        val bottomNav = requireActivity()
+            .findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation)
+        if (bottomNav != null) {
+            bottomNav.selectedItemId = itemId
+        } else {
+            findNavController().navigate(itemId)
+        }
     }
 
     private fun showMilestoneInfo() {

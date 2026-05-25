@@ -9,16 +9,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentReviewBinding
+import com.duc.objectlanguage.ui.common.addPulseFeedback
+import com.duc.objectlanguage.ui.common.addScaleFeedback
+import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class ReviewFragment : Fragment() {
 
     private var _binding: FragmentReviewBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: ReviewViewModel by viewModels()
+    private val viewModel: ReviewViewModel by activityViewModels()
 
     private val collectionId: Int by lazy { arguments?.getInt("collectionId") ?: 0 }
     private val collectionName: String? by lazy { arguments?.getString("collectionName") }
@@ -62,6 +65,12 @@ class ReviewFragment : Fragment() {
             }
         }
 
+        binding.btnReveal.addScaleFeedback()
+        binding.btnAgain.addScaleFeedback()
+        binding.btnHard.addScaleFeedback()
+        binding.btnGood.addScaleFeedback()
+        binding.btnEasy.addScaleFeedback()
+
         binding.btnReveal.setOnClickListener {
             val flipOut = ObjectAnimator.ofFloat(binding.cardFlashcard, "rotationY", 0f, 90f).apply { duration = 200 }
             val flipIn  = ObjectAnimator.ofFloat(binding.cardFlashcard, "rotationY", -90f, 0f).apply { duration = 200 }
@@ -80,6 +89,7 @@ class ReviewFragment : Fragment() {
         binding.btnHard.setOnClickListener  { submitAnswer(3) }
         binding.btnGood.setOnClickListener  { submitAnswer(4) }
         binding.btnEasy.setOnClickListener  { submitAnswer(5) }
+        binding.btnPlayAudioReview.addPulseFeedback()
         binding.btnPlayAudioReview.setOnClickListener {
             currentCard()?.let { card ->
                 viewModel.playAudio(card.audioUrl, card.wordName, card.languageCode.ifBlank { "en" })
@@ -122,7 +132,8 @@ class ReviewFragment : Fragment() {
         }
 
         // Back: nghĩa tiếng Việt + ví dụ
-        binding.tvAnswerDefinition.text = card.definition ?: ""
+        val rawDef = card.definition ?: ""
+        binding.tvAnswerDefinition.text = DefinitionFormatter.formatDefinition(requireContext(), rawDef)
 
         val example = card.examples.firstOrNull()?.cauViDu
         if (!example.isNullOrEmpty()) {

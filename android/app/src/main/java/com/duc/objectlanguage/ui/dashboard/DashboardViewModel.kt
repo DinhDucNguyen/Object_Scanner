@@ -43,6 +43,9 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     private val _topCollections = MutableLiveData<List<CollectionHighlight>>(emptyList())
     val topCollections: LiveData<List<CollectionHighlight>> = _topCollections
 
+    private val _avatarUrl = MutableLiveData<String?>()
+    val avatarUrl: LiveData<String?> = _avatarUrl
+
     fun loadStats() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -52,6 +55,14 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 onFailure = { _error.value = it.message }
             )
             _isLoading.value = false
+        }
+    }
+
+    fun loadAvatarUrl() {
+        viewModelScope.launch {
+            repo.getProfile().getOrNull()?.avatarUrl?.let { url ->
+                if (url.isNotBlank() && url != "default_avatar.png") _avatarUrl.value = url
+            }
         }
     }
 

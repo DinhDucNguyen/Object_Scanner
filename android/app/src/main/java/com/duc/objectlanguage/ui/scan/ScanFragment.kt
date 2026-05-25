@@ -30,6 +30,9 @@ import kotlinx.coroutines.withContext
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentScanBinding
 import com.duc.objectlanguage.ui.common.GuestUpsellDialog
+import com.duc.objectlanguage.ui.common.addPulseFeedback
+import com.duc.objectlanguage.ui.common.addScaleFeedback
+import com.duc.objectlanguage.utils.DefinitionFormatter
 import com.yalantis.ucrop.UCrop
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -49,6 +52,7 @@ class ScanFragment : Fragment() {
     private var detectorHelper: ObjectDetectorHelper? = null
     private var latestDetection: DetectionResult? = null
     private var selectedModelName = ObjectDetectorHelper.CUSTOM_MODEL
+    private var lastScannedBitmap: Bitmap? = null
 
     private val requestCameraPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -167,37 +171,66 @@ class ScanFragment : Fragment() {
                 binding.cameraControls.visibility = View.GONE
                 binding.btnCapture.visibility = View.GONE
                 binding.btnGallery.visibility = View.GONE
-                binding.tvObjectName.text = result.objectCode.replaceFirstChar { it.uppercase() }
-                if (result.aliases.isNotEmpty()) {
-                    binding.tvAliases.text = getString(R.string.scan_also_known_as, result.aliases.joinToString(", "))
-                    binding.tvAliases.visibility = View.VISIBLE
+
+                // 1. Scanned Image
+                if (lastScannedBitmap != null) {
+                    binding.ivScannedImage.setImageBitmap(lastScannedBitmap)
+                    binding.ivScannedImage.visibility = View.VISIBLE
                 } else {
-                    binding.tvAliases.visibility = View.GONE
+                    binding.ivScannedImage.visibility = View.GONE
                 }
+
+                // 2. Detection source chip
                 val source = viewModel.detectionSource.value
-                binding.tvCategory.text = if (isPending) {
-                    val pending = getString(R.string.scan_pending)
-                    if (source != null) "$pending · $source" else pending
-                } else {
-                    val category = result.categoryName ?: getString(R.string.scan_category_ai)
-                    if (source != null) "$category · $source" else category
+                binding.tvDetectionSource.apply {
+                    text = if (isPending) {
+                        val pending = getString(R.string.scan_pending)
+                        if (source != null) "$pending · $source" else pending
+                    } else {
+                        source ?: getString(R.string.scan_category_ai)
+                    }
+                    visibility = View.VISIBLE
                 }
 
                 val enTrans = result.translations.firstOrNull { it.languageCode == "en" }
                     ?: result.translations.firstOrNull()
+
                 if (enTrans != null) {
-                    val sb = StringBuilder()
-                    if (!enTrans.partOfSpeech.isNullOrEmpty()) {
-                        sb.appendLine(getString(R.string.scan_translation_word, enTrans.wordName, enTrans.partOfSpeech))
-                    } else {
-                        sb.appendLine(enTrans.wordName)
+                    // 3. Word Name
+                    binding.tvObjectName.text = enTrans.wordName.replaceFirstChar { it.uppercase() }
+
+                    // 4. Phonetic & Part of speech
+                    binding.tvPhonetic.apply {
+                        text = enTrans.phonetic ?: ""
+                        visibility = if (enTrans.phonetic.isNullOrEmpty()) View.GONE else View.VISIBLE
                     }
-                    if (!enTrans.phonetic.isNullOrEmpty()) sb.appendLine(enTrans.phonetic)
-                    if (!enTrans.definition.isNullOrEmpty()) sb.appendLine(enTrans.definition)
-                    binding.tvTranslations.text = sb.toString().trimEnd()
+                    binding.tvPartOfSpeech.apply {
+                        text = if (!enTrans.partOfSpeech.isNullOrEmpty()) "(${enTrans.partOfSpeech})" else ""
+                        visibility = if (enTrans.partOfSpeech.isNullOrEmpty()) View.GONE else View.VISIBLE
+                    }
+
+                    // 5. Definition Card
+                    val def = enTrans.definition ?: ""
+                    if (def.isNotEmpty()) {
+                        binding.cardDefinition.visibility = View.VISIBLE
+                        val colonIndex = def.indexOf(':')
+                        if (colonIndex != -1) {
+                            binding.tvDefinitionTitle.text = def.substring(0, colonIndex).trim()
+                            binding.tvDefinitionDesc.apply {
+                                text = def.substring(colonIndex + 1).trim()
+                                visibility = View.VISIBLE
+                            }
+                        } else {
+                            binding.tvDefinitionTitle.text = def
+                            binding.tvDefinitionDesc.visibility = View.GONE
+                        }
+                    } else {
+                        binding.cardDefinition.visibility = View.GONE
+                    }
 
                     if (!viewModel.isGuest) {
                         binding.btnPlayAudio.visibility = View.VISIBLE
+                        binding.btnPlayAudio.addPulseFeedback()
                         binding.btnPlayAudio.setOnClickListener {
                             viewModel.playAudio(enTrans.audioUrl, enTrans.wordName, "en")
                         }
@@ -213,6 +246,14 @@ class ScanFragment : Fragment() {
                         binding.btnPlayAudio.visibility = View.GONE
                         binding.btnAddToCollection.visibility = View.GONE
                     }
+                } else {
+                    // Fallback if no translation found
+                    binding.tvObjectName.text = result.objectCode.replaceFirstChar { it.uppercase() }
+                    binding.tvPhonetic.visibility = View.GONE
+                    binding.tvPartOfSpeech.visibility = View.GONE
+                    binding.cardDefinition.visibility = View.GONE
+                    binding.btnPlayAudio.visibility = View.GONE
+                    binding.btnAddToCollection.visibility = View.GONE
                 }
             } else {
                 binding.resultCard.visibility = View.GONE
@@ -235,14 +276,21 @@ class ScanFragment : Fragment() {
                 val inflater = LayoutInflater.from(requireContext())
                 items.forEachIndexed { i, item ->
                     val itemView = inflater.inflate(R.layout.item_example_sentence, binding.llExamples, false)
+                    val tvIndex = itemView.findViewById<android.widget.TextView>(R.id.tvIndex)
                     val tvEn = itemView.findViewById<android.widget.TextView>(R.id.tvEnSentence)
                     val tvVi = itemView.findViewById<android.widget.TextView>(R.id.tvViTranslation)
-                    tvEn.text = "${i + 1}. ${item.en}"
+                    
+                    tvIndex.text = String.format(java.util.Locale.US, "%02d", i + 1)
+                    tvEn.text = "\"${item.en}\""
                     if (!item.vi.isNullOrBlank()) {
                         tvVi.text = item.vi
+                        tvVi.visibility = View.GONE
                         itemView.setOnClickListener {
                             tvVi.visibility = if (tvVi.visibility == View.VISIBLE) View.GONE else View.VISIBLE
                         }
+                    } else {
+                        tvVi.visibility = View.GONE
+                        itemView.setOnClickListener(null)
                     }
                     binding.llExamples.addView(itemView)
                 }
@@ -429,6 +477,7 @@ class ScanFragment : Fragment() {
     private fun showPreviewDialog(imageBytes: ByteArray, previewBitmap: Bitmap? = null) {
         // Dùng bitmap đã có hoặc decode từ bytes
         val bitmap = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        lastScannedBitmap = bitmap
 
         // Tạo ImageView cho preview
         val imageView = ImageView(requireContext()).apply {

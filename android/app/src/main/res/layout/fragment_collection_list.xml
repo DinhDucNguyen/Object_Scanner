@@ -114,7 +114,8 @@
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:paddingTop="2dp"
-                android:paddingBottom="104dp" />
+                android:paddingBottom="104dp"
+                android:layoutAnimation="@anim/layout_item_anim" />
 
             <LinearLayout
                 android:id="@+id/emptyStateLayout"
@@ -147,8 +148,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/collection_empty_subtitle"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    android:textAppearance="@style/TextAppearance.App.BodyMedium" />
 
             </LinearLayout>
 
@@ -200,8 +200,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/collection_community_empty_subtitle"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    android:textAppearance="@style/TextAppearance.App.BodyMedium" />
 
             </LinearLayout>
 

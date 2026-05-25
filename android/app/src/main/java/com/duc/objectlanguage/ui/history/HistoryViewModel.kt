@@ -5,7 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.asLiveData
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.data.local.StreakDataStore
 import com.duc.objectlanguage.data.model.HistoryItem
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -14,7 +16,21 @@ import kotlinx.coroutines.launch
 class HistoryViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repo = (application as ObjectLanguageApp).repository
+    private val streakStore = StreakDataStore(application)
     private val pageSize = 20
+
+    val streakValue: LiveData<Int> = streakStore.currentStreak.asLiveData()
+
+    private val _avatarUrl = MutableLiveData<String?>()
+    val avatarUrl: LiveData<String?> = _avatarUrl
+
+    fun loadAvatarUrl() {
+        viewModelScope.launch {
+            repo.getProfile().getOrNull()?.avatarUrl?.let { url ->
+                if (url.isNotBlank() && url != "default_avatar.png") _avatarUrl.value = url
+            }
+        }
+    }
 
     private val _items = MutableLiveData<List<HistoryItem>>()
     val items: LiveData<List<HistoryItem>> = _items

@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
+    android:clipChildren="false"
     android:clipToPadding="false"
     android:fillViewport="true">
 
@@ -11,16 +12,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:paddingStart="20dp"
         android:paddingTop="24dp"
         android:paddingEnd="20dp"
         android:paddingBottom="108dp">
 
+        <!-- ── HEADER ────────────────────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="bottom"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/ivDashboardAvatar"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/bg_avatar_circle"
+                android:contentDescription="@null"
+                android:padding="10dp"
+                android:src="@drawable/ic_person"
+                app:tint="@color/primary" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -29,41 +44,69 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/dashboard_greeting"
                     android:textColor="@color/text_primary"
-                    android:textSize="24sp"
+                    android:textSize="26sp"
+                    android:fontWeight="700"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
+                    android:layout_marginTop="2dp"
                     android:text="@string/dashboard_greeting_subtitle"
                     android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
+                    android:textSize="15sp"
+                    android:fontWeight="700"
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <TextView
+            <LinearLayout
+                android:id="@+id/btnStreakBadge"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/dashboard_brand_name"
-                android:textColor="@color/primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_height="34dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_pill_orange"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="9dp"
+                android:paddingEnd="11dp">
+
+                <ImageView
+                    android:layout_width="17dp"
+                    android:layout_height="17dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_fire" />
+
+                <TextView
+                    android:id="@+id/tvStreakBadgeValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="0"
+                    android:textColor="@android:color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
         </LinearLayout>
 
+        <!-- ── SEARCH BAR ────────────────────────────────────────── -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardDashboardSearch"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="50dp"
             android:layout_marginTop="18dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="26dp"
+            app:cardCornerRadius="25dp"
             app:cardElevation="0dp"
             app:strokeColor="@color/divider"
             app:strokeWidth="1dp">
@@ -77,8 +120,8 @@
                 android:paddingEnd="16dp">
 
                 <ImageView
-                    android:layout_width="21dp"
-                    android:layout_height="21dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_search"
                     app:tint="@color/text_muted" />
@@ -86,26 +129,39 @@
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="11dp"
+                    android:layout_marginStart="10dp"
                     android:layout_weight="1"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:text="@string/dashboard_search_hint"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="@color/text_muted"
                     android:textSize="14sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- ── SHIMMER LOADING ──────────────────────────────────── -->
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmerStats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone">
+            <include layout="@layout/shimmer_stats_row" />
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+        <!-- ── STATS ROW ──────────────────────────────────────────── -->
         <LinearLayout
+            android:id="@+id/statsRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:orientation="horizontal">
 
+            <!-- Streak Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardDashboardStreak"
                 android:layout_width="0dp"
-                android:layout_height="138dp"
+                android:layout_height="match_parent"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:clickable="true"
@@ -113,14 +169,14 @@
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="18dp"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
-                app:strokeColor="@color/warning_light"
-                app:strokeWidth="1dp">
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1.5dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="14dp">
 
@@ -132,17 +188,16 @@
 
                         <ImageView
                             android:id="@+id/ivDashboardStreakIcon"
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
                             android:contentDescription="@null"
-                            android:src="@drawable/ic_streak_fire"
-                            app:tint="@color/warning" />
+                            android:src="@drawable/ic_fire" />
 
                         <TextView
                             android:id="@+id/tvDashboardStreakValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="7dp"
+                            android:layout_marginStart="6dp"
                             android:text="0"
                             android:textColor="@color/warning"
                             android:textSize="25sp"
@@ -155,7 +210,8 @@
                             android:layout_marginStart="4dp"
                             android:text="@string/streak_days_plural"
                             android:textColor="@color/text_primary"
-                            android:textSize="13sp"
+                            android:textSize="15sp"
+                            android:fontWeight="700"
                             android:textStyle="bold" />
                     </LinearLayout>
 
@@ -165,24 +221,22 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="@string/dashboard_streak_today_pending"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:textAppearance="@style/TextAppearance.App.Hint" />
 
                     <TextView
                         android:id="@+id/tvDashboardStreakReviewsToday"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="1dp"
+                        android:layout_marginTop="2dp"
                         android:text="@string/dashboard_streak_today_count_initial"
-                        android:textColor="@color/text_muted"
-                        android:textSize="11sp" />
+                        android:textAppearance="@style/TextAppearance.App.Hint" />
 
                     <ProgressBar
                         android:id="@+id/progressDashboardStreak"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="6dp"
-                        android:layout_marginTop="9dp"
+                        android:layout_height="10dp"
+                        android:layout_marginTop="8dp"
                         android:indeterminate="false"
                         android:max="100"
                         android:progress="0"
@@ -193,28 +247,26 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
                         android:text="@string/dashboard_streak_next_milestone_initial"
-                        android:textColor="@color/text_muted"
-                        android:textSize="11sp" />
+                        android:textAppearance="@style/TextAppearance.App.Hint" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Mastery Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
-                android:layout_height="138dp"
+                android:layout_height="match_parent"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="18dp"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
-                app:strokeColor="@color/primary_light"
-                app:strokeWidth="1dp">
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1.5dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="14dp">
 
@@ -225,8 +277,8 @@
                         android:orientation="horizontal">
 
                         <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_book"
                             app:tint="@color/primary" />
@@ -235,40 +287,44 @@
                             android:id="@+id/tvProgressPct"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="6dp"
                             android:text="@string/dashboard_progress_short_initial"
-                            android:textColor="@color/text_primary"
-                            android:textSize="17sp"
+                            android:textColor="@color/primary"
+                            android:textSize="25sp"
                             android:textStyle="bold" />
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="@string/dashboard_mastery_label"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1" />
+                        android:layout_marginTop="4dp"
+                        android:text="@string/dashboard_mastery_short"
+                        android:textAppearance="@style/TextAppearance.App.Hint"
+                        android:textColor="@color/primary" />
 
                     <com.google.android.material.progressindicator.LinearProgressIndicator
                         android:id="@+id/progressMastery"
                         android:layout_width="match_parent"
-                        android:layout_height="7dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
                         android:max="100"
                         android:progress="0"
                         app:indicatorColor="@color/primary"
                         app:trackColor="@color/primary_light"
                         app:trackCornerRadius="4dp"
                         app:trackThickness="7dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/dashboard_mastery_hint"
+                        android:textAppearance="@style/TextAppearance.App.Hint" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
+        <!-- ── EXPLORE BANNER ────────────────────────────────────── -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardExploreBanner"
             android:layout_width="match_parent"
@@ -277,53 +333,68 @@
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
-            app:cardCornerRadius="22dp"
+            app:cardCornerRadius="32dp"
             app:cardElevation="0dp"
             app:strokeWidth="0dp">
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_gradient_header"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="20dp">
+                android:background="@drawable/bg_explore_banner">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="24dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/containerIcon"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/dashboard_explore_title"
-                        android:textColor="@color/text_on_primary"
-                        android:textSize="20sp"
+                        android:textColor="@android:color/white"
+                        android:textSize="22sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:alpha="0.85"
+                        android:layout_marginTop="8dp"
+                        android:alpha="0.9"
                         android:text="@string/dashboard_explore_subtitle"
-                        android:textColor="@color/text_on_primary"
-                        android:textSize="13sp" />
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
                 </LinearLayout>
 
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_explore"
-                    app:tint="@color/text_on_primary" />
+                <FrameLayout
+                    android:id="@+id/containerIcon"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/bg_badge_glass"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
-            </LinearLayout>
+                    <ImageView
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_explore"
+                        app:tint="@android:color/white" />
+                </FrameLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Top Collections section -->
+        <!-- ── TOP COLLECTIONS ───────────────────────────────────── -->
         <LinearLayout
             android:id="@+id/sectionTopCollections"
             android:layout_width="match_parent"
@@ -344,7 +415,8 @@
                     android:layout_weight="1"
                     android:text="@string/dashboard_collections_title"
                     android:textColor="@color/text_primary"
-                    android:textSize="18sp"
+                    android:textSize="22sp"
+                    android:fontWeight="700"
                     android:textStyle="bold" />
 
                 <TextView
@@ -357,7 +429,9 @@
                     android:padding="4dp"
                     android:text="@string/dashboard_collections_see_all"
                     android:textColor="@color/primary"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:fontWeight="700"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <HorizontalScrollView
@@ -374,14 +448,14 @@
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardHighlight1"
-                        android:layout_width="130dp"
+                        android:layout_width="160dp"
                         android:layout_height="wrap_content"
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackground"
                         android:visibility="gone"
                         app:cardBackgroundColor="@color/surface"
-                        app:cardCornerRadius="18dp"
+                        app:cardCornerRadius="20dp"
                         app:cardElevation="0dp"
                         app:strokeColor="@color/divider"
                         app:strokeWidth="1dp">
@@ -394,13 +468,13 @@
                             android:padding="16dp">
 
                             <ImageView
-                                android:layout_width="52dp"
-                                android:layout_height="52dp"
-                                android:background="@drawable/bg_icon_primary"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:background="@drawable/bg_icon_warning"
                                 android:contentDescription="@null"
-                                android:padding="13dp"
+                                android:padding="16dp"
                                 android:src="@drawable/ic_folder_outline"
-                                app:tint="@color/primary" />
+                                app:tint="@color/warning" />
 
                             <TextView
                                 android:id="@+id/tvHighlightName1"
@@ -420,14 +494,14 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="3dp"
                                 android:gravity="center"
-                                android:textColor="@color/text_muted"
+                                android:textAppearance="@style/TextAppearance.App.Caption"
                                 android:textSize="11sp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardHighlight2"
-                        android:layout_width="130dp"
+                        android:layout_width="160dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:clickable="true"
@@ -435,7 +509,7 @@
                         android:foreground="?attr/selectableItemBackground"
                         android:visibility="gone"
                         app:cardBackgroundColor="@color/surface"
-                        app:cardCornerRadius="18dp"
+                        app:cardCornerRadius="20dp"
                         app:cardElevation="0dp"
                         app:strokeColor="@color/divider"
                         app:strokeWidth="1dp">
@@ -448,13 +522,13 @@
                             android:padding="16dp">
 
                             <ImageView
-                                android:layout_width="52dp"
-                                android:layout_height="52dp"
-                                android:background="@drawable/bg_icon_success"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:background="@drawable/bg_icon_primary"
                                 android:contentDescription="@null"
-                                android:padding="13dp"
+                                android:padding="16dp"
                                 android:src="@drawable/ic_folder_outline"
-                                app:tint="@color/success" />
+                                app:tint="@color/primary" />
 
                             <TextView
                                 android:id="@+id/tvHighlightName2"
@@ -474,14 +548,14 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="3dp"
                                 android:gravity="center"
-                                android:textColor="@color/text_muted"
+                                android:textAppearance="@style/TextAppearance.App.Caption"
                                 android:textSize="11sp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardHighlight3"
-                        android:layout_width="130dp"
+                        android:layout_width="160dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:clickable="true"
@@ -489,7 +563,7 @@
                         android:foreground="?attr/selectableItemBackground"
                         android:visibility="gone"
                         app:cardBackgroundColor="@color/surface"
-                        app:cardCornerRadius="18dp"
+                        app:cardCornerRadius="20dp"
                         app:cardElevation="0dp"
                         app:strokeColor="@color/divider"
                         app:strokeWidth="1dp">
@@ -502,11 +576,11 @@
                             android:padding="16dp">
 
                             <ImageView
-                                android:layout_width="52dp"
-                                android:layout_height="52dp"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
                                 android:background="@drawable/bg_icon_violet"
                                 android:contentDescription="@null"
-                                android:padding="13dp"
+                                android:padding="16dp"
                                 android:src="@drawable/ic_folder_outline"
                                 app:tint="@color/violet" />
 
@@ -528,7 +602,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="3dp"
                                 android:gravity="center"
-                                android:textColor="@color/text_muted"
+                                android:textAppearance="@style/TextAppearance.App.Caption"
                                 android:textSize="11sp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -537,92 +611,100 @@
             </HorizontalScrollView>
         </LinearLayout>
 
-        <TextView
+        <!-- ── DAILY GOAL CARD ───────────────────────────────────── -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="10dp"
-            android:text="@string/dashboard_goal_title"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:background="@drawable/bg_goal_card_dashed"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="20dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="22dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/primary_light"
-            app:strokeWidth="1dp">
+            <LinearLayout
+                android:id="@+id/tvObjectOfDayContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_soft_panel"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="10dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tvObjectOfDay"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/dashboard_object_today_placeholder"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:gravity="top"
+                android:orientation="horizontal">
 
                 <LinearLayout
-                    android:id="@+id/tvObjectOfDayContainer"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="14dp"
-                    android:background="@drawable/bg_soft_panel"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="14dp"
-                    android:paddingTop="10dp"
-                    android:paddingEnd="14dp"
-                    android:paddingBottom="10dp"
-                    android:visibility="gone">
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tvObjectOfDay"
-                        android:layout_width="0dp"
+                        android:id="@+id/tvMissionTitle"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/dashboard_object_today_placeholder"
+                        android:text="@string/dashboard_goal_title"
                         android:textColor="@color/text_primary"
-                        android:textSize="15sp"
+                        android:textSize="22sp"
+                        android:fontWeight="700"
                         android:textStyle="bold" />
 
+                    <TextView
+                        android:id="@+id/tvMissionSubtitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/dashboard_hunt_subtitle"
+                        android:textAppearance="@style/TextAppearance.App.BodySmall" />
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tvMissionTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dashboard_hunt_title"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvMissionSubtitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/dashboard_hunt_subtitle"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnScanNow"
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:id="@+id/ivGoalIcon"
+                    android:layout_width="52dp"
                     android:layout_height="52dp"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/dashboard_btn_scan_now"
-                    android:textColor="@color/text_on_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="@color/primary"
-                    app:cornerRadius="18dp"
-                    app:icon="@drawable/ic_camera"
-                    app:iconGravity="textStart"
-                    app:iconTint="@color/text_on_primary" />
-
+                    android:layout_marginStart="12dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_target_goal" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnScanNow"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/dashboard_btn_scan_now"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/primary"
+                app:cornerRadius="26dp"
+                app:icon="@drawable/ic_camera"
+                app:iconGravity="textStart"
+                app:iconTint="@android:color/white" />
+
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -631,5 +713,6 @@
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
             android:visibility="gone" />
+
     </LinearLayout>
 </ScrollView>

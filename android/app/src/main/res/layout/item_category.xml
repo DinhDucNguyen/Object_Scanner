@@ -46,7 +46,6 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="2"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
+            android:textAppearance="@style/TextAppearance.App.BodySmall" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

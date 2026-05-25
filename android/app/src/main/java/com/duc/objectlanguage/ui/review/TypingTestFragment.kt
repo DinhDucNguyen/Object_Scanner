@@ -84,12 +84,20 @@ class TypingTestFragment : Fragment() {
 
         viewModel.currentIndex.observe(viewLifecycleOwner) { index ->
             val total = viewModel.getTotalQuestions()
-            tvProgress.text = "Question ${index + 1}/$total"
+            if (total > 0) {
+                tvProgress.text = "Question ${index + 1}/$total"
+            } else {
+                tvProgress.text = ""
+            }
         }
 
         viewModel.score.observe(viewLifecycleOwner) { score ->
             val total = viewModel.getTotalQuestions()
-            tvScore.text = "Score: $score/$total"
+            if (total > 0) {
+                tvScore.text = "Score: $score/$total"
+            } else {
+                tvScore.text = ""
+            }
         }
 
         viewModel.answerResult.observe(viewLifecycleOwner) { result ->

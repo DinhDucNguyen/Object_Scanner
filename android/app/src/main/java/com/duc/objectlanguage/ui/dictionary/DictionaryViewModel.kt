@@ -114,19 +114,22 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
             ?.let { (text, lang) -> PronunciationTarget(text, lang.ifBlank { "en" }) }
     }
 
+
     fun playAudio(target: PronunciationTarget?) {
         if (target == null) {
             _error.value = "Câu quá dài nên không tạo phát âm"
             return
         }
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val bytes = repo.getTtsAudio(target.text, target.lang)
             if (bytes == null) {
-                _error.value = "Không tải được audio"
+                _error.postValue("Không tải được audio")
                 return@launch
             }
-            audioPlayer.playMp3(bytes) {
-                _error.postValue("Lỗi phát audio")
+            kotlinx.coroutines.withContext(Dispatchers.Main) {
+                audioPlayer.playMp3(bytes) {
+                    _error.postValue("Lỗi phát audio")
+                }
             }
         }
     }

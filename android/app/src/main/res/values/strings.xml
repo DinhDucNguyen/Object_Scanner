@@ -67,6 +67,8 @@
     <string name="dashboard_brand_name">LengoLens.</string>
     <string name="dashboard_search_hint">Tra từ hoặc quét đồ vật...</string>
     <string name="dashboard_mastery_label">Mức độ thành thạo</string>
+    <string name="dashboard_mastery_short">Thành thạo</string>
+    <string name="dashboard_mastery_hint">Cố lên, sắp giỏi rồi!</string>
     <string name="dashboard_goal_title">Mục tiêu hôm nay</string>
     <string name="dashboard_hunt_title">Biến đồ vật thật thành từ mới</string>
     <string name="dashboard_hunt_subtitle">Chọn một món ở gần bạn, quét bằng camera rồi lưu vào bộ từ ôn tập.</string>
@@ -86,8 +88,8 @@
     <string name="dashboard_explore_title">Khám phá theo chủ đề</string>
     <string name="dashboard_explore_subtitle">Học từ vựng có hệ thống theo từng chủ đề</string>
     <string name="dashboard_btn_review_short">Ôn ngay</string>
-    <string name="dashboard_progress_short">%d%% thành thạo</string>
-    <string name="dashboard_progress_short_initial">0% thành thạo</string>
+    <string name="dashboard_progress_short">%d%%</string>
+    <string name="dashboard_progress_short_initial">0%</string>
     <string name="dashboard_streak_title">Chuỗi ngày học</string>
     <string name="dashboard_streak_content_desc">Xem chuỗi ngày học</string>
     <string name="dashboard_streak_today_done">Đã ôn hôm nay</string>
@@ -299,6 +301,9 @@
     <string name="collection_community_empty_title">Chưa có bộ sưu tập công khai</string>
     <string name="collection_community_empty_subtitle">Hãy là người đầu tiên chia sẻ!</string>
     <string name="collection_added_to">Đã thêm vào \"%s\"</string>
+    <string name="collection_add_to">Thêm vào \"%s\"</string>
+    <string name="collection_add_source_scan">Quét vật thể mới</string>
+    <string name="collection_add_source_history">Chọn từ lịch sử quét</string>
 
     <!-- Collection insights -->
     <string name="ci_select_collection">Chọn bộ sưu tập</string>
@@ -441,6 +446,7 @@
     <string name="btn_cancel">Hủy</string>
     <string name="btn_delete">Xóa</string>
     <string name="btn_close">Đóng</string>
+    <string name="btn_back">Quay lại</string>
     <string name="arrow">›</string>
     <string name="content_description_avatar">Ảnh đại diện</string>
 </resources>

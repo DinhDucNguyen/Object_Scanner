@@ -14,6 +14,9 @@ import com.bumptech.glide.Glide
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.TranslationResponse
 import com.duc.objectlanguage.databinding.FragmentHistoryDetailBinding
+import com.duc.objectlanguage.ui.common.addPulseFeedback
+import com.duc.objectlanguage.ui.common.addScaleFeedback
+import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class HistoryDetailFragment : Fragment() {
 
@@ -24,6 +27,8 @@ class HistoryDetailFragment : Fragment() {
     private var currentWord: String? = null
     private var currentLanguage: String = "en"
     private var currentTranslationId: Int? = null
+    private var targetCollectionId: Int = 0
+    private var targetCollectionName: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHistoryDetailBinding.inflate(inflater, container, false)
@@ -37,6 +42,12 @@ class HistoryDetailFragment : Fragment() {
         val objectCode = arguments?.getString("objectCode") ?: ""
         val imageUrl = arguments?.getString("imageUrl")
         val scanDate = arguments?.getString("scanDate")
+        targetCollectionId = arguments?.getInt("targetCollectionId") ?: 0
+        targetCollectionName = arguments?.getString("targetCollectionName")
+
+        if (targetCollectionId > 0 && !targetCollectionName.isNullOrBlank()) {
+            binding.btnAddHistoryToCollection.text = getString(R.string.collection_add_to, targetCollectionName)
+        }
 
         bindHeader(
             title = objectCode.replace("_", " ").replaceFirstChar { it.uppercase() },
@@ -46,12 +57,17 @@ class HistoryDetailFragment : Fragment() {
             status = null,
         )
         setupObservers()
+        binding.btnPlayAudioHistory.addPulseFeedback()
         binding.btnPlayAudioHistory.setOnClickListener {
             viewModel.playAudio(currentAudioUrl, currentWord, currentLanguage)
         }
         binding.btnAddHistoryToCollection.setOnClickListener {
             currentTranslationId?.let { translationId ->
-                viewModel.showAddToCollectionDialog(translationId, requireContext())
+                if (targetCollectionId > 0 && !targetCollectionName.isNullOrBlank()) {
+                    viewModel.addToCollectionDirect(translationId, targetCollectionId, targetCollectionName!!)
+                } else {
+                    viewModel.showAddToCollectionDialog(translationId, requireContext())
+                }
             }
         }
         viewModel.loadDetail(scanId, objectCode)
@@ -179,8 +195,9 @@ class HistoryDetailFragment : Fragment() {
             visibility = if (translation.phonetic.isNullOrEmpty()) View.GONE else View.VISIBLE
         }
         binding.tvDefinition.apply {
-            text = translation.definition ?: ""
-            visibility = if (translation.definition.isNullOrEmpty()) View.GONE else View.VISIBLE
+            val def = translation.definition ?: ""
+            text = DefinitionFormatter.formatDefinition(context, def)
+            visibility = if (def.isNullOrEmpty()) View.GONE else View.VISIBLE
         }
         binding.tvExample.apply {
             val example = translation.examples.firstOrNull()?.cauViDu

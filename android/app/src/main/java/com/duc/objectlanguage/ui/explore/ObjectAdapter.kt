@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.ObjectData
 import com.duc.objectlanguage.databinding.ItemExploreObjectBinding
+import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class ObjectAdapter(
     private val onClick: (ObjectData) -> Unit
@@ -27,7 +28,8 @@ class ObjectAdapter(
         fun bind(item: ObjectData) {
             binding.wordName.text = item.wordName ?: item.objectCode.replace("_", " ")
             binding.objectCode.text = item.objectCode
-            binding.definition.text = item.definition ?: "Chua co nghia hien thi"
+            val rawDef = item.definition ?: "Chua co nghia hien thi"
+            binding.definition.text = DefinitionFormatter.formatDefinition(binding.root.context, rawDef)
             binding.phonetic.text = item.phonetic ?: ""
 
             if (item.imageUrl.isNullOrBlank()) {

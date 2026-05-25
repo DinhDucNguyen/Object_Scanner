@@ -76,7 +76,8 @@ class MainActivity : AppCompatActivity() {
             R.id.loginFragment, R.id.registerFragment,
             R.id.forgotPasswordFragment, R.id.verifyOtpFragment, R.id.resetPasswordFragment,
             R.id.dashboardFragment, R.id.scanFragment, R.id.reviewFragment,
-            R.id.dictionaryFragment, R.id.profileFragment, R.id.exploreFragment
+            R.id.dictionaryFragment, R.id.profileFragment, R.id.exploreFragment,
+            R.id.historyFragment, R.id.streakFragment
         )
         val hideBottomNavDests = setOf(
             R.id.loginFragment, R.id.registerFragment,
@@ -99,6 +100,15 @@ class MainActivity : AppCompatActivity() {
                 val graph = navController.navInflater.inflate(R.navigation.nav_graph)
                 graph.setStartDestination(R.id.dashboardFragment)
                 navController.graph = graph
+                // Fix: override any pending scan-tab sync from the initial nav_graph startDestination
+                binding.bottomNavigation.post {
+                    isSyncingBottomNavigation = true
+                    try {
+                        binding.bottomNavigation.selectedItemId = R.id.dashboardFragment
+                    } finally {
+                        isSyncingBottomNavigation = false
+                    }
+                }
             }
         }
 
@@ -165,10 +175,26 @@ class MainActivity : AppCompatActivity() {
             return true
         }
 
+        val tabOrder = listOf(
+            R.id.dashboardFragment,
+            R.id.scanFragment,
+            R.id.dictionaryFragment,
+            R.id.reviewFragment,
+            R.id.profileFragment
+        )
+        val currentTabId = bottomNavItemForDestination(navController.currentDestination?.id ?: -1) ?: -1
+        val fromIndex = tabOrder.indexOf(currentTabId)
+        val toIndex = tabOrder.indexOf(itemId)
+        val goingRight = toIndex > fromIndex
+
         return try {
             val options = NavOptions.Builder()
                 .setLaunchSingleTop(true)
                 .setPopUpTo(navController.graph.startDestinationId, false)
+                .setEnterAnim(if (goingRight) R.anim.nav_slide_in_right else R.anim.nav_slide_in_left)
+                .setExitAnim(if (goingRight) R.anim.nav_slide_out_left else R.anim.nav_slide_out_right)
+                .setPopEnterAnim(R.anim.nav_slide_in_left)
+                .setPopExitAnim(R.anim.nav_slide_out_right)
                 .build()
             navController.navigate(itemId, null, options)
             true

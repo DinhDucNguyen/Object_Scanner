@@ -14,6 +14,7 @@ import com.duc.objectlanguage.data.model.ObjectData
 import com.duc.objectlanguage.databinding.DialogObjectDetailBinding
 import com.duc.objectlanguage.databinding.FragmentCategoryDetailBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class CategoryDetailFragment : Fragment() {
 
@@ -63,7 +64,8 @@ class CategoryDetailFragment : Fragment() {
             ?: "Chu de"
 
         detailBinding.detailWordName.text = wordName
-        detailBinding.detailDefinition.text = item.definition ?: "Chua co nghia hien thi"
+        val rawDef = item.definition ?: "Chua co nghia hien thi"
+        detailBinding.detailDefinition.text = DefinitionFormatter.formatDefinition(requireContext(), rawDef)
         detailBinding.detailCategory.text = "Chu de: $categoryName"
         detailBinding.detailObjectCode.text = "Ma tu: ${item.objectCode}"
         detailBinding.detailTranslationCount.text = "${item.translationCount} ban dich"

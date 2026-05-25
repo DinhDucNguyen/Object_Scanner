@@ -36,8 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="@string/dictionary_subtitle"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
+                android:textAppearance="@style/TextAppearance.App.BodyMedium" />
         </LinearLayout>
 
         <ImageButton
@@ -109,9 +108,7 @@
                             android:layout_marginStart="10dp"
                             android:layout_weight="1"
                             android:text="@string/dictionary_input_label"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:textAppearance="@style/TextAppearance.App.Caption" />
 
                         <ImageButton
                             android:id="@+id/btnClearInput"
@@ -173,13 +170,14 @@
 
                         <ImageButton
                             android:id="@+id/btnPlayAudio"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:src="@android:drawable/ic_lock_silent_mode_off"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:background="@drawable/bg_icon_primary"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_volume_up"
                             android:contentDescription="@string/dictionary_play_audio"
-                            android:visibility="gone"
-                            app:tint="@color/primary" />
+                            app:tint="@color/primary"
+                            android:visibility="gone" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -202,8 +200,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/dictionary_loading"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    android:textAppearance="@style/TextAppearance.App.BodyMedium" />
             </LinearLayout>
 
             <com.google.android.material.card.MaterialCardView
@@ -250,19 +247,18 @@
                             android:layout_marginStart="10dp"
                             android:layout_weight="1"
                             android:text="@string/dictionary_result_label"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:textAppearance="@style/TextAppearance.App.Caption" />
 
                         <ImageButton
                             android:id="@+id/btnPlayAudioResult"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:src="@android:drawable/ic_lock_silent_mode_off"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:background="@drawable/bg_icon_primary"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_volume_up"
                             android:contentDescription="@string/dictionary_play_audio"
-                            android:visibility="gone"
-                            app:tint="@color/primary" />
+                            app:tint="@color/primary"
+                            android:visibility="gone" />
 
                     </LinearLayout>
 
@@ -328,11 +324,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:text="@string/dictionary_recent_label"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.06"
-                    android:textAllCaps="true" />
+                    android:textAppearance="@style/TextAppearance.App.Overline"
+                    android:letterSpacing="0.06" />
 
                 <HorizontalScrollView
                     android:layout_width="match_parent"

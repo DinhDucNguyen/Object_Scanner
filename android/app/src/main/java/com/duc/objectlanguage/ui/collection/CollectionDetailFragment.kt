@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentCollectionDetailBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class CollectionDetailFragment : Fragment() {
 
@@ -84,13 +85,29 @@ class CollectionDetailFragment : Fragment() {
     }
 
     private fun openAddWordSource() {
-        Toast.makeText(requireContext(), R.string.collection_add_word_toast, Toast.LENGTH_SHORT).show()
-        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigation)
-        if (bottomNav != null) {
-            bottomNav.selectedItemId = R.id.scanFragment
-        } else {
-            findNavController().navigate(R.id.scanFragment)
-        }
+        val collectionName = viewModel.collectionDetail.value?.name ?: ""
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.collection_add_word_title)
+            .setItems(arrayOf(
+                getString(R.string.collection_add_source_scan),
+                getString(R.string.collection_add_source_history),
+            )) { _, which ->
+                when (which) {
+                    0 -> {
+                        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigation)
+                        if (bottomNav != null) bottomNav.selectedItemId = R.id.scanFragment
+                        else findNavController().navigate(R.id.scanFragment)
+                    }
+                    1 -> {
+                        val args = Bundle().apply {
+                            putInt("targetCollectionId", collectionId)
+                            putString("targetCollectionName", collectionName)
+                        }
+                        findNavController().navigate(R.id.action_collectionDetail_to_history, args)
+                    }
+                }
+            }
+            .show()
     }
 
     override fun onDestroyView() {

@@ -1,71 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Brand -->
-    <color name="primary">#2563EB</color>
-    <color name="primary_dark">#1E40AF</color>
-    <color name="primary_light">#DBEAFE</color>
+    <!-- Primary — Vibrant Blue (Vibrant Scholastic) -->
+    <color name="primary">#004AC6</color>
+    <color name="primary_dark">#003EA8</color>
+    <color name="primary_light">#DBE1FF</color>
 
-    <!-- Accent -->
-    <color name="secondary">#16A34A</color>
-    <color name="secondary_dark">#15803D</color>
+    <!-- Accent — Warm Orange (streak, achievements) -->
+    <color name="secondary">#FD933D</color>
+    <color name="secondary_dark">#944A00</color>
+    <color name="secondary_light">#FFDCC5</color>
 
-    <!-- Background & Surface -->
-    <color name="background">#F6F8FB</color>
+    <!-- Background — Lavender White -->
+    <color name="background">#FAF8FF</color>
     <color name="surface">#FFFFFF</color>
-    <color name="surface_variant">#EAF0F7</color>
-    <color name="surface_soft">#F1F5F9</color>
+    <color name="surface_variant">#E1E2ED</color>
+    <color name="surface_soft">#F3F3FE</color>
     <color name="surface_warm">#FFF7ED</color>
 
-    <!-- Text -->
-    <color name="text_primary">#111827</color>
-    <color name="text_secondary">#5B6472</color>
-    <color name="text_muted">#94A3B8</color>
+    <!-- Text — Deep Slate for AA/AAA contrast -->
+    <color name="text_primary">#191B23</color>
+    <color name="text_secondary">#22242F</color>
+    <color name="text_muted">#3A3C4E</color>
     <color name="text_on_primary">#FFFFFF</color>
 
-    <!-- Status Colors -->
+    <!-- Status -->
     <color name="success">#16A34A</color>
     <color name="success_light">#DCFCE7</color>
-    <color name="warning">#D97706</color>
-    <color name="warning_light">#FEF3C7</color>
-    <color name="error">#DC2626</color>
-    <color name="error_light">#FEE2E2</color>
+    <color name="warning">#F97316</color>
+    <color name="warning_light">#FFEDD5</color>
+    <color name="error">#BA1A1A</color>
+    <color name="error_light">#FFDAD6</color>
 
-    <!-- Other -->
-    <color name="divider">#D8DEE8</color>
+    <!-- Utility -->
+    <color name="divider">#C3C6D7</color>
+    <color name="outline_variant">#C3C6D7</color>
     <color name="overlay_dark">#B0000000</color>
     <color name="overlay_soft">#66000000</color>
-    <color name="glass_white">#2EFFFFFF</color>
+    <color name="glass_white">#33FFFFFF</color>
     <color name="glass_stroke">#66FFFFFF</color>
     <color name="scan_frame">#E6FFFFFF</color>
 
     <!-- Bottom Nav -->
-    <color name="bottom_nav_active">#2563EB</color>
-    <color name="bottom_nav_inactive">#8B95A5</color>
+    <color name="bottom_nav_active">#004AC6</color>
+    <color name="bottom_nav_inactive">#737686</color>
     <color name="bottom_nav_bg">#FFFFFF</color>
 
-    <!-- Gradient Colors -->
-    <color name="gradient_start">#2563EB</color>
-    <color name="gradient_end">#0F766E</color>
-    <color name="gradient_accent">#16A34A</color>
+    <!-- Gradient — Blue banner (dark → bright blue) -->
+    <color name="gradient_start">#003EA8</color>
+    <color name="gradient_end">#2563EB</color>
+    <color name="gradient_accent">#3B82F6</color>
 
-    <!-- Card Accent Colors -->
-    <color name="card_scan_bg">#EFF6FF</color>
-    <color name="card_learned_bg">#ECFDF5</color>
-    <color name="card_due_bg">#FFFBEB</color>
-    <color name="card_mastered_bg">#F5F3FF</color>
+    <color name="gradient_hero_start">#003EA8</color>
+    <color name="gradient_hero_mid">#004AC6</color>
+    <color name="gradient_hero_end">#2563EB</color>
 
-    <color name="card_scan_icon">#2563EB</color>
-    <color name="card_learned_icon">#16A34A</color>
-    <color name="card_due_icon">#D97706</color>
+    <!-- Scan gradient — orange warm -->
+    <color name="gradient_scan_start">#EA580C</color>
+    <color name="gradient_scan_end">#FBBF24</color>
+
+    <!-- Card accent backgrounds -->
+    <color name="card_scan_bg">#FFEDD5</color>
+    <color name="card_learned_bg">#DBE1FF</color>
+    <color name="card_due_bg">#FEF9C3</color>
+    <color name="card_mastered_bg">#EDE9FE</color>
+
+    <color name="card_scan_icon">#F97316</color>
+    <color name="card_learned_icon">#004AC6</color>
+    <color name="card_due_icon">#EAB308</color>
     <color name="card_mastered_icon">#7C3AED</color>
+
     <color name="violet">#7C3AED</color>
     <color name="violet_light">#EDE9FE</color>
-    <color name="cyan">#0891B2</color>
-    <color name="cyan_light">#E0F7FA</color>
+    <color name="cyan">#06B6D4</color>
+    <color name="cyan_light">#CFFAFE</color>
+
+    <!-- Glow -->
+    <color name="primary_glow">#33004AC6</color>
+    <color name="surface_glass">#F3F3FE</color>
 
     <!-- Streak Heat Palette -->
-    <color name="streak_idle">#94A3B8</color>
-    <color name="streak_idle_track">#E2E8F0</color>
+    <color name="streak_idle">#9CA3AF</color>
+    <color name="streak_idle_track">#E5E7EB</color>
     <color name="streak_heat_1">#F97316</color>
     <color name="streak_heat_1_track">#FFEDD5</color>
     <color name="streak_heat_2">#FE2C55</color>
@@ -74,11 +89,11 @@
     <color name="streak_heat_3_track">#FAE8FF</color>
     <color name="streak_heat_4">#8B5CF6</color>
     <color name="streak_heat_4_track">#EDE9FE</color>
-    <color name="streak_header_bg">#3B82F6</color>
+    <color name="streak_header_bg">#EA580C</color>
 
-    <!-- Legacy Material aliases -->
-    <color name="purple_500">#2563EB</color>
-    <color name="purple_700">#1E40AF</color>
-    <color name="teal_200">#86EFAC</color>
-    <color name="teal_700">#15803D</color>
+    <!-- Legacy aliases -->
+    <color name="purple_500">#004AC6</color>
+    <color name="purple_700">#003EA8</color>
+    <color name="teal_200">#93C5FD</color>
+    <color name="teal_700">#1D4ED8</color>
 </resources>

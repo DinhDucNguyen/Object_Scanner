@@ -55,8 +55,7 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:text="object_code"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/TextAppearance.App.BodyMedium"
                     android:textStyle="italic" />
 
                 <TextView

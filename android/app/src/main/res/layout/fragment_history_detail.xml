@@ -43,8 +43,7 @@
                 android:id="@+id/tvScanDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp"
+                android:textAppearance="@style/TextAppearance.App.BodyMedium"
                 android:layout_marginBottom="8dp" />
 
             <TextView
@@ -129,13 +128,13 @@
                             android:minHeight="46dp"
                             android:text=""
                             android:visibility="gone"
-                            app:backgroundTint="@color/primary"
+                            app:backgroundTint="@android:color/transparent"
                             app:cornerRadius="23dp"
-                            app:icon="@drawable/ic_volume"
+                            app:icon="@drawable/ic_speaker"
                             app:iconGravity="textStart"
                             app:iconPadding="0dp"
                             app:iconSize="22dp"
-                            app:iconTint="@color/text_on_primary" />
+                            app:iconTint="@null" />
                     </LinearLayout>
 
                     <!-- Phonetic -->
@@ -164,8 +163,7 @@
                         android:layout_height="wrap_content"
                         android:background="@color/surface"
                         android:padding="10dp"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"
+                        android:textAppearance="@style/TextAppearance.App.BodyMedium"
                         android:fontStyle="italic" />
 
                     <com.google.android.material.button.MaterialButton

@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.duc.objectlanguage.R
 import com.google.android.material.card.MaterialCardView
 import java.util.*
+import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class PronunciationFragment : Fragment() {
 
@@ -174,7 +175,7 @@ class PronunciationFragment : Fragment() {
             word?.let {
                 tvWord.text = it.wordName
                 tvPhonetic.text = it.phonetic
-                tvDefinition.text = it.definition
+                tvDefinition.text = DefinitionFormatter.formatDefinition(requireContext(), it.definition)
                 tvRecordingStatus.text = "Tap microphone to practice"
                 tvRecordingStatus.setTextColor(resources.getColor(android.R.color.darker_gray, null))
                 tvPronunciationScore.visibility = View.GONE

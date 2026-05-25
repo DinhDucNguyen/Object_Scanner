@@ -80,12 +80,10 @@ def translate(
         req.to_lang,
         user_id,
     )
-    if result is None:
-        raise HTTPException(503, "Translation service temporarily unavailable")
-    if result.get("_error") == "quota_exceeded":
+    if result is None or result.get("_error") in ("quota_exceeded", "service_unavailable"):
         return TranslateResponse(
             original=req.text.strip(),
-            translation="Dịch tự động tạm thời không khả dụng, vui lòng thử lại sau.",
+            translation="Không thể dịch lúc này, vui lòng thử lại sau.",
             from_lang=req.from_lang,
             to_lang=req.to_lang,
             source="external_unavailable",

@@ -126,6 +126,20 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
+    fun addToCollectionDirect(translationId: Int, collectionId: Int, collectionName: String) {
+        viewModelScope.launch {
+            val result = collectionRepo.addToCollection(collectionId, translationId)
+            _addedMsg.value = if (result.isSuccess) {
+                getApplication<Application>().getString(R.string.collection_added_to, collectionName)
+            } else {
+                getApplication<Application>().getString(
+                    R.string.review_error_format,
+                    result.exceptionOrNull()?.message.orEmpty()
+                )
+            }
+        }
+    }
+
     fun clearError() {
         _error.value = null
     }

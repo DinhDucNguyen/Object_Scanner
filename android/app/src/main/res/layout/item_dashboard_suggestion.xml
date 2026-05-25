@@ -50,7 +50,7 @@
             android:gravity="center"
             android:maxLines="1"
             android:text="@string/dashboard_suggestion_scan_hint"
-            android:textColor="@color/text_secondary"
+            android:textAppearance="@style/TextAppearance.App.Caption"
             android:textSize="11sp" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

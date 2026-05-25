@@ -238,9 +238,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             .replace("-", "_")
     }
     
-    /**
-     * ✅ HÀM MỚI: Compress ảnh xuống 800x800 nếu quá lớn
-     */
+
     private fun compressImageIfNeeded(imageBytes: ByteArray): ByteArray {
         // Nếu file nhỏ hơn 200KB thì không cần compress
         if (imageBytes.size < 200 * 1024) return imageBytes

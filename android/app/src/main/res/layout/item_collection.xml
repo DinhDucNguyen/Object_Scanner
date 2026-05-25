@@ -76,8 +76,7 @@
                         android:ellipsize="end"
                         android:maxLines="1"
                         android:text="Tạo --"
-                        android:textColor="@color/text_muted"
-                        android:textSize="12sp" />
+                        android:textAppearance="@style/TextAppearance.App.Caption" />
 
                 </LinearLayout>
 
@@ -111,9 +110,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/collection_progress_label"
-                android:textColor="@color/text_secondary"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+                android:textAppearance="@style/TextAppearance.App.Caption"
+                android:textSize="11sp" />
 
             <TextView
                 android:id="@+id/progressPercent"

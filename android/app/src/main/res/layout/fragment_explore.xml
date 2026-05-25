@@ -73,7 +73,8 @@
             android:paddingStart="12dp"
             android:paddingTop="2dp"
             android:paddingEnd="12dp"
-            android:paddingBottom="20dp" />
+            android:paddingBottom="20dp"
+            android:layoutAnimation="@anim/layout_item_anim" />
 
         <LinearLayout
             android:id="@+id/emptyStateLayout"
@@ -107,8 +108,7 @@
                 android:layout_marginTop="6dp"
                 android:text="@string/explore_empty_subtitle"
                 android:textAlignment="center"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
+                android:textAppearance="@style/TextAppearance.App.BodyMedium" />
         </LinearLayout>
 
         <ProgressBar

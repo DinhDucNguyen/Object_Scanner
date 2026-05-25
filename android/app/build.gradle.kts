@@ -120,6 +120,9 @@ dependencies {
     // UCrop - Image cropping
     implementation("com.github.yalantis:ucrop:2.2.8")
 
+    // Shimmer loading effect
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
+
     // Encrypted SharedPreferences
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 

@@ -78,8 +78,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/analytics_total_words"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
+                            android:textAppearance="@style/TextAppearance.App.Hint" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -125,8 +124,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/analytics_due_today"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
+                            android:textAppearance="@style/TextAppearance.App.Hint" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -178,8 +176,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/analytics_mastered"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
+                            android:textAppearance="@style/TextAppearance.App.Hint" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -204,10 +201,10 @@
                         <ImageView
                             android:layout_width="34dp"
                             android:layout_height="34dp"
-                            android:background="@drawable/bg_icon_primary"
+                            android:background="@drawable/bg_icon_warning"
                             android:contentDescription="@null"
                             android:padding="8dp"
-                            android:src="@drawable/ic_streak_fire" />
+                            android:src="@drawable/ic_fire" />
 
                         <TextView
                             android:id="@+id/tvCurrentStreak"
@@ -224,8 +221,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/analytics_current_streak"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
+                            android:textAppearance="@style/TextAppearance.App.Hint" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -267,8 +263,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/analytics_reviews_today"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
+                            android:textAppearance="@style/TextAppearance.App.Hint" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -305,8 +300,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/analytics_longest_streak"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
+                            android:textAppearance="@style/TextAppearance.App.Hint" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -342,8 +336,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/analytics_total_reviews"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
+                            android:textAppearance="@style/TextAppearance.App.Hint" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -392,8 +385,7 @@
                         android:layout_marginTop="6dp"
                         android:gravity="center"
                         android:text="@string/analytics_empty_message"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+                        android:textAppearance="@style/TextAppearance.App.BodySmall" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

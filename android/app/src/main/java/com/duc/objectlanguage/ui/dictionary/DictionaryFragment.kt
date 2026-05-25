@@ -13,8 +13,11 @@ import androidx.fragment.app.viewModels
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.DictionaryHistoryItem
 import com.duc.objectlanguage.databinding.FragmentDictionaryBinding
+import com.duc.objectlanguage.ui.common.addPulseFeedback
+import com.duc.objectlanguage.ui.common.addScaleFeedback
 import com.duc.objectlanguage.ui.collection.SaveToCollectionBottomSheet
 import com.google.android.material.chip.Chip
+import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class DictionaryFragment : Fragment() {
 
@@ -86,10 +89,12 @@ class DictionaryFragment : Fragment() {
                 .show(childFragmentManager, "save_to_collection")
         }
 
+        binding.btnPlayAudio.addPulseFeedback()
         binding.btnPlayAudio.setOnClickListener {
             viewModel.playAudio(viewModel.pronunciationTarget(viewModel.result.value))
         }
 
+        binding.btnPlayAudioResult.addPulseFeedback()
         binding.btnPlayAudioResult.setOnClickListener {
             viewModel.playAudio(viewModel.pronunciationTarget(viewModel.result.value))
         }
@@ -146,8 +151,10 @@ class DictionaryFragment : Fragment() {
                     binding.dividerDefs.visibility = View.VISIBLE
                     binding.containerDefinitions.visibility = View.VISIBLE
                     result.definitions.forEachIndexed { i, def ->
+                        val formattedDef = DefinitionFormatter.formatDefinition(requireContext(), def)
+                        val ssb = android.text.SpannableStringBuilder("${i + 1}. ").append(formattedDef)
                         val tv = TextView(requireContext()).apply {
-                            text = "${i + 1}. $def"
+                            text = ssb
                             textSize = 14f
                             setTextColor(resources.getColor(R.color.text_secondary, null))
                             setPadding(0, 0, 0, 8)

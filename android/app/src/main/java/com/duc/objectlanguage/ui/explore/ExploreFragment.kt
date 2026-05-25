@@ -37,7 +37,10 @@ class ExploreFragment : Fragment() {
         binding.recyclerViewCategories.adapter = adapter
 
         viewModel.categories.observe(viewLifecycleOwner) { categories ->
-            adapter.submitList(categories)
+            val wasEmpty = adapter.itemCount == 0
+            adapter.submitList(categories) {
+                if (wasEmpty && categories.isNotEmpty()) binding.recyclerViewCategories.scheduleLayoutAnimation()
+            }
             binding.emptyStateLayout.visibility = if (categories.isEmpty()) View.VISIBLE else View.GONE
             binding.recyclerViewCategories.visibility = if (categories.isEmpty()) View.GONE else View.VISIBLE
         }

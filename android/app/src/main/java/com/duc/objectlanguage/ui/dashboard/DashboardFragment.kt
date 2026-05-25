@@ -1,18 +1,28 @@
 package com.duc.objectlanguage.ui.dashboard
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.data.local.ApiConfig
 import com.duc.objectlanguage.databinding.FragmentDashboardBinding
+import com.duc.objectlanguage.ui.common.addScaleFeedback
 
 class DashboardFragment : Fragment() {
 
@@ -20,6 +30,7 @@ class DashboardFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: DashboardViewModel by viewModels()
     private var missionOpensReview = false
+    private var goalIconAnimator: ObjectAnimator? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
@@ -32,13 +43,18 @@ class DashboardFragment : Fragment() {
         binding.cardDashboardSearch.setOnClickListener {
             openDictionary()
         }
+        binding.cardDashboardSearch.addScaleFeedback()
+        binding.btnScanNow.addScaleFeedback()
 
         binding.btnScanNow.setOnClickListener {
             if (missionOpensReview) openReview() else openScan()
         }
 
         binding.cardDashboardStreak.setOnClickListener {
-            findNavController().navigate(com.duc.objectlanguage.R.id.streakFragment)
+            findNavController().navigate(R.id.streakFragment)
+        }
+        binding.btnStreakBadge.setOnClickListener {
+            findNavController().navigate(R.id.streakFragment)
         }
         binding.cardExploreBanner.setOnClickListener {
             findNavController().navigate(R.id.action_dashboard_to_explore)
@@ -48,7 +64,15 @@ class DashboardFragment : Fragment() {
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
-            binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            if (loading) {
+                binding.shimmerStats.visibility = View.VISIBLE
+                binding.shimmerStats.startShimmer()
+                binding.statsRow.visibility = View.INVISIBLE
+            } else {
+                binding.shimmerStats.stopShimmer()
+                binding.shimmerStats.visibility = View.GONE
+                binding.statsRow.visibility = View.VISIBLE
+            }
         }
 
         viewModel.stats.observe(viewLifecycleOwner) { stats ->
@@ -56,8 +80,8 @@ class DashboardFragment : Fragment() {
                 val total = stats.totalLearned
                 val mastered = stats.mastered
                 val pct = if (total > 0) (mastered * 100 / total) else 0
-                binding.progressMastery.progress = pct
-                binding.tvProgressPct.text = getString(R.string.dashboard_progress_short, pct)
+                animateProgress(binding.progressMastery, pct)
+                animateCounter(binding.tvProgressPct, 0, pct, suffix = "%")
                 bindMission(stats.dueToday, stats.totalScans)
             }
         }
@@ -76,9 +100,25 @@ class DashboardFragment : Fragment() {
             }
         }
 
+        viewModel.avatarUrl.observe(viewLifecycleOwner) { url ->
+            if (!url.isNullOrBlank()) {
+                Glide.with(this)
+                    .load(resolveMediaUrl(url))
+                    .transform(CircleCrop())
+                    .placeholder(R.drawable.ic_person)
+                    .error(R.drawable.ic_person)
+                    .into(binding.ivDashboardAvatar)
+                binding.ivDashboardAvatar.setPadding(0, 0, 0, 0)
+                binding.ivDashboardAvatar.imageTintList = null
+            }
+        }
+
         viewModel.loadStats()
         viewModel.loadStreak()
         viewModel.loadTopCollections()
+        viewModel.loadAvatarUrl()
+        animateDashboardEntrance()
+        startGoalIconFloatAnimation()
     }
 
     private fun openScan() {
@@ -164,9 +204,65 @@ class DashboardFragment : Fragment() {
         viewModel.loadStats()
         viewModel.loadStreak()
         viewModel.loadTopCollections()
+        viewModel.loadAvatarUrl()
+    }
+
+    private fun resolveMediaUrl(path: String): String {
+        val trimmed = path.trim()
+        return if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) trimmed
+        else "${ApiConfig.baseUrl.trimEnd('/')}/${trimmed.trimStart('/')}"
+    }
+
+    private fun animateCounter(view: TextView, from: Int, to: Int, suffix: String = "") {
+        ValueAnimator.ofInt(from, to).apply {
+            duration = 900
+            interpolator = DecelerateInterpolator()
+            addUpdateListener { view.text = "${it.animatedValue}$suffix" }
+            start()
+        }
+    }
+
+    private fun animateProgress(bar: ProgressBar, to: Int) {
+        ObjectAnimator.ofInt(bar, "progress", 0, to).apply {
+            duration = 900
+            interpolator = DecelerateInterpolator()
+            start()
+        }
+    }
+
+    private fun animateDashboardEntrance() {
+        val sections = listOf(
+            binding.cardDashboardSearch,
+            binding.cardExploreBanner,
+        )
+        sections.forEachIndexed { i, view ->
+            view.alpha = 0f
+            view.translationY = 40f
+            view.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(350)
+                .setStartDelay(100L + i * 80L)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
+        }
+    }
+
+    private fun startGoalIconFloatAnimation() {
+        goalIconAnimator?.cancel()
+        val density = resources.displayMetrics.density
+        val floatDistance = -14f * density // 14dp float distance
+        goalIconAnimator = ObjectAnimator.ofFloat(binding.ivGoalIcon, View.TRANSLATION_Y, 0f, floatDistance, 0f).apply {
+            duration = 2400
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
     }
 
     override fun onDestroyView() {
+        goalIconAnimator?.cancel()
+        goalIconAnimator = null
         super.onDestroyView()
         _binding = null
     }
@@ -186,7 +282,8 @@ class DashboardFragment : Fragment() {
         binding.progressDashboardStreak.progressTintList = ColorStateList.valueOf(accentColor)
         binding.progressDashboardStreak.progressBackgroundTintList = ColorStateList.valueOf(trackColor)
 
-        binding.tvDashboardStreakValue.text = streak.currentStreak.toString()
+        animateCounter(binding.tvDashboardStreakValue, 0, streak.currentStreak)
+        animateCounter(binding.tvStreakBadgeValue, 0, streak.currentStreak)
         binding.tvDashboardStreakDays.text = getString(
             if (streak.currentStreak == 1) R.string.streak_days_singular else R.string.streak_days_plural
         )
