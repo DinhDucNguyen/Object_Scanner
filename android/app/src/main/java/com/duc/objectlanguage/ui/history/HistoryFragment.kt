@@ -22,6 +22,7 @@ import com.duc.objectlanguage.data.model.HistoryItem
 import com.duc.objectlanguage.databinding.FragmentHistoryBinding
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
+import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -156,10 +157,21 @@ class HistoryFragment : Fragment() {
 
     private fun setupObservers() {
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
-            binding.progressBar.visibility = if (loading && adapter.itemCount == 0) View.VISIBLE else View.GONE
-            if (!loading) binding.swipeRefresh.isRefreshing = false
+            if (loading && adapter.itemCount == 0) {
+                binding.shimmerHistory.visibility = View.VISIBLE
+                binding.shimmerHistory.startShimmer()
+            } else {
+                binding.shimmerHistory.stopShimmer()
+                binding.shimmerHistory.visibility = View.GONE
+                if (!loading) binding.swipeRefresh.isRefreshing = false
+            }
         }
-        binding.swipeRefresh.setOnRefreshListener { viewModel.load() }
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.load()
+            binding.swipeRefresh.post {
+                Snackbar.make(binding.root, R.string.refresh_success, Snackbar.LENGTH_SHORT).show()
+            }
+        }
 
         viewModel.items.observe(viewLifecycleOwner) { items ->
             val wasEmpty = adapter.itemCount == 0

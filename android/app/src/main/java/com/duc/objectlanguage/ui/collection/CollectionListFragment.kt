@@ -16,6 +16,7 @@ import com.duc.objectlanguage.databinding.FragmentCollectionListBinding
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.textfield.TextInputEditText
 
@@ -145,10 +146,21 @@ class CollectionListFragment : Fragment() {
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-            if (!isLoading) binding.swipeRefresh.isRefreshing = false
+            if (isLoading) {
+                binding.shimmerCollections.visibility = View.VISIBLE
+                binding.shimmerCollections.startShimmer()
+            } else {
+                binding.shimmerCollections.stopShimmer()
+                binding.shimmerCollections.visibility = View.GONE
+                binding.swipeRefresh.isRefreshing = false
+            }
         }
-        binding.swipeRefresh.setOnRefreshListener { viewModel.loadCollections() }
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.loadCollections()
+            binding.swipeRefresh.post {
+                Snackbar.make(binding.root, R.string.refresh_success, Snackbar.LENGTH_SHORT).show()
+            }
+        }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
             error?.let {

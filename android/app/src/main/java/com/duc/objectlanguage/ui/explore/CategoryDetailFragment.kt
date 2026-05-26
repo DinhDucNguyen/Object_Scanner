@@ -15,6 +15,7 @@ import com.duc.objectlanguage.databinding.DialogObjectDetailBinding
 import com.duc.objectlanguage.databinding.FragmentCategoryDetailBinding
 import com.duc.objectlanguage.databinding.SheetCategoryFlashcardBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.snackbar.Snackbar
 import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class CategoryDetailFragment : Fragment() {
@@ -48,7 +49,12 @@ class CategoryDetailFragment : Fragment() {
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
             if (!loading) binding.swipeRefresh.isRefreshing = false
         }
-        binding.swipeRefresh.setOnRefreshListener { viewModel.loadObjects(categoryId) }
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.loadObjects(categoryId)
+            binding.swipeRefresh.post {
+                Snackbar.make(binding.root, R.string.refresh_success, Snackbar.LENGTH_SHORT).show()
+            }
+        }
         viewModel.error.observe(viewLifecycleOwner) { error ->
             error?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()

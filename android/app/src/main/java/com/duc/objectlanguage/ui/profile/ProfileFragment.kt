@@ -1,19 +1,28 @@
 package com.duc.objectlanguage.ui.profile
 
+import android.app.Activity
+import android.app.Dialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.ImageDecoder
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -32,7 +41,9 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.yalantis.ucrop.UCrop
 import java.io.ByteArrayOutputStream
+import java.io.File
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -45,7 +56,25 @@ class ProfileFragment : Fragment() {
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri ?: return@registerForActivityResult
-        uploadSelectedAvatar(uri)
+        launchAvatarCrop(uri)
+    }
+
+    private val cropAvatar = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            UCrop.getOutput(result.data!!)?.let { croppedUri ->
+                uploadSelectedAvatar(croppedUri)
+            }
+            return@registerForActivityResult
+        }
+
+        val error = result.data?.let { UCrop.getError(it) }
+        if (error != null) {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.profile_avatar_crop_error, error.message ?: ""),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -63,9 +92,12 @@ class ProfileFragment : Fragment() {
 
         binding.tvUsername.text = app.tokenManager.username ?: getString(R.string.dashboard_default_user)
         updateLangButtons()
+        setupDarkModeSwitch()
         setupClicks()
         observeViewModel()
         viewModel.loadProfile()
+        viewModel.loadStats()
+        viewModel.loadCollections()
         animateEntrance()
     }
 
@@ -94,6 +126,14 @@ class ProfileFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.profile.observe(viewLifecycleOwner) { profile ->
             profile ?: return@observe
+            val app = requireActivity().application as ObjectLanguageApp
+            binding.tvUsername.text = profile.username?.takeIf { it.isNotBlank() }
+                ?: app.tokenManager.username
+                ?: getString(R.string.dashboard_default_user)
+            binding.tvUsernameHandle.text = getString(
+                R.string.profile_username_handle,
+                binding.tvUsername.text.toString()
+            )
             binding.tvBio.text = profile.bio?.takeIf { it.isNotBlank() }
                 ?: getString(R.string.profile_bio_placeholder)
 
@@ -116,6 +156,13 @@ class ProfileFragment : Fragment() {
             Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
             viewModel.clearMessage()
         }
+        viewModel.stats.observe(viewLifecycleOwner) { stats ->
+            binding.tvProfileScanCount.text = (stats?.dueToday ?: 0).toString()
+            binding.tvProfileDueCount.text = (stats?.currentStreak ?: 0).toString()
+        }
+        viewModel.collectionCount.observe(viewLifecycleOwner) { count ->
+            binding.tvProfileLearnedCount.text = count.toString()
+        }
     }
 
     private fun setupClicks() {
@@ -125,7 +172,8 @@ class ProfileFragment : Fragment() {
         binding.cardCollection.setOnClickListener { findNavController().navigateWithSlide(R.id.collectionListFragment) }
         binding.btnLangVI.setOnClickListener { setDisplayLanguage("vi") }
         binding.btnLangEN.setOnClickListener { setDisplayLanguage("en") }
-        binding.frameAvatar.setOnClickListener { pickImage.launch("image/*") }
+        binding.frameAvatar.setOnClickListener { showAvatarOptions() }
+        binding.tvUsername.setOnClickListener { showUsernameDialog() }
         binding.tvBio.setOnClickListener { showBioDialog() }
         binding.btnMenu.setOnClickListener { showOverflowMenu() }
         binding.btnLogout.setOnClickListener {
@@ -144,6 +192,109 @@ class ProfileFragment : Fragment() {
                 .setOnClickListener { dialog.dismiss() }
             dialog.show()
         }
+    }
+
+    private fun showAvatarOptions() {
+        if (!hasCustomAvatar()) {
+            pickImage.launch("image/*")
+            return
+        }
+
+        val actions = arrayOf(
+            getString(R.string.profile_avatar_view),
+            getString(R.string.profile_avatar_change)
+        )
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.content_description_avatar))
+            .setItems(actions) { _, index ->
+                if (index == 0) showAvatarPreview() else pickImage.launch("image/*")
+            }
+            .show()
+    }
+
+    private fun hasCustomAvatar(): Boolean {
+        val avatarUrl = viewModel.profile.value?.avatarUrl
+        return !avatarUrl.isNullOrBlank() && avatarUrl != "default_avatar.png"
+    }
+
+    private fun launchAvatarCrop(sourceUri: Uri) {
+        val destination = Uri.fromFile(
+            File(requireContext().cacheDir, "avatar_crop_${System.currentTimeMillis()}.jpg")
+        )
+        val options = UCrop.Options().apply {
+            setCircleDimmedLayer(true)
+            setShowCropFrame(false)
+            setShowCropGrid(false)
+            setFreeStyleCropEnabled(false)
+            setCompressionFormat(Bitmap.CompressFormat.JPEG)
+            setCompressionQuality(AVATAR_JPEG_QUALITY)
+            setToolbarTitle(getString(R.string.profile_avatar_crop_title))
+            setToolbarColor(ContextCompat.getColor(requireContext(), R.color.primary))
+            setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.primary_dark))
+            setActiveControlsWidgetColor(ContextCompat.getColor(requireContext(), R.color.primary))
+        }
+        val intent = UCrop.of(sourceUri, destination)
+            .withAspectRatio(1f, 1f)
+            .withMaxResultSize(MAX_AVATAR_SIZE_PX, MAX_AVATAR_SIZE_PX)
+            .withOptions(options)
+            .getIntent(requireContext())
+        cropAvatar.launch(intent)
+    }
+
+    private fun showAvatarPreview() {
+        val dialog = Dialog(requireContext())
+        val container = FrameLayout(requireContext()).apply {
+            setBackgroundColor(Color.BLACK)
+        }
+        val image = ImageView(requireContext()).apply {
+            adjustViewBounds = true
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            setBackgroundColor(Color.BLACK)
+        }
+
+        container.addView(
+            image,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        )
+
+        val closeButton = ImageButton(requireContext()).apply {
+            setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+            background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_profile_edit_button)
+            contentDescription = getString(R.string.btn_cancel)
+            setPadding(dp(10), dp(10), dp(10), dp(10))
+            setOnClickListener { dialog.dismiss() }
+        }
+        container.addView(
+            closeButton,
+            FrameLayout.LayoutParams(dp(44), dp(44), Gravity.TOP or Gravity.END).apply {
+                topMargin = dp(24)
+                marginEnd = dp(18)
+            }
+        )
+
+        val avatarUrl = viewModel.profile.value?.avatarUrl
+        if (!avatarUrl.isNullOrBlank() && avatarUrl != "default_avatar.png") {
+            Glide.with(this)
+                .load(resolveMediaUrl(avatarUrl))
+                .placeholder(R.drawable.ic_person)
+                .error(R.drawable.ic_person)
+                .into(image)
+        } else {
+            image.setImageResource(R.drawable.ic_person)
+            image.setColorFilter(ContextCompat.getColor(requireContext(), R.color.text_on_primary))
+            image.setPadding(dp(96), dp(96), dp(96), dp(96))
+        }
+
+        dialog.setContentView(container)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.show()
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
     }
 
     private fun resetGraphToGuestScan() {
@@ -223,6 +374,44 @@ class ProfileFragment : Fragment() {
             .show()
     }
 
+    private fun showUsernameDialog() {
+        val inputLayout = TextInputLayout(requireContext()).apply {
+            hint = getString(R.string.profile_username_hint)
+            setPadding(32, 12, 32, 0)
+        }
+        val input = TextInputEditText(inputLayout.context).apply {
+            setSingleLine(true)
+            setText(binding.tvUsername.text)
+            setSelection(text?.length ?: 0)
+        }
+        inputLayout.addView(input)
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.profile_username_dialog_title))
+            .setView(inputLayout)
+            .setPositiveButton(getString(R.string.btn_save), null)
+            .setNegativeButton(getString(R.string.btn_cancel), null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val username = input.text?.toString()?.trim().orEmpty()
+                if (username.isBlank()) {
+                    inputLayout.error = getString(R.string.profile_username_required)
+                    return@setOnClickListener
+                }
+                if (!USERNAME_PATTERN.matches(username)) {
+                    inputLayout.error = getString(R.string.auth_invalid_username)
+                    return@setOnClickListener
+                }
+                inputLayout.error = null
+                viewModel.updateUsername(username)
+                dialog.dismiss()
+            }
+        }
+        dialog.show()
+    }
+
     private fun showChangePasswordDialog() {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_change_password, null)
         val tilCurrent = dialogView.findViewById<TextInputLayout>(R.id.tilCurrentPassword)
@@ -288,6 +477,28 @@ class ProfileFragment : Fragment() {
         popup.show()
     }
 
+    private fun setupDarkModeSwitch() {
+        val prefs = requireContext().getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+        val isDark = prefs.getBoolean("dark_mode", false)
+        // Tắt listener trước khi set checked để tránh trigger giả
+        binding.switchDarkMode.setOnCheckedChangeListener(null)
+        binding.switchDarkMode.isChecked = isDark
+        binding.switchDarkMode.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean("dark_mode", checked).apply()
+            val app = requireActivity().application as ObjectLanguageApp
+            if (app.tokenManager.isLoggedIn) {
+                // Dùng GlobalScope để request không bị cancel khi activity recreate
+                kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    app.repository.updateDarkMode(checked)
+                }
+            }
+            // Gọi sau khi API đã được dispatch để không cancel coroutine
+            AppCompatDelegate.setDefaultNightMode(
+                if (checked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
+    }
+
     private fun updateLangButtons() {
         val isVI = LocaleHelper.getSavedLocale(requireContext()) == "vi"
         val active = ContextCompat.getColorStateList(requireContext(), R.color.primary)
@@ -331,7 +542,7 @@ class ProfileFragment : Fragment() {
         val padding = (20 * resources.displayMetrics.density).toInt()
         binding.ivAvatar.setImageResource(R.drawable.ic_person)
         binding.ivAvatar.setPadding(padding, padding, padding, padding)
-        binding.ivAvatar.imageTintList = ContextCompat.getColorStateList(requireContext(), R.color.text_on_primary)
+        binding.ivAvatar.imageTintList = ContextCompat.getColorStateList(requireContext(), R.color.primary)
     }
 
     override fun onDestroyView() {
@@ -342,5 +553,8 @@ class ProfileFragment : Fragment() {
     companion object {
         private const val AVATAR_JPEG_QUALITY = 86
         private const val MAX_AVATAR_SIZE_PX = 1024
+        private val USERNAME_PATTERN = Regex("^[a-zA-Z0-9_]{3,50}$")
     }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).roundToInt()
 }

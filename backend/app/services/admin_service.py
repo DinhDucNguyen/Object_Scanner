@@ -1484,6 +1484,34 @@ class AdminService:
             changed += 1
         return changed
 
+    def update_object_alias(self, db: Session, alias_id: int, ma_bi_danh: str, ten_hien_thi: str | None, ngon_ngu: str | None) -> ObjectAliasItem | None:
+        alias = db.query(ObjectAlias).filter(ObjectAlias.id == alias_id).first()
+        if not alias:
+            return None
+
+        new_code = normalize_object_code(ma_bi_danh)
+        if not new_code:
+            raise ValueError("Mã bí danh không hợp lệ")
+
+        obj = db.query(Object).filter(Object.id == alias.doi_tuong_id, Object.thoi_gian_xoa.is_(None)).first()
+        if obj and new_code == obj.ma_doi_tuong:
+            raise ValueError("Bí danh không được trùng mã đối tượng chính")
+
+        conflict = db.query(ObjectAlias).filter(
+            ObjectAlias.ma_bi_danh == new_code,
+            ObjectAlias.id != alias_id,
+        ).first()
+        if conflict:
+            raise ValueError(f"'{new_code}' đã tồn tại dưới dạng bí danh khác")
+
+        alias.ma_bi_danh = new_code
+        alias.ten_hien_thi = (ten_hien_thi or "").strip() or None
+        if ngon_ngu is not None:
+            alias.ngon_ngu = ngon_ngu.strip() or None
+        db.commit()
+        db.refresh(alias)
+        return ObjectAliasItem.model_validate(alias)
+
     def delete_object_alias(self, db: Session, alias_id: int) -> bool:
         alias = db.query(ObjectAlias).filter(ObjectAlias.id == alias_id).first()
         if not alias:

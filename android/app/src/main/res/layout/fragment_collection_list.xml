@@ -128,21 +128,28 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingStart="32dp"
-                android:paddingEnd="32dp"
+                android:paddingStart="40dp"
+                android:paddingEnd="40dp"
                 android:visibility="gone">
 
-                <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:layout_marginBottom="16dp"
-                    android:src="@drawable/ic_book"
-                    app:tint="@color/text_muted" />
+                <FrameLayout
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:layout_marginBottom="20dp"
+                    android:background="@drawable/bg_icon_primary">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_folder_outline"
+                        app:tint="@color/primary" />
+                </FrameLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="10dp"
                     android:text="@string/collection_empty_title"
                     android:textColor="@color/text_primary"
                     android:textSize="20sp"
@@ -152,6 +159,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:lineSpacingMultiplier="1.3"
                     android:text="@string/collection_empty_subtitle"
                     android:textAppearance="@style/TextAppearance.App.BodyMedium" />
 
@@ -214,12 +222,14 @@
     </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerCollections"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
+        android:layout_marginTop="80dp"
+        android:visibility="gone">
+        <include layout="@layout/shimmer_collection_list" />
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddCollection"

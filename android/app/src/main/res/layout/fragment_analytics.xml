@@ -28,7 +28,7 @@
                 android:layout_marginBottom="10dp"
                 android:text="@string/analytics_overview_title"
                 android:textColor="@color/text_primary"
-                android:textSize="18sp"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
             <LinearLayout

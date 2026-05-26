@@ -4,7 +4,12 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import androidx.core.content.getSystemService
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -163,7 +168,29 @@ class ReviewFragment : Fragment() {
     }
 
     private fun submitAnswer(quality: Int) {
+        vibrateReview(quality)
         viewModel.submitAnswer(quality)
+    }
+
+    private fun vibrateReview(quality: Int) {
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            requireContext().getSystemService<VibratorManager>()?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            requireContext().getSystemService<Vibrator>()
+        } ?: return
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val effect = if (quality >= 4) {
+                VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE)
+            } else {
+                VibrationEffect.createWaveform(longArrayOf(0, 30, 60, 30), -1)
+            }
+            vibrator.vibrate(effect)
+        } else {
+            @Suppress("DEPRECATION")
+            if (quality >= 4) vibrator.vibrate(40) else vibrator.vibrate(longArrayOf(0, 30, 60, 30), -1)
+        }
     }
 
     private fun updateCard() {

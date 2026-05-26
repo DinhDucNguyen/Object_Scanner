@@ -46,6 +46,18 @@ class HistoryAdapter(
             .placeholder(R.drawable.ic_image_placeholder)
             .error(R.drawable.ic_image_placeholder)
             .into(holder.binding.ivThumbnail)
+        val statusText = when (item.status) {
+            "pending_review" -> holder.itemView.context.getString(R.string.history_status_pending)
+            "rejected" -> holder.itemView.context.getString(R.string.history_status_rejected)
+            else -> null
+        }
+        if (statusText != null) {
+            holder.binding.tvScanStatus.text = statusText
+            holder.binding.tvScanStatus.visibility = View.VISIBLE
+        } else {
+            holder.binding.tvScanStatus.visibility = View.GONE
+        }
+
         holder.binding.root.setOnClickListener { onItemClick(item) }
         holder.binding.btnDeleteHistory.setOnClickListener { onDeleteClick(item) }
 

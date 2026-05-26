@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentExploreBinding
+import com.google.android.material.snackbar.Snackbar
 
 class ExploreFragment : Fragment() {
 
@@ -48,7 +49,12 @@ class ExploreFragment : Fragment() {
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
             if (!loading) binding.swipeRefresh.isRefreshing = false
         }
-        binding.swipeRefresh.setOnRefreshListener { viewModel.loadCategories() }
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.loadCategories()
+            binding.swipeRefresh.post {
+                Snackbar.make(binding.root, R.string.refresh_success, Snackbar.LENGTH_SHORT).show()
+            }
+        }
         viewModel.error.observe(viewLifecycleOwner) { error ->
             error?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()

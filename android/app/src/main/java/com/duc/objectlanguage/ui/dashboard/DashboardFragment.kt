@@ -23,6 +23,7 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.ApiConfig
 import com.duc.objectlanguage.databinding.FragmentDashboardBinding
 import com.duc.objectlanguage.ui.common.addScaleFeedback
+import com.google.android.material.snackbar.Snackbar
 
 class DashboardFragment : Fragment() {
 
@@ -45,6 +46,10 @@ class DashboardFragment : Fragment() {
         }
         binding.cardDashboardSearch.addScaleFeedback()
         binding.btnScanNow.addScaleFeedback()
+        binding.ivDashboardAvatar.addScaleFeedback()
+        binding.ivDashboardAvatar.setOnClickListener {
+            selectBottomTab(R.id.profileFragment)
+        }
 
         binding.btnScanNow.setOnClickListener {
             if (missionOpensReview) openReview() else openScan()
@@ -79,7 +84,10 @@ class DashboardFragment : Fragment() {
             viewModel.loadStats()
             viewModel.loadStreak()
             viewModel.loadTopCollections()
-            viewModel.loadAvatarUrl()
+            viewModel.loadProfileSummary()
+            binding.swipeRefresh.post {
+                Snackbar.make(binding.root, R.string.refresh_success, Snackbar.LENGTH_SHORT).show()
+            }
         }
 
         viewModel.stats.observe(viewLifecycleOwner) { stats ->
@@ -119,11 +127,14 @@ class DashboardFragment : Fragment() {
                 binding.ivDashboardAvatar.imageTintList = null
             }
         }
+        viewModel.displayName.observe(viewLifecycleOwner) { name ->
+            binding.tvDashboardGreeting.text = getString(R.string.dashboard_greeting_named, name)
+        }
 
         viewModel.loadStats()
         viewModel.loadStreak()
         viewModel.loadTopCollections()
-        viewModel.loadAvatarUrl()
+        viewModel.loadProfileSummary()
         animateDashboardEntrance()
         startGoalIconFloatAnimation()
     }
@@ -227,7 +238,7 @@ class DashboardFragment : Fragment() {
         viewModel.loadStats()
         viewModel.loadStreak()
         viewModel.loadTopCollections()
-        viewModel.loadAvatarUrl()
+        viewModel.loadProfileSummary()
     }
 
     private fun resolveMediaUrl(path: String): String {

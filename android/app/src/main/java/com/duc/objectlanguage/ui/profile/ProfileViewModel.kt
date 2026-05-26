@@ -8,19 +8,28 @@ import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.ProfileData
+import com.duc.objectlanguage.data.model.StatsResponse
 import com.duc.objectlanguage.data.model.UserSettingsResponse
+import com.duc.objectlanguage.data.repository.CollectionRepository
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
     private val app = application as ObjectLanguageApp
     private val repo = app.repository
+    private val collectionRepo = CollectionRepository(app.tokenManager)
 
     private val _profile = MutableLiveData<ProfileData?>()
     val profile: LiveData<ProfileData?> = _profile
 
     private val _settings = MutableLiveData<UserSettingsResponse?>()
     val settings: LiveData<UserSettingsResponse?> = _settings
+
+    private val _stats = MutableLiveData<StatsResponse?>()
+    val stats: LiveData<StatsResponse?> = _stats
+
+    private val _collectionCount = MutableLiveData(0)
+    val collectionCount: LiveData<Int> = _collectionCount
 
     private val _message = MutableLiveData<String?>()
     val message: LiveData<String?> = _message
@@ -37,6 +46,24 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun loadStats() {
+        viewModelScope.launch {
+            repo.getStats().fold(
+                onSuccess = { _stats.value = it },
+                onFailure = { _stats.value = null }
+            )
+        }
+    }
+
+    fun loadCollections() {
+        viewModelScope.launch {
+            collectionRepo.getCollections().fold(
+                onSuccess = { _collectionCount.value = it.size },
+                onFailure = { _collectionCount.value = 0 }
+            )
+        }
+    }
+
     fun updateBio(bio: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -44,6 +71,34 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 onSuccess = {
                     _profile.value = it
                     _message.value = string(R.string.profile_bio_updated)
+                },
+                onFailure = { _message.value = string(R.string.profile_error_format, it.message ?: "") }
+            )
+            _isLoading.value = false
+        }
+    }
+
+    fun updateFullName(fullName: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            repo.updateProfile(fullName = fullName, bio = _profile.value?.bio).fold(
+                onSuccess = {
+                    _profile.value = it
+                    _message.value = string(R.string.profile_name_updated)
+                },
+                onFailure = { _message.value = string(R.string.profile_error_format, it.message ?: "") }
+            )
+            _isLoading.value = false
+        }
+    }
+
+    fun updateUsername(username: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            repo.updateProfile(username = username).fold(
+                onSuccess = {
+                    _profile.value = it
+                    _message.value = string(R.string.profile_username_updated)
                 },
                 onFailure = { _message.value = string(R.string.profile_error_format, it.message ?: "") }
             )

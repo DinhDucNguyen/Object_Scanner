@@ -7,17 +7,26 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.PorterDuff
+import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.data.model.StreakCalendarDay
 import com.duc.objectlanguage.databinding.FragmentStreakBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import nl.dionsegijn.konfetti.core.Party
 import nl.dionsegijn.konfetti.core.Position
 import nl.dionsegijn.konfetti.core.emitter.Emitter
 import androidx.navigation.fragment.findNavController
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class StreakFragment : Fragment() {
@@ -43,14 +52,22 @@ class StreakFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        var previousStreak = -1
         viewModel.streakData.observe(viewLifecycleOwner) { data ->
             updateUI(data)
+            if (previousStreak >= 0 && data.currentStreak > previousStreak) {
+                celebrateStreakIncrease()
+            }
+            previousStreak = data.currentStreak
         }
         viewModel.celebrateMilestone.observe(viewLifecycleOwner) { milestone ->
             if (milestone != null) {
                 celebrateMilestone(milestone)
                 viewModel.clearCelebration()
             }
+        }
+        viewModel.calendarDays.observe(viewLifecycleOwner) { days ->
+            bindCalendar(days)
         }
     }
 
@@ -273,6 +290,19 @@ class StreakFragment : Fragment() {
         dialog.show()
     }
 
+    private fun celebrateStreakIncrease() {
+        val party = Party(
+            speed = 5f,
+            maxSpeed = 20f,
+            damping = 0.9f,
+            spread = 60,
+            colors = listOf(0xfce18a, 0xff726d, 0xf4306d),
+            emitter = Emitter(duration = 1, TimeUnit.SECONDS).max(40),
+            position = Position.Relative(0.5, 0.0)
+        )
+        binding.konfettiView.start(party)
+    }
+
     fun celebrateMilestone(milestone: Int) {
         val party = Party(
             speed = 0f,
@@ -294,6 +324,100 @@ class StreakFragment : Fragment() {
         dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCelebrateOk)
             .setOnClickListener { dialog.dismiss() }
         dialog.show()
+    }
+
+    private fun bindCalendar(days: List<StreakCalendarDay>) {
+        val container = binding.gridCalendar
+        container.removeAllViews()
+        if (days.isEmpty()) return
+
+        val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        val firstCal = Calendar.getInstance().apply { time = fmt.parse(days.first().date)!! }
+        // DAY_OF_WEEK: 1=CN, 2=T2 ... 7=T7 → offset 0-based
+        val firstDow = firstCal.get(Calendar.DAY_OF_WEEK) - 1
+        val todayStr = fmt.format(Calendar.getInstance().time)
+
+        // Tạo mảng slot: firstDow ô null + các ngày thực
+        val slots: MutableList<StreakCalendarDay?> = MutableList(firstDow) { null }
+        slots.addAll(days)
+        // Pad cuối để đủ hàng
+        while (slots.size % 7 != 0) slots.add(null)
+
+        val numRows = slots.size / 7
+        val ctx = requireContext()
+
+        for (row in 0 until numRows) {
+            val rowLayout = LinearLayout(ctx).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            for (col in 0 until 7) {
+                val slot = slots[row * 7 + col]
+                val isToday = slot?.date == todayStr
+
+                val cellFrame = android.widget.FrameLayout(ctx).apply {
+                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                }
+
+                if (slot != null) {
+                    val dp28 = (28 * resources.displayMetrics.density).toInt()
+                    val dp36 = (36 * resources.displayMetrics.density).toInt()
+                    val iconSize = if (isToday) dp36 else dp28
+
+                    // Background tròn highlight cho hôm nay
+                    if (isToday) {
+                        val bg = View(ctx).apply {
+                            val lp = android.widget.FrameLayout.LayoutParams(dp36, dp36)
+                            lp.gravity = android.view.Gravity.CENTER
+                            layoutParams = lp
+                            background = ContextCompat.getDrawable(ctx, R.drawable.bg_calendar_today)
+                        }
+                        cellFrame.addView(bg)
+                    }
+
+                    val icon = ImageView(ctx).apply {
+                        val lp = android.widget.FrameLayout.LayoutParams(iconSize, iconSize)
+                        lp.gravity = android.view.Gravity.CENTER
+                        layoutParams = lp
+                        setImageResource(R.drawable.ic_fire)
+                        scaleType = ImageView.ScaleType.FIT_CENTER
+
+                        if (slot.count == 0) {
+                            // Lửa xám chuẩn: desaturate hoàn toàn
+                            val cm = ColorMatrix().apply { setSaturation(0f) }
+                            colorFilter = ColorMatrixColorFilter(cm)
+                        }
+                    }
+
+                    if (isToday) {
+                        icon.scaleX = 0.4f; icon.scaleY = 0.4f
+                        icon.animate().scaleX(1f).scaleY(1f)
+                            .setDuration(450)
+                            .setInterpolator(OvershootInterpolator(2.2f))
+                            .setStartDelay(row * 50L + 100)
+                            .start()
+                    }
+
+                    cellFrame.addView(icon)
+                }
+
+                rowLayout.addView(cellFrame)
+            }
+
+            // Fade-in từng hàng với stagger
+            rowLayout.alpha = 0f
+            rowLayout.animate()
+                .alpha(1f)
+                .setDuration(200)
+                .setStartDelay(row * 50L)
+                .start()
+
+            container.addView(rowLayout)
+        }
     }
 
     override fun onDestroyView() {

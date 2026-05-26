@@ -101,6 +101,16 @@ class UserService:
         return self._generate_tokens(user)
 
     def update_profile(self, db: Session, user_id: int, data) -> dict:
+        user = self.repo.get_by_id(db, user_id)
+        if not user:
+            raise HTTPException(404, "Không tìm thấy người dùng")
+
+        if data.username is not None:
+            existing = self.repo.get_by_username(db, data.username)
+            if existing and existing.id != user_id:
+                raise HTTPException(400, "Tên đăng nhập đã được sử dụng")
+            user.ten_dang_nhap = data.username
+
         profile = self._get_or_create_profile(db, user_id)
         if data.full_name is not None:
             profile.ho_ten = data.full_name
@@ -108,8 +118,10 @@ class UserService:
             profile.gioi_thieu = data.bio
         db.commit()
         db.refresh(profile)
+        db.refresh(user)
         return {
             "user_id": profile.user_id,
+            "username": user.ten_dang_nhap,
             "full_name": profile.ho_ten,
             "avatar_url": profile.anh_dai_dien,
             "bio": profile.gioi_thieu,
@@ -141,8 +153,10 @@ class UserService:
 
     def get_profile(self, db: Session, user_id: int):
         profile = self._get_or_create_profile(db, user_id)
+        user = self.repo.get_by_id(db, user_id)
         return {
             "user_id": profile.user_id,
+            "username": user.ten_dang_nhap if user else None,
             "full_name": profile.ho_ten,
             "avatar_url": profile.anh_dai_dien,
             "bio": profile.gioi_thieu,
@@ -173,6 +187,7 @@ class UserService:
         return {
             "user_id": settings.user_id,
             "display_language": settings.ngon_ngu_giao_dien or "vi",
+            "dark_mode": bool(settings.che_do_toi),
         }
 
     def update_settings(self, db: Session, user_id: int, data: UserSettingsUpdate):
@@ -183,11 +198,14 @@ class UserService:
 
         if data.display_language is not None:
             settings.ngon_ngu_giao_dien = data.display_language
+        if data.dark_mode is not None:
+            settings.che_do_toi = data.dark_mode
 
         self.repo.update_settings(db, settings)
         return {
             "user_id": settings.user_id,
             "display_language": settings.ngon_ngu_giao_dien or "vi",
+            "dark_mode": bool(settings.che_do_toi),
         }
 
     def forgot_password(self, db: Session, data: ForgotPasswordRequest) -> dict:

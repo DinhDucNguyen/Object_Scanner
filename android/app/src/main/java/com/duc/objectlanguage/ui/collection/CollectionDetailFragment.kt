@@ -15,6 +15,7 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentCollectionDetailBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.snackbar.Snackbar
 
 class CollectionDetailFragment : Fragment() {
 
@@ -45,7 +46,12 @@ class CollectionDetailFragment : Fragment() {
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
             if (!loading) binding.swipeRefresh.isRefreshing = false
         }
-        binding.swipeRefresh.setOnRefreshListener { viewModel.loadCollectionDetail(collectionId) }
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.loadCollectionDetail(collectionId)
+            binding.swipeRefresh.post {
+                Snackbar.make(binding.root, R.string.refresh_success, Snackbar.LENGTH_SHORT).show()
+            }
+        }
 
         viewModel.collectionDetail.observe(viewLifecycleOwner) { detail ->
             if (detail == null) return@observe

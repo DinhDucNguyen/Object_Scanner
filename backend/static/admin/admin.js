@@ -1223,14 +1223,39 @@
       </div>
       <div id="obj-alias-list" class="alias-list">
         ${aliases.length ? aliases.map(a => `
-          <div class="alias-item">
-            <div style="min-width:0;">
+          <div class="alias-item" id="alias-row-${a.id}">
+            <div style="min-width:0;flex:1;">
               <code class="cell-ellipsis" style="max-width:220px;" title="${escHtml(a.ma_bi_danh || '')}">${escHtml(a.ma_bi_danh || '')}</code>
               ${a.ten_hien_thi ? `<div class="text-muted mt-1" style="font-size:.78rem;">Hiển thị: ${escHtml(a.ten_hien_thi)}</div>` : ''}
             </div>
-            <button class="btn-act del" onclick="deleteObjectAlias(${a.id})" title="Xoá tên gọi này">
-              <i class="bi bi-trash3"></i>
-            </button>
+            <div class="d-flex gap-1">
+              <button class="btn-act" onclick="toggleEditAlias(${a.id},'${escHtml(a.ma_bi_danh || '')}','${escHtml(a.ten_hien_thi || '')}','${escHtml(a.ngon_ngu || 'en')}')" title="Sửa tên gọi này">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn-act del" onclick="deleteObjectAlias(${a.id})" title="Xoá tên gọi này">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </div>
+          </div>
+          <div id="alias-edit-${a.id}" style="display:none;" class="alias-edit-form">
+            <div class="alias-form-grid">
+              <div>
+                <label class="form-label" style="font-size:.78rem;">Nhãn phụ / alias <span class="text-danger">*</span></label>
+                <input id="alias-edit-code-${a.id}" class="form-control form-control-sm" value="${escHtml(a.ma_bi_danh || '')}">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:.78rem;">Tên hiển thị</label>
+                <input id="alias-edit-display-${a.id}" class="form-control form-control-sm" value="${escHtml(a.ten_hien_thi || '')}">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:.78rem;">Ngôn ngữ</label>
+                <input id="alias-edit-lang-${a.id}" class="form-control form-control-sm" value="${escHtml(a.ngon_ngu || 'en')}">
+              </div>
+            </div>
+            <div class="d-flex gap-2 justify-content-end mt-2">
+              <button class="btn btn-sm btn-outline-secondary" onclick="toggleEditAlias(${a.id})">Huỷ</button>
+              <button class="btn btn-sm btn-primary" onclick="saveEditAlias(${a.id})"><i class="bi bi-check-lg me-1"></i>Lưu</button>
+            </div>
           </div>`).join('') : '<div class="alias-empty"><i class="bi bi-link-45deg me-1"></i>Chưa có tên gọi khác cho object này.</div>'}
       </div>
     </div>
@@ -1293,6 +1318,42 @@
           loadObjects();
         } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
       }, 'Xóa bí danh');
+    }
+
+    function toggleEditAlias(aliasId, code, display, lang) {
+      const editDiv = document.getElementById(`alias-edit-${aliasId}`);
+      const rowDiv = document.getElementById(`alias-row-${aliasId}`);
+      if (!editDiv) return;
+      const isOpen = editDiv.style.display !== 'none';
+      if (isOpen) {
+        editDiv.style.display = 'none';
+        rowDiv.style.opacity = '1';
+      } else {
+        if (code !== undefined) {
+          document.getElementById(`alias-edit-code-${aliasId}`).value = code;
+          document.getElementById(`alias-edit-display-${aliasId}`).value = display || '';
+          document.getElementById(`alias-edit-lang-${aliasId}`).value = lang || 'en';
+        }
+        editDiv.style.display = 'block';
+        rowDiv.style.opacity = '0.5';
+        document.getElementById(`alias-edit-code-${aliasId}`)?.focus();
+      }
+    }
+
+    async function saveEditAlias(aliasId) {
+      const code = document.getElementById(`alias-edit-code-${aliasId}`)?.value.trim();
+      const display = document.getElementById(`alias-edit-display-${aliasId}`)?.value.trim();
+      const lang = document.getElementById(`alias-edit-lang-${aliasId}`)?.value.trim() || 'en';
+      if (!code) { toast('Nhập nhãn phụ / alias', 'warning'); return; }
+      try {
+        await apiJSON(`/object-aliases/${aliasId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ ma_bi_danh: code, ten_hien_thi: display || null, ngon_ngu: lang }),
+        });
+        toast('Đã cập nhật bí danh');
+        bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide();
+        loadObjects();
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
     }
 
     async function deleteObj(id) {

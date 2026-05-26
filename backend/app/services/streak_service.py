@@ -47,6 +47,30 @@ class StreakService:
             "ngay_on_cuoi": str(last_review) if last_review else None,
         }
 
+    def get_calendar(self, db: Session, user_id: int, days: int) -> list[dict]:
+        today = self._today()
+        start = today - timedelta(days=days - 1)
+        review_day = func.date(ReviewLog.thoi_diem_on)
+        rows = (
+            db.query(review_day, func.count(ReviewLog.id))
+            .filter(
+                ReviewLog.user_id == user_id,
+                func.date(ReviewLog.thoi_diem_on) >= str(start),
+            )
+            .group_by(review_day)
+            .all()
+        )
+        count_map: dict[str, int] = {}
+        for (value, cnt) in rows:
+            d = self._coerce_date(value)
+            if d:
+                count_map[str(d)] = cnt
+        result = []
+        for i in range(days):
+            day = start + timedelta(days=i)
+            result.append({"date": str(day), "count": count_map.get(str(day), 0)})
+        return result
+
     def _review_dates(self, db: Session, user_id: int, today: date) -> list[date]:
         review_day = func.date(ReviewLog.thoi_diem_on)
         rows = (

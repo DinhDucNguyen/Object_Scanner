@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.ui.auth
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -52,7 +54,10 @@ class LoginFragment : Fragment() {
                 binding.btnLogin.isEnabled = true
 
                 result.fold(
-                    onSuccess = { resetGraphToDashboard() },
+                    onSuccess = {
+                        applyAccountDarkMode()
+                        resetGraphToDashboard()
+                    },
                     onFailure = {
                         Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
                     }
@@ -86,6 +91,20 @@ class LoginFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun applyAccountDarkMode() {
+        val app = requireActivity().application as ObjectLanguageApp
+        val prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        lifecycleScope.launch {
+            app.repository.getUserSettings().onSuccess { settings ->
+                val isDark = settings.darkMode
+                prefs.edit().putBoolean("dark_mode", isDark).apply()
+                AppCompatDelegate.setDefaultNightMode(
+                    if (isDark) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+                )
+            }
+        }
     }
 
     private fun resetGraphToDashboard() {

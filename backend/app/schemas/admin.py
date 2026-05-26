@@ -173,6 +173,12 @@ class ObjectAliasUpsertRequest(BaseModel):
     ngon_ngu: Optional[str] = "en"
 
 
+class ObjectAliasUpdateRequest(BaseModel):
+    ma_bi_danh: str
+    ten_hien_thi: Optional[str] = None
+    ngon_ngu: Optional[str] = "en"
+
+
 class ObjectListItem(BaseModel):
     id: int
     ma_doi_tuong: Optional[str] = None

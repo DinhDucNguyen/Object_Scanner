@@ -40,7 +40,7 @@
                 android:layout_gravity="center"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_streak_fire"
-                app:tint="#FFFFFF" />
+                app:tint="@android:color/white" />
         </FrameLayout>
     </FrameLayout>
 
@@ -86,7 +86,7 @@
             app:icon="@drawable/ic_star"
             app:iconGravity="textStart"
             app:iconSize="18dp"
-            app:iconTint="#FFFFFF" />
+            app:iconTint="@android:color/white" />
 
     </LinearLayout>
 </LinearLayout>

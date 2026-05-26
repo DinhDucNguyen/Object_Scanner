@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.StreakDataStore
 import com.duc.objectlanguage.data.model.StatsResponse
 import com.duc.objectlanguage.data.repository.CollectionRepository
@@ -17,8 +18,9 @@ import kotlinx.coroutines.launch
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = (application as ObjectLanguageApp).repository
-    private val collectionRepo = CollectionRepository((application as ObjectLanguageApp).tokenManager)
+    private val app = application as ObjectLanguageApp
+    private val repo = app.repository
+    private val collectionRepo = CollectionRepository(app.tokenManager)
     private val streakStore = StreakDataStore(application)
 
     private val _stats = MutableLiveData<StatsResponse?>()
@@ -46,6 +48,9 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     private val _avatarUrl = MutableLiveData<String?>()
     val avatarUrl: LiveData<String?> = _avatarUrl
 
+    private val _displayName = MutableLiveData<String>()
+    val displayName: LiveData<String> = _displayName
+
     fun loadStats() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -58,10 +63,15 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun loadAvatarUrl() {
+    fun loadProfileSummary() {
         viewModelScope.launch {
-            repo.getProfile().getOrNull()?.avatarUrl?.let { url ->
-                if (url.isNotBlank() && url != "default_avatar.png") _avatarUrl.value = url
+            _displayName.value = app.tokenManager.username?.takeIf { it.isNotBlank() }
+                ?: app.getString(R.string.dashboard_default_user)
+            val profile = repo.getProfile().getOrNull()
+
+            val url = profile?.avatarUrl
+            if (!url.isNullOrBlank() && url != "default_avatar.png") {
+                _avatarUrl.value = url
             }
         }
     }

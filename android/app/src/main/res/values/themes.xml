@@ -53,6 +53,12 @@
         <item name="cornerSize">20dp</item>
     </style>
 
+    <style name="TextAppearance.App.ToolbarTitle" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <!-- Text Appearances — Vibrant Scholastic scale (DESIGN.md) -->
     <style name="TextAppearance.App.Display" parent="TextAppearance.Material3.DisplaySmall">
         <item name="android:fontFamily">@font/quicksand</item>

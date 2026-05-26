@@ -159,6 +159,9 @@ interface ApiService {
     @GET("api/streak")
     suspend fun getStreak(): Response<StreakResponse>
 
+    @GET("api/streak/calendar")
+    suspend fun getStreakCalendar(@Query("days") days: Int = 30): Response<StreakCalendarResponse>
+
     @POST("api/streak/record")
     suspend fun recordStreak(): Response<StreakResponse>
 

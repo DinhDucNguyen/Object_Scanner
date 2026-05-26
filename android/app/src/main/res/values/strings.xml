@@ -74,6 +74,7 @@
     <!-- Dashboard -->
     <string name="dashboard_default_user">bạn</string>
     <string name="dashboard_greeting">Chào bạn!</string>
+    <string name="dashboard_greeting_named">Chào %s!</string>
     <string name="dashboard_greeting_subtitle">Sẵn sàng học từ vựng mới chưa?</string>
     <string name="dashboard_brand_name">LengoLens.</string>
     <string name="dashboard_search_hint">Tra từ hoặc quét đồ vật...</string>
@@ -371,7 +372,8 @@
     <string name="pronunciation_next_word">Từ tiếp theo</string>
 
     <!-- History -->
-    <string name="history_empty">Chưa có lịch sử quét</string>
+    <string name="history_empty_title">Chưa quét vật thể nào</string>
+    <string name="history_empty">Hãy dùng camera để quét đồ vật xung quanh bạn!</string>
     <string name="history_image">Ảnh lịch sử quét</string>
     <string name="history_search_hint">Tìm vật thể đã quét</string>
     <string name="history_filter_all">Tất cả</string>
@@ -388,9 +390,13 @@
     <string name="history_audio_load_error">Không tải được audio</string>
     <string name="history_audio_play_error">Không phát được audio</string>
     <string name="history_empty_vocab">Không có dữ liệu từ vựng</string>
-    <string name="history_status_pending">Chờ duyệt</string>
-    <string name="history_status_rejected">Không được duyệt</string>
+    <string name="history_status_pending">Đang cập nhật từ vựng cho vật thể này</string>
+    <string name="history_status_rejected">Hệ thống chưa nhận diện được, thử chụp lại nhé</string>
     <string name="history_status_approved">Đã duyệt</string>
+
+    <!-- Offline -->
+    <string name="offline_banner">Không có kết nối mạng</string>
+    <string name="refresh_success">Đã cập nhật</string>
 
     <!-- Streak -->
     <string name="streak_days_singular">ngày</string>
@@ -423,6 +429,10 @@
     <string name="streak_celebrate_title">Đạt mốc thành tích!</string>
     <string name="streak_celebrate_msg">Chúc mừng! Bạn đã đạt chuỗi %d ngày!\n\nSự kiên trì của bạn thật đáng tự hào. Tiếp tục phát huy nhé!</string>
     <string name="streak_celebrate_btn">Tuyệt vời</string>
+    <string name="streak_section_calendar">LỊCH HỌC</string>
+    <string name="streak_calendar_title">30 ngày gần nhất</string>
+    <string name="streak_calendar_legend_none">Ít</string>
+    <string name="streak_calendar_legend_many">Nhiều</string>
     <string name="streak_section_activity">THỐNG KÊ HOẠT ĐỘNG</string>
     <string name="streak_section_achievements">THÀNH TỰU</string>
     <string name="streak_view_all">Xem tất cả</string>
@@ -583,6 +593,7 @@
     <string name="profile_menu_analytics">Thống kê học tập</string>
     <string name="profile_menu_streak">Chuỗi ngày học</string>
     <string name="profile_menu_collection">Bộ sưu tập</string>
+    <string name="profile_dark_mode">Chế độ tối</string>
     <string name="profile_btn_logout">Đăng xuất</string>
     <string name="profile_logout_confirm_title">Đăng xuất</string>
     <string name="profile_logout_confirm_msg">Bạn có chắc muốn đăng xuất không?</string>
@@ -602,12 +613,29 @@
     <string name="profile_password_rules">Ít nhất 8 ký tự&#10;Có chữ thường và chữ viết hoa&#10;Có ít nhất 1 chữ số</string>
     <string name="profile_badge">Người học tích cực</string>
     <string name="profile_account_title">Tài khoản học tập</string>
+    <string name="profile_username_handle">@%s</string>
+    <string name="profile_stat_learned">Bộ sưu tập</string>
+    <string name="profile_stat_scans">Đến hạn ôn</string>
+    <string name="profile_stat_due">Chuỗi ngày</string>
     <string name="profile_language_changed_vi">Đã chuyển sang tiếng Việt</string>
     <string name="profile_language_changed_en">Switched to English</string>
     <string name="profile_language_save_failed">Không lưu được ngôn ngữ lên tài khoản, app vẫn đổi tạm trên thiết bị này</string>
     <string name="profile_menu_content_description">Menu hồ sơ</string>
     <string name="profile_bio_updated">Đã cập nhật giới thiệu</string>
+    <string name="profile_name_updated">Đã cập nhật tên hiển thị</string>
+    <string name="profile_name_dialog_title">Tên hiển thị</string>
+    <string name="profile_name_hint">Nhập tên của bạn</string>
+    <string name="profile_name_required">Vui lòng nhập tên hiển thị</string>
+    <string name="profile_username_updated">Đã cập nhật tên đăng nhập</string>
+    <string name="profile_username_dialog_title">Sửa tên đăng nhập</string>
+    <string name="profile_username_hint">Nhập tên đăng nhập mới</string>
+    <string name="profile_username_required">Vui lòng nhập tên đăng nhập</string>
+    <string name="profile_edit_username">Sửa tên đăng nhập</string>
     <string name="profile_avatar_updated">Đã cập nhật ảnh đại diện</string>
+    <string name="profile_avatar_view">Xem ảnh</string>
+    <string name="profile_avatar_change">Đổi ảnh</string>
+    <string name="profile_avatar_crop_title">Căn ảnh đại diện</string>
+    <string name="profile_avatar_crop_error">Không cắt được ảnh: %s</string>
     <string name="profile_error_format">Lỗi: %s</string>
     <string name="profile_avatar_upload_error_format">Lỗi upload: %s</string>
     <string name="profile_password_required">Vui lòng nhập đầy đủ thông tin</string>

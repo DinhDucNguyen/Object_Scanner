@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
@@ -31,6 +31,15 @@ class StreakSyncRequest(BaseModel):
     ngay_on_cuoi:    Optional[date] = None
 
 
+class CalendarDay(BaseModel):
+    date: str        # "yyyy-MM-dd"
+    count: int       # số lượt ôn trong ngày
+
+
+class StreakCalendarResponse(BaseModel):
+    days: list[CalendarDay]
+
+
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
 @router.get("", response_model=StreakResponse, summary="Lấy streak hiện tại")
@@ -52,6 +61,17 @@ def record_review(
     Endpoint này chỉ trả về streak mới nhất để tương thích client cũ.
     """
     return streak_service.record_review(db, user_id)
+
+
+@router.get("/calendar", response_model=StreakCalendarResponse, summary="Lịch học 30 ngày gần nhất")
+def get_streak_calendar(
+    days:    int     = Query(default=30, ge=7, le=90),
+    db:      Session = Depends(get_db),
+    user_id: int     = Depends(get_current_user_id),
+):
+    """Trả về số lượt ôn mỗi ngày trong `days` ngày gần nhất."""
+    calendar_days = streak_service.get_calendar(db, user_id, days)
+    return StreakCalendarResponse(days=calendar_days)
 
 
 @router.post("/sync", response_model=StreakResponse, summary="Lấy streak server cho client cũ")

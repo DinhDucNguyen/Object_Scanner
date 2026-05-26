@@ -72,6 +72,7 @@ class UserResponse(BaseModel):
 
 class ProfileResponse(BaseModel):
     user_id: int
+    username: Optional[str] = None
     full_name: Optional[str] = None
     avatar_url: Optional[str] = None
     bio: Optional[str] = None
@@ -83,6 +84,7 @@ class ProfileResponse(BaseModel):
 class UserSettingsResponse(BaseModel):
     user_id: int
     display_language: str = "vi"
+    dark_mode: bool = False
 
     class Config:
         from_attributes = True
@@ -90,6 +92,7 @@ class UserSettingsResponse(BaseModel):
 
 class UserSettingsUpdate(BaseModel):
     display_language: Optional[str] = None
+    dark_mode: Optional[bool] = None
 
     @field_validator("display_language")
     @classmethod
@@ -165,8 +168,19 @@ class ChangePasswordRequest(BaseModel):
 
 
 class ProfileUpdateRequest(BaseModel):
+    username: Optional[str] = None
     full_name: Optional[str] = None
     bio: Optional[str] = None
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        username = v.strip()
+        if not USERNAME_PATTERN.match(username):
+            raise ValueError("Username phải từ 3-50 ký tự, chỉ gồm chữ, số và underscore")
+        return username
 
 
 class AvatarUploadResponse(BaseModel):

@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/dictionary_title"
                 android:textColor="@color/text_primary"
-                android:textSize="30sp"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
             <TextView

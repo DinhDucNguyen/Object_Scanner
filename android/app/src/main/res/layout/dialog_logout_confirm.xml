@@ -42,7 +42,7 @@
                 android:layout_gravity="center"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_person"
-                app:tint="#FFFFFF" />
+                app:tint="@android:color/white" />
         </FrameLayout>
     </FrameLayout>
 
@@ -89,7 +89,7 @@
             app:icon="@drawable/ic_back"
             app:iconGravity="textStart"
             app:iconSize="18dp"
-            app:iconTint="#FFFFFF" />
+            app:iconTint="@android:color/white" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancelLogout"

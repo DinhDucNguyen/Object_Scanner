@@ -31,7 +31,7 @@
                 android:layout_gravity="center"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_award"
-                app:tint="#FFFFFF" />
+                app:tint="@android:color/white" />
         </FrameLayout>
     </FrameLayout>
 

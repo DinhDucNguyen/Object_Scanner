@@ -39,7 +39,7 @@
                     android:maxLines="1"
                     android:text="@string/collection_default_title"
                     android:textColor="@color/text_primary"
-                    android:textSize="30sp"
+                    android:textSize="22sp"
                     android:textStyle="bold" />
 
                 <LinearLayout

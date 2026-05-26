@@ -39,7 +39,7 @@ from app.schemas.admin import (
     AliasPredictionResponse,
     RejectResponse, SplitToNewObjectResponse,
     CategoryAdminResponse, CategoryCreateRequest, CategoryUpdateRequest,
-    ObjectAliasItem, ObjectAliasUpsertRequest,
+    ObjectAliasItem, ObjectAliasUpsertRequest, ObjectAliasUpdateRequest,
     ObjectListItem, ObjectDetailResponse, ObjectCreateRequest, ObjectUpdateRequest,
     TranslationAdminResponse, TranslationCreateRequest, TranslationUpdateRequest,
     UserAdminResponse, UserRoleUpdate, UserStatusUpdate, UserPasswordReset,
@@ -565,6 +565,17 @@ def upsert_object_alias(req: ObjectAliasUpsertRequest, db: Session = Depends(get
         raise HTTPException(400, str(exc))
     if not result:
         raise HTTPException(404, "Khong tim thay doi tuong hoac ma bi danh khong hop le")
+    return result
+
+
+@router.put("/object-aliases/{alias_id}", response_model=ObjectAliasItem)
+def update_object_alias(alias_id: int, req: ObjectAliasUpdateRequest, db: Session = Depends(get_db)):
+    try:
+        result = admin_service.update_object_alias(db, alias_id, req.ma_bi_danh, req.ten_hien_thi, req.ngon_ngu)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+    if not result:
+        raise HTTPException(404, "Không tìm thấy bí danh")
     return result
 
 

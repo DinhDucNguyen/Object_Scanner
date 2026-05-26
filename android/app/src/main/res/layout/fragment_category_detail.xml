@@ -27,7 +27,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/text_primary"
-            android:textSize="26sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <TextView
@@ -95,7 +95,7 @@
         app:icon="@drawable/ic_play_circle"
         app:iconGravity="textStart"
         app:iconSize="20dp"
-        app:iconTint="#FFFFFF" />
+        app:iconTint="@android:color/white" />
 
 </LinearLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

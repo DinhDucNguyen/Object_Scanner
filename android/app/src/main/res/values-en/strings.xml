@@ -73,6 +73,7 @@
     <!-- Dashboard -->
     <string name="dashboard_default_user">there</string>
     <string name="dashboard_greeting">Hello!</string>
+    <string name="dashboard_greeting_named">Hello %s!</string>
     <string name="dashboard_greeting_subtitle">Ready to learn a new word?</string>
     <string name="dashboard_brand_name">LengoLens.</string>
     <string name="dashboard_search_hint">Search or scan an object…</string>
@@ -481,7 +482,7 @@
     <string name="collection_saved_to">Saved to \"%1$s\"</string>
     <string name="collection_save_error">Could not save word, please try again</string>
     <string name="collection_word_count">%1$d words</string>
-    <string name="collection_tab_mine">Mine</string>
+    <string name="collection_tab_mine">My collections</string>
     <string name="collection_tab_community">Community</string>
     <string name="collection_dialog_public_label">Share with everyone</string>
     <string name="collection_dialog_public_hint">Others will be able to see this collection</string>
@@ -602,12 +603,29 @@
     <string name="profile_password_rules">At least 8 characters&#10;Lowercase and uppercase letters&#10;At least 1 number</string>
     <string name="profile_badge">Active learner</string>
     <string name="profile_account_title">Learning account</string>
+    <string name="profile_username_handle">@%s</string>
+    <string name="profile_stat_learned">Collections</string>
+    <string name="profile_stat_scans">Due</string>
+    <string name="profile_stat_due">Streak</string>
     <string name="profile_language_changed_vi">Đã chuyển sang tiếng Việt</string>
     <string name="profile_language_changed_en">Switched to English</string>
     <string name="profile_language_save_failed">Could not save language to your account. The app changed it on this device only.</string>
     <string name="profile_menu_content_description">Profile menu</string>
     <string name="profile_bio_updated">Bio updated</string>
+    <string name="profile_name_updated">Display name updated</string>
+    <string name="profile_name_dialog_title">Display name</string>
+    <string name="profile_name_hint">Enter your name</string>
+    <string name="profile_name_required">Please enter a display name</string>
+    <string name="profile_username_updated">Username updated</string>
+    <string name="profile_username_dialog_title">Edit username</string>
+    <string name="profile_username_hint">Enter a new username</string>
+    <string name="profile_username_required">Please enter a username</string>
+    <string name="profile_edit_username">Edit username</string>
     <string name="profile_avatar_updated">Avatar updated</string>
+    <string name="profile_avatar_view">View photo</string>
+    <string name="profile_avatar_change">Change photo</string>
+    <string name="profile_avatar_crop_title">Adjust profile photo</string>
+    <string name="profile_avatar_crop_error">Could not crop photo: %s</string>
     <string name="profile_error_format">Error: %s</string>
     <string name="profile_avatar_upload_error_format">Upload error: %s</string>
     <string name="profile_password_required">Please fill in all fields</string>

@@ -120,7 +120,7 @@
                             android:layout_marginTop="2dp"
                             android:text="19:00"
                             android:textColor="@color/text_primary"
-                            android:textSize="28sp"
+                            android:textSize="22sp"
                             android:textStyle="bold" />
                     </LinearLayout>
 

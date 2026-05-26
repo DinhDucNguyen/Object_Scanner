@@ -39,6 +39,9 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
         )
     }.asLiveData()
 
+    private val _calendarDays = MutableLiveData<List<com.duc.objectlanguage.data.model.StreakCalendarDay>>()
+    val calendarDays: LiveData<List<com.duc.objectlanguage.data.model.StreakCalendarDay>> = _calendarDays
+
     private val _celebrateMilestone = MutableLiveData<Int?>()
     val celebrateMilestone: LiveData<Int?> = _celebrateMilestone
 
@@ -81,6 +84,15 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             repository.getStreak().onSuccess { remote ->
                 applyServerStreak(remote)
+            }
+        }
+        loadCalendar()
+    }
+
+    fun loadCalendar() {
+        viewModelScope.launch {
+            repository.getStreakCalendar(30).onSuccess { response ->
+                _calendarDays.postValue(response.days)
             }
         }
     }

@@ -2,6 +2,11 @@ package com.duc.objectlanguage.ui
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Typeface
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Bundle
 import android.view.View
 import android.view.animation.OvershootInterpolator
@@ -9,6 +14,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -28,6 +35,29 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var isApplyingAccountLanguage = false
     private var currentTabId = R.id.scanFragment
+
+    private val validatedNetworks = mutableSetOf<Network>()
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+            val hasInternet = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                    capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            if (hasInternet) {
+                validatedNetworks.add(network)
+            } else {
+                validatedNetworks.remove(network)
+            }
+            runOnUiThread {
+                binding.offlineBanner.visibility = if (validatedNetworks.isNotEmpty()) View.GONE else View.VISIBLE
+            }
+        }
+        override fun onLost(network: Network) {
+            validatedNetworks.remove(network)
+            runOnUiThread {
+                binding.offlineBanner.visibility = if (validatedNetworks.isNotEmpty()) View.GONE else View.VISIBLE
+            }
+        }
+    }
 
     private data class NavTab(
         val tabView: LinearLayout,
@@ -106,6 +136,7 @@ class MainActivity : AppCompatActivity() {
                 if (dest.id in hideToolbarDests) View.GONE else View.VISIBLE
             binding.customBottomNav.visibility =
                 if (dest.id in hideBottomNavDests) View.GONE else View.VISIBLE
+            setNavHostBehindBottomNav(dest.id == R.id.scanFragment)
 
             val app = application as ObjectLanguageApp
             // Sau khi logout về scanFragment, force reset highlight state
@@ -181,17 +212,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setNavHostBehindBottomNav(behindBottomNav: Boolean) {
+        val params = binding.navHostFragment.layoutParams as ConstraintLayout.LayoutParams
+        val targetBottomToBottom = if (behindBottomNav) ConstraintLayout.LayoutParams.PARENT_ID else ConstraintLayout.LayoutParams.UNSET
+        val targetBottomToTop = if (behindBottomNav) ConstraintLayout.LayoutParams.UNSET else R.id.customBottomNav
+
+        if (params.bottomToBottom == targetBottomToBottom && params.bottomToTop == targetBottomToTop) return
+
+        params.bottomToBottom = targetBottomToBottom
+        params.bottomToTop = targetBottomToTop
+        binding.navHostFragment.layoutParams = params
+    }
+
     private fun syncTabSelection(activeDestId: Int, tabs: List<NavTab>) {
         if (currentTabId == activeDestId) return
         currentTabId = activeDestId
         val activeColor = ContextCompat.getColor(this, R.color.primary)
         val inactiveColor = ContextCompat.getColor(this, R.color.bottom_nav_inactive)
+        val scanActiveColor = ContextCompat.getColor(this, R.color.text_on_primary)
         tabs.forEach { tab ->
             val isActive = tab.destinationId == activeDestId
-            if (!tab.isScan) tab.icon.imageTintList = ColorStateList.valueOf(if (isActive) activeColor else inactiveColor)
+            tab.tabView.setBackgroundResource(
+                if (isActive && !tab.isScan) R.drawable.bg_bottom_nav_item_active else R.drawable.bg_bottom_nav_item_idle
+            )
+            if (tab.isScan) {
+                tab.icon.setBackgroundResource(
+                    if (isActive) R.drawable.bg_bottom_nav_scan_button_active else R.drawable.bg_bottom_nav_scan_button_idle
+                )
+                tab.icon.imageTintList = ColorStateList.valueOf(if (isActive) scanActiveColor else activeColor)
+            } else {
+                tab.icon.imageTintList = ColorStateList.valueOf(if (isActive) activeColor else inactiveColor)
+            }
             tab.label.setTextColor(if (isActive) activeColor else inactiveColor)
+            tab.label.alpha = if (isActive) 1f else 0.82f
+            tab.label.setTypeface(null, if (isActive) Typeface.BOLD else Typeface.NORMAL)
             if (isActive) {
-                tab.icon.animate().scaleX(1.15f).scaleY(1.15f)
+                val activeScale = if (tab.isScan) 1.08f else 1.12f
+                tab.icon.animate().scaleX(activeScale).scaleY(activeScale)
                     .setDuration(200).setInterpolator(OvershootInterpolator(2f)).start()
             } else {
                 tab.icon.animate().scaleX(1f).scaleY(1f).setDuration(150).start()
@@ -235,12 +292,46 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        validatedNetworks.clear()
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        cm.registerNetworkCallback(request, networkCallback)
+        val isOnline = cm.activeNetwork?.let { net ->
+            cm.getNetworkCapabilities(net)?.let { caps ->
+                caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                        caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            }
+        } ?: false
+        binding.offlineBanner.visibility = if (isOnline) View.GONE else View.VISIBLE
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        cm.unregisterNetworkCallback(networkCallback)
+    }
+
     private fun syncAccountLanguage() {
         val app = application as ObjectLanguageApp
         if (!app.tokenManager.isLoggedIn || isApplyingAccountLanguage) return
 
         lifecycleScope.launch {
             app.repository.getUserSettings().onSuccess { settings ->
+                // Sync dark mode từ server về local
+                val serverDark = settings.darkMode
+                val prefs = getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+                val localDark = prefs.getBoolean("dark_mode", false)
+                if (serverDark != localDark) {
+                    prefs.edit().putBoolean("dark_mode", serverDark).apply()
+                    AppCompatDelegate.setDefaultNightMode(
+                        if (serverDark) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+                    )
+                }
+
                 val accountLanguage = settings.displayLanguage
                 if (accountLanguage.isNotBlank() && accountLanguage != LocaleHelper.getSavedLocale(this@MainActivity)) {
                     isApplyingAccountLanguage = true

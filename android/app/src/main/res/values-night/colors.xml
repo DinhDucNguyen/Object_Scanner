@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Background dark -->
+    <color name="background">#0F1117</color>
+    <color name="surface">#1A1C26</color>
+    <color name="surface_variant">#2A2D3E</color>
+    <color name="surface_soft">#1E2030</color>
+    <color name="surface_warm">#1E1A14</color>
+
+    <!-- Text dark -->
+    <color name="text_primary">#E8EAF6</color>
+    <color name="text_secondary">#C5C8DC</color>
+    <color name="text_muted">#9496A8</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- Primary -->
+    <color name="primary">#5B8FFF</color>
+    <color name="primary_dark">#4070E0</color>
+    <color name="primary_light">#1A2A50</color>
+
+    <!-- Accent -->
+    <color name="secondary">#FFA05C</color>
+    <color name="secondary_dark">#C06820</color>
+    <color name="secondary_light">#3D2410</color>
+
+    <!-- Status -->
+    <color name="success">#4ADE80</color>
+    <color name="success_light">#0D2E1A</color>
+    <color name="warning">#FB923C</color>
+    <color name="warning_light">#2E1A0A</color>
+    <color name="error">#FF5449</color>
+    <color name="error_light">#2E0F0E</color>
+
+    <!-- Utility -->
+    <color name="divider">#2E3148</color>
+    <color name="outline_variant">#2E3148</color>
+    <color name="overlay_dark">#CC000000</color>
+    <color name="overlay_soft">#80000000</color>
+    <color name="glass_white">#1AFFFFFF</color>
+    <color name="glass_stroke">#33FFFFFF</color>
+    <color name="scan_frame">#99FFFFFF</color>
+
+    <!-- Bottom nav dark -->
+    <color name="bottom_nav_active">#5B8FFF</color>
+    <color name="bottom_nav_inactive">#6B6E84</color>
+    <color name="bottom_nav_bg">#1A1C26</color>
+
+    <!-- Gradient dark -->
+    <color name="gradient_start">#1A2A50</color>
+    <color name="gradient_end">#2040A0</color>
+    <color name="gradient_accent">#3060C0</color>
+    <color name="gradient_hero_start">#1A2A50</color>
+    <color name="gradient_hero_mid">#1E3060</color>
+    <color name="gradient_hero_end">#2040A0</color>
+
+    <!-- Card accents dark -->
+    <color name="card_scan_bg">#2E1A0A</color>
+    <color name="card_learned_bg">#0A1530</color>
+    <color name="card_due_bg">#2A2200</color>
+    <color name="card_mastered_bg">#1A1030</color>
+    <color name="card_scan_icon">#FB923C</color>
+    <color name="card_learned_icon">#5B8FFF</color>
+    <color name="card_due_icon">#FACC15</color>
+    <color name="card_mastered_icon">#A78BFA</color>
+
+    <color name="violet">#A78BFA</color>
+    <color name="violet_light">#1A1030</color>
+    <color name="cyan">#22D3EE</color>
+    <color name="cyan_light">#0A2030</color>
+
+    <color name="primary_glow">#335B8FFF</color>
+    <color name="surface_glass">#1E2030</color>
+
+    <!-- Streak -->
+    <color name="streak_idle">#4B5563</color>
+    <color name="streak_idle_track">#1F2937</color>
+    <color name="streak_header_bg">#C04010</color>
+
+    <!-- Legacy aliases -->
+    <color name="purple_500">@color/primary</color>
+    <color name="purple_700">@color/primary_dark</color>
+    <color name="teal_200">#93C5FD</color>
+    <color name="teal_700">#3B82F6</color>
+</resources>

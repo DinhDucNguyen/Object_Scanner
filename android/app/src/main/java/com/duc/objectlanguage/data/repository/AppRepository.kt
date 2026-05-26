@@ -353,10 +353,14 @@ class AppRepository(private val tokenManager: TokenManager) {
         }
     }
 
-    suspend fun updateProfile(fullName: String?, bio: String?): Result<ProfileData> {
+    suspend fun updateProfile(username: String? = null, fullName: String? = null, bio: String? = null): Result<ProfileData> {
         return try {
-            val response = api.updateProfile(ProfileUpdateRequest(fullName, bio))
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            val response = api.updateProfile(ProfileUpdateRequest(username, fullName, bio))
+            if (response.isSuccessful && response.body() != null) {
+                val profile = response.body()!!
+                profile.username?.takeIf { it.isNotBlank() }?.let { tokenManager.username = it }
+                Result.success(profile)
+            }
             else Result.failure(Exception(apiError(response, "Cập nhật profile thất bại")))
         } catch (e: Exception) {
             Result.failure(e)
@@ -387,7 +391,17 @@ class AppRepository(private val tokenManager: TokenManager) {
 
     suspend fun updateUserSettings(displayLanguage: String): Result<UserSettingsResponse> {
         return try {
-            val response = api.updateSettings(UserSettingsUpdate(displayLanguage))
+            val response = api.updateSettings(UserSettingsUpdate(displayLanguage = displayLanguage))
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception("Cập nhật thất bại"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateDarkMode(darkMode: Boolean): Result<UserSettingsResponse> {
+        return try {
+            val response = api.updateSettings(UserSettingsUpdate(darkMode = darkMode))
             if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
             else Result.failure(Exception("Cập nhật thất bại"))
         } catch (e: Exception) {
@@ -452,6 +466,16 @@ class AppRepository(private val tokenManager: TokenManager) {
             val response = api.recordStreak()
             if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
             else Result.failure(Exception("Lỗi ghi streak"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getStreakCalendar(days: Int = 30): Result<StreakCalendarResponse> {
+        return try {
+            val response = api.getStreakCalendar(days)
+            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
+            else Result.failure(Exception("Lỗi tải lịch streak"))
         } catch (e: Exception) {
             Result.failure(e)
         }

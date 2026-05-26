@@ -50,11 +50,13 @@ data class UserResponse(
 
 data class UserSettingsResponse(
     @SerializedName("user_id") val userId: Int,
-    @SerializedName("display_language") val displayLanguage: String = "vi"
+    @SerializedName("display_language") val displayLanguage: String = "vi",
+    @SerializedName("dark_mode") val darkMode: Boolean = false
 )
 
 data class UserSettingsUpdate(
-    @SerializedName("display_language") val displayLanguage: String?
+    @SerializedName("display_language") val displayLanguage: String? = null,
+    @SerializedName("dark_mode") val darkMode: Boolean? = null
 )
 
 // ====== SCAN ======
@@ -276,12 +278,14 @@ data class ObjectData(
 
 data class ProfileData(
     @SerializedName("user_id") val userId: Int,
+    val username: String?,
     @SerializedName("full_name") val fullName: String?,
     @SerializedName("avatar_url") val avatarUrl: String?,
     val bio: String?
 )
 
 data class ProfileUpdateRequest(
+    val username: String? = null,
     @SerializedName("full_name") val fullName: String? = null,
     val bio: String? = null
 )
@@ -316,6 +320,15 @@ data class MasteryDist(
 data class AnalyticsResponse(
     @SerializedName("weekly_reviews") val weeklyReviews: List<DailyReview>,
     @SerializedName("mastery") val mastery: MasteryDist
+)
+
+data class StreakCalendarDay(
+    @SerializedName("date")  val date: String,
+    @SerializedName("count") val count: Int
+)
+
+data class StreakCalendarResponse(
+    @SerializedName("days") val days: List<StreakCalendarDay>
 )
 
 data class StreakSyncRequest(

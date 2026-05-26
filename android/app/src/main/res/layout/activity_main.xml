@@ -14,7 +14,21 @@
         android:elevation="0dp"
         app:title="Object Language"
         app:titleTextColor="@color/text_primary"
+        app:titleTextAppearance="@style/TextAppearance.App.ToolbarTitle"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/offlineBanner"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@color/warning"
+        android:gravity="center"
+        android:text="@string/offline_banner"
+        android:textColor="@android:color/white"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
@@ -23,7 +37,7 @@
         android:layout_height="0dp"
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintTop_toBottomOf="@id/offlineBanner"
         app:layout_constraintBottom_toTopOf="@id/customBottomNav"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -31,21 +45,21 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/customBottomNav"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:background="@color/bottom_nav_bg"
-        android:elevation="8dp"
+        android:layout_height="86dp"
+        android:background="@drawable/bg_bottom_nav_container"
+        android:elevation="12dp"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/divider"
-            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/navTabHome"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginHorizontal="2dp"
+            android:background="@drawable/bg_bottom_nav_item_idle"
             android:gravity="center"
             android:orientation="vertical"
             android:clickable="true"
@@ -65,16 +79,18 @@
                 android:id="@+id/navLabelHome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="4dp"
                 android:text="@string/nav_home"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textColor="@color/bottom_nav_inactive" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/navTabDictionary"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginHorizontal="2dp"
+            android:background="@drawable/bg_bottom_nav_item_idle"
             android:gravity="center"
             android:orientation="vertical"
             android:clickable="true"
@@ -94,16 +110,18 @@
                 android:id="@+id/navLabelDictionary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="4dp"
                 android:text="@string/nav_dictionary"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textColor="@color/bottom_nav_inactive" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/navTabScan"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginHorizontal="2dp"
+            android:background="@drawable/bg_bottom_nav_item_idle"
             android:gravity="center"
             android:orientation="vertical"
             android:clickable="true"
@@ -111,28 +129,33 @@
             android:foreground="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintStart_toEndOf="@id/navTabDictionary"
             app:layout_constraintEnd_toStartOf="@id/navTabReview"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintWidth_percent="0.2">
             <ImageView
                 android:id="@+id/navIconScan"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_scan" />
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:background="@drawable/bg_bottom_nav_scan_button_idle"
+                android:padding="10dp"
+                android:src="@drawable/ic_scan"
+                app:tint="@color/primary" />
             <TextView
                 android:id="@+id/navLabelScan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="2dp"
                 android:text="@string/nav_scan"
-                android:textSize="15sp"
-                android:textStyle="bold"
+                android:textSize="12sp"
                 android:textColor="@color/bottom_nav_inactive" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/navTabReview"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginHorizontal="2dp"
+            android:background="@drawable/bg_bottom_nav_item_idle"
             android:gravity="center"
             android:orientation="vertical"
             android:clickable="true"
@@ -152,16 +175,18 @@
                 android:id="@+id/navLabelReview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="4dp"
                 android:text="@string/nav_review"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textColor="@color/bottom_nav_inactive" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/navTabProfile"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginHorizontal="2dp"
+            android:background="@drawable/bg_bottom_nav_item_idle"
             android:gravity="center"
             android:orientation="vertical"
             android:clickable="true"
@@ -181,9 +206,9 @@
                 android:id="@+id/navLabelProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="4dp"
                 android:text="@string/nav_profile"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textColor="@color/bottom_nav_inactive" />
         </LinearLayout>
 

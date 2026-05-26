@@ -18,7 +18,7 @@
         android:layout_marginTop="18dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="14dp"
-        app:cardCornerRadius="22dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="0dp"
         app:strokeWidth="0dp">
 
@@ -41,7 +41,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/explore_title"
                     android:textColor="@color/text_on_primary"
-                    android:textSize="28sp"
+                    android:textSize="22sp"
                     android:textStyle="bold" />
 
                 <TextView

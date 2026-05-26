@@ -1308,3 +1308,11 @@
       gap: .6rem;
       align-items: end;
     }
+
+    .alias-edit-form {
+      padding: .75rem;
+      border: 1px solid var(--primary);
+      border-radius: var(--radius);
+      background: #f0f4ff;
+      margin-top: -.25rem;
+    }
