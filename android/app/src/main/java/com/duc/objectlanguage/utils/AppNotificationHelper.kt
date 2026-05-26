@@ -96,9 +96,18 @@ object AppNotificationHelper {
     ) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channel = NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_DEFAULT).apply {
+        val channel = NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_HIGH).apply {
             this.description = description
             enableVibration(true)
+            vibrationPattern = longArrayOf(0, 300, 200, 300)
+            enableLights(true)
+            setSound(
+                android.provider.Settings.System.DEFAULT_NOTIFICATION_URI,
+                android.media.AudioAttributes.Builder()
+                    .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
         }
         notificationManager.createNotificationChannel(channel)
     }

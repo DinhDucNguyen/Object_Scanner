@@ -561,16 +561,16 @@
     <string name="notification_channel_daily_desc">Nhắc bạn ôn các từ đến hạn mỗi ngày.</string>
     <string name="notification_channel_milestone_name">Mốc học tập</string>
     <string name="notification_channel_milestone_desc">Chúc mừng khi bạn đạt mốc chuỗi học.</string>
-    <string name="notification_due_message">Bạn có %d từ cần ôn hôm nay. Vào ôn vài phút nhé.</string>
-    <string name="notification_due_streak_message">Bạn có %1$d từ cần ôn hôm nay. Ôn ngay để giữ chuỗi %2$d ngày.</string>
-    <string name="notification_generic_title">Đến giờ ôn tập</string>
-    <string name="notification_generic_message">Mở LengoLens để ôn lại từ vựng hôm nay.</string>
-    <string name="notification_generic_streak_message">Mở LengoLens để giữ chuỗi %d ngày của bạn.</string>
+    <string name="notification_due_message">Bạn có %d từ chưa ôn hôm nay, vào làm nhanh rồi đi chơi thôi~</string>
+    <string name="notification_due_streak_message">Còn %1$d từ chưa ôn, đừng để đứt chuỗi %2$d ngày tiếc lắm đó! 🔥</string>
+    <string name="notification_generic_title">Ê, đến giờ học rồi đó! 👋</string>
+    <string name="notification_generic_message">Ghé vào LengoLens ôn vài từ cho não nó tỉnh nào~</string>
+    <string name="notification_generic_streak_message">Chuỗi %d ngày của bạn đang run rẩy chờ kìa~ 🔥</string>
     <string name="notification_milestone_title">Đạt mốc %d ngày!</string>
     <string name="notification_milestone_message">Bạn vừa giữ chuỗi học %d ngày. Tiếp tục rất ổn.</string>
     <plurals name="notification_due_title">
-        <item quantity="one">Có %d từ cần ôn</item>
-        <item quantity="other">Có %d từ cần ôn</item>
+        <item quantity="one">Có %d từ đang chờ bạn! 📚</item>
+        <item quantity="other">Có %d từ đang chờ bạn! 📚</item>
     </plurals>
 
     <!-- Profile -->
