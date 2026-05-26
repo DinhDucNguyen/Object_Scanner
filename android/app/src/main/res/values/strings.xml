@@ -120,6 +120,9 @@
     <string name="scan_cd_gallery">Chọn ảnh từ thư viện</string>
     <string name="scan_cd_capture">Chụp ảnh</string>
     <string name="scan_pending">Đang chờ admin kiểm duyệt</string>
+    <string name="scan_label_definition">ĐỊNH NGHĨA</string>
+    <string name="scan_label_example">Ví dụ sử dụng</string>
+    <string name="scan_label_also_known_as">Còn gọi là</string>
     <string name="scan_category_ai">Nhận diện bằng AI</string>
     <string name="scan_also_known_as">Còn gọi là: %s</string>
     <string name="scan_result_label">Kết quả nhận diện</string>
@@ -167,8 +170,151 @@
     <string name="explore_subtitle">Học từ vựng theo chủ đề</string>
     <string name="explore_empty_title">Chưa có chủ đề</string>
     <string name="explore_empty_subtitle">Hãy thêm danh mục trong hệ thống</string>
+    <string name="explore_word_count">%1$d từ</string>
     <string name="category_detail_hint">Chạm vào từ để xem chi tiết</string>
     <string name="category_detail_empty">Chưa có từ vựng</string>
+    <string name="category_detail_learn_now">Học ngay</string>
+    <string name="flashcard_tap_to_reveal">Chạm để xem nghĩa</string>
+    <string name="flashcard_next">Từ tiếp theo</string>
+    <string name="flashcard_finish">Xong</string>
+    <string name="flashcard_counter">%1$d / %2$d</string>
+    <string name="object_detail_category">Chủ đề: %1$s</string>
+    <string name="object_detail_code">Mã từ: %1$s</string>
+    <string name="object_detail_translations">%1$d bản dịch</string>
+    <string name="object_detail_no_definition">Chưa có nghĩa hiển thị</string>
+    <string name="category_detail_fallback">Chủ đề</string>
+
+    <!-- Auth validation -->
+    <string name="auth_fill_all_fields">Vui lòng nhập đầy đủ thông tin</string>
+    <string name="auth_invalid_username">Tên đăng nhập phải từ 3-50 ký tự, chỉ gồm chữ, số và underscore</string>
+    <string name="auth_invalid_email">Email không hợp lệ</string>
+    <string name="auth_password_mismatch">Mật khẩu xác nhận không khớp</string>
+    <string name="auth_reset_success">Đặt lại mật khẩu thành công!</string>
+    <string name="otp_resend_btn">Gửi lại mã OTP</string>
+    <string name="auth_register_success">%1$s! Vui lòng đăng nhập.</string>
+    <string name="auth_otp_required">Vui lòng nhập đủ 6 số</string>
+    <string name="auth_otp_resent">Đã gửi lại mã OTP</string>
+    <string name="auth_otp_sent_to">Mã đã gửi đến: %1$s</string>
+    <string name="auth_enter_email">Vui lòng nhập email</string>
+
+    <!-- Review tests shared -->
+    <string name="test_question_counter">Câu %1$d/%2$d</string>
+    <string name="test_score">Điểm: %1$d/%2$d</string>
+    <string name="test_skip_title">Bỏ qua câu hỏi</string>
+    <string name="test_skip_message">Bạn chắc chắn muốn bỏ qua? Câu này sẽ bị tính sai.</string>
+    <string name="test_yes">Có</string>
+    <string name="test_no">Không</string>
+    <string name="test_ok">OK</string>
+    <string name="test_done">Xong</string>
+    <string name="test_error_title">Lỗi</string>
+    <string name="test_complete_title">Hoàn thành!</string>
+    <string name="test_answer_empty">Vui lòng nhập câu trả lời</string>
+    <string name="test_feedback_correct">✓ Đúng rồi!</string>
+    <string name="test_feedback_wrong">✗ Đáp án đúng: %1$s</string>
+    <string name="test_hint_first_letter">Gợi ý: Bắt đầu bằng \"%1$s\"</string>
+    <string name="test_hint_word_length">Gợi ý: %1$d chữ cái</string>
+    <string name="test_tts_not_ready">Chưa sẵn sàng phát âm</string>
+    <string name="test_mic_permission">Cần quyền microphone</string>
+    <string name="test_result_excellent">Xuất sắc! 🌟</string>
+    <string name="test_result_great">Tốt lắm! 💪</string>
+    <string name="test_result_good">Cố gắng tốt! 👍</string>
+    <string name="test_result_keep_going">Luyện thêm nhé! 📚</string>
+    <string name="test_complete_body">%1$s\n\nBạn đạt %2$d/%3$d (%4$d%%)</string>
+    <string name="test_complete_message">Hoàn thành!\nĐiểm: %1$d/%2$d (%3$d%%)\n%4$s</string>
+    <string name="test_timer_seconds">⏱️ %1$ds</string>
+    <string name="test_timer_zero">⏱️ 0s</string>
+
+    <!-- Listening test -->
+    <string name="test_listening_played">Đã phát: %1$d lần</string>
+    <string name="listening_played_times">Đã phát: %1$d lần</string>
+    <string name="listening_result_excellent">Nghe tuyệt vời! 🎧</string>
+    <string name="listening_result_great">Tốt lắm! 👂</string>
+    <string name="listening_result_good">Cố gắng tốt! 🔊</string>
+    <string name="listening_result_keep">Luyện thêm nhé! 📻</string>
+    <string name="listening_result_msg">%1$s\n\nBạn đạt %2$d/%3$d (%4$d%%)</string>
+
+    <!-- Typing test -->
+    <string name="typing_result_outstanding">Xuất sắc! 🌟</string>
+    <string name="typing_result_great">Tốt lắm! 💪</string>
+    <string name="typing_result_good">Cố gắng tốt! 👍</string>
+    <string name="typing_result_keep">Luyện thêm nhé! 📚</string>
+    <string name="typing_result_msg">%1$s\n\nBạn đạt %2$d/%3$d (%4$d%%)</string>
+
+    <!-- Quiz -->
+    <string name="quiz_timer">⏱ %1$ds</string>
+    <string name="quiz_timer_zero">⏱ 0s</string>
+    <string name="quiz_result_amazing">Xuất sắc! Bạn là bậc thầy từ vựng! 🏆</string>
+    <string name="quiz_result_great">Tốt lắm! Tiếp tục phát huy! ⭐</string>
+    <string name="quiz_result_good">Cố gắng tốt! Luyện tập tạo nên hoàn hảo! 👍</string>
+    <string name="quiz_result_keep">Đừng bỏ cuộc! Ôn lại và thử tiếp! 💪</string>
+    <string name="quiz_result_msg">Hoàn thành!\nĐiểm: %1$d/%2$d (%3$d%%)\n%4$s</string>
+
+    <!-- Image matching -->
+    <string name="test_matching_round">Vòng %1$d</string>
+    <string name="test_matching_score">Điểm: %1$d</string>
+    <string name="test_matching_final_score">%1$s\n\nĐiểm cuối: %2$d</string>
+    <string name="test_matching_timer">⏱ %1$s</string>
+    <string name="test_matching_timer_zero">⏱ 00:00</string>
+    <string name="matching_round">Vòng %1$d</string>
+    <string name="matching_score">Điểm: %1$d</string>
+    <string name="matching_timer">⏱ %1$s</string>
+    <string name="matching_timer_zero">⏱ 00:00</string>
+    <string name="matching_result_perfect">Trí nhớ hoàn hảo! 🧠✨</string>
+    <string name="matching_result_excellent">Ghép hình xuất sắc! 🎯</string>
+    <string name="matching_result_great">Tốt lắm! 💪</string>
+    <string name="matching_result_keep">Luyện thêm nhé! 🎮</string>
+    <string name="matching_result_msg">%1$s\n\nĐiểm cuối: %2$d</string>
+    <string name="matching_complete_title">Trò chơi kết thúc!</string>
+
+    <!-- Pronunciation -->
+    <string name="test_pronunciation_word_counter">Từ %1$d/%2$d</string>
+    <string name="test_pronunciation_tap_to_practice">Chạm vào mic để luyện tập</string>
+    <string name="test_pronunciation_listening">🎤 Đang nghe...</string>
+    <string name="test_pronunciation_speaking_detected">🎤 Phát hiện giọng nói...</string>
+    <string name="test_pronunciation_processing">Đang xử lý...</string>
+    <string name="test_pronunciation_you_said">Bạn nói: \"%1$s\"</string>
+    <string name="test_pronunciation_score">Điểm: %1$d%%</string>
+    <string name="test_pronunciation_feedback_excellent">🌟 Hoàn hảo! Phát âm xuất sắc!</string>
+    <string name="test_pronunciation_feedback_good">👍 Tốt lắm! Tiếp tục luyện tập!</string>
+    <string name="test_pronunciation_feedback_ok">📖 Không tệ! Nghe lại mẫu thêm nhé.</string>
+    <string name="test_pronunciation_feedback_retry">🔄 Cố lên! Nghe kỹ và lặp lại.</string>
+    <string name="test_pronunciation_error_audio">Lỗi ghi âm</string>
+    <string name="test_pronunciation_error_client">Lỗi client</string>
+    <string name="test_pronunciation_error_permissions">Không có quyền</string>
+    <string name="test_pronunciation_error_network">Lỗi mạng</string>
+    <string name="test_pronunciation_error_network_timeout">Hết thời gian mạng</string>
+    <string name="test_pronunciation_error_no_match">Không nhận diện được. Thử lại!</string>
+    <string name="test_pronunciation_error_busy">Đang nhận diện</string>
+    <string name="test_pronunciation_error_server">Lỗi server</string>
+    <string name="test_pronunciation_error_speech_timeout">Không có giọng nói. Thử lại!</string>
+    <string name="test_pronunciation_error_unknown">Lỗi không xác định</string>
+    <string name="pronunciation_word_counter">Từ %1$d/%2$d</string>
+    <string name="pronunciation_tap_mic">Chạm vào mic để luyện tập</string>
+    <string name="pronunciation_listening">🎤 Đang nghe...</string>
+    <string name="pronunciation_speaking">🎤 Phát hiện giọng nói...</string>
+    <string name="pronunciation_processing">Đang xử lý...</string>
+    <string name="pronunciation_you_said">Bạn nói: \"%1$s\"</string>
+    <string name="pronunciation_score">Điểm: %1$d%%</string>
+    <string name="pronunciation_feedback_perfect">🌟 Hoàn hảo! Phát âm xuất sắc!</string>
+    <string name="pronunciation_feedback_good">👍 Tốt lắm! Tiếp tục luyện tập!</string>
+    <string name="pronunciation_feedback_ok">📖 Không tệ! Nghe lại mẫu thêm nhé.</string>
+    <string name="pronunciation_feedback_keep">🔄 Cố lên! Nghe kỹ và lặp lại.</string>
+    <string name="pronunciation_result_outstanding">Phát âm xuất sắc! 🗣️✨</string>
+    <string name="pronunciation_result_great">Kỹ năng nói tốt! 🎤</string>
+    <string name="pronunciation_result_good">Tiến bộ tốt! 📢</string>
+    <string name="pronunciation_result_keep">Tiếp tục luyện tập! 🔊</string>
+    <string name="pronunciation_result_msg">%1$s\n\nBạn đạt %2$d/%3$d (%4$d%%)</string>
+    <string name="pronunciation_complete_title">Luyện tập xong!</string>
+    <string name="pronunciation_error_audio">Lỗi ghi âm</string>
+    <string name="pronunciation_error_client">Lỗi client</string>
+    <string name="pronunciation_error_permission">Không có quyền</string>
+    <string name="pronunciation_error_network">Lỗi mạng</string>
+    <string name="pronunciation_error_timeout">Hết thời gian mạng</string>
+    <string name="pronunciation_error_no_match">Không nhận diện được. Thử lại!</string>
+    <string name="pronunciation_error_busy">Đang nhận diện</string>
+    <string name="pronunciation_error_server">Lỗi server</string>
+    <string name="pronunciation_error_speech_timeout">Không có giọng nói. Thử lại!</string>
+    <string name="pronunciation_error_unknown">Lỗi không xác định</string>
 
     <!-- Review -->
     <string name="review_finished">Hoàn thành!\nKhông còn từ nào cần ôn.</string>
@@ -203,6 +349,7 @@
     <string name="translation_verified">Đã xác minh</string>
     <string name="translation_add_to_learn">Thêm vào danh sách học</string>
     <string name="quiz_translate_prompt">Dịch từ này:</string>
+    <string name="quiz_question_label">Tiếng Việt: %1$s</string>
     <string name="quiz_choose_answer">Chọn đáp án đúng:</string>
     <string name="quiz_submit">Nộp đáp án</string>
     <string name="typing_instruction">Gõ bản dịch tiếng Anh:</string>
@@ -327,6 +474,10 @@
     <string name="collection_name_empty">Tên bộ sưu tập không được để trống</string>
     <string name="collection_added">Đã thêm vào bộ sưu tập</string>
     <string name="collection_removed">Đã xóa khỏi bộ sưu tập</string>
+    <string name="collection_load_error">Không tải được danh sách bộ sưu tập</string>
+    <string name="collection_saved_to">Đã lưu vào \"%1$s\"</string>
+    <string name="collection_save_error">Không thể lưu từ vựng, vui lòng thử lại</string>
+    <string name="collection_word_count">%1$d từ</string>
     <string name="collection_tab_mine">Của tôi</string>
     <string name="collection_tab_community">Cộng đồng</string>
     <string name="collection_dialog_public_label">Chia sẻ với mọi người</string>

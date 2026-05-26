@@ -43,7 +43,9 @@ class CollectionDetailFragment : Fragment() {
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            if (!loading) binding.swipeRefresh.isRefreshing = false
         }
+        binding.swipeRefresh.setOnRefreshListener { viewModel.loadCollectionDetail(collectionId) }
 
         viewModel.collectionDetail.observe(viewLifecycleOwner) { detail ->
             if (detail == null) return@observe

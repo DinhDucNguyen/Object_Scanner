@@ -5,33 +5,31 @@ import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.databinding.FragmentImageMatchingBinding
 
 class ImageMatchingFragment : Fragment() {
 
+    private var _binding: FragmentImageMatchingBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var viewModel: ImageMatchingViewModel
-    private lateinit var tvProgress: TextView
-    private lateinit var tvTimer: TextView
-    private lateinit var tvScore: TextView
-    private lateinit var rvCards: RecyclerView
-    private lateinit var progressBar: ProgressBar
     private lateinit var adapter: MatchingCardAdapter
     private var timer: CountDownTimer? = null
-    private var timeLimit = 120 // 2 minutes
+    private val timeLimit = 120
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_image_matching, container, false)
+    ): View {
+        _binding = FragmentImageMatchingBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -39,27 +37,16 @@ class ImageMatchingFragment : Fragment() {
 
         viewModel = ViewModelProvider(this)[ImageMatchingViewModel::class.java]
 
-        initViews(view)
         setupRecyclerView()
         setupObservers()
 
         viewModel.loadGame()
     }
 
-    private fun initViews(view: View) {
-        tvProgress = view.findViewById(R.id.tvProgress)
-        tvTimer = view.findViewById(R.id.tvTimer)
-        tvScore = view.findViewById(R.id.tvScore)
-        rvCards = view.findViewById(R.id.rvCards)
-        progressBar = view.findViewById(R.id.progressBar)
-    }
-
     private fun setupRecyclerView() {
-        adapter = MatchingCardAdapter { position ->
-            viewModel.onCardClicked(position)
-        }
-        rvCards.layoutManager = GridLayoutManager(requireContext(), 3)
-        rvCards.adapter = adapter
+        adapter = MatchingCardAdapter { position -> viewModel.onCardClicked(position) }
+        binding.rvCards.layoutManager = GridLayoutManager(requireContext(), 3)
+        binding.rvCards.adapter = adapter
     }
 
     private fun setupObservers() {
@@ -68,21 +55,19 @@ class ImageMatchingFragment : Fragment() {
         }
 
         viewModel.currentRound.observe(viewLifecycleOwner) { round ->
-            tvProgress.text = "Round $round"
+            binding.tvProgress.text = getString(R.string.test_matching_round, round)
         }
 
         viewModel.score.observe(viewLifecycleOwner) { score ->
-            tvScore.text = "Score: $score"
+            binding.tvScore.text = getString(R.string.test_matching_score, score)
         }
 
         viewModel.gameStarted.observe(viewLifecycleOwner) { started ->
-            if (started) {
-                startTimer()
-            }
+            if (started) startTimer()
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
-            progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
@@ -101,9 +86,8 @@ class ImageMatchingFragment : Fragment() {
 
         viewModel.roundComplete.observe(viewLifecycleOwner) { complete ->
             if (complete) {
-                // Short delay before next round
-                view?.postDelayed({
-                    viewModel.startNextRound()
+                binding.root.postDelayed({
+                    if (_binding != null) viewModel.startNextRound()
                 }, 1000)
             }
         }
@@ -113,22 +97,24 @@ class ImageMatchingFragment : Fragment() {
         timer?.cancel()
         timer = object : CountDownTimer(timeLimit * 1000L, 1000) {
             override fun onTick(millisUntilFinished: Long) {
+                if (_binding == null) return
                 val seconds = millisUntilFinished / 1000
                 val minutes = seconds / 60
                 val secs = seconds % 60
-                tvTimer.text = "⏱️ ${String.format("%02d:%02d", minutes, secs)}"
+                binding.tvTimer.text = getString(R.string.test_matching_timer, String.format("%02d:%02d", minutes, secs))
 
-                // Color warning
-                when {
-                    seconds <= 10 -> tvTimer.setTextColor(resources.getColor(android.R.color.holo_red_light, null))
-                    seconds <= 30 -> tvTimer.setTextColor(resources.getColor(android.R.color.holo_orange_light, null))
-                    else -> tvTimer.setTextColor(resources.getColor(android.R.color.black, null))
+                val color = when {
+                    seconds <= 10 -> ContextCompat.getColor(requireContext(), R.color.error)
+                    seconds <= 30 -> ContextCompat.getColor(requireContext(), R.color.warning)
+                    else -> ContextCompat.getColor(requireContext(), R.color.text_primary)
                 }
+                binding.tvTimer.setTextColor(color)
             }
 
             override fun onFinish() {
-                tvTimer.text = "⏱️ 00:00"
-                tvTimer.setTextColor(resources.getColor(android.R.color.holo_red_dark, null))
+                if (_binding == null) return
+                binding.tvTimer.text = getString(R.string.test_matching_timer_zero)
+                binding.tvTimer.setTextColor(ContextCompat.getColor(requireContext(), R.color.error))
                 viewModel.onTimeUp()
             }
         }.start()
@@ -140,9 +126,9 @@ class ImageMatchingFragment : Fragment() {
 
     private fun showError(message: String) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Error")
+            .setTitle(getString(R.string.test_error_title))
             .setMessage(message)
-            .setPositiveButton("OK", null)
+            .setPositiveButton(getString(R.string.test_ok), null)
             .show()
     }
 
@@ -151,24 +137,25 @@ class ImageMatchingFragment : Fragment() {
         val totalRounds = viewModel.getTotalRounds()
 
         val message = when {
-            score >= totalRounds * 10 -> "Perfect memory! 🧠✨"
-            score >= totalRounds * 8 -> "Excellent matching! 🎯"
-            score >= totalRounds * 6 -> "Great work! 💪"
-            else -> "Keep practicing! 🎮"
+            score >= totalRounds * 10 -> getString(R.string.test_result_excellent)
+            score >= totalRounds * 8 -> getString(R.string.test_result_great)
+            score >= totalRounds * 6 -> getString(R.string.test_result_good)
+            else -> getString(R.string.test_result_keep_going)
         }
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Game Complete!")
-            .setMessage("$message\n\nFinal Score: $score")
-            .setPositiveButton("Done") { _, _ ->
-                requireActivity().onBackPressed()
+            .setTitle(getString(R.string.test_complete_title))
+            .setMessage(getString(R.string.test_matching_final_score, message, score))
+            .setPositiveButton(getString(R.string.test_done)) { _, _ ->
+                requireActivity().onBackPressedDispatcher.onBackPressed()
             }
             .setCancelable(false)
             .show()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         stopTimer()
+        _binding = null
     }
 }

@@ -2,9 +2,7 @@ package com.duc.objectlanguage.ui.profile
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.ImageDecoder
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -268,7 +266,6 @@ class ProfileFragment : Fragment() {
             dialog.dismiss()
         }
         dialog.show()
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
     private fun showOverflowMenu() {

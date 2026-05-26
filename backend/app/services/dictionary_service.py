@@ -60,8 +60,20 @@ class DictionaryService:
             self._set_cached(cache_key, response)
             return response
 
-        # 2. Nếu tiếng Việt → dịch sang EN rồi tìm lại trong DB
+        # 2. Nếu tiếng Việt → tìm trong DB bằng dinh_nghia (phần trước ":") trước
         if from_lang == "vi":
+            found = self._find_by_vi_definition(db, normalized, to_lang)
+            if found:
+                obj, matched_trans, target_trans = found
+                response = self._response_from_translation(
+                    normalized, from_lang, to_lang, obj, matched_trans, target_trans
+                )
+                self._upsert_lookup(db, user_id, normalized, from_lang, to_lang, response, obj.id)
+                db.commit()
+                self._set_cached(cache_key, response)
+                return response
+
+            # Nếu không thấy trong DB → dịch sang EN qua MyMemory rồi tìm lại
             en_text = self._translate_mymemory(normalized, "vi", "en")
             if en_text:
                 for candidate in self._singular_candidates(en_text):
@@ -238,6 +250,27 @@ class DictionaryService:
             func.lower(ObjectAlias.ma_bi_danh) == code,
             func.lower(Translation.tu_vung) == text_lower,
         )
+
+    def _find_by_vi_definition(
+        self, db: Session, vi_text: str, to_lang: str
+    ) -> tuple[Object, Translation, Translation] | None:
+        """Tìm object bằng phần tên tiếng Việt trong dinh_nghia (trước dấu ':')."""
+        text_lower = vi_text.strip().lower()
+        rows = (
+            db.query(Object, Translation)
+            .join(Translation, Translation.doi_tuong_id == Object.id)
+            .filter(Object.thoi_gian_xoa.is_(None))
+            .filter(Translation.thoi_gian_xoa.is_(None))
+            .filter(Translation.dinh_nghia.isnot(None))
+            .all()
+        )
+        for obj, trans in rows:
+            dinh_nghia = (trans.dinh_nghia or "").strip()
+            vi_name = dinh_nghia.split(":")[0].strip().lower() if ":" in dinh_nghia else dinh_nghia.lower()
+            if vi_name == text_lower:
+                target_trans = self._find_target_translation(db, obj.id, to_lang) or trans
+                return obj, trans, target_trans
+        return None
 
     def _find_target_translation(
         self, db: Session, object_id: int, to_lang: str

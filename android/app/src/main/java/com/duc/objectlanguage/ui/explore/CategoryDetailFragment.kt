@@ -13,6 +13,7 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.ObjectData
 import com.duc.objectlanguage.databinding.DialogObjectDetailBinding
 import com.duc.objectlanguage.databinding.FragmentCategoryDetailBinding
+import com.duc.objectlanguage.databinding.SheetCategoryFlashcardBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.duc.objectlanguage.utils.DefinitionFormatter
 
@@ -31,7 +32,7 @@ class CategoryDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val categoryId = requireArguments().getInt("categoryId")
-        val categoryName = requireArguments().getString("categoryName") ?: "Chu de"
+        val categoryName = requireArguments().getString("categoryName") ?: getString(R.string.category_detail_fallback)
         binding.title.text = categoryName
 
         adapter = ObjectAdapter { item -> showObjectDetail(item) }
@@ -45,7 +46,9 @@ class CategoryDetailFragment : Fragment() {
         }
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            if (!loading) binding.swipeRefresh.isRefreshing = false
         }
+        binding.swipeRefresh.setOnRefreshListener { viewModel.loadObjects(categoryId) }
         viewModel.error.observe(viewLifecycleOwner) { error ->
             error?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
@@ -53,6 +56,71 @@ class CategoryDetailFragment : Fragment() {
             }
         }
         viewModel.loadObjects(categoryId)
+
+        binding.btnLearnNow.setOnClickListener {
+            val items = viewModel.objects.value ?: emptyList()
+            if (items.isNotEmpty()) showFlashcardSheet(items, categoryName)
+        }
+    }
+
+    private fun showFlashcardSheet(items: List<ObjectData>, categoryName: String) {
+        val sheet = BottomSheetDialog(requireContext())
+        val sheetBinding = SheetCategoryFlashcardBinding.inflate(layoutInflater)
+        sheet.setContentView(sheetBinding.root)
+
+        var currentIndex = 0
+        var isFlipped = false
+
+        fun updateProgress() {
+            sheetBinding.progressFlashcard.max = items.size
+            sheetBinding.progressFlashcard.progress = currentIndex + 1
+            sheetBinding.tvCardCounter.text = getString(R.string.flashcard_counter, currentIndex + 1, items.size)
+        }
+
+        fun showCard(index: Int) {
+            val item = items[index]
+            isFlipped = false
+            sheetBinding.sideFront.visibility = android.view.View.VISIBLE
+            sheetBinding.sideBack.visibility = android.view.View.GONE
+            sheetBinding.tvWord.text = item.wordName ?: item.objectCode.replace("_", " ")
+            sheetBinding.tvPhonetic.text = item.phonetic ?: ""
+            sheetBinding.tvPhonetic.visibility = if (item.phonetic.isNullOrBlank()) android.view.View.GONE else android.view.View.VISIBLE
+            sheetBinding.tvDefinition.text = item.definition ?: ""
+            sheetBinding.btnNextCard.text = if (index == items.size - 1)
+                getString(R.string.flashcard_finish) else getString(R.string.flashcard_next)
+            updateProgress()
+        }
+
+        sheetBinding.tvSheetTitle.text = categoryName
+
+        sheetBinding.cardFlashcard.setOnClickListener {
+            if (!isFlipped) {
+                isFlipped = true
+                sheetBinding.cardFlashcard.animate().scaleX(0f).setDuration(120).withEndAction {
+                    sheetBinding.sideFront.visibility = android.view.View.GONE
+                    sheetBinding.sideBack.visibility = android.view.View.VISIBLE
+                    sheetBinding.cardFlashcard.animate().scaleX(1f).setDuration(120).start()
+                }.start()
+            }
+        }
+
+        sheetBinding.btnNextCard.setOnClickListener {
+            if (currentIndex < items.size - 1) {
+                currentIndex++
+                showCard(currentIndex)
+            } else {
+                sheet.dismiss()
+            }
+        }
+
+        sheetBinding.btnCloseSheet.setOnClickListener { sheet.dismiss() }
+        sheetBinding.btnSpeak.setOnClickListener {
+            val word = items[currentIndex].wordName ?: items[currentIndex].objectCode.replace("_", " ")
+            viewModel.playAudio(word)
+        }
+
+        showCard(0)
+        sheet.show()
     }
 
     private fun showObjectDetail(item: ObjectData) {
@@ -61,14 +129,11 @@ class CategoryDetailFragment : Fragment() {
         val wordName = item.wordName ?: item.objectCode.replace("_", " ")
         val categoryName = item.categoryName
             ?: requireArguments().getString("categoryName")
-            ?: "Chu de"
+            ?: getString(R.string.category_detail_fallback)
 
         detailBinding.detailWordName.text = wordName
-        val rawDef = item.definition ?: "Chua co nghia hien thi"
+        val rawDef = item.definition ?: getString(R.string.object_detail_no_definition)
         detailBinding.detailDefinition.text = DefinitionFormatter.formatDefinition(requireContext(), rawDef)
-        detailBinding.detailCategory.text = "Chu de: $categoryName"
-        detailBinding.detailObjectCode.text = "Ma tu: ${item.objectCode}"
-        detailBinding.detailTranslationCount.text = "${item.translationCount} ban dich"
 
         if (item.phonetic.isNullOrBlank()) {
             detailBinding.detailPhonetic.visibility = View.GONE
@@ -87,6 +152,9 @@ class CategoryDetailFragment : Fragment() {
                 .into(detailBinding.detailImage)
         }
 
+        detailBinding.btnSpeakDetail.setOnClickListener {
+            viewModel.playAudio(wordName)
+        }
         detailBinding.btnCloseDetail.setOnClickListener { dialog.dismiss() }
         dialog.setContentView(detailBinding.root)
         dialog.show()

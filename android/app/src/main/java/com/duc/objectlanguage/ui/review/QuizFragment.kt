@@ -90,7 +90,7 @@ class QuizFragment : Fragment() {
         viewModel.currentIndex.observe(viewLifecycleOwner) { index ->
             val total = viewModel.getTotalQuestions()
             if (total > 0) {
-                binding.tvProgress.text = "Question ${index + 1}/$total"
+                binding.tvProgress.text = getString(R.string.test_question_counter, index + 1, total)
             } else {
                 binding.tvProgress.text = ""
             }
@@ -99,7 +99,7 @@ class QuizFragment : Fragment() {
         viewModel.score.observe(viewLifecycleOwner) { score ->
             val total = viewModel.getTotalQuestions()
             if (total > 0) {
-                binding.tvScore.text = "Score: $score/$total"
+                binding.tvScore.text = getString(R.string.test_score, score, total)
             } else {
                 binding.tvScore.text = ""
             }
@@ -126,7 +126,7 @@ class QuizFragment : Fragment() {
         resetOptionColors()
 
         // Display question
-        binding.tvQuestion.text = "Vietnamese: ${question.questionWord}"
+        binding.tvQuestion.text = getString(R.string.quiz_question_label, question.questionWord)
 
         // Display options
         binding.option1.text = question.options[0]
@@ -145,7 +145,7 @@ class QuizFragment : Fragment() {
         timer = object : CountDownTimer(10000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val secondsRemaining = (millisUntilFinished / 1000).toInt()
-                binding.tvTimer.text = "⏱️ ${secondsRemaining}s"
+                binding.tvTimer.text = getString(R.string.test_timer_seconds, secondsRemaining)
 
                 // Change color when time is running out
                 val color = when {
@@ -157,7 +157,7 @@ class QuizFragment : Fragment() {
             }
 
             override fun onFinish() {
-                binding.tvTimer.text = "⏱️ 0s"
+                binding.tvTimer.text = getString(R.string.test_timer_zero)
                 // Auto-submit with no answer
                 viewModel.submitAnswer(-1)
             }
@@ -228,15 +228,15 @@ class QuizFragment : Fragment() {
         val percentage = if (total > 0) (score * 100) / total else 0
 
         val message = when {
-            percentage >= 90 -> "Amazing! You're a vocabulary master! 🏆"
-            percentage >= 70 -> "Great job! Keep it up! ⭐"
-            percentage >= 50 -> "Good effort! Practice makes perfect! 👍"
-            else -> "Don't give up! Review and try again! 💪"
+            percentage >= 90 -> getString(R.string.test_result_excellent)
+            percentage >= 70 -> getString(R.string.test_result_great)
+            percentage >= 50 -> getString(R.string.test_result_good)
+            else -> getString(R.string.test_result_keep_going)
         }
 
         Toast.makeText(
             requireContext(),
-            "Quiz Complete!\nScore: $score/$total ($percentage%)\n$message",
+            getString(R.string.test_complete_message, score, total, percentage, message),
             Toast.LENGTH_LONG
         ).show()
 

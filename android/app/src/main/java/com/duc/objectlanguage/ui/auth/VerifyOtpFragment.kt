@@ -32,12 +32,12 @@ class VerifyOtpFragment : Fragment() {
         email = arguments?.getString("email") ?: ""
         val displayEmail = arguments?.getString("masked_email")?.takeIf { it.isNotEmpty() }
             ?: maskEmail(email)
-        binding.tvEmailHint.text = "Mã đã gửi đến: $displayEmail"
+        binding.tvEmailHint.text = getString(R.string.auth_otp_sent_to, displayEmail)
 
         binding.btnVerify.setOnClickListener {
             val otp = binding.etOtp.text.toString().trim()
             if (otp.length != 6) {
-                Toast.makeText(requireContext(), "Vui lòng nhập đủ 6 số", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.auth_otp_required), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -69,7 +69,7 @@ class VerifyOtpFragment : Fragment() {
                 val result = repo.forgotPassword(email)
                 result.fold(
                     onSuccess = {
-                        Toast.makeText(requireContext(), "Đã gửi lại mã OTP", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.auth_otp_resent), Toast.LENGTH_SHORT).show()
                     },
                     onFailure = {
                         Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()

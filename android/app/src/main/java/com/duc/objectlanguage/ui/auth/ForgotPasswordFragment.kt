@@ -31,11 +31,11 @@ class ForgotPasswordFragment : Fragment() {
         binding.btnSendOtp.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
             if (email.isEmpty()) {
-                Toast.makeText(requireContext(), "Vui lòng nhập email", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.auth_enter_email), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(requireContext(), "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.auth_invalid_email), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -44,6 +44,7 @@ class ForgotPasswordFragment : Fragment() {
 
             lifecycleScope.launch {
                 val result = repo.forgotPassword(email)
+                if (_binding == null) return@launch
                 binding.progressBar.visibility = View.GONE
                 binding.btnSendOtp.isEnabled = true
 

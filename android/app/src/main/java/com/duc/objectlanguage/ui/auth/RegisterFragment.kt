@@ -41,17 +41,17 @@ class RegisterFragment : Fragment() {
             val confirmPass = binding.etConfirmPassword.text.toString().trim()
 
             if (fullName.isEmpty() || user.isEmpty() || email.isEmpty() || pass.isEmpty() || confirmPass.isEmpty()) {
-                Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.auth_fill_all_fields), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             if (!Regex("^[a-zA-Z0-9_]{3,50}$").matches(user)) {
-                Toast.makeText(requireContext(), "Tên đăng nhập phải từ 3-50 ký tự, chỉ gồm chữ, số và underscore", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), getString(R.string.auth_invalid_username), Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
 
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(requireContext(), "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.auth_invalid_email), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -62,7 +62,7 @@ class RegisterFragment : Fragment() {
             }
 
             if (pass != confirmPass) {
-                Toast.makeText(requireContext(), "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.auth_password_mismatch), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -71,12 +71,13 @@ class RegisterFragment : Fragment() {
 
             lifecycleScope.launch {
                 val result = repo.register(user, email, pass, fullName)
+                if (_binding == null) return@launch
                 binding.progressBar.visibility = View.GONE
                 binding.btnRegister.isEnabled = true
 
                 result.fold(
                     onSuccess = { message ->
-                        Toast.makeText(requireContext(), "$message! Vui lòng đăng nhập.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.auth_register_success, message), Toast.LENGTH_SHORT).show()
                         findNavController().navigate(R.id.action_register_to_login)
                     },
                     onFailure = {

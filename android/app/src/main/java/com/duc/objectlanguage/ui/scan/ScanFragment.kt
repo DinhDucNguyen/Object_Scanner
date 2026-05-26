@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
@@ -266,6 +267,8 @@ class ScanFragment : Fragment() {
                     binding.btnPlayAudio.visibility = View.GONE
                     binding.btnAddToCollection.visibility = View.GONE
                 }
+
+                showAliases(result.aliases)
 
                 // ── Bước 2: animate SAU khi data đã set xong ──
                 hideCameraControls()
@@ -650,6 +653,8 @@ class ScanFragment : Fragment() {
     }
 
     private fun hideResultAndShowCamera() {
+        binding.llAliasesContainer.visibility = View.GONE
+        binding.llAliasChips.removeAllViews()
         binding.resultCard.animate()
             .alpha(0f)
             .translationY(120f)
@@ -684,6 +689,36 @@ class ScanFragment : Fragment() {
             .setDuration(220)
             .withEndAction { flash.visibility = View.INVISIBLE }
             .start()
+    }
+
+    private fun showAliases(aliases: List<String>) {
+        binding.llAliasChips.removeAllViews()
+        if (aliases.isEmpty()) {
+            binding.llAliasesContainer.visibility = View.GONE
+            return
+        }
+        aliases.forEach { name ->
+            val chip = TextView(requireContext()).apply {
+                text = name
+                setTextColor(resources.getColor(R.color.primary, requireContext().theme))
+                textSize = 13f
+                setPadding(
+                    (12 * resources.displayMetrics.density).toInt(),
+                    (5 * resources.displayMetrics.density).toInt(),
+                    (12 * resources.displayMetrics.density).toInt(),
+                    (5 * resources.displayMetrics.density).toInt()
+                )
+                background = resources.getDrawable(R.drawable.bg_chip_surface, requireContext().theme)
+                val lp = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                lp.marginEnd = (8 * resources.displayMetrics.density).toInt()
+                layoutParams = lp
+            }
+            binding.llAliasChips.addView(chip)
+        }
+        binding.llAliasesContainer.visibility = View.VISIBLE
     }
 
     override fun onDestroyView() {

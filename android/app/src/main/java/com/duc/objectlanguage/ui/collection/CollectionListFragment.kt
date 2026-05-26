@@ -146,7 +146,9 @@ class CollectionListFragment : Fragment() {
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            if (!isLoading) binding.swipeRefresh.isRefreshing = false
         }
+        binding.swipeRefresh.setOnRefreshListener { viewModel.loadCollections() }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
             error?.let {

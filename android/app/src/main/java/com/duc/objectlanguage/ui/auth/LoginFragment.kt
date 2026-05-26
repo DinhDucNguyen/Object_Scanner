@@ -37,7 +37,7 @@ class LoginFragment : Fragment() {
             val pass = binding.etPassword.text.toString().trim()
 
             if (user.isEmpty() || pass.isEmpty()) {
-                Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.auth_fill_all_fields), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -46,13 +46,13 @@ class LoginFragment : Fragment() {
 
             lifecycleScope.launch {
                 val result = repo.login(user, pass)
+                if (_binding == null) return@launch
+
                 binding.progressBar.visibility = View.GONE
                 binding.btnLogin.isEnabled = true
 
                 result.fold(
-                    onSuccess = {
-                        resetGraphToDashboard()
-                    },
+                    onSuccess = { resetGraphToDashboard() },
                     onFailure = {
                         Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
                     }
@@ -70,24 +70,17 @@ class LoginFragment : Fragment() {
     }
 
     private fun animateEntrance() {
-        // ScrollView > LinearLayout > [logoZone(0), formCard(1)]
         val container = binding.root.getChildAt(0) as? android.view.ViewGroup ?: return
         val logoZone = container.getChildAt(0) ?: return
         val formCard = container.getChildAt(1) ?: return
 
-        logoZone.alpha = 0f
-        logoZone.translationY = -40f
-        logoZone.animate()
-            .alpha(1f).translationY(0f)
-            .setDuration(420).setInterpolator(OvershootInterpolator(1.2f))
-            .setStartDelay(60).start()
+        logoZone.alpha = 0f; logoZone.translationY = -40f
+        logoZone.animate().alpha(1f).translationY(0f)
+            .setDuration(420).setInterpolator(OvershootInterpolator(1.2f)).setStartDelay(60).start()
 
-        formCard.alpha = 0f
-        formCard.translationY = 60f
-        formCard.animate()
-            .alpha(1f).translationY(0f)
-            .setDuration(380).setInterpolator(DecelerateInterpolator(1.8f))
-            .setStartDelay(160).start()
+        formCard.alpha = 0f; formCard.translationY = 60f
+        formCard.animate().alpha(1f).translationY(0f)
+            .setDuration(380).setInterpolator(DecelerateInterpolator(1.8f)).setStartDelay(160).start()
     }
 
     override fun onDestroyView() {

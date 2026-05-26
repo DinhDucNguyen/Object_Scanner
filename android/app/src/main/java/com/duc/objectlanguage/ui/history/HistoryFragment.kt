@@ -157,7 +157,9 @@ class HistoryFragment : Fragment() {
     private fun setupObservers() {
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading && adapter.itemCount == 0) View.VISIBLE else View.GONE
+            if (!loading) binding.swipeRefresh.isRefreshing = false
         }
+        binding.swipeRefresh.setOnRefreshListener { viewModel.load() }
 
         viewModel.items.observe(viewLifecycleOwner) { items ->
             val wasEmpty = adapter.itemCount == 0

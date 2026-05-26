@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.bumptech.glide.Glide
 import com.duc.objectlanguage.data.model.DictionaryHistoryItem
 import com.duc.objectlanguage.databinding.DialogDictionaryHistoryDetailBinding
@@ -60,13 +61,6 @@ class DictionaryHistoryDetailBottomSheet : BottomSheetDialogFragment() {
             binding.tvDetailPhonetic.visibility = View.GONE
         }
 
-        if (!item.objectCode.isNullOrBlank()) {
-            binding.layoutObjectCode.visibility = View.VISIBLE
-            binding.tvObjectCode.text = item.objectCode
-        } else {
-            binding.layoutObjectCode.visibility = View.GONE
-        }
-
         if (!item.imageUrl.isNullOrBlank()) {
             binding.layoutImage.visibility = View.VISIBLE
             Glide.with(this)
@@ -91,6 +85,17 @@ class DictionaryHistoryDetailBottomSheet : BottomSheetDialogFragment() {
     private fun parseIsoLikeTime(value: String): Date? {
         val normalized = value.take(19).replace(' ', 'T')
         return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(normalized)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val bottomSheet = dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+        bottomSheet?.let {
+            val behavior = BottomSheetBehavior.from(it)
+            val maxHeight = (resources.displayMetrics.heightPixels * 0.85).toInt()
+            behavior.maxHeight = maxHeight
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
     }
 
     override fun onDestroyView() {

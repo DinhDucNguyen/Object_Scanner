@@ -27,9 +27,8 @@ class ObjectAdapter(
     inner class ViewHolder(private val binding: ItemExploreObjectBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ObjectData) {
             binding.wordName.text = item.wordName ?: item.objectCode.replace("_", " ")
-            binding.objectCode.text = item.objectCode
-            val rawDef = item.definition ?: "Chua co nghia hien thi"
-            binding.definition.text = DefinitionFormatter.formatDefinition(binding.root.context, rawDef)
+            binding.objectCode.visibility = android.view.View.GONE
+            binding.definition.text = DefinitionFormatter.formatDefinition(binding.root.context, item.definition ?: "")
             binding.phonetic.text = item.phonetic ?: ""
 
             if (item.imageUrl.isNullOrBlank()) {

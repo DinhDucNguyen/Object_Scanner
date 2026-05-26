@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.databinding.DialogSaveToCollectionBinding
@@ -54,7 +55,7 @@ class SaveToCollectionBottomSheet : BottomSheetDialogFragment() {
                     }
                 },
                 onFailure = {
-                    Toast.makeText(requireContext(), "Không tải được danh sách bộ sưu tập", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.collection_load_error), Toast.LENGTH_SHORT).show()
                     dismiss()
                 }
             )
@@ -65,10 +66,10 @@ class SaveToCollectionBottomSheet : BottomSheetDialogFragment() {
         lifecycleScope.launch {
             val result = repo.addToCollection(collection.id, translationId)
             if (result.isSuccess) {
-                Toast.makeText(requireContext(), "Đã lưu vào \"${collection.name}\"", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.collection_saved_to, collection.name), Toast.LENGTH_SHORT).show()
                 dismiss()
             } else {
-                Toast.makeText(requireContext(), "Không thể lưu từ vựng, vui lòng thử lại", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.collection_save_error), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -100,7 +101,7 @@ private class CollectionPickerAdapter(
     override fun onBindViewHolder(holder: VH, position: Int) {
         val item = items[position]
         holder.binding.tvName.text = item.name
-        holder.binding.tvCount.text = "${item.itemCount} từ"
+        holder.binding.tvCount.text = holder.itemView.context.getString(R.string.collection_word_count, item.itemCount)
         holder.binding.root.setOnClickListener { onClick(item) }
     }
 

@@ -41,7 +41,7 @@ class ResetPasswordFragment : Fragment() {
                 return@setOnClickListener
             }
             if (newPass != confirmPass) {
-                Toast.makeText(requireContext(), "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.auth_password_mismatch), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -55,7 +55,7 @@ class ResetPasswordFragment : Fragment() {
 
                 result.fold(
                     onSuccess = {
-                        Toast.makeText(requireContext(), "Đặt lại mật khẩu thành công!", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), getString(R.string.auth_reset_success), Toast.LENGTH_LONG).show()
                         findNavController().navigate(R.id.action_resetPassword_to_login)
                     },
                     onFailure = {

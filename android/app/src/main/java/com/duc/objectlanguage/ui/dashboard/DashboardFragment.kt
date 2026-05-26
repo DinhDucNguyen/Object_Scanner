@@ -72,7 +72,14 @@ class DashboardFragment : Fragment() {
                 binding.shimmerStats.stopShimmer()
                 binding.shimmerStats.visibility = View.GONE
                 binding.statsRow.visibility = View.VISIBLE
+                binding.swipeRefresh.isRefreshing = false
             }
+        }
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.loadStats()
+            viewModel.loadStreak()
+            viewModel.loadTopCollections()
+            viewModel.loadAvatarUrl()
         }
 
         viewModel.stats.observe(viewLifecycleOwner) { stats ->

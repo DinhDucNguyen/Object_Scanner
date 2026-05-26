@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.repositories.object_repo import ObjectRepository
 from app.repositories.translation_repo import TranslationRepository
@@ -6,6 +7,7 @@ from app.repositories.language_repo import LanguageRepository
 from app.repositories.learning_repo import LearningProgressRepository
 from app.repositories.history_repo import HistoryRepository
 from app.models.category import Category
+from app.models.object import Object
 from app.schemas.common import StatsResponse
 from app.services.object_media_service import pick_primary_object_image
 from app.services.streak_service import StreakService
@@ -34,13 +36,20 @@ class DataService:
         ]
 
     def get_categories(self, db: Session):
+        counts = dict(
+            db.query(Object.danh_muc_id, func.count(Object.id))
+            .filter(Object.thoi_gian_xoa.is_(None))
+            .group_by(Object.danh_muc_id)
+            .all()
+        )
         categories = db.query(Category).filter(Category.thoi_gian_xoa.is_(None)).all()
         return [
             {
                 "id": cat.id,
                 "name": cat.ten_danh_muc,
                 "parent_id": cat.danh_muc_cha,
-                "description": cat.mo_ta
+                "description": cat.mo_ta,
+                "object_count": counts.get(cat.id, 0)
             }
             for cat in categories
         ]
@@ -59,7 +68,7 @@ class DataService:
                 "category_id": obj.danh_muc_id,
                 "category_name": obj.category.ten_danh_muc if obj.category else None,
                 "translation_count": len(obj.translations),
-                "word_name": primary_translation.tu_vung if primary_translation else obj.ma_doi_tuong,
+                "word_name": primary_translation.tu_vung if primary_translation else obj.ma_doi_tuong.replace("_", " ").title(),
                 "phonetic": primary_translation.phien_am if primary_translation else None,
                 "definition": primary_translation.dinh_nghia if primary_translation else None,
                 "translation_id": primary_translation.id if primary_translation else None,

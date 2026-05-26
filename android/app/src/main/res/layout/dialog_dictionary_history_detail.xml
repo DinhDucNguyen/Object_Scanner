@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_dialog_rounded"
-    android:orientation="vertical"
-    android:paddingBottom="32dp">
+    android:orientation="vertical">
 
     <!-- Drag handle -->
     <View
@@ -15,23 +14,38 @@
         android:layout_marginTop="12dp"
         android:background="@drawable/bg_sheet_handle" />
 
-    <!-- Object image (shown only for physical objects) -->
-    <FrameLayout
-        android:id="@+id/layoutImage"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginStart="16dp"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="32dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <!-- Object image (shown only for physical objects) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/layoutImage"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/bg_card_rounded"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/surface"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/divider"
+        app:strokeWidth="1dp">
 
         <ImageView
             android:id="@+id/ivDetailImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop" />
-    </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- Content area -->
     <LinearLayout
@@ -149,38 +163,6 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <!-- Object code chip -->
-        <LinearLayout
-            android:id="@+id/layoutObjectCode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <View
-                android:layout_width="3dp"
-                android:layout_height="16dp"
-                android:layout_marginEnd="8dp"
-                android:background="@color/primary" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/dictionary_object_code_label"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/tvObjectCode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:textColor="@color/primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-        </LinearLayout>
 
         <!-- Delete button — danger style -->
         <LinearLayout
@@ -205,4 +187,7 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    </LinearLayout>
+    </ScrollView>
 </LinearLayout>

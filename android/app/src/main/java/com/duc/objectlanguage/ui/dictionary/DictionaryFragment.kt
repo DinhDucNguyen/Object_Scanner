@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
-import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -20,7 +19,6 @@ import com.duc.objectlanguage.ui.common.addScaleFeedback
 import com.duc.objectlanguage.ui.common.playSuccessBounce
 import com.duc.objectlanguage.ui.collection.SaveToCollectionBottomSheet
 import com.google.android.material.chip.Chip
-import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class DictionaryFragment : Fragment() {
 
@@ -68,6 +66,7 @@ class DictionaryFragment : Fragment() {
                 if (!hasText) {
                     viewModel.clearResult()
                     binding.cardResult.visibility = View.GONE
+                    binding.tvInputPhonetic.visibility = View.GONE
                     binding.groupEmptyState.visibility = View.VISIBLE
                     binding.layoutRecentChips.visibility =
                         if (binding.chipGroupRecent.childCount > 0) View.VISIBLE else View.GONE
@@ -177,51 +176,40 @@ class DictionaryFragment : Fragment() {
                 binding.tvTranslation.text = result.translation
                 binding.tvToLang.text = langLabel(result.toLang)
 
-                val showPhonetic = !result.phonetic.isNullOrEmpty()
-                    && result.toLang !in listOf("vi", "zh", "fr")
-                if (showPhonetic) {
+                val hasPhonetic = !result.phonetic.isNullOrBlank()
+                val enIsSource = result.fromLang.lowercase() == "en"
+
+                // Phonetic bên dưới từ nhập: chỉ khi nguồn là EN
+                if (hasPhonetic && enIsSource) {
+                    binding.tvInputPhonetic.text = result.phonetic
+                    binding.tvInputPhonetic.visibility = View.VISIBLE
+                } else {
+                    binding.tvInputPhonetic.visibility = View.GONE
+                }
+
+                // Phonetic ở khung kết quả: chỉ khi kết quả là EN (nhập VI → ra EN)
+                if (hasPhonetic && !enIsSource) {
                     binding.tvPhonetic.text = result.phonetic
                     binding.tvPhonetic.visibility = View.VISIBLE
                 } else {
                     binding.tvPhonetic.visibility = View.GONE
                 }
 
-                binding.containerDefinitions.removeAllViews()
-                if (result.definitions.isNotEmpty()) {
-                    binding.dividerDefs.visibility = View.VISIBLE
-                    binding.containerDefinitions.visibility = View.VISIBLE
-                    result.definitions.forEachIndexed { i, def ->
-                        val formattedDef = DefinitionFormatter.formatDefinition(requireContext(), def)
-                        val ssb = android.text.SpannableStringBuilder("${i + 1}. ").append(formattedDef)
-                        val tv = TextView(requireContext()).apply {
-                            text = ssb
-                            textSize = 14f
-                            setTextColor(resources.getColor(R.color.text_secondary, null))
-                            setPadding(0, 0, 0, 8)
-                        }
-                        binding.containerDefinitions.addView(tv)
-                    }
-                } else {
-                    binding.dividerDefs.visibility = View.GONE
-                    binding.containerDefinitions.visibility = View.GONE
-                }
+                binding.dividerDefs.visibility = View.GONE
+                binding.containerDefinitions.visibility = View.GONE
+                binding.btnSaveWord.visibility = View.GONE
 
                 val hasPronunciation = viewModel.pronunciationTarget(result) != null
-                val enIsSource = result.fromLang.lowercase() == "en"
                 binding.btnPlayAudio.visibility =
                     if (hasPronunciation && enIsSource) View.VISIBLE else View.GONE
                 binding.btnPlayAudioResult.visibility =
                     if (hasPronunciation && !enIsSource) View.VISIBLE else View.GONE
-                binding.btnSaveWord.visibility = if (result.canSave && result.translationId != null) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
             } else if (viewModel.isLoading.value != true) {
                 binding.cardResult.visibility = View.GONE
                 binding.btnPlayAudio.visibility = View.GONE
                 binding.btnPlayAudioResult.visibility = View.GONE
                 binding.btnSaveWord.visibility = View.GONE
+                binding.tvInputPhonetic.visibility = View.GONE
                 if (binding.etInput.text.isNullOrEmpty()) {
                     binding.groupEmptyState.visibility = View.VISIBLE
                 }

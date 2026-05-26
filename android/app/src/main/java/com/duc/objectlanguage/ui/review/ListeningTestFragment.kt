@@ -7,36 +7,21 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.databinding.FragmentListeningTestBinding
 import java.util.*
 
 class ListeningTestFragment : Fragment() {
 
+    private var _binding: FragmentListeningTestBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var viewModel: ListeningTestViewModel
-    private lateinit var tts: TextToSpeech
+    private var tts: TextToSpeech? = null
     private var ttsReady = false
-    
-    private lateinit var tvProgress: TextView
-    private lateinit var tvScore: TextView
-    private lateinit var tvInstruction: TextView
-    private lateinit var btnPlayAudio: ImageButton
-    private lateinit var btnPlaySlow: Button
-    private lateinit var tvRepeatCount: TextView
-    private lateinit var tvHint: TextView
-    private lateinit var etAnswer: EditText
-    private lateinit var btnHintFirstLetter: Button
-    private lateinit var btnHintWordLength: Button
-    private lateinit var btnSubmit: Button
-    private lateinit var btnSkip: Button
-    private lateinit var progressBar: ProgressBar
 
     private var hintFirstLetterUsed = false
     private var hintWordLengthUsed = false
@@ -46,8 +31,9 @@ class ListeningTestFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_listening_test, container, false)
+    ): View {
+        _binding = FragmentListeningTestBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -56,7 +42,6 @@ class ListeningTestFragment : Fragment() {
         viewModel = ViewModelProvider(this)[ListeningTestViewModel::class.java]
 
         initTTS()
-        initViews(view)
         setupObservers()
         setupListeners()
 
@@ -66,83 +51,57 @@ class ListeningTestFragment : Fragment() {
     private fun initTTS() {
         tts = TextToSpeech(requireContext()) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                val result = tts.setLanguage(Locale.US)
+                val result = tts?.setLanguage(Locale.US) ?: return@TextToSpeech
                 ttsReady = result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED
             }
         }
     }
 
-    private fun initViews(view: View) {
-        tvProgress = view.findViewById(R.id.tvProgress)
-        tvScore = view.findViewById(R.id.tvScore)
-        tvInstruction = view.findViewById(R.id.tvInstruction)
-        btnPlayAudio = view.findViewById(R.id.btnPlayAudio)
-        btnPlaySlow = view.findViewById(R.id.btnPlaySlow)
-        tvRepeatCount = view.findViewById(R.id.tvRepeatCount)
-        tvHint = view.findViewById(R.id.tvHint)
-        etAnswer = view.findViewById(R.id.etAnswer)
-        btnHintFirstLetter = view.findViewById(R.id.btnHintFirstLetter)
-        btnHintWordLength = view.findViewById(R.id.btnHintWordLength)
-        btnSubmit = view.findViewById(R.id.btnSubmit)
-        btnSkip = view.findViewById(R.id.btnSkip)
-        progressBar = view.findViewById(R.id.progressBar)
-    }
-
     private fun setupObservers() {
         viewModel.currentQuestion.observe(viewLifecycleOwner) { question ->
             question?.let {
-                etAnswer.text?.clear()
-                etAnswer.isEnabled = true
-                btnSubmit.isEnabled = true
-                tvHint.text = ""
-                tvHint.visibility = View.GONE
+                binding.etAnswer.text?.clear()
+                binding.etAnswer.isEnabled = true
+                binding.btnSubmit.isEnabled = true
+                binding.tvHint.text = ""
+                binding.tvHint.visibility = View.GONE
                 hintFirstLetterUsed = false
                 hintWordLengthUsed = false
                 repeatCount = 0
                 updateRepeatCount()
-                btnHintFirstLetter.isEnabled = true
-                btnHintWordLength.isEnabled = true
-                btnPlayAudio.isEnabled = ttsReady
-                btnPlaySlow.isEnabled = ttsReady
-                
-                // Auto-play first time
+                binding.btnHintFirstLetter.isEnabled = true
+                binding.btnHintWordLength.isEnabled = true
+                binding.btnPlayAudio.isEnabled = ttsReady
+                binding.btnPlaySlow.isEnabled = ttsReady
                 playAudio(normalSpeed = true)
             }
         }
 
         viewModel.currentIndex.observe(viewLifecycleOwner) { index ->
             val total = viewModel.getTotalQuestions()
-            if (total > 0) {
-                tvProgress.text = "Question ${index + 1}/$total"
-            } else {
-                tvProgress.text = ""
-            }
+            binding.tvProgress.text = if (total > 0)
+                getString(R.string.test_question_counter, index + 1, total) else ""
         }
 
         viewModel.score.observe(viewLifecycleOwner) { score ->
             val total = viewModel.getTotalQuestions()
-            if (total > 0) {
-                tvScore.text = "Score: $score/$total"
-            } else {
-                tvScore.text = ""
-            }
+            binding.tvScore.text = if (total > 0)
+                getString(R.string.test_score, score, total) else ""
         }
 
         viewModel.answerResult.observe(viewLifecycleOwner) { result ->
-            result?.let {
-                showAnswerFeedback(it)
-            }
+            result?.let { showAnswerFeedback(it) }
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
-            progressBar.visibility = if (loading) View.VISIBLE else View.GONE
-            etAnswer.isEnabled = !loading
-            btnSubmit.isEnabled = !loading
-            btnSkip.isEnabled = !loading
-            btnHintFirstLetter.isEnabled = !loading
-            btnHintWordLength.isEnabled = !loading
-            btnPlayAudio.isEnabled = !loading && ttsReady
-            btnPlaySlow.isEnabled = !loading && ttsReady
+            binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            binding.etAnswer.isEnabled = !loading
+            binding.btnSubmit.isEnabled = !loading
+            binding.btnSkip.isEnabled = !loading
+            binding.btnHintFirstLetter.isEnabled = !loading
+            binding.btnHintWordLength.isEnabled = !loading
+            binding.btnPlayAudio.isEnabled = !loading && ttsReady
+            binding.btnPlaySlow.isEnabled = !loading && ttsReady
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
@@ -153,127 +112,106 @@ class ListeningTestFragment : Fragment() {
         }
 
         viewModel.finished.observe(viewLifecycleOwner) { finished ->
-            if (finished) {
-                showResultDialog()
-            }
+            if (finished) showResultDialog()
         }
     }
 
     private fun setupListeners() {
-        btnPlayAudio.setOnClickListener {
-            playAudio(normalSpeed = true)
-        }
+        binding.btnPlayAudio.setOnClickListener { playAudio(normalSpeed = true) }
+        binding.btnPlaySlow.setOnClickListener { playAudio(normalSpeed = false) }
 
-        btnPlaySlow.setOnClickListener {
-            playAudio(normalSpeed = false)
-        }
-
-        btnSubmit.setOnClickListener {
-            val userAnswer = etAnswer.text.toString().trim()
+        binding.btnSubmit.setOnClickListener {
+            val userAnswer = binding.etAnswer.text.toString().trim()
             if (userAnswer.isEmpty()) {
-                etAnswer.error = "Please type what you heard"
+                binding.etAnswer.error = getString(R.string.test_answer_empty)
                 return@setOnClickListener
             }
             viewModel.submitAnswer(userAnswer)
         }
 
-        btnSkip.setOnClickListener {
+        binding.btnSkip.setOnClickListener {
             AlertDialog.Builder(requireContext())
-                .setTitle("Skip Question")
-                .setMessage("Are you sure you want to skip? It will be marked as incorrect.")
-                .setPositiveButton("Yes") { _, _ ->
-                    viewModel.skipQuestion()
-                }
-                .setNegativeButton("No", null)
+                .setTitle(getString(R.string.test_skip_title))
+                .setMessage(getString(R.string.test_skip_message))
+                .setPositiveButton(getString(R.string.test_yes)) { _, _ -> viewModel.skipQuestion() }
+                .setNegativeButton(getString(R.string.test_no), null)
                 .show()
         }
 
-        btnHintFirstLetter.setOnClickListener {
+        binding.btnHintFirstLetter.setOnClickListener {
             if (!hintFirstLetterUsed) {
-                val hint = viewModel.getFirstLetterHint()
-                tvHint.text = "Hint: Starts with \"$hint\""
-                tvHint.visibility = View.VISIBLE
+                binding.tvHint.text = getString(R.string.test_hint_first_letter, viewModel.getFirstLetterHint())
+                binding.tvHint.visibility = View.VISIBLE
                 hintFirstLetterUsed = true
-                btnHintFirstLetter.isEnabled = false
+                binding.btnHintFirstLetter.isEnabled = false
             }
         }
 
-        btnHintWordLength.setOnClickListener {
+        binding.btnHintWordLength.setOnClickListener {
             if (!hintWordLengthUsed) {
-                val hint = viewModel.getWordLengthHint()
-                tvHint.text = "Hint: $hint letters"
-                tvHint.visibility = View.VISIBLE
+                binding.tvHint.text = getString(R.string.test_hint_word_length, viewModel.getWordLengthHint())
+                binding.tvHint.visibility = View.VISIBLE
                 hintWordLengthUsed = true
-                btnHintWordLength.isEnabled = false
+                binding.btnHintWordLength.isEnabled = false
             }
         }
 
-        etAnswer.addTextChangedListener(object : TextWatcher {
+        binding.etAnswer.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                etAnswer.error = null
-            }
+            override fun afterTextChanged(s: Editable?) { binding.etAnswer.error = null }
         })
     }
 
     private fun playAudio(normalSpeed: Boolean) {
         val word = viewModel.currentQuestion.value?.correctAnswer ?: return
-        
         if (!ttsReady) {
-            showError("Text-to-Speech not ready yet")
+            showError(getString(R.string.test_tts_not_ready))
             return
         }
-
         repeatCount++
         updateRepeatCount()
-
-        val speed = if (normalSpeed) 0.8f else 0.5f
-        tts.setSpeechRate(speed)
-        tts.speak(word, TextToSpeech.QUEUE_FLUSH, null, null)
+        tts?.setSpeechRate(if (normalSpeed) 0.8f else 0.5f)
+        tts?.speak(word, TextToSpeech.QUEUE_FLUSH, null, null)
     }
 
     private fun updateRepeatCount() {
-        tvRepeatCount.text = "Played: $repeatCount times"
+        binding.tvRepeatCount.text = getString(R.string.test_listening_played, repeatCount)
     }
 
     private fun showAnswerFeedback(result: ListeningAnswerResult) {
-        etAnswer.isEnabled = false
-        btnSubmit.isEnabled = false
-        btnPlayAudio.isEnabled = false
-        btnPlaySlow.isEnabled = false
+        binding.etAnswer.isEnabled = false
+        binding.btnSubmit.isEnabled = false
+        binding.btnPlayAudio.isEnabled = false
+        binding.btnPlaySlow.isEnabled = false
 
         if (result.isCorrect) {
-            // Correct answer
-            etAnswer.setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
-            tvHint.text = "✓ Correct!"
-            tvHint.setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
-            tvHint.visibility = View.VISIBLE
+            binding.etAnswer.setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
+            binding.tvHint.text = getString(R.string.test_feedback_correct)
+            binding.tvHint.setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
+            binding.tvHint.visibility = View.VISIBLE
         } else {
-            // Incorrect answer
-            etAnswer.setTextColor(resources.getColor(android.R.color.holo_red_dark, null))
-            tvHint.text = "✗ Correct answer: ${result.correctAnswer}"
-            tvHint.setTextColor(resources.getColor(android.R.color.holo_red_dark, null))
-            tvHint.visibility = View.VISIBLE
-            
-            // Play correct answer
-            tts.setSpeechRate(0.6f)
-            tts.speak(result.correctAnswer, TextToSpeech.QUEUE_FLUSH, null, null)
+            binding.etAnswer.setTextColor(resources.getColor(android.R.color.holo_red_dark, null))
+            binding.tvHint.text = getString(R.string.test_feedback_wrong, result.correctAnswer)
+            binding.tvHint.setTextColor(resources.getColor(android.R.color.holo_red_dark, null))
+            binding.tvHint.visibility = View.VISIBLE
+            tts?.setSpeechRate(0.6f)
+            tts?.speak(result.correctAnswer, TextToSpeech.QUEUE_FLUSH, null, null)
         }
 
-        // Auto-advance after 3 seconds
-        view?.postDelayed({
-            etAnswer.setTextColor(resources.getColor(android.R.color.black, null))
-            tvHint.setTextColor(resources.getColor(android.R.color.darker_gray, null))
+        binding.root.postDelayed({
+            if (_binding == null) return@postDelayed
+            binding.etAnswer.setTextColor(resources.getColor(android.R.color.black, null))
+            binding.tvHint.setTextColor(resources.getColor(android.R.color.darker_gray, null))
             viewModel.moveToNext()
         }, 3000)
     }
 
     private fun showError(message: String) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Error")
+            .setTitle(getString(R.string.test_error_title))
             .setMessage(message)
-            .setPositiveButton("OK", null)
+            .setPositiveButton(getString(R.string.test_ok), null)
             .show()
     }
 
@@ -283,27 +221,27 @@ class ListeningTestFragment : Fragment() {
         val percentage = if (total > 0) (score * 100) / total else 0
 
         val message = when {
-            percentage >= 90 -> "Excellent listening! 🎧"
-            percentage >= 70 -> "Great job! 👂"
-            percentage >= 50 -> "Good effort! 🔊"
-            else -> "Keep practicing! 📻"
+            percentage >= 90 -> getString(R.string.test_result_excellent)
+            percentage >= 70 -> getString(R.string.test_result_great)
+            percentage >= 50 -> getString(R.string.test_result_good)
+            else -> getString(R.string.test_result_keep_going)
         }
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Test Complete!")
-            .setMessage("$message\n\nYou scored $score out of $total ($percentage%)")
-            .setPositiveButton("Done") { _, _ ->
-                requireActivity().onBackPressed()
+            .setTitle(getString(R.string.test_complete_title))
+            .setMessage(getString(R.string.test_complete_body, message, score, total, percentage))
+            .setPositiveButton(getString(R.string.test_done)) { _, _ ->
+                requireActivity().onBackPressedDispatcher.onBackPressed()
             }
             .setCancelable(false)
             .show()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (this::tts.isInitialized) {
-            tts.stop()
-            tts.shutdown()
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        tts?.stop()
+        tts?.shutdown()
+        tts = null
+        _binding = null
     }
 }

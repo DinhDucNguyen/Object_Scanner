@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         val tabs = listOf(
             NavTab(binding.navTabHome, binding.navIconHome, binding.navLabelHome, R.id.dashboardFragment),
             NavTab(binding.navTabDictionary, binding.navIconDictionary, binding.navLabelDictionary, R.id.dictionaryFragment),
-            NavTab(binding.navTabScan, binding.navIconScan, binding.navLabelScan, R.id.scanFragment),
+            NavTab(binding.navTabScan, binding.navIconScan, binding.navLabelScan, R.id.scanFragment, isScan = true),
             NavTab(binding.navTabReview, binding.navIconReview, binding.navLabelReview, R.id.reviewFragment),
             NavTab(binding.navTabProfile, binding.navIconProfile, binding.navLabelProfile, R.id.profileFragment),
         )
@@ -188,7 +188,7 @@ class MainActivity : AppCompatActivity() {
         val inactiveColor = ContextCompat.getColor(this, R.color.bottom_nav_inactive)
         tabs.forEach { tab ->
             val isActive = tab.destinationId == activeDestId
-            tab.icon.imageTintList = ColorStateList.valueOf(if (isActive) activeColor else inactiveColor)
+            if (!tab.isScan) tab.icon.imageTintList = ColorStateList.valueOf(if (isActive) activeColor else inactiveColor)
             tab.label.setTextColor(if (isActive) activeColor else inactiveColor)
             if (isActive) {
                 tab.icon.animate().scaleX(1.15f).scaleY(1.15f)

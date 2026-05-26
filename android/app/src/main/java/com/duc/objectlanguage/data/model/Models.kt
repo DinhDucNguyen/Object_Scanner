@@ -255,7 +255,8 @@ data class CategoryData(
     val id: Int,
     val name: String,
     @SerializedName("parent_id") val parentId: Int?,
-    val description: String?
+    val description: String?,
+    @SerializedName("object_count") val objectCount: Int = 0
 )
 
 data class ObjectData(

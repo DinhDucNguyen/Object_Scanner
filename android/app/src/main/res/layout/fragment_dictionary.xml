@@ -135,6 +135,16 @@
                         android:textColorHint="@color/text_muted"
                         android:textSize="19sp" />
 
+                    <TextView
+                        android:id="@+id/tvInputPhonetic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/primary"
+                        android:textSize="14sp"
+                        android:textStyle="italic"
+                        android:visibility="gone" />
+
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"

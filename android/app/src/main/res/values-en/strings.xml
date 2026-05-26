@@ -119,6 +119,9 @@
     <string name="scan_cd_gallery">Choose from gallery</string>
     <string name="scan_cd_capture">Capture image</string>
     <string name="scan_pending">Pending admin review</string>
+    <string name="scan_label_definition">DEFINITION</string>
+    <string name="scan_label_example">Usage examples</string>
+    <string name="scan_label_also_known_as">Also known as</string>
     <string name="scan_category_ai">Recognized by AI</string>
     <string name="scan_result_label">Recognition result</string>
     <string name="scan_translation_label">Vocabulary</string>
@@ -165,8 +168,151 @@
     <string name="explore_subtitle">Learn vocabulary by topic</string>
     <string name="explore_empty_title">No topics yet</string>
     <string name="explore_empty_subtitle">Add categories in the system</string>
+    <string name="explore_word_count">%1$d words</string>
     <string name="category_detail_hint">Tap a word to view details</string>
     <string name="category_detail_empty">No vocabulary yet</string>
+    <string name="category_detail_learn_now">Learn now</string>
+    <string name="flashcard_tap_to_reveal">Tap to reveal meaning</string>
+    <string name="flashcard_next">Next word</string>
+    <string name="flashcard_finish">Done</string>
+    <string name="flashcard_counter">%1$d / %2$d</string>
+    <string name="object_detail_category">Topic: %1$s</string>
+    <string name="object_detail_code">Code: %1$s</string>
+    <string name="object_detail_translations">%1$d translations</string>
+    <string name="object_detail_no_definition">No definition available</string>
+    <string name="category_detail_fallback">Topic</string>
+
+    <!-- Auth validation -->
+    <string name="auth_fill_all_fields">Please fill in all fields</string>
+    <string name="auth_invalid_username">Username must be 3-50 characters, letters, numbers and underscore only</string>
+    <string name="auth_invalid_email">Invalid email address</string>
+    <string name="auth_password_mismatch">Passwords do not match</string>
+    <string name="auth_reset_success">Password reset successfully!</string>
+    <string name="otp_resend_btn">Resend OTP</string>
+    <string name="auth_register_success">%1$s! Please log in.</string>
+    <string name="auth_otp_required">Please enter all 6 digits</string>
+    <string name="auth_otp_resent">OTP code resent</string>
+    <string name="auth_otp_sent_to">Code sent to: %1$s</string>
+    <string name="auth_enter_email">Please enter your email</string>
+
+    <!-- Review tests shared -->
+    <string name="test_question_counter">Question %1$d/%2$d</string>
+    <string name="test_score">Score: %1$d/%2$d</string>
+    <string name="test_skip_title">Skip Question</string>
+    <string name="test_skip_message">Are you sure you want to skip? It will be marked as incorrect.</string>
+    <string name="test_yes">Yes</string>
+    <string name="test_no">No</string>
+    <string name="test_ok">OK</string>
+    <string name="test_done">Done</string>
+    <string name="test_error_title">Error</string>
+    <string name="test_complete_title">Test Complete!</string>
+    <string name="test_answer_empty">Please type an answer</string>
+    <string name="test_feedback_correct">✓ Correct!</string>
+    <string name="test_feedback_wrong">✗ Correct answer: %1$s</string>
+    <string name="test_hint_first_letter">Hint: Starts with \"%1$s\"</string>
+    <string name="test_hint_word_length">Hint: %1$d letters</string>
+    <string name="test_tts_not_ready">Text-to-Speech not ready yet</string>
+    <string name="test_mic_permission">Microphone permission required</string>
+    <string name="test_result_excellent">Excellent! 🌟</string>
+    <string name="test_result_great">Great work! 💪</string>
+    <string name="test_result_good">Good effort! 👍</string>
+    <string name="test_result_keep_going">Keep practicing! 📚</string>
+    <string name="test_complete_body">%1$s\n\nYou scored %2$d out of %3$d (%4$d%%)</string>
+    <string name="test_complete_message">Test Complete!\nScore: %1$d/%2$d (%3$d%%)\n%4$s</string>
+    <string name="test_timer_seconds">⏱️ %1$ds</string>
+    <string name="test_timer_zero">⏱️ 0s</string>
+
+    <!-- Listening test -->
+    <string name="test_listening_played">Played: %1$d times</string>
+    <string name="listening_played_times">Played: %1$d times</string>
+    <string name="listening_result_excellent">Excellent listening! 🎧</string>
+    <string name="listening_result_great">Great job! 👂</string>
+    <string name="listening_result_good">Good effort! 🔊</string>
+    <string name="listening_result_keep">Keep practicing! 📻</string>
+    <string name="listening_result_msg">%1$s\n\nYou scored %2$d out of %3$d (%4$d%%)</string>
+
+    <!-- Typing test -->
+    <string name="typing_result_outstanding">Outstanding! 🌟</string>
+    <string name="typing_result_great">Great work! 💪</string>
+    <string name="typing_result_good">Good effort! 👍</string>
+    <string name="typing_result_keep">Keep practicing! 📚</string>
+    <string name="typing_result_msg">%1$s\n\nYou scored %2$d out of %3$d (%4$d%%)</string>
+
+    <!-- Quiz -->
+    <string name="quiz_timer">⏱ %1$ds</string>
+    <string name="quiz_timer_zero">⏱ 0s</string>
+    <string name="quiz_result_amazing">Amazing! You\'re a vocabulary master! 🏆</string>
+    <string name="quiz_result_great">Great job! Keep it up! ⭐</string>
+    <string name="quiz_result_good">Good effort! Practice makes perfect! 👍</string>
+    <string name="quiz_result_keep">Don\'t give up! Review and try again! 💪</string>
+    <string name="quiz_result_msg">Quiz Complete!\nScore: %1$d/%2$d (%3$d%%)\n%4$s</string>
+
+    <!-- Image matching -->
+    <string name="test_matching_round">Round %1$d</string>
+    <string name="test_matching_score">Score: %1$d</string>
+    <string name="test_matching_final_score">%1$s\n\nFinal Score: %2$d</string>
+    <string name="test_matching_timer">⏱ %1$s</string>
+    <string name="test_matching_timer_zero">⏱ 00:00</string>
+    <string name="matching_round">Round %1$d</string>
+    <string name="matching_score">Score: %1$d</string>
+    <string name="matching_timer">⏱ %1$s</string>
+    <string name="matching_timer_zero">⏱ 00:00</string>
+    <string name="matching_result_perfect">Perfect memory! 🧠✨</string>
+    <string name="matching_result_excellent">Excellent matching! 🎯</string>
+    <string name="matching_result_great">Great work! 💪</string>
+    <string name="matching_result_keep">Keep practicing! 🎮</string>
+    <string name="matching_result_msg">%1$s\n\nFinal Score: %2$d</string>
+    <string name="matching_complete_title">Game Complete!</string>
+
+    <!-- Pronunciation -->
+    <string name="test_pronunciation_word_counter">Word %1$d/%2$d</string>
+    <string name="test_pronunciation_tap_to_practice">Tap microphone to practice</string>
+    <string name="test_pronunciation_listening">🎤 Listening...</string>
+    <string name="test_pronunciation_speaking_detected">🎤 Speaking detected...</string>
+    <string name="test_pronunciation_processing">Processing...</string>
+    <string name="test_pronunciation_you_said">You said: \"%1$s\"</string>
+    <string name="test_pronunciation_score">Score: %1$d%%</string>
+    <string name="test_pronunciation_feedback_excellent">🌟 Perfect! Excellent pronunciation!</string>
+    <string name="test_pronunciation_feedback_good">👍 Good job! Keep practicing!</string>
+    <string name="test_pronunciation_feedback_ok">📖 Not bad! Try listening to the model again.</string>
+    <string name="test_pronunciation_feedback_retry">🔄 Keep trying! Listen carefully and repeat.</string>
+    <string name="test_pronunciation_error_audio">Audio recording error</string>
+    <string name="test_pronunciation_error_client">Client error</string>
+    <string name="test_pronunciation_error_permissions">Insufficient permissions</string>
+    <string name="test_pronunciation_error_network">Network error</string>
+    <string name="test_pronunciation_error_network_timeout">Network timeout</string>
+    <string name="test_pronunciation_error_no_match">No speech detected. Try again!</string>
+    <string name="test_pronunciation_error_busy">Recognition busy</string>
+    <string name="test_pronunciation_error_server">Server error</string>
+    <string name="test_pronunciation_error_speech_timeout">No speech input. Try again!</string>
+    <string name="test_pronunciation_error_unknown">Unknown error</string>
+    <string name="pronunciation_word_counter">Word %1$d/%2$d</string>
+    <string name="pronunciation_tap_mic">Tap microphone to practice</string>
+    <string name="pronunciation_listening">🎤 Listening...</string>
+    <string name="pronunciation_speaking">🎤 Speaking detected...</string>
+    <string name="pronunciation_processing">Processing...</string>
+    <string name="pronunciation_you_said">You said: \"%1$s\"</string>
+    <string name="pronunciation_score">Score: %1$d%%</string>
+    <string name="pronunciation_feedback_perfect">🌟 Perfect! Excellent pronunciation!</string>
+    <string name="pronunciation_feedback_good">👍 Good job! Keep practicing!</string>
+    <string name="pronunciation_feedback_ok">📖 Not bad! Try listening to the model again.</string>
+    <string name="pronunciation_feedback_keep">🔄 Keep trying! Listen carefully and repeat.</string>
+    <string name="pronunciation_result_outstanding">Outstanding pronunciation! 🗣️✨</string>
+    <string name="pronunciation_result_great">Great speaking skills! 🎤</string>
+    <string name="pronunciation_result_good">Good progress! 📢</string>
+    <string name="pronunciation_result_keep">Keep practicing! 🔊</string>
+    <string name="pronunciation_result_msg">%1$s\n\nYou scored %2$d out of %3$d (%4$d%%)</string>
+    <string name="pronunciation_complete_title">Practice Complete!</string>
+    <string name="pronunciation_error_audio">Audio recording error</string>
+    <string name="pronunciation_error_client">Client error</string>
+    <string name="pronunciation_error_permission">Insufficient permissions</string>
+    <string name="pronunciation_error_network">Network error</string>
+    <string name="pronunciation_error_timeout">Network timeout</string>
+    <string name="pronunciation_error_no_match">No speech detected. Try again!</string>
+    <string name="pronunciation_error_busy">Recognition busy</string>
+    <string name="pronunciation_error_server">Server error</string>
+    <string name="pronunciation_error_speech_timeout">No speech input. Try again!</string>
+    <string name="pronunciation_error_unknown">Unknown error</string>
 
     <!-- Review -->
     <string name="review_finished">All done!\nNo more words to review.</string>
@@ -201,6 +347,7 @@
     <string name="translation_verified">Verified</string>
     <string name="translation_add_to_learn">Add to learning list</string>
     <string name="quiz_translate_prompt">Translate this word:</string>
+    <string name="quiz_question_label">Vietnamese: %1$s</string>
     <string name="quiz_choose_answer">Choose the correct answer:</string>
     <string name="quiz_submit">Submit answer</string>
     <string name="typing_instruction">Type the English translation:</string>
@@ -304,6 +451,11 @@
     <string name="collection_item_count_in_detail">%d words in this collection</string>
     <string name="collection_vocab_section_title">VOCABULARY LIST</string>
     <string name="collection_add_word_title">Add new word</string>
+    <string name="collection_add_word_pick_source">Choose a source to add words to this collection</string>
+    <string name="collection_add_source_scan">Scan a new object</string>
+    <string name="collection_add_source_scan_desc">Scan an object to recognize and add vocabulary</string>
+    <string name="collection_add_source_history">Choose from scan history</string>
+    <string name="collection_add_source_history_desc">Select from previously scanned objects</string>
     <string name="collection_add_word_subtitle">Start expanding your vocabulary</string>
     <string name="collection_add_word_toast">Scan or look up a new word, then save it to this collection.</string>
     <string name="collection_empty_title_detail">This collection is empty</string>
@@ -325,6 +477,10 @@
     <string name="collection_name_empty">Collection name cannot be empty</string>
     <string name="collection_added">Added to collection</string>
     <string name="collection_removed">Removed from collection</string>
+    <string name="collection_load_error">Could not load collections</string>
+    <string name="collection_saved_to">Saved to \"%1$s\"</string>
+    <string name="collection_save_error">Could not save word, please try again</string>
+    <string name="collection_word_count">%1$d words</string>
     <string name="collection_tab_mine">Mine</string>
     <string name="collection_tab_community">Community</string>
     <string name="collection_dialog_public_label">Share with everyone</string>

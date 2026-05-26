@@ -103,7 +103,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"
                 android:padding="8dp"
-                android:text="Gửi lại mã OTP"
+                android:text="@string/otp_resend_btn"
                 android:textColor="@color/primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />

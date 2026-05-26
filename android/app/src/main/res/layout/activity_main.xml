@@ -115,17 +115,17 @@
             app:layout_constraintWidth_percent="0.2">
             <ImageView
                 android:id="@+id/navIconScan"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_scan"
-                app:tint="@color/bottom_nav_inactive" />
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_scan" />
             <TextView
                 android:id="@+id/navLabelScan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
                 android:text="@string/nav_scan"
-                android:textSize="13sp"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:textColor="@color/bottom_nav_inactive" />
         </LinearLayout>
 
