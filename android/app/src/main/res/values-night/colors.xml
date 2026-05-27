@@ -5,7 +5,6 @@
     <color name="surface">#1A1C26</color>
     <color name="surface_variant">#2A2D3E</color>
     <color name="surface_soft">#1E2030</color>
-    <color name="surface_warm">#1E1A14</color>
 
     <!-- Text dark -->
     <color name="text_primary">#E8EAF6</color>
@@ -20,7 +19,6 @@
 
     <!-- Accent -->
     <color name="secondary">#FFA05C</color>
-    <color name="secondary_dark">#C06820</color>
     <color name="secondary_light">#3D2410</color>
 
     <!-- Status -->
@@ -42,14 +40,12 @@
     <color name="switch_thumb_unchecked">#E1E5F5</color>
     <color name="switch_track_checked">#6EA0FF</color>
     <color name="switch_track_unchecked">#4B5068</color>
-    <color name="overlay_dark">#CC000000</color>
     <color name="overlay_soft">#80000000</color>
     <color name="glass_white">#1AFFFFFF</color>
     <color name="glass_stroke">#33FFFFFF</color>
     <color name="scan_frame">#99FFFFFF</color>
 
     <!-- Bottom nav dark -->
-    <color name="bottom_nav_active">#5B8FFF</color>
     <color name="bottom_nav_inactive">#6B6E84</color>
     <color name="bottom_nav_bg">#1A1C26</color>
 
@@ -61,12 +57,19 @@
     <color name="gradient_hero_mid">#1E3060</color>
     <color name="gradient_hero_end">#2040A0</color>
 
+    <!-- Auth -->
+    <color name="auth_gradient_start">#11141E</color>
+    <color name="auth_gradient_mid">#171B29</color>
+    <color name="auth_gradient_end">#202A46</color>
+    <color name="auth_card_bg">#1A1D28</color>
+    <color name="auth_card_stroke">#30364A</color>
+    <color name="auth_field_bg">#222635</color>
+    <color name="auth_field_stroke">#3B4258</color>
+    <color name="auth_field_stroke_focused">#6EA0FF</color>
+    <color name="auth_icon_tint">#AAB0C3</color>
+    <color name="auth_logo_bg">#26385F</color>
+
     <!-- Card accents dark -->
-    <color name="card_scan_bg">#2E1A0A</color>
-    <color name="card_learned_bg">#0A1530</color>
-    <color name="card_due_bg">#2A2200</color>
-    <color name="card_mastered_bg">#1A1030</color>
-    <color name="card_scan_icon">#FB923C</color>
     <color name="card_learned_icon">#5B8FFF</color>
     <color name="card_due_icon">#FACC15</color>
     <color name="card_mastered_icon">#A78BFA</color>
@@ -94,17 +97,9 @@
     <color name="cyan">#22D3EE</color>
     <color name="cyan_light">#0A2030</color>
 
-    <color name="primary_glow">#335B8FFF</color>
     <color name="surface_glass">#1E2030</color>
 
     <!-- Streak -->
     <color name="streak_idle">#4B5563</color>
     <color name="streak_idle_track">#1F2937</color>
-    <color name="streak_header_bg">#C04010</color>
-
-    <!-- Legacy aliases -->
-    <color name="purple_500">@color/primary</color>
-    <color name="purple_700">@color/primary_dark</color>
-    <color name="teal_200">#93C5FD</color>
-    <color name="teal_700">#3B82F6</color>
 </resources>

@@ -47,7 +47,7 @@
                         android:layout_height="72dp"
                         android:background="@drawable/bg_icon_primary"
                         android:gravity="center"
-                        android:text="✓"
+            android:text="@string/symbol_check"
                         android:textColor="@color/primary"
                         android:textSize="32sp"
                         android:textStyle="bold" />
@@ -193,7 +193,7 @@
                     android:paddingTop="6dp"
                     android:paddingEnd="12dp"
                     android:paddingBottom="6dp"
-                    android:text="1 / 10"
+            android:text="@string/placeholder_review_progress"
                     android:textColor="@color/primary"
                     android:textSize="13sp"
                     android:textStyle="bold" />
@@ -242,7 +242,7 @@
                         android:layout_marginTop="22dp"
                         android:layout_marginBottom="6dp"
                         android:gravity="center"
-                        android:text="word"
+                    android:text="@string/placeholder_word"
                         android:textAlignment="center"
                         android:textColor="@color/text_primary"
                         android:textSize="40sp"

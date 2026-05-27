@@ -267,7 +267,6 @@ class DictionaryFragment : Fragment() {
                 setTextColor(requireContext().getColor(R.color.text_primary))
                 chipStrokeWidth = 1f
                 setChipStrokeColorResource(R.color.divider)
-                chipCornerRadius = 20f
             }
             chip.setOnClickListener {
                 DictionaryHistoryDetailBottomSheet.newInstance(item).apply {

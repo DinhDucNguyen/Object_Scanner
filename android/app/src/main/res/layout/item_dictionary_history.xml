@@ -31,6 +31,7 @@
                 android:id="@+id/ivObjectImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:contentDescription="@string/history_image"
                 android:scaleType="centerCrop"
                 android:visibility="gone" />
 
@@ -39,6 +40,7 @@
                 android:layout_width="26dp"
                 android:layout_height="26dp"
                 android:layout_gravity="center"
+                android:contentDescription="@null"
                 android:src="@drawable/ic_dictionary"
                 app:tint="@color/primary" />
         </FrameLayout>
@@ -99,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:layout_gravity="end"
-                android:text="›"
+            android:text="@string/arrow"
                 android:textColor="@color/text_muted"
                 android:textSize="18sp" />
         </LinearLayout>

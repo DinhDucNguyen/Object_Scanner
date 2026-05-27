@@ -35,7 +35,7 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:visibility="gone"
-            android:contentDescription="Matching image"
+        android:contentDescription="@string/matching_image_content_description"
             tools:src="@drawable/ic_image_placeholder" />
 
         <!-- Text Card -->

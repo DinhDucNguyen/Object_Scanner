@@ -11,11 +11,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.data.local.ApiConfig
+import com.duc.objectlanguage.data.model.CollectionItem
+import com.duc.objectlanguage.databinding.DialogCollectionWordDetailBinding
 import com.duc.objectlanguage.databinding.FragmentCollectionDetailBinding
+import com.duc.objectlanguage.utils.DefinitionFormatter
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
+import java.util.Locale
 
 class CollectionDetailFragment : Fragment() {
 
@@ -34,9 +40,14 @@ class CollectionDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter = CollectionWordAdapter { translationId ->
-            viewModel.removeFromCollection(collectionId, translationId)
-        }
+        val adapter = CollectionWordAdapter(
+            onRemove = { translationId ->
+                viewModel.removeFromCollection(collectionId, translationId)
+            },
+            onOpenDetail = { item ->
+                showWordDetail(item)
+            }
+        )
         adapter.setCanEdit(!isPractice)
         binding.recyclerWords.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerWords.adapter = adapter
@@ -129,7 +140,7 @@ class CollectionDetailFragment : Fragment() {
         if (viewModel.collectionDetail.value?.canEdit != true) return
         val collectionName = viewModel.collectionDetail.value?.name ?: ""
         val sheet = BottomSheetDialog(requireContext())
-        val view = layoutInflater.inflate(R.layout.dialog_add_word_source, null)
+        val view = layoutInflater.inflate(R.layout.dialog_add_word_source, binding.root, false)
         sheet.setContentView(view)
 
         view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardScan)
@@ -148,6 +159,72 @@ class CollectionDetailFragment : Fragment() {
             }
 
         sheet.show()
+    }
+
+    private fun showWordDetail(item: CollectionItem) {
+        val sheet = BottomSheetDialog(requireContext())
+        val detailBinding = DialogCollectionWordDetailBinding.inflate(layoutInflater)
+
+        detailBinding.tvWordTitle.text = item.translation
+        detailBinding.tvWordCategory.text = item.category.uppercase(Locale.getDefault())
+        detailBinding.tvObjectName.text = item.objectName.replace("_", " ")
+
+        if (item.phonetic.isNullOrBlank()) {
+            detailBinding.tvWordPhonetic.visibility = View.GONE
+        } else {
+            detailBinding.tvWordPhonetic.text = item.phonetic
+            detailBinding.tvWordPhonetic.visibility = View.VISIBLE
+        }
+
+        val definition = item.definition?.takeIf { it.isNotBlank() }
+            ?: getString(R.string.object_detail_no_definition)
+        detailBinding.tvWordDefinition.text =
+            DefinitionFormatter.formatDefinition(requireContext(), definition)
+
+        val exampleText = item.examples
+            .filter { !it.cauViDu.isNullOrBlank() }
+            .take(3)
+            .joinToString(separator = "\n\n") { example ->
+                buildString {
+                    append("\"")
+                    append(example.cauViDu?.trim())
+                    append("\"")
+                    example.dichNghia?.takeIf { it.isNotBlank() }?.let { translation ->
+                        append("\n")
+                        append(translation.trim())
+                    }
+                }
+            }
+        detailBinding.tvWordExample.visibility =
+            if (exampleText.isBlank()) View.GONE else View.VISIBLE
+        detailBinding.tvWordExample.text = exampleText
+
+        if (item.imageUrl.isNullOrBlank()) {
+            detailBinding.ivWordImage.setImageResource(R.drawable.ic_image_placeholder)
+        } else {
+            Glide.with(detailBinding.ivWordImage)
+                .load(resolveMediaUrl(item.imageUrl))
+                .placeholder(R.drawable.ic_image_placeholder)
+                .error(R.drawable.ic_image_placeholder)
+                .into(detailBinding.ivWordImage)
+        }
+
+        detailBinding.btnSpeakWordDetail.setOnClickListener {
+            viewModel.playAudio(
+                audioUrl = item.audioUrl,
+                word = item.translation,
+                lang = item.languageCode ?: "en"
+            )
+        }
+        detailBinding.btnCloseWordDetail.setOnClickListener { sheet.dismiss() }
+        sheet.setContentView(detailBinding.root)
+        sheet.show()
+    }
+
+    private fun resolveMediaUrl(path: String): String {
+        val trimmed = path.trim()
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed
+        return "${ApiConfig.baseUrl.trimEnd('/')}/${trimmed.trimStart('/')}"
     }
 
     override fun onDestroyView() {

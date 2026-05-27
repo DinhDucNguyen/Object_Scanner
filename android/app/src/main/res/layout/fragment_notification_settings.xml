@@ -118,7 +118,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="19:00"
+                android:text="@string/value_time_1900"
                             android:textColor="@color/text_primary"
                             android:textSize="22sp"
                             android:textStyle="bold" />

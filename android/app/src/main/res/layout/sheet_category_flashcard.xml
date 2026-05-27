@@ -52,7 +52,7 @@
             android:layout_height="36dp"
             android:background="@drawable/bg_chip_surface"
             android:gravity="center"
-            android:text="✕"
+                android:text="@string/symbol_close"
             android:textColor="@color/text_muted"
             android:textSize="14sp" />
     </LinearLayout>
@@ -125,17 +125,41 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="24dp"
+                android:paddingStart="24dp"
+                android:paddingTop="20dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="20dp"
                 android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tvBackWordTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/primary"
+                    android:textSize="27sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvDefinition"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:background="@drawable/bg_definition_box"
                     android:gravity="center"
                     android:lineSpacingExtra="4dp"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp" />
+                    android:padding="14dp"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:alpha="0.5"
+                    android:text="@string/flashcard_tap_to_front"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
             </LinearLayout>
         </FrameLayout>
     </androidx.cardview.widget.CardView>

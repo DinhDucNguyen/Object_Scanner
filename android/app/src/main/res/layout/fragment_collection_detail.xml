@@ -52,6 +52,7 @@
                     <ImageView
                         android:layout_width="18dp"
                         android:layout_height="18dp"
+                        android:contentDescription="@null"
                         android:src="@drawable/ic_book"
                         app:tint="@color/text_secondary" />
 
@@ -132,7 +133,7 @@
                         android:layout_height="64dp"
                         android:background="@drawable/bg_collection_add_icon"
                         android:gravity="center"
-                        android:text="+"
+                android:text="@string/symbol_plus"
                         android:textColor="@color/primary_dark"
                         android:textSize="38sp"
                         android:textStyle="bold" />
@@ -168,6 +169,7 @@
                         android:layout_width="112dp"
                         android:layout_height="76dp"
                         android:alpha="0.24"
+                        android:contentDescription="@null"
                         android:src="@drawable/ic_book"
                         app:tint="@color/primary_light" />
 

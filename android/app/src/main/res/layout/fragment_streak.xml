@@ -27,7 +27,7 @@
                 android:layout_centerVertical="true"
                 android:padding="8dp"
                 android:src="@drawable/ic_back"
-                android:contentDescription="Back"
+                android:contentDescription="@string/streak_cd_back"
                 app:tint="@color/text_primary"
                 android:background="?attr/selectableItemBackgroundBorderless"/>
 
@@ -51,7 +51,7 @@
                 android:layout_centerVertical="true"
                 android:padding="8dp"
                 android:src="@drawable/ic_info_outline"
-                android:contentDescription="Milestone Info"
+                android:contentDescription="@string/streak_cd_milestone_info"
                 app:tint="@color/text_secondary"
                 android:background="?attr/selectableItemBackgroundBorderless"/>
 
@@ -106,14 +106,14 @@
                         android:layout_width="44dp"
                         android:layout_height="44dp"
                         android:src="@drawable/ic_fire"
-                        android:contentDescription="Streak Flame"
+                        android:contentDescription="@string/streak_cd_flame"
                         android:layout_marginBottom="2dp" />
 
                     <TextView
                         android:id="@+id/currentStreakText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="@string/value_zero"
                         android:textColor="@color/text_primary"
                         android:textSize="56sp"
                         android:textStyle="bold"
@@ -145,7 +145,7 @@
                             android:id="@+id/todayStatusIcon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="✓"
+                            android:text="@string/symbol_check"
                             android:textColor="@color/success"
                             android:textSize="11sp"
                             android:textStyle="bold"
@@ -232,13 +232,13 @@
                         android:orientation="horizontal"
                         android:layout_marginBottom="4dp">
 
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="CN" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T2" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T3" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T4" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T5" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T6" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="T7" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_sun_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_mon_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_tue_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_wed_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_thu_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_fri_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_sat_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
 
                     </LinearLayout>
 
@@ -285,6 +285,7 @@
                         android:layout_width="44dp"
                         android:layout_height="44dp"
                         android:background="@drawable/bg_badge_violet_rounded"
+                        android:contentDescription="@null"
                         android:padding="10dp"
                         android:src="@drawable/ic_award"
                         app:tint="@color/violet" />
@@ -321,7 +322,7 @@
                         android:id="@+id/longestStreakText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="@string/value_zero"
                         android:textColor="@color/violet"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -352,6 +353,7 @@
                         android:layout_width="44dp"
                         android:layout_height="44dp"
                         android:background="@drawable/bg_badge_green_rounded"
+                        android:contentDescription="@null"
                         android:padding="10dp"
                         android:src="@drawable/ic_book"
                         app:tint="@color/success" />
@@ -388,7 +390,7 @@
                         android:id="@+id/totalReviewsText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="@string/value_zero"
                         android:textColor="@color/success"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -419,6 +421,7 @@
                         android:layout_width="44dp"
                         android:layout_height="44dp"
                         android:background="@drawable/bg_badge_orange_rounded"
+                        android:contentDescription="@null"
                         android:padding="10dp"
                         android:src="@drawable/ic_calendar"
                         app:tint="@color/secondary" />
@@ -455,7 +458,7 @@
                         android:id="@+id/reviewsTodayText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="@string/value_zero"
                         android:textColor="@color/secondary"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -535,6 +538,7 @@
                                 android:id="@+id/achievement1Icon"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:contentDescription="@null"
                                 android:padding="11dp"
                                 android:src="@drawable/ic_lock"
                                 app:tint="@color/text_muted" />
@@ -588,6 +592,7 @@
                                 android:id="@+id/achievement2Icon"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:contentDescription="@null"
                                 android:padding="11dp"
                                 android:src="@drawable/ic_lock"
                                 app:tint="@color/text_muted" />
@@ -641,6 +646,7 @@
                                 android:id="@+id/achievement3Icon"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:contentDescription="@null"
                                 android:padding="12dp"
                                 android:src="@drawable/ic_lock"
                                 app:tint="@color/text_muted" />
@@ -694,6 +700,7 @@
                                 android:id="@+id/achievement4Icon"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:contentDescription="@null"
                                 android:padding="12dp"
                                 android:src="@drawable/ic_lock"
                                 app:tint="@color/text_muted" />
@@ -745,6 +752,7 @@
                             android:layout_width="22dp"
                             android:layout_height="22dp"
                             android:layout_gravity="center"
+                            android:contentDescription="@null"
                             android:src="@drawable/ic_calendar"
                             app:tint="#FFFFFFFF" />
 

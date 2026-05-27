@@ -9,7 +9,7 @@
     <string name="onboarding_slide1_title">Chụp là biết nghĩa</string>
     <string name="onboarding_slide1_desc">Hướng camera vào bất kỳ vật thể nào — AI sẽ nhận diện và cho bạn biết tên tiếng Anh, phiên âm và nghĩa ngay lập tức.</string>
     <string name="onboarding_slide2_title">Lưu từ, xây bộ sưu tập</string>
-    <string name="onboarding_slide2_desc">Thêm từ bạn học được vào các bộ sưu tập cá nhân. Sắp xếp theo chủ đề, theo ngày — học từ đúng lúc đúng chỗ.</string>
+    <string name="onboarding_slide2_desc">Thêm từ bạn học được vào các bộ sưu tập cá nhân. Sắp xếp theo chủ đề, theo ngày — học từ đúng thời điểm.</string>
     <string name="onboarding_slide3_title">Ôn tập thông minh</string>
     <string name="onboarding_slide3_desc">Hệ thống lặp lại cách quãng (spaced repetition) nhắc đúng từ vào đúng thời điểm bạn sắp quên — giúp nhớ lâu hơn với ít nỗ lực hơn.</string>
 
@@ -111,10 +111,13 @@
     <string name="dashboard_streak_next_milestone_initial">Còn 3 ngày tới mốc 3 ngày</string>
     <string name="dashboard_streak_next_milestone">Còn %1$d ngày tới mốc %2$d ngày</string>
     <string name="dashboard_streak_top_milestone">Đã đạt mốc chuỗi cao nhất</string>
+    <string name="dashboard_streak_welcome_title">Bắt đầu thôi!</string>
+    <string name="dashboard_streak_welcome_hint">Quét một vật thể để học từ đầu tiên.</string>
+    <string name="dashboard_streak_welcome_milestone">Từ đầu tiên, chuỗi đầu tiên.</string>
 
     <!-- Scan -->
     <string name="scan_overlay">Đưa vật thể vào khung hình rồi nhấn chụp</string>
-    <string name="scan_analyzing">Đang nhận diện...\nVui lòng chờ trong giây lát</string>
+    <string name="scan_analyzing">Đang nhận diện...\nVui lòng chờ một chút</string>
     <string name="scan_btn_play">Nghe phát âm</string>
     <string name="scan_btn_learn">Lưu</string>
     <string name="scan_btn_retake">Quét lại</string>
@@ -165,6 +168,8 @@
     <string name="dictionary_object_code_label">Mã đối tượng:</string>
     <string name="dictionary_play_audio">Nghe phát âm</string>
     <string name="dictionary_history_delete">Xóa khỏi lịch sử</string>
+    <string name="dictionary_history_search_hint">Tìm kiếm lịch sử...</string>
+    <string name="dictionary_history_no_results">Không tìm thấy kết quả</string>
 
     <!-- Explore -->
     <string name="explore_title">Khám phá</string>
@@ -176,6 +181,7 @@
     <string name="category_detail_empty">Chưa có từ vựng</string>
     <string name="category_detail_learn_now">Học ngay</string>
     <string name="flashcard_tap_to_reveal">Chạm để xem nghĩa</string>
+    <string name="flashcard_tap_to_front">Chạm để quay lại từ</string>
     <string name="flashcard_next">Từ tiếp theo</string>
     <string name="flashcard_finish">Xong</string>
     <string name="flashcard_counter">%1$d / %2$d</string>
@@ -389,9 +395,9 @@
     <string name="history_btn_play_audio">Nghe phát âm</string>
     <string name="history_audio_load_error">Không tải được audio</string>
     <string name="history_audio_play_error">Không phát được audio</string>
-    <string name="history_empty_vocab">Không có dữ liệu từ vựng</string>
+    <string name="history_empty_vocab">Chưa có dữ liệu từ vựng</string>
     <string name="history_status_pending">Đang cập nhật từ vựng cho vật thể này</string>
-    <string name="history_status_rejected">Hệ thống chưa nhận diện được, thử chụp lại nhé</string>
+    <string name="history_status_rejected">Chưa nhận diện được vật thể, thử chụp lại nhé</string>
     <string name="history_status_approved">Đã duyệt</string>
 
     <!-- Offline -->
@@ -442,7 +448,7 @@
     <string name="streak_achievement_4_label">Chuyên cần</string>
     <string name="streak_next_milestone_banner">MỐC TIẾP THEO</string>
     <string name="streak_learn_now">Học ngay</string>
-    <string name="streak_stat_best_label">Kỳ lục chuỗi</string>
+    <string name="streak_stat_best_label">Kỷ lục chuỗi</string>
     <string name="streak_stat_total_reviews_label">Tổng lượt ôn tập</string>
     <string name="streak_stat_today_label">Lượt ôn hôm nay</string>
 
@@ -467,6 +473,8 @@
     <string name="collection_add_word_subtitle">Bắt đầu mở rộng vốn từ của bạn</string>
     <string name="collection_add_word_toast">Quét hoặc tra từ mới, rồi lưu vào bộ sưu tập này nhé!</string>
     <string name="collection_empty_title_detail">Bộ sưu tập trống</string>
+    <string name="collection_audio_load_error">Không tải được âm thanh</string>
+    <string name="collection_audio_play_error">Không phát được âm thanh</string>
     <string name="collection_cd_add">Thêm bộ sưu tập</string>
     <string name="collection_dialog_create_title">Tạo bộ sưu tập</string>
     <string name="collection_dialog_subtitle">Khởi đầu hành trình học tập mới của bạn</string>
@@ -633,7 +641,7 @@
     <string name="profile_stat_due">Chuỗi ngày</string>
     <string name="profile_language_changed_vi">Đã chuyển sang tiếng Việt</string>
     <string name="profile_language_changed_en">Switched to English</string>
-    <string name="profile_language_save_failed">Không lưu được ngôn ngữ lên tài khoản, app vẫn đổi tạm trên thiết bị này</string>
+    <string name="profile_language_save_failed">Không thể đồng bộ ngôn ngữ lên tài khoản, app vẫn đổi tạm trên thiết bị này</string>
     <string name="profile_menu_content_description">Menu hồ sơ</string>
     <string name="profile_bio_updated">Đã cập nhật giới thiệu</string>
     <string name="profile_name_updated">Đã cập nhật tên hiển thị</string>
@@ -689,4 +697,49 @@
     <string name="collection_add_word_pick_source">Chọn nguồn để thêm từ vào bộ sưu tập</string>
     <string name="collection_add_source_scan_desc">Quét vật thể mới để nhận diện và thêm từ vựng</string>
     <string name="collection_add_source_history_desc">Chọn từ lịch sử quét đã lưu trước đó</string>
+    <string name="profile_edit_display_name">Sửa tên hiển thị</string>
+    <string name="format_number_suffix">%1$d%2$s</string>
+    <string name="format_percent_int">%d%%</string>
+    <string name="format_fraction_spaced">%1$d / %2$d</string>
+    <string name="format_quoted_text">"%s"</string>
+    <string name="format_example_index">%02d</string>
+    <string name="symbol_plus">+</string>
+    <string name="symbol_check">✓</string>
+    <string name="symbol_close">✕</string>
+    <string name="symbol_bullet">•</string>
+    <string name="symbol_translation_arrow">→</string>
+    <string name="value_zero">0</string>
+    <string name="value_zero_percent">0%</string>
+    <string name="value_zero_decimal">0.0</string>
+    <string name="value_time_1900">19:00</string>
+    <string name="language_en_short">EN</string>
+    <string name="language_vi_short">VI</string>
+    <string name="language_pair_en_vi">EN &lt;-&gt; VI</string>
+    <string name="scan_model_label">Model</string>
+    <string name="scan_model_custom">Custom YOLO</string>
+    <string name="scan_model_coco">COCO</string>
+    <string name="scan_definition_title">Định nghĩa</string>
+    <string name="placeholder_word">word</string>
+    <string name="placeholder_object">Object</string>
+    <string name="placeholder_object_code">object_code</string>
+    <string name="placeholder_collection_name">Collection Name</string>
+    <string name="placeholder_collection_owner">by username</string>
+    <string name="placeholder_collection_count_zero">0 từ</string>
+    <string name="placeholder_collection_created">Tạo --</string>
+    <string name="placeholder_confidence">90%</string>
+    <string name="placeholder_date">2024-01-01</string>
+    <string name="placeholder_review_progress">1 / 10</string>
+    <string name="placeholder_example_index">01</string>
+    <string name="collection_word_category_placeholder">DANH MỤC</string>
+    <string name="matching_image_content_description">Matching image</string>
+    <string name="streak_cd_back">Back</string>
+    <string name="streak_cd_milestone_info">Milestone Info</string>
+    <string name="streak_cd_flame">Streak Flame</string>
+    <string name="weekday_sun_short">CN</string>
+    <string name="weekday_mon_short">T2</string>
+    <string name="weekday_tue_short">T3</string>
+    <string name="weekday_wed_short">T4</string>
+    <string name="weekday_thu_short">T5</string>
+    <string name="weekday_fri_short">T6</string>
+    <string name="weekday_sat_short">T7</string>
 </resources>

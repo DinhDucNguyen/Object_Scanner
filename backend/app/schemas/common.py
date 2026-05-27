@@ -122,7 +122,13 @@ class CollectionItemResponse(BaseModel):
     object_name: str
     translation: str
     category: str
+    language_code: Optional[str] = None
     image_url: Optional[str] = None
+    phonetic: Optional[str] = None
+    part_of_speech: Optional[str] = None
+    definition: Optional[str] = None
+    examples: List[ViDuResponse] = []
+    audio_url: Optional[str] = None
 
     class Config:
         from_attributes = True

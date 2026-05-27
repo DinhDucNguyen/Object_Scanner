@@ -20,7 +20,11 @@ object GuestUpsellDialog {
         onLogin: () -> Unit,
         onRegister: () -> Unit
     ) {
-        val view = LayoutInflater.from(context).inflate(R.layout.dialog_guest_upsell, null)
+        val view = LayoutInflater.from(context).inflate(
+            R.layout.dialog_guest_upsell,
+            android.widget.FrameLayout(context),
+            false
+        )
 
         val title = if (reason == Reason.SCAN_LIMIT)
             context.getString(R.string.guest_scan_limit_title)

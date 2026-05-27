@@ -85,13 +85,23 @@ class CategoryDetailFragment : Fragment() {
 
         fun showCard(index: Int) {
             val item = items[index]
+            val wordName = item.wordName ?: item.objectCode.replace("_", " ")
             isFlipped = false
             sheetBinding.sideFront.visibility = android.view.View.VISIBLE
             sheetBinding.sideBack.visibility = android.view.View.GONE
-            sheetBinding.tvWord.text = item.wordName ?: item.objectCode.replace("_", " ")
+            sheetBinding.tvWord.text = wordName
             sheetBinding.tvPhonetic.text = item.phonetic ?: ""
             sheetBinding.tvPhonetic.visibility = if (item.phonetic.isNullOrBlank()) android.view.View.GONE else android.view.View.VISIBLE
-            sheetBinding.tvDefinition.text = item.definition ?: ""
+            val rawDefinition = item.definition?.takeIf { it.isNotBlank() }
+                ?: getString(R.string.object_detail_no_definition)
+            val colonIndex = rawDefinition.indexOf(':')
+            if (colonIndex > 0) {
+                sheetBinding.tvBackWordTitle.text = rawDefinition.substring(0, colonIndex).trim()
+                sheetBinding.tvDefinition.text = rawDefinition.substring(colonIndex + 1).trim()
+            } else {
+                sheetBinding.tvBackWordTitle.text = getString(R.string.label_definition)
+                sheetBinding.tvDefinition.text = rawDefinition
+            }
             sheetBinding.btnNextCard.text = if (index == items.size - 1)
                 getString(R.string.flashcard_finish) else getString(R.string.flashcard_next)
             updateProgress()
@@ -99,15 +109,18 @@ class CategoryDetailFragment : Fragment() {
 
         sheetBinding.tvSheetTitle.text = categoryName
 
+        fun flipCard(showBack: Boolean) {
+            if (isFlipped == showBack) return
+            isFlipped = showBack
+            sheetBinding.cardFlashcard.animate().scaleX(0f).setDuration(120).withEndAction {
+                sheetBinding.sideFront.visibility = if (showBack) View.GONE else View.VISIBLE
+                sheetBinding.sideBack.visibility = if (showBack) View.VISIBLE else View.GONE
+                sheetBinding.cardFlashcard.animate().scaleX(1f).setDuration(120).start()
+            }.start()
+        }
+
         sheetBinding.cardFlashcard.setOnClickListener {
-            if (!isFlipped) {
-                isFlipped = true
-                sheetBinding.cardFlashcard.animate().scaleX(0f).setDuration(120).withEndAction {
-                    sheetBinding.sideFront.visibility = android.view.View.GONE
-                    sheetBinding.sideBack.visibility = android.view.View.VISIBLE
-                    sheetBinding.cardFlashcard.animate().scaleX(1f).setDuration(120).start()
-                }.start()
-            }
+            flipCard(showBack = !isFlipped)
         }
 
         sheetBinding.btnNextCard.setOnClickListener {
@@ -133,9 +146,6 @@ class CategoryDetailFragment : Fragment() {
         val dialog = BottomSheetDialog(requireContext())
         val detailBinding = DialogObjectDetailBinding.inflate(layoutInflater)
         val wordName = item.wordName ?: item.objectCode.replace("_", " ")
-        val categoryName = item.categoryName
-            ?: requireArguments().getString("categoryName")
-            ?: getString(R.string.category_detail_fallback)
 
         detailBinding.detailWordName.text = wordName
         val rawDef = item.definition ?: getString(R.string.object_detail_no_definition)

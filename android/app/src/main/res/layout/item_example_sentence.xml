@@ -23,7 +23,7 @@
             android:layout_height="32dp"
             android:background="@drawable/bg_number_circle"
             android:gravity="center"
-            android:text="01"
+        android:text="@string/placeholder_example_index"
             android:textColor="@color/primary"
             android:textSize="13sp"
             android:textStyle="bold"

@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Collection Name"
+            android:text="@string/placeholder_collection_name"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -48,7 +48,7 @@
                 android:layout_marginTop="4dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="by username"
+            android:text="@string/placeholder_collection_owner"
                 android:textAppearance="@style/TextAppearance.App.BodySmall" />
 
             <TextView
@@ -60,7 +60,7 @@
                 android:gravity="center"
                 android:paddingStart="9dp"
                 android:paddingEnd="9dp"
-                android:text="0 từ"
+            android:text="@string/placeholder_collection_count_zero"
                 android:textColor="@color/primary_dark"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -76,6 +76,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center"
+                android:contentDescription="@null"
                 android:src="@drawable/ic_folder_outline"
                 app:tint="@color/primary_dark" />
 

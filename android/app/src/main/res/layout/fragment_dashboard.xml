@@ -58,7 +58,6 @@
                     android:text="@string/dashboard_greeting"
                     android:textColor="@color/text_primary"
                     android:textSize="26sp"
-                    android:fontWeight="700"
                     android:textStyle="bold" />
 
                 <TextView
@@ -67,8 +66,7 @@
                     android:layout_marginTop="2dp"
                     android:text="@string/dashboard_greeting_subtitle"
                     android:textColor="@color/text_secondary"
-                    android:textSize="15sp"
-                    android:fontWeight="400" />
+                    android:textSize="15sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -96,7 +94,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:text="0"
+                android:text="@string/value_zero"
                     android:textColor="@android:color/white"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -206,7 +204,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="6dp"
-                            android:text="0"
+                            android:text="@string/value_zero"
                             android:textColor="@color/warning"
                             android:textSize="25sp"
                             android:textStyle="bold" />
@@ -219,7 +217,6 @@
                             android:text="@string/streak_days_plural"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp"
-                            android:fontWeight="700"
                             android:textStyle="bold" />
                     </LinearLayout>
 
@@ -424,7 +421,6 @@
                     android:text="@string/dashboard_collections_title"
                     android:textColor="@color/text_primary"
                     android:textSize="22sp"
-                    android:fontWeight="700"
                     android:textStyle="bold" />
 
                 <TextView
@@ -438,7 +434,6 @@
                     android:text="@string/dashboard_collections_see_all"
                     android:textColor="@color/primary"
                     android:textSize="14sp"
-                    android:fontWeight="700"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -677,7 +672,6 @@
                         android:text="@string/dashboard_goal_title"
                         android:textColor="@color/text_primary"
                         android:textSize="22sp"
-                        android:fontWeight="700"
                         android:textStyle="bold" />
 
                     <TextView

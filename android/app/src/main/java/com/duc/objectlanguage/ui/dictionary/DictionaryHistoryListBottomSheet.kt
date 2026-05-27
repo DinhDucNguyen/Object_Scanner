@@ -1,6 +1,8 @@
 package com.duc.objectlanguage.ui.dictionary
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +20,7 @@ class DictionaryHistoryListBottomSheet : BottomSheetDialogFragment() {
 
     private var onItemDeleted: ((Int) -> Unit)? = null
     private var adapter: DictionaryHistoryAdapter? = null
-    private val currentItems = mutableListOf<DictionaryHistoryItem>()
+    private val allItems = mutableListOf<DictionaryHistoryItem>()
 
     fun setOnItemDeletedListener(listener: (Int) -> Unit) {
         onItemDeleted = listener
@@ -38,12 +40,13 @@ class DictionaryHistoryListBottomSheet : BottomSheetDialogFragment() {
         val type = object : TypeToken<List<DictionaryHistoryItem>>() {}.type
         val items: List<DictionaryHistoryItem> = Gson().fromJson(json, type) ?: emptyList()
 
-        currentItems.clear()
-        currentItems.addAll(items)
+        allItems.clear()
+        allItems.addAll(items)
 
         if (items.isEmpty()) {
             binding.rvHistoryList.visibility = View.GONE
             binding.tvHistoryListEmpty.visibility = View.VISIBLE
+            binding.tilHistorySearch.visibility = View.GONE
             return
         }
 
@@ -61,13 +64,55 @@ class DictionaryHistoryListBottomSheet : BottomSheetDialogFragment() {
             it.submitList(items.toList())
             binding.rvHistoryList.adapter = it
         }
+
+        setupSearch()
+    }
+
+    private fun setupSearch() {
+        binding.etHistorySearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                filterList(s?.toString().orEmpty())
+            }
+        })
+    }
+
+    private fun filterList(query: String) {
+        val filtered = if (query.isBlank()) {
+            allItems.toList()
+        } else {
+            val lowerQuery = query.trim().lowercase()
+            allItems.filter { item ->
+                item.tuTra.lowercase().contains(lowerQuery) ||
+                    item.ketQuaDich?.lowercase()?.contains(lowerQuery) == true
+            }
+        }
+
+        adapter?.submitList(filtered)
+
+        when {
+            filtered.isEmpty() && query.isNotBlank() -> {
+                binding.rvHistoryList.visibility = View.GONE
+                binding.tvHistoryNoResults.visibility = View.VISIBLE
+                binding.tvHistoryListEmpty.visibility = View.GONE
+            }
+            else -> {
+                binding.rvHistoryList.visibility = View.VISIBLE
+                binding.tvHistoryNoResults.visibility = View.GONE
+                binding.tvHistoryListEmpty.visibility = View.GONE
+            }
+        }
     }
 
     private fun removeItem(id: Int) {
-        currentItems.removeAll { it.id == id }
-        adapter?.submitList(currentItems.toList())
-        if (currentItems.isEmpty()) {
+        allItems.removeAll { it.id == id }
+        val currentQuery = binding.etHistorySearch.text?.toString().orEmpty()
+        filterList(currentQuery)
+        if (allItems.isEmpty()) {
             binding.rvHistoryList.visibility = View.GONE
+            binding.tilHistorySearch.visibility = View.GONE
+            binding.tvHistoryNoResults.visibility = View.GONE
             binding.tvHistoryListEmpty.visibility = View.VISIBLE
         }
     }

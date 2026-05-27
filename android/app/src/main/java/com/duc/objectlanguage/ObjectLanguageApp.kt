@@ -10,12 +10,16 @@ import com.duc.objectlanguage.data.repository.AppRepository
 import com.duc.objectlanguage.utils.LocaleHelper
 import com.duc.objectlanguage.workers.DailyReminderWorker
 import com.duc.objectlanguage.workers.StreakResetWorker
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 class ObjectLanguageApp : Application() {
 
     lateinit var tokenManager: TokenManager
     lateinit var repository: AppRepository
     lateinit var guestSessionManager: GuestSessionManager
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(LocaleHelper.applyLocale(base))

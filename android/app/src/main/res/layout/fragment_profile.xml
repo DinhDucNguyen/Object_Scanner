@@ -38,16 +38,16 @@
                     android:focusable="true"
                     android:foreground="?android:attr/selectableItemBackgroundBorderless">
 
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivAvatar"
                         android:layout_width="92dp"
                         android:layout_height="92dp"
                         android:background="@drawable/bg_profile_avatar_shell"
-                        android:clipToOutline="true"
                         android:contentDescription="@string/content_description_avatar"
                         android:padding="22dp"
                         android:scaleType="centerCrop"
                         android:src="@drawable/ic_person"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircleImage"
                         app:tint="@color/primary" />
 
                     <ImageView
@@ -55,26 +55,55 @@
                         android:layout_height="28dp"
                         android:layout_gravity="bottom|end"
                         android:background="@drawable/bg_profile_edit_button"
+                        android:contentDescription="@string/profile_avatar_change"
                         android:padding="5dp"
                         android:src="@drawable/ic_camera"
                         app:tint="@color/primary" />
                 </FrameLayout>
 
-                <TextView
-                    android:id="@+id/tvUsername"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layoutDisplayName"
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp"
                     android:layout_marginTop="10dp"
-                    android:clickable="true"
-                    android:ellipsize="end"
-                    android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
-                    android:maxWidth="230dp"
-                    android:maxLines="1"
-                    android:text="@string/dashboard_default_user"
-                    android:textColor="@color/text_primary"
-                    android:textSize="21sp"
-                    android:textStyle="bold" />
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <TextView
+                        android:id="@+id/tvUsername"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                        android:maxWidth="210dp"
+                        android:maxLines="1"
+                        android:text="@string/dashboard_default_user"
+                        android:textColor="@color/text_primary"
+                        android:textSize="21sp"
+                        android:textStyle="bold"
+                        app:layout_constrainedWidth="true"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageButton
+                        android:id="@+id/btnEditFullName"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="6dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/profile_edit_display_name"
+                        android:padding="6dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_pencil"
+                        app:layout_constraintBottom_toBottomOf="@id/tvUsername"
+                        app:layout_constraintStart_toEndOf="@id/tvUsername"
+                        app:layout_constraintTop_toTopOf="@id/tvUsername"
+                        app:tint="@color/text_muted" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
                     android:id="@+id/tvUsernameHandle"
@@ -105,7 +134,7 @@
                             android:id="@+id/tvProfileLearnedCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                        android:text="@string/value_zero"
                             android:textColor="@color/text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -134,7 +163,7 @@
                             android:id="@+id/tvProfileScanCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                        android:text="@string/value_zero"
                             android:textColor="@color/text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -163,7 +192,7 @@
                             android:id="@+id/tvProfileDueCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                        android:text="@string/value_zero"
                             android:textColor="@color/text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -240,6 +269,7 @@
                     android:layout_height="42dp"
                     android:layout_marginEnd="14dp"
                     android:background="@drawable/bg_icon_primary"
+                    android:contentDescription="@null"
                     android:padding="10dp"
                     android:src="@drawable/ic_dictionary"
                     app:tint="@color/primary" />
@@ -281,7 +311,7 @@
                         android:layout_height="34dp"
                         android:paddingStart="0dp"
                         android:paddingEnd="0dp"
-                        android:text="VI"
+                            android:text="@string/language_vi_short"
                         android:textSize="12sp"
                         app:backgroundTint="@color/primary"
                         app:cornerRadius="10dp" />
@@ -293,7 +323,7 @@
                         android:layout_marginStart="3dp"
                         android:paddingStart="0dp"
                         android:paddingEnd="0dp"
-                        android:text="EN"
+                            android:text="@string/language_en_short"
                         android:textSize="12sp"
                         app:backgroundTint="@color/surface_variant"
                         app:cornerRadius="10dp" />
@@ -336,6 +366,7 @@
                     android:layout_height="40dp"
                     android:layout_marginEnd="14dp"
                     android:background="@drawable/bg_icon_primary"
+                    android:contentDescription="@null"
                     android:padding="10dp"
                     android:src="@drawable/ic_camera"
                     app:tint="@color/primary" />
@@ -384,6 +415,7 @@
                     android:layout_height="40dp"
                     android:layout_marginEnd="14dp"
                     android:background="@drawable/bg_icon_success"
+                    android:contentDescription="@null"
                     android:padding="10dp"
                     android:src="@drawable/ic_explore"
                     app:tint="@color/success" />
@@ -432,6 +464,7 @@
                     android:layout_height="40dp"
                     android:layout_marginEnd="14dp"
                     android:background="@drawable/bg_icon_warning"
+                    android:contentDescription="@null"
                     android:padding="8dp"
                     android:src="@drawable/ic_fire" />
 
@@ -475,6 +508,7 @@
                     android:layout_height="40dp"
                     android:layout_marginEnd="14dp"
                     android:background="@drawable/bg_icon_cyan"
+                    android:contentDescription="@null"
                     android:padding="10dp"
                     android:src="@drawable/ic_dark_mode"
                     app:tint="@color/cyan" />
@@ -525,6 +559,7 @@
                     android:layout_height="40dp"
                     android:layout_marginEnd="14dp"
                     android:background="@drawable/bg_icon_violet"
+                    android:contentDescription="@null"
                     android:padding="10dp"
                     android:src="@drawable/ic_dictionary"
                     app:tint="@color/violet" />

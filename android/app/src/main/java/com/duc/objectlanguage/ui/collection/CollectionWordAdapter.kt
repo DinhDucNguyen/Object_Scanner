@@ -11,7 +11,8 @@ import com.duc.objectlanguage.databinding.ItemCollectionWordBinding
 import java.util.Locale
 
 class CollectionWordAdapter(
-    private val onRemove: (translationId: Int) -> Unit
+    private val onRemove: (translationId: Int) -> Unit,
+    private val onOpenDetail: (item: CollectionItem) -> Unit
 ) : ListAdapter<CollectionItem, CollectionWordAdapter.ViewHolder>(DiffCallback()) {
 
     private var canEdit: Boolean = true
@@ -19,7 +20,7 @@ class CollectionWordAdapter(
     fun setCanEdit(value: Boolean) {
         if (canEdit == value) return
         canEdit = value
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     inner class ViewHolder(private val binding: ItemCollectionWordBinding) :
@@ -30,6 +31,7 @@ class CollectionWordAdapter(
             binding.tvDefinition.visibility = View.GONE
             binding.tvCategory.text = item.category.uppercase(Locale.getDefault())
             binding.btnRemove.visibility = if (canEdit) View.VISIBLE else View.GONE
+            binding.root.setOnClickListener { onOpenDetail(item) }
             binding.btnRemove.setOnClickListener { onRemove(item.translationId) }
         }
     }

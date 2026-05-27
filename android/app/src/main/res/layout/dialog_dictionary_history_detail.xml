@@ -44,6 +44,7 @@
             android:id="@+id/ivDetailImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@string/history_image"
             android:scaleType="centerCrop" />
     </com.google.android.material.card.MaterialCardView>
 
@@ -82,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                android:text="→"
+                android:text="@string/symbol_translation_arrow"
                 android:textColor="@color/text_muted"
                 android:textSize="14sp" />
 

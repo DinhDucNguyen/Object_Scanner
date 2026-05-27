@@ -5,8 +5,8 @@ Centralized magic numbers and configuration values.
 
 # Image processing
 MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024  # 10MB
-IMAGE_COMPRESS_MAX_SIZE = 800  # pixels (width/height)
-IMAGE_COMPRESS_QUALITY = 85  # JPEG quality (1-100)
+IMAGE_COMPRESS_MAX_SIZE = 1024  # pixels (width/height)
+IMAGE_COMPRESS_QUALITY = 70     # WEBP quality (65-75 là đủ cho Gemini vision)
 
 # SM-2 Spaced Repetition
 SM2_MASTERED_MIN_REPETITIONS = 3

@@ -15,7 +15,7 @@ def compress_image(image_bytes: bytes, max_size: int = IMAGE_COMPRESS_MAX_SIZE) 
     Giúp Gemini API xử lý nhanh hơn 2-3x.
     """
     try:
-        logger.info("Compressing image: %d bytes", len(image_bytes))
+        logger.debug("Compressing image: %d bytes", len(image_bytes))
         img = Image.open(io.BytesIO(image_bytes))
         logger.debug("Original size: %s, mode: %s", img.size, img.mode)
 
@@ -27,14 +27,15 @@ def compress_image(image_bytes: bytes, max_size: int = IMAGE_COMPRESS_MAX_SIZE) 
             background.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
             img = background
 
-        # Resize giữ tỷ lệ
-        img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+        # Resize giữ tỷ lệ — chỉ resize khi ảnh lớn hơn max_size
+        if img.width > max_size or img.height > max_size:
+            img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
 
-        # Compress với JPEG
+        # Compress sang WEBP — nhỏ hơn JPEG ~30%, Gemini hỗ trợ tốt
         output = io.BytesIO()
-        img.save(output, format='JPEG', quality=IMAGE_COMPRESS_QUALITY, optimize=True)
+        img.save(output, format='WEBP', quality=IMAGE_COMPRESS_QUALITY, method=6)
         compressed = output.getvalue()
-        logger.info("Compressed to: %d bytes, size: %s", len(compressed), img.size)
+        logger.debug("Compressed to: %d bytes, size: %s (WEBP)", len(compressed), img.size)
         return compressed
     except Exception as e:
         logger.warning("Image compression failed: %s", e)

@@ -5,11 +5,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.data.model.CollectionDetail
 import com.duc.objectlanguage.data.repository.CollectionRepository
+import com.duc.objectlanguage.utils.AudioPlayerManager
 import kotlinx.coroutines.launch
 
 /**
@@ -20,6 +22,8 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
     
     private val tokenManager = TokenManager(application)
     private val repo = CollectionRepository(tokenManager)
+    private val appRepository = (application as ObjectLanguageApp).repository
+    private val audioPlayer = AudioPlayerManager(application.applicationContext)
     
     // Collections list
     private val _collections = MutableLiveData<List<Collection>>()
@@ -300,5 +304,26 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
      */
     fun clearSuccessMessage() {
         _successMessage.value = null
+    }
+
+    fun playAudio(audioUrl: String?, word: String, lang: String = "en") {
+        viewModelScope.launch {
+            val bytes = audioUrl
+                ?.takeIf { it.isNotBlank() }
+                ?.let { appRepository.getAudioByUrl(it) }
+                ?: appRepository.getTtsAudio(word, lang)
+            if (bytes != null) {
+                audioPlayer.playMp3(bytes) {
+                    _error.value = getApplication<Application>().getString(R.string.collection_audio_play_error)
+                }
+            } else {
+                _error.value = getApplication<Application>().getString(R.string.collection_audio_load_error)
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        audioPlayer.release()
     }
 }

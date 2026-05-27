@@ -67,6 +67,33 @@
         android:layout_height="1dp"
         android:background="@color/divider" />
 
+    <!-- Search bar -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilHistorySearch"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="4dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:endIconMode="clear_text"
+        app:startIconDrawable="@drawable/ic_search">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etHistorySearch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="@string/dictionary_history_search_hint"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textSize="14sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <!-- List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvHistoryList"
@@ -77,6 +104,19 @@
         android:paddingTop="8dp"
         android:paddingEnd="12dp"
         android:paddingBottom="32dp" />
+
+    <!-- No search results -->
+    <TextView
+        android:id="@+id/tvHistoryNoResults"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingTop="32dp"
+        android:paddingBottom="32dp"
+        android:text="@string/dictionary_history_no_results"
+        android:textColor="@color/text_muted"
+        android:textSize="14sp"
+        android:visibility="gone" />
 
     <!-- Empty state -->
     <LinearLayout

@@ -48,7 +48,7 @@
                     android:layout_weight="1"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="Object"
+            android:text="@string/placeholder_object"
                     android:textColor="@color/text_primary"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -57,7 +57,7 @@
                     android:id="@+id/tvConfidence"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="90%"
+            android:text="@string/placeholder_confidence"
                     android:textColor="@color/secondary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -105,7 +105,7 @@
                     android:layout_marginEnd="8dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="2024-01-01"
+                android:text="@string/placeholder_date"
                     android:textColor="@color/text_muted"
                     android:textSize="12sp" />
 

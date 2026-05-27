@@ -59,6 +59,7 @@
                 android:layout_height="52dp"
                 android:layout_marginStart="14dp"
                 android:background="@drawable/bg_glass_pill"
+                android:contentDescription="@null"
                 android:padding="13dp"
                 android:src="@drawable/ic_explore"
                 app:tint="@color/text_on_primary" />
@@ -95,6 +96,7 @@
                 android:layout_height="62dp"
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/bg_icon_primary"
+                android:contentDescription="@null"
                 android:padding="15dp"
                 android:src="@drawable/ic_explore"
                 app:tint="@color/primary" />

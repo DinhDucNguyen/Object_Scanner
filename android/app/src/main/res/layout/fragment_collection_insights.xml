@@ -105,7 +105,7 @@
                             android:id="@+id/totalItemsText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                    android:text="@string/value_zero"
                             android:textColor="@color/primary_dark"
                             android:textSize="26sp"
                             android:textStyle="bold" />
@@ -145,7 +145,7 @@
                             android:id="@+id/reviewedItemsText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                    android:text="@string/value_zero"
                             android:textColor="@color/primary"
                             android:textSize="26sp"
                             android:textStyle="bold" />
@@ -185,7 +185,7 @@
                             android:id="@+id/masteredItemsText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                    android:text="@string/value_zero"
                             android:textColor="@color/success"
                             android:textSize="26sp"
                             android:textStyle="bold" />
@@ -225,7 +225,7 @@
                             android:id="@+id/successRateText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0%"
+                    android:text="@string/value_zero_percent"
                             android:textColor="@color/warning"
                             android:textSize="26sp"
                             android:textStyle="bold" />
@@ -264,7 +264,7 @@
                             android:id="@+id/avgQualityText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.0"
+                    android:text="@string/value_zero_decimal"
                             android:textColor="@color/cyan"
                             android:textSize="26sp"
                             android:textStyle="bold" />
@@ -303,7 +303,7 @@
                             android:id="@+id/totalReviewsText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                    android:text="@string/value_zero"
                             android:textColor="@color/violet"
                             android:textSize="26sp"
                             android:textStyle="bold" />

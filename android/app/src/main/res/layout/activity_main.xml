@@ -73,6 +73,7 @@
                 android:id="@+id/navIconHome"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:contentDescription="@string/nav_home"
                 android:src="@drawable/ic_home"
                 app:tint="@color/bottom_nav_inactive" />
             <TextView
@@ -104,6 +105,7 @@
                 android:id="@+id/navIconDictionary"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:contentDescription="@string/nav_dictionary"
                 android:src="@drawable/ic_dictionary"
                 app:tint="@color/bottom_nav_inactive" />
             <TextView
@@ -137,6 +139,7 @@
                 android:layout_width="46dp"
                 android:layout_height="46dp"
                 android:background="@drawable/bg_bottom_nav_scan_button_idle"
+                android:contentDescription="@string/nav_scan"
                 android:padding="10dp"
                 android:src="@drawable/ic_scan"
                 app:tint="@color/primary" />
@@ -169,6 +172,7 @@
                 android:id="@+id/navIconReview"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:contentDescription="@string/nav_review"
                 android:src="@drawable/ic_book"
                 app:tint="@color/bottom_nav_inactive" />
             <TextView
@@ -200,6 +204,7 @@
                 android:id="@+id/navIconProfile"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:contentDescription="@string/nav_profile"
                 android:src="@drawable/ic_person"
                 app:tint="@color/bottom_nav_inactive" />
             <TextView

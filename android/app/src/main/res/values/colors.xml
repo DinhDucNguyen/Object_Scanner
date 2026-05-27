@@ -7,7 +7,6 @@
 
     <!-- Accent — Warm Orange (streak, achievements) -->
     <color name="secondary">#FD933D</color>
-    <color name="secondary_dark">#944A00</color>
     <color name="secondary_light">#FFDCC5</color>
 
     <!-- Background — Lavender White -->
@@ -15,7 +14,6 @@
     <color name="surface">#FFFFFF</color>
     <color name="surface_variant">#E1E2ED</color>
     <color name="surface_soft">#F3F3FE</color>
-    <color name="surface_warm">#FFF7ED</color>
 
     <!-- Text — Deep Slate for AA/AAA contrast -->
     <color name="text_primary">#191B23</color>
@@ -42,14 +40,12 @@
     <color name="switch_thumb_unchecked">#737686</color>
     <color name="switch_track_checked">#004AC6</color>
     <color name="switch_track_unchecked">#D9DCE8</color>
-    <color name="overlay_dark">#B0000000</color>
     <color name="overlay_soft">#66000000</color>
     <color name="glass_white">#33FFFFFF</color>
     <color name="glass_stroke">#66FFFFFF</color>
     <color name="scan_frame">#E6FFFFFF</color>
 
     <!-- Bottom Nav -->
-    <color name="bottom_nav_active">#004AC6</color>
     <color name="bottom_nav_inactive">#737686</color>
     <color name="bottom_nav_bg">#FFFFFF</color>
 
@@ -62,17 +58,19 @@
     <color name="gradient_hero_mid">#004AC6</color>
     <color name="gradient_hero_end">#2563EB</color>
 
+    <!-- Auth -->
+    <color name="auth_gradient_start">#F8FAFF</color>
+    <color name="auth_gradient_mid">#EEF3FF</color>
+    <color name="auth_gradient_end">#DCE8FF</color>
+    <color name="auth_card_bg">#FFFFFF</color>
+    <color name="auth_card_stroke">#D9E1F2</color>
+    <color name="auth_field_bg">#F5F7FC</color>
+    <color name="auth_field_stroke">#D5DDEA</color>
+    <color name="auth_field_stroke_focused">#004AC6</color>
+    <color name="auth_icon_tint">#5F6578</color>
+    <color name="auth_logo_bg">#E7EEFF</color>
+
     <!-- Scan gradient — orange warm -->
-    <color name="gradient_scan_start">#EA580C</color>
-    <color name="gradient_scan_end">#FBBF24</color>
-
-    <!-- Card accent backgrounds -->
-    <color name="card_scan_bg">#FFEDD5</color>
-    <color name="card_learned_bg">#DBE1FF</color>
-    <color name="card_due_bg">#FEF9C3</color>
-    <color name="card_mastered_bg">#EDE9FE</color>
-
-    <color name="card_scan_icon">#F97316</color>
     <color name="card_learned_icon">#004AC6</color>
     <color name="card_due_icon">#EAB308</color>
     <color name="card_mastered_icon">#7C3AED</color>
@@ -101,25 +99,13 @@
     <color name="cyan_light">#CFFAFE</color>
 
     <!-- Glow -->
-    <color name="primary_glow">#33004AC6</color>
     <color name="surface_glass">#F3F3FE</color>
 
     <!-- Streak Heat Palette -->
     <color name="streak_idle">#9CA3AF</color>
     <color name="streak_idle_track">#E5E7EB</color>
     <color name="streak_heat_1">#F97316</color>
-    <color name="streak_heat_1_track">#FFEDD5</color>
     <color name="streak_heat_2">#FE2C55</color>
-    <color name="streak_heat_2_track">#FFE4EC</color>
     <color name="streak_heat_3">#D946EF</color>
-    <color name="streak_heat_3_track">#FAE8FF</color>
     <color name="streak_heat_4">#8B5CF6</color>
-    <color name="streak_heat_4_track">#EDE9FE</color>
-    <color name="streak_header_bg">#EA580C</color>
-
-    <!-- Legacy aliases -->
-    <color name="purple_500">#004AC6</color>
-    <color name="purple_700">#003EA8</color>
-    <color name="teal_200">#93C5FD</color>
-    <color name="teal_700">#1D4ED8</color>
 </resources>

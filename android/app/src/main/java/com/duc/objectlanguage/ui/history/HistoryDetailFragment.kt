@@ -120,7 +120,7 @@ class HistoryDetailFragment : Fragment() {
             if (confidence == null) {
                 visibility = View.GONE
             } else {
-                text = "${(confidence * 100).toInt()}%"
+                text = getString(R.string.format_percent_int, (confidence * 100).toInt())
                 visibility = View.VISIBLE
             }
         }

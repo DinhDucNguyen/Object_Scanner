@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 
 class StreakViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val ctx = application.applicationContext
     private val streakStore = StreakDataStore(application)
     private val repository = (application as ObjectLanguageApp).repository
 
@@ -115,10 +114,11 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
         }
         if (achieved != null) {
             streakStore.updateMilestone(achieved)
-            val settings = NotificationPreferences(ctx).currentSettings()
+            val appContext = getApplication<Application>().applicationContext
+            val settings = NotificationPreferences(appContext).currentSettings()
             if (settings.milestoneCelebrationEnabled) {
                 _celebrateMilestone.postValue(achieved)
-                AppNotificationHelper.showMilestone(ctx, achieved)
+                AppNotificationHelper.showMilestone(appContext, achieved)
             }
         }
     }

@@ -32,6 +32,8 @@ class DashboardFragment : Fragment() {
     private val viewModel: DashboardViewModel by viewModels()
     private var missionOpensReview = false
     private var goalIconAnimator: ObjectAnimator? = null
+    private var hasStartedLearning: Boolean? = null
+    private var latestStreakSummary: DashboardStreakSummary? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
@@ -98,10 +100,16 @@ class DashboardFragment : Fragment() {
                 animateProgress(binding.progressMastery, pct)
                 animateCounter(binding.tvProgressPct, 0, pct, suffix = "%")
                 bindMission(stats.dueToday, stats.totalScans)
+                hasStartedLearning = stats.totalScans > 0 ||
+                    stats.totalLearned > 0 ||
+                    stats.mastered > 0 ||
+                    stats.dueToday > 0
+                latestStreakSummary?.let { bindStreakSummary(it) }
             }
         }
 
         viewModel.streakSummary.observe(viewLifecycleOwner) { streak ->
+            latestStreakSummary = streak
             bindStreakSummary(streak)
         }
 
@@ -251,7 +259,9 @@ class DashboardFragment : Fragment() {
         ValueAnimator.ofInt(from, to).apply {
             duration = 900
             interpolator = DecelerateInterpolator()
-            addUpdateListener { view.text = "${it.animatedValue}$suffix" }
+            addUpdateListener {
+                view.text = getString(R.string.format_number_suffix, it.animatedValue as Int, suffix)
+            }
             start()
         }
     }
@@ -307,6 +317,9 @@ class DashboardFragment : Fragment() {
         val accent = getStreakAccent(streak.currentStreak)
         val accentColor = ContextCompat.getColor(requireContext(), accent.colorRes)
         val trackColor = ContextCompat.getColor(requireContext(), accent.trackColorRes)
+        val isNewAccount = hasStartedLearning == false &&
+            streak.currentStreak == 0 &&
+            streak.reviewsToday == 0
 
         binding.cardDashboardStreak.setStrokeColor(trackColor)
         binding.ivDashboardStreakIcon.imageTintList = if (streak.reviewsToday > 0) {
@@ -323,25 +336,29 @@ class DashboardFragment : Fragment() {
         binding.tvDashboardStreakDays.text = getString(
             if (streak.currentStreak == 1) R.string.streak_days_singular else R.string.streak_days_plural
         )
-        binding.tvDashboardStreakStatus.text = getString(
-            if (streak.reviewsToday > 0) R.string.dashboard_streak_today_done
-            else R.string.dashboard_streak_today_pending
-        )
+        binding.tvDashboardStreakStatus.text = when {
+            isNewAccount -> getString(R.string.dashboard_streak_welcome_title)
+            streak.reviewsToday > 0 -> getString(R.string.dashboard_streak_today_done)
+            else -> getString(R.string.dashboard_streak_today_pending)
+        }
         binding.tvDashboardStreakStatus.setTextColor(
             if (streak.reviewsToday > 0) accentColor
             else ContextCompat.getColor(requireContext(), R.color.text_secondary)
         )
-        binding.tvDashboardStreakReviewsToday.text =
-            getString(R.string.dashboard_streak_today_count, streak.reviewsToday)
-
-        binding.tvDashboardStreakMilestone.text = if (streak.hasReachedTopMilestone) {
-            getString(R.string.dashboard_streak_top_milestone)
+        binding.tvDashboardStreakReviewsToday.text = if (isNewAccount) {
+            getString(R.string.dashboard_streak_welcome_hint)
         } else {
-            getString(
-                R.string.dashboard_streak_next_milestone,
-                streak.daysToMilestone,
-                streak.nextMilestone
-            )
+            getString(R.string.dashboard_streak_today_count, streak.reviewsToday)
+        }
+
+        binding.tvDashboardStreakMilestone.text = when {
+            isNewAccount -> getString(R.string.dashboard_streak_welcome_milestone)
+            streak.hasReachedTopMilestone -> getString(R.string.dashboard_streak_top_milestone)
+            else -> getString(
+                    R.string.dashboard_streak_next_milestone,
+                    streak.daysToMilestone,
+                    streak.nextMilestone
+                )
         }
 
         binding.progressDashboardStreak.progress = if (streak.hasReachedTopMilestone) {

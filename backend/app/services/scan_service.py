@@ -90,22 +90,34 @@ class ScanService:
         user_id: int | None = None,
         base_url: str | None = None,
     ) -> ScanResponse:
-        gemini_result = self.gemini.identify_object(image_bytes)
-        if not gemini_result:
-            return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
+        # Bước 1: quick scan — model nhẹ, quota cao
+        quick = self.gemini.identify_object_quick(image_bytes)
 
-        if gemini_result.get("_error") == "quota_exceeded":
+        if quick.get("_error") == "quota_exceeded":
             return ScanResponse(source="gemini_quota_exceeded", object_id=0, object_code="quota_exceeded", translations=[])
-
-        if gemini_result.get("_error"):
+        if quick.get("_error"):
             return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
 
-        object_code = normalize_object_code(gemini_result.get("object_code", "unknown") or "unknown")
-        translations_raw = gemini_result.get("translations", [])
+        object_code = normalize_object_code(quick.get("object_code", "unknown") or "unknown")
+        confidence = quick.get("confidence", 0)
+        is_clear = quick.get("is_clear", True)
+
+        if object_code == "unknown":
+            return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
+
+        # Nếu nhận diện mơ hồ → leo lên model mạnh hơn để xác nhận + lấy vocab luôn
+        if confidence < 80 or not is_clear:
+            logger.info("Low confidence (%d, clear=%s), escalating to full identify", confidence, is_clear)
+            gemini_result = self.gemini.identify_object(image_bytes)
+            if gemini_result.get("_error"):
+                return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
+            object_code = normalize_object_code(gemini_result.get("object_code", "unknown") or "unknown")
+            if object_code == "unknown":
+                return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
+        else:
+            gemini_result = None  # confidence tốt, chưa cần vocab — check DB trước
+
         obj = self.obj_repo.get_by_code(db, object_code)
-
-        if object_code == "unknown" or not translations_raw:
-            return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
 
         if obj:
             object_code = obj.ma_doi_tuong
@@ -119,6 +131,16 @@ class ScanService:
                     translations=[self._to_dto(db, t) for t in existing_translations],
                     aliases=self._get_aliases(db, obj.id),
                 )
+
+        # DB miss và chưa có vocab → gọi full identify để sinh vocab
+        if gemini_result is None:
+            gemini_result = self.gemini.identify_object(image_bytes)
+            if gemini_result.get("_error"):
+                return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
+
+        translations_raw = gemini_result.get("translations", [])
+        if not translations_raw:
+            return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
 
         existing_pending = self._find_pending_review_prediction(db, object_code)
         if existing_pending:

@@ -128,7 +128,13 @@ class CollectionService:
                 object_name=obj.ma_doi_tuong if obj else "Unknown",
                 translation=t.tu_vung,
                 category=category.ten_danh_muc if category else "Uncategorized",
-                image_url=pick_primary_object_image(obj)
+                language_code=t.language.ma_ngon_ngu if t.language else None,
+                image_url=pick_primary_object_image(obj),
+                phonetic=t.phien_am,
+                part_of_speech=t.loai_tu,
+                definition=t.dinh_nghia,
+                examples=t.examples or [],
+                audio_url=t.am_thanh_url
             ))
 
         return CollectionDetailResponse(

@@ -289,8 +289,8 @@ class ScanFragment : Fragment() {
                     val tvEn = itemView.findViewById<android.widget.TextView>(R.id.tvEnSentence)
                     val tvVi = itemView.findViewById<android.widget.TextView>(R.id.tvViTranslation)
                     
-                    tvIndex.text = String.format(java.util.Locale.US, "%02d", i + 1)
-                    tvEn.text = "\"${item.en}\""
+                    tvIndex.text = getString(R.string.format_example_index, i + 1)
+                    tvEn.text = getString(R.string.format_quoted_text, item.en)
                     if (!item.vi.isNullOrBlank()) {
                         tvVi.text = item.vi
                         tvVi.visibility = View.GONE
@@ -358,7 +358,9 @@ class ScanFragment : Fragment() {
             openGalleryWithPermission()
         }
 
+        binding.btnRetake.addScaleFeedback()
         binding.btnRetake.setOnClickListener {
+            binding.btnRetake.performLightHaptic()
             viewModel.clearResult()
             restartCameraIfPermitted()
         }
@@ -381,7 +383,6 @@ class ScanFragment : Fragment() {
         }
 
     private fun initDetector(modelName: String) {
-        Log.d("ScanFragment", "Using detector model: ${ObjectDetectorHelper.displayNameForModel(modelName)} ($modelName)")
         detectorHelper?.close()
         detectorHelper = ObjectDetectorHelper(
             context = requireContext(),
@@ -444,8 +445,6 @@ class ScanFragment : Fragment() {
                         
                         // Convert sang JPEG bytes
                         val jpegBytes = bitmapToJpegBytes(rotatedBitmap)
-                        
-                        Log.d("ScanFragment", "Captured: ${rotatedBitmap.width}x${rotatedBitmap.height}, Rotation: $rotation°, Size: ${jpegBytes.size} bytes")
                         
                         // YOLO runs after the user confirms the preview.
                         showPreviewDialog(jpegBytes, rotatedBitmap)

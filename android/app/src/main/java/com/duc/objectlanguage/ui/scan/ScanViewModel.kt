@@ -71,14 +71,11 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             _error.value = null
 
             // 1. YOLO — thử DB lookup khi confidence >= 0.80
-            Log.d("ScanViewModel", "YOLO result: ${if (yoloResult != null) "${yoloResult.label} (${yoloResult.confidence}) model=${yoloResult.modelName}" else "null — no detection"}")
             if (yoloResult != null && yoloResult.confidence >= 0.80f) {
                 val objectCode = normalizeObjectCode(yoloResult.label)
-                Log.d("ScanViewModel", "YOLOv10: ${yoloResult.label} (${yoloResult.confidence})")
                 val yoloScan = repo.scanByCode(objectCode, yoloResult.confidence)
                 yoloScan.onFailure { Log.w("ScanViewModel", "YOLO scanByCode error: ${it.message}") }
                 val dbResult = yoloScan.getOrNull()
-                Log.d("ScanViewModel", "YOLO DB result: source=${dbResult?.source} translations=${dbResult?.translations?.size}")
                 if (dbResult != null && dbResult.translations.isNotEmpty()) {
                     val modelLabel = ObjectDetectorHelper.displayNameForModel(yoloResult.modelName)
                     _detectionSource.value = "$modelLabel · ${(yoloResult.confidence * 100).toInt()}%"
@@ -90,13 +87,11 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 // DB miss — nếu YOLO rất tự tin thì skip ML Kit, dùng Gemini ngay
                 if (yoloResult.confidence >= 0.90f) {
-                    Log.d("ScanViewModel", "YOLO high-conf DB miss → Gemini")
                     val modelLabel = ObjectDetectorHelper.displayNameForModel(yoloResult.modelName)
                     _detectionSource.value = "$modelLabel + Gemini AI · ${(yoloResult.confidence * 100).toInt()}%"
                     runGemini(imageBytes)
                     return@launch
                 }
-                Log.d("ScanViewModel", "YOLO low-conf DB miss → try ML Kit")
             }
 
             // 2. ML Kit — chỉ chạy khi YOLO không detect được
@@ -112,11 +107,9 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                 val topLabel = labels.maxByOrNull { it.confidence }
                 if (topLabel != null && topLabel.confidence >= 0.80f) {
                     val objectCode = normalizeObjectCode(topLabel.text)
-                    Log.d("ScanViewModel", "ML Kit: ${topLabel.text} (${topLabel.confidence})")
                     val mlScan = repo.scanByCode(objectCode, topLabel.confidence)
                     mlScan.onFailure { Log.w("ScanViewModel", "ML Kit scanByCode error: ${it.message}") }
                     val dbResult = mlScan.getOrNull()
-                    Log.d("ScanViewModel", "ML Kit DB result: source=${dbResult?.source} translations=${dbResult?.translations?.size}")
                     if (dbResult != null && dbResult.translations.isNotEmpty()) {
                         _detectionSource.value = "ML Kit · ${(topLabel.confidence * 100).toInt()}%"
                         _scanResult.value = dbResult
@@ -150,7 +143,6 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun runGemini(imageBytes: ByteArray) {
-        Log.d("ScanViewModel", "Fallback to Gemini...")
         repo.scanByImage(compressImageIfNeeded(imageBytes)).fold(
             onSuccess = {
                 when {

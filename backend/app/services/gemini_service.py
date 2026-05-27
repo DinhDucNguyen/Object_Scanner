@@ -11,30 +11,48 @@ logger = logging.getLogger(__name__)
 
 class GeminiService:
     def __init__(self):
+        # Quick scan — model nhẹ, quota cao (500 RPD), dùng cho bước nhận diện nhanh
         self.models_to_try = [
+            "gemini-3.1-flash-lite",
+            "gemini-3-flash",
+            "gemini-3.5-flash",
             "gemini-2.5-flash",
-            "gemini-2.0-flash",
-            "gemini-flash-latest",
+        ]
+        # Full identify — model mạnh hơn, dùng khi confidence thấp hoặc DB miss cần sinh vocab
+        self.vision_full_models = [
+            "gemini-3-flash",
+            "gemini-3.5-flash",
+            "gemini-2.5-flash",
+        ]
+        # Text-only (translate, dictionary, example) — nhẹ trước, không tranh quota scan
+        self.translate_models = [
+            "gemini-2.5-flash-lite",
+            "gemini-3.1-flash-lite",
+            "gemini-3-flash",
+            "gemini-2.5-flash",
+            "gemini-1.5-flash-8b",
+            "gemini-1.5-flash",  
         ]
         self.client: genai.Client | None = None
 
         if settings.GEMINI_API_KEY:
             self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            logger.info("Gemini client initialized")
+            logger.debug("Gemini client initialized")
         else:
             logger.warning("No GEMINI_API_KEY configured — Gemini disabled")
 
-    def _generate(self, contents: list) -> str | None:
+    def _generate(self, contents: list, models: list[str] | None = None) -> str | None:
         """Gọi Gemini với fallback qua từng model, trả về response.text."""
         if not self.client:
             return None
         last_error: Exception | None = None
-        for model_name in self.models_to_try:
+        for model_name in (models or self.models_to_try):
             try:
                 response = self.client.models.generate_content(
                     model=model_name,
                     contents=contents,
                 )
+                logger.debug("Gemini model used: %s", model_name)
                 return response.text
             except ResourceExhausted as e:
                 logger.warning("Model %s quota exhausted", model_name)
@@ -66,12 +84,51 @@ class GeminiService:
                 pass
         return None
 
+    def identify_object_quick(self, image_bytes: bytes) -> dict:
+        """Bước 1: nhận diện nhanh — chỉ trả object_name, confidence, is_clear.
+        Dùng model nhẹ/quota cao trước để tiết kiệm RPD."""
+        if not self.client:
+            return {"_error": "model_not_initialized"}
+
+        prompt = """Look at this image and identify the main object.
+Return ONLY valid JSON, no markdown:
+{
+  "object_code": "english_name_lowercase_underscores",
+  "confidence": 90,
+  "is_clear": true
+}
+Rules:
+- object_code: lowercase English, underscores for spaces (e.g. "water_bottle")
+- confidence: integer 0-100, how certain you are about the identification
+- is_clear: true if the object is clearly visible and unambiguous, false if blurry/partial/uncertain
+Return ONLY JSON."""
+
+        try:
+            image_part = types.Part.from_bytes(data=image_bytes, mime_type="image/webp")
+            text = self._generate([prompt, image_part])
+            if not text:
+                return {"_error": "empty_response"}
+            result = self._parse_json(text)
+            if not isinstance(result, dict):
+                return {"_error": "parse_error"}
+            return {
+                "object_code": self._normalize_object_code(result.get("object_code") or ""),
+                "confidence": int(result.get("confidence") or 0),
+                "is_clear": bool(result.get("is_clear", True)),
+            }
+        except ResourceExhausted as e:
+            return {"_error": "quota_exceeded", "_message": str(e)}
+        except Exception as e:
+            logger.error("identify_object_quick error: %s", e)
+            return {"_error": "api_error", "_message": str(e)}
+
     def identify_object(self, image_bytes: bytes) -> dict:
-        """Gọi Gemini Vision API để nhận diện vật thể từ ảnh."""
+        """Bước 2: nhận diện đầy đủ — trả object + toàn bộ vocab.
+        Gọi khi quick check thất bại hoặc object chưa có trong DB."""
         if not self.client:
             return {"_error": "model_not_initialized", "_message": "Gemini not configured"}
 
-        logger.info("Calling Gemini API with image size: %d bytes", len(image_bytes))
+        logger.debug("Calling Gemini API with image size: %d bytes", len(image_bytes))
 
         prompt = """Analyze this image and identify the main object. Return a JSON object with this exact format:
 {
@@ -103,18 +160,18 @@ Rules:
 - Return ONLY valid JSON, no markdown, no extra text"""
 
         try:
-            image_part = types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
-            text = self._generate([prompt, image_part])
+            image_part = types.Part.from_bytes(data=image_bytes, mime_type="image/webp")
+            text = self._generate([prompt, image_part], models=self.vision_full_models)
 
             if not text:
                 return {"_error": "empty_response", "_message": "Gemini returned empty response"}
 
-            logger.info("Gemini response: %s...", text[:200])
+            logger.debug("Gemini response: %s...", text[:200])
             result = self._parse_json(text)
 
             if isinstance(result, dict):
                 result = self._sanitize_result(result)
-                logger.info("Parsed object_code: %s", result.get("object_code", "N/A"))
+                logger.debug("Parsed object_code: %s", result.get("object_code", "N/A"))
                 return result
 
             # Fallback regex parse
@@ -232,7 +289,7 @@ Return ONLY valid JSON:
 Text: {text}"""
 
         try:
-            raw = self._generate([prompt])
+            raw = self._generate([prompt], models=self.translate_models)
             if not raw:
                 return None
             result = self._parse_json(raw)
@@ -295,7 +352,7 @@ Target language: {to_name}
 Input: {text}"""
 
         try:
-            raw = self._generate([prompt])
+            raw = self._generate([prompt], models=self.translate_models)
             if not raw:
                 return None
             result = self._parse_json(raw)
@@ -325,7 +382,7 @@ Return a JSON array of strings, like: ["sentence 1", "sentence 2", "sentence 3"]
 Return ONLY valid JSON, no markdown or extra text."""
 
         try:
-            text = self._generate([prompt])
+            text = self._generate([prompt], models=self.translate_models)
             if not text:
                 return []
             result = self._parse_json(text)

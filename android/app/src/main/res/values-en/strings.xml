@@ -2,6 +2,17 @@
 <resources>
     <string name="app_name">LengoLens</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_btn_next">Next</string>
+    <string name="onboarding_btn_skip">Skip</string>
+    <string name="onboarding_btn_start">Start learning</string>
+    <string name="onboarding_slide1_title">Snap to learn</string>
+    <string name="onboarding_slide1_desc">Point the camera at an object to see its English name, pronunciation, and meaning.</string>
+    <string name="onboarding_slide2_title">Save words, build collections</string>
+    <string name="onboarding_slide2_desc">Add discovered words to personal collections and organize them by topic or day.</string>
+    <string name="onboarding_slide3_title">Review smarter</string>
+    <string name="onboarding_slide3_desc">Spaced repetition brings words back when you are about to forget them.</string>
+
     <!-- Bottom navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_scan">Scan</string>
@@ -27,7 +38,7 @@
     <string name="title_image_matching">Image Matching</string>
     <string name="title_pronunciation">Pronunciation Practice</string>
     <string name="title_explore">Explore</string>
-    <string name="title_explore_detail">Topic Vocabulary</string>
+    <string name="title_explore_detail">Vocabulary by Topic</string>
     <string name="title_collections">Collections</string>
     <string name="title_collection_detail">Collection Detail</string>
     <string name="title_collection_insights">Collection Insights</string>
@@ -79,11 +90,11 @@
     <string name="dashboard_search_hint">Search or scan an object…</string>
     <string name="dashboard_mastery_label">Mastery level</string>
     <string name="dashboard_goal_title">Today\'s goal</string>
-    <string name="dashboard_hunt_title">Turn real objects into new words</string>
+    <string name="dashboard_hunt_title">Turn everyday objects into vocabulary</string>
     <string name="dashboard_hunt_subtitle">Pick something nearby, scan it with the camera, and save it to your review set.</string>
     <string name="dashboard_mission_first_scan_title">Scan your first object</string>
     <string name="dashboard_mission_first_scan_subtitle">Try something on your desk to start your word list.</string>
-    <string name="dashboard_mission_review_title">Review %d words before they fade</string>
+    <string name="dashboard_mission_review_title">Review %d words before  you forget them</string>
     <string name="dashboard_mission_review_subtitle">Finish your reviews first, then scan more objects.</string>
     <string name="dashboard_mission_scan_title">Find this object in real life</string>
     <string name="dashboard_mission_scan_subtitle">Today, find a real object, scan it, and record its pronunciation.</string>
@@ -110,6 +121,9 @@
     <string name="dashboard_streak_next_milestone_initial">3 days to the 3-day milestone</string>
     <string name="dashboard_streak_next_milestone">%1$d days to the %2$d-day milestone</string>
     <string name="dashboard_streak_top_milestone">Top streak milestone reached</string>
+    <string name="dashboard_streak_welcome_title">Let\'s begin!</string>
+    <string name="dashboard_streak_welcome_hint">Scan an object to learn your first word.</string>
+    <string name="dashboard_streak_welcome_milestone">First word, first streak.</string>
 
     <!-- Scan -->
     <string name="scan_overlay">Place an object in frame, then capture</string>
@@ -123,8 +137,9 @@
     <string name="scan_label_definition">DEFINITION</string>
     <string name="scan_label_example">Usage examples</string>
     <string name="scan_label_also_known_as">Also known as</string>
+    <string name="scan_also_known_as">Also known as: %s</string>
     <string name="scan_category_ai">Recognized by AI</string>
-    <string name="scan_result_label">Recognition result</string>
+    <string name="scan_result_label">Recognition Result</string>
     <string name="scan_translation_label">Vocabulary</string>
     <string name="scan_error_camera_permission">Camera permission is required to scan objects</string>
     <string name="scan_error_gallery_permission">Photo access permission is required</string>
@@ -163,6 +178,8 @@
     <string name="dictionary_object_code_label">Object code:</string>
     <string name="dictionary_play_audio">Play pronunciation</string>
     <string name="dictionary_history_delete">Remove from history</string>
+    <string name="dictionary_history_search_hint">Search history...</string>
+    <string name="dictionary_history_no_results">No results found</string>
 
     <!-- Explore -->
     <string name="explore_title">Explore</string>
@@ -174,6 +191,7 @@
     <string name="category_detail_empty">No vocabulary yet</string>
     <string name="category_detail_learn_now">Learn now</string>
     <string name="flashcard_tap_to_reveal">Tap to reveal meaning</string>
+    <string name="flashcard_tap_to_front">Tap to see the word</string>
     <string name="flashcard_next">Next word</string>
     <string name="flashcard_finish">Done</string>
     <string name="flashcard_counter">%1$d / %2$d</string>
@@ -371,6 +389,7 @@
 
     <!-- History -->
     <string name="history_empty">No scan history yet</string>
+    <string name="history_empty_title">No scan history yet</string>
     <string name="history_image">Scan history image</string>
     <string name="history_search_hint">Search scanned objects</string>
     <string name="history_filter_all">All</string>
@@ -400,7 +419,7 @@
     <string name="streak_stat_today">Reviews today</string>
     <string name="streak_stats_title">Review statistics</string>
     <string name="streak_today_done">Completed today!</string>
-    <string name="streak_today_pending">Review pending today</string>
+    <string name="streak_today_pending">No review yet today</string>
     <string name="streak_milestone_label">Next milestone: %d days</string>
     <string name="streak_days_to_go">%d days to go</string>
     <string name="streak_days_count">%d days</string>
@@ -410,19 +429,23 @@
     <string name="streak_msg_dont_break">Do not break your %d-day streak!</string>
     <string name="streak_msg_great_start">Great start! Come back tomorrow!</string>
     <string name="streak_msg_keep_going">Keep going! Build your daily habit.</string>
-    <string name="streak_msg_momentum">%d days strong! You are building momentum.</string>
+    <string name="streak_msg_momentum">%d days in a row! You are building momentum.</string>
     <string name="streak_msg_one_week">One week streak! Nice work!</string>
     <string name="streak_msg_two_weeks">Two weeks! Keep the rhythm going!</string>
     <string name="streak_msg_champion">%d days! You are a consistent learner!</string>
     <string name="streak_msg_legend">%d days! That is something to be proud of!</string>
     <string name="streak_msg_default">Keep learning every day!</string>
     <string name="streak_milestone_title">Streak milestones</string>
-    <string name="streak_milestone_content">3 days - Beginner\n7 days - Week Warrior\n14 days - Two Week Champion\n30 days - Monthly Master\n50 days - Consistency King\n100 days - Century Club\n365 days - Year Legend\n\nKeep your daily streak to unlock achievements!</string>
+    <string name="streak_milestone_content">3 days - Beginner\n7 days - Week Warrior\n14 days - Two Week Champion\n30 days - Monthly Master\n50 days - Consistency Master\n100 days - Century Club\n365 days - Year Legend\n\nKeep your daily streak to unlock achievements!</string>
     <string name="streak_milestone_btn_ok">Got it</string>
     <string name="streak_celebrate_title">Milestone achieved!</string>
     <string name="streak_celebrate_msg">Congratulations! You reached a %d-day streak!\n\nYour dedication is inspiring. Keep it up!</string>
     <string name="streak_celebrate_btn">Awesome</string>
     <string name="streak_section_activity">ACTIVITY STATS</string>
+    <string name="streak_section_calendar">LEARNING CALENDAR</string>
+    <string name="streak_calendar_title">Last 30 days</string>
+    <string name="streak_calendar_legend_none">Less</string>
+    <string name="streak_calendar_legend_many">More</string>
     <string name="streak_section_achievements">ACHIEVEMENTS</string>
     <string name="streak_view_all">View all</string>
     <string name="streak_achievement_1_label">Beginner</string>
@@ -438,7 +461,7 @@
     <!-- Collections -->
     <string name="collection_search_hint">Search collections...</string>
     <string name="collection_empty_title">No collections yet</string>
-    <string name="collection_empty_subtitle">Create your first collection\nto organize your vocabulary</string>
+    <string name="collection_empty_subtitle">Create your first collection\nand organize your vocabulary</string>
     <string name="collection_item_count">%d words</string>
     <string name="collection_created_date">Created %s</string>
     <string name="collection_progress_label">PROGRESS</string>
@@ -446,7 +469,7 @@
     <string name="collection_btn_insights">Insights</string>
     <string name="collection_btn_delete">Delete</string>
     <string name="collection_btn_rename">Rename</string>
-    <string name="collection_btn_review">Review collection</string>
+    <string name="collection_btn_review">Review This Collection</string>
     <string name="collection_btn_review_short">Review</string>
     <string name="collection_default_title">Collection</string>
     <string name="collection_item_count_zero">0 words in this collection</string>
@@ -468,6 +491,8 @@
     <string name="collection_dialog_name_subtitle">E.g. English conversation, JLPT N3...</string>
     <string name="collection_dialog_delete_title">Delete collection</string>
     <string name="collection_dialog_delete_msg">Are you sure you want to delete \"%s\"?</string>
+    <string name="collection_audio_load_error">Could not load audio</string>
+    <string name="collection_audio_play_error">Could not play audio</string>
     <string name="collection_add_to_title">Add to collection</string>
     <string name="collection_no_collections">No collections yet. Create one in Profile!</string>
     <string name="collection_save_title">Save to collection</string>
@@ -503,6 +528,7 @@
     <string name="collection_by_owner">by %s</string>
     <string name="collection_community_empty_title">No public collections yet</string>
     <string name="collection_community_empty_subtitle">Be the first to share your collection!</string>
+    <string name="collection_add_to">Add to \"%s\"</string>
     <string name="collection_added_to">Added to \"%s\"</string>
 
     <!-- Collection insights -->
@@ -578,7 +604,7 @@
     <string name="notification_channel_milestone_desc">Celebrations when you reach streak milestones.</string>
     <string name="notification_due_message">You have %d words due today. A few minutes is enough.</string>
     <string name="notification_due_streak_message">You have %1$d words due today. Review now to keep your %2$d-day streak.</string>
-    <string name="notification_generic_title">Time to review</string>
+    <string name="notification_generic_title">Time to learn ✨</string>
     <string name="notification_generic_message">Open LengoLens for today\'s vocabulary practice.</string>
     <string name="notification_generic_streak_message">Open LengoLens to keep your %d-day streak.</string>
     <string name="notification_milestone_title">%d-day milestone reached!</string>
@@ -598,6 +624,7 @@
     <string name="profile_menu_analytics">Learning analytics</string>
     <string name="profile_menu_streak">Daily streak</string>
     <string name="profile_menu_collection">Collections</string>
+    <string name="profile_dark_mode">Dark mode</string>
     <string name="profile_btn_logout">Log out</string>
     <string name="profile_logout_confirm_title">Log out</string>
     <string name="profile_logout_confirm_msg">Are you sure you want to log out?</string>
@@ -623,7 +650,7 @@
     <string name="profile_stat_due">Streak</string>
     <string name="profile_language_changed_vi">Đã chuyển sang tiếng Việt</string>
     <string name="profile_language_changed_en">Switched to English</string>
-    <string name="profile_language_save_failed">Could not save language to your account. The app changed it on this device only.</string>
+    <string name="profile_language_save_failed">Could not sync your language preference to your account. The app changed it on this device only.</string>
     <string name="profile_menu_content_description">Profile menu</string>
     <string name="profile_bio_updated">Bio updated</string>
     <string name="profile_name_updated">Display name updated</string>
@@ -666,4 +693,51 @@
     <string name="btn_back">Back</string>
     <string name="arrow">›</string>
     <string name="content_description_avatar">Avatar</string>
+    <string name="offline_banner">You are offline. Some features may be limited.</string>
+    <string name="refresh_success">Updated</string>
+    <string name="profile_edit_display_name">Edit display name</string>
+    <string name="format_number_suffix">%1$d%2$s</string>
+    <string name="format_percent_int">%d%%</string>
+    <string name="format_fraction_spaced">%1$d / %2$d</string>
+    <string name="format_quoted_text">"%s"</string>
+    <string name="format_example_index">%02d</string>
+    <string name="symbol_plus">+</string>
+    <string name="symbol_check">✓</string>
+    <string name="symbol_close">✕</string>
+    <string name="symbol_bullet">•</string>
+    <string name="symbol_translation_arrow">→</string>
+    <string name="value_zero">0</string>
+    <string name="value_zero_percent">0%</string>
+    <string name="value_zero_decimal">0.0</string>
+    <string name="value_time_1900">19:00</string>
+    <string name="language_en_short">EN</string>
+    <string name="language_vi_short">VI</string>
+    <string name="language_pair_en_vi">EN &lt;-&gt; VI</string>
+    <string name="scan_model_label">Model</string>
+    <string name="scan_model_custom">Custom YOLO</string>
+    <string name="scan_model_coco">COCO</string>
+    <string name="scan_definition_title">Definition</string>
+    <string name="placeholder_word">word</string>
+    <string name="placeholder_object">Object</string>
+    <string name="placeholder_object_code">object_code</string>
+    <string name="placeholder_collection_name">Collection Name</string>
+    <string name="placeholder_collection_owner">by username</string>
+    <string name="placeholder_collection_count_zero">0 words</string>
+    <string name="placeholder_collection_created">Created --</string>
+    <string name="placeholder_confidence">90%</string>
+    <string name="placeholder_date">2024-01-01</string>
+    <string name="placeholder_review_progress">1 / 10</string>
+    <string name="placeholder_example_index">01</string>
+    <string name="collection_word_category_placeholder">CATEGORY</string>
+    <string name="matching_image_content_description">Matching image</string>
+    <string name="streak_cd_back">Back</string>
+    <string name="streak_cd_milestone_info">Milestone Info</string>
+    <string name="streak_cd_flame">Streak Flame</string>
+    <string name="weekday_sun_short">Sun</string>
+    <string name="weekday_mon_short">Mon</string>
+    <string name="weekday_tue_short">Tue</string>
+    <string name="weekday_wed_short">Wed</string>
+    <string name="weekday_thu_short">Thu</string>
+    <string name="weekday_fri_short">Fri</string>
+    <string name="weekday_sat_short">Sat</string>
 </resources>

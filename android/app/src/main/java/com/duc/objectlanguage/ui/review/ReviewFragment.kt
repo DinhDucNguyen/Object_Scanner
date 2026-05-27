@@ -199,7 +199,7 @@ class ReviewFragment : Fragment() {
 
         // Front: từ tiếng Anh + phiên âm
         binding.tvQuestion.text = card.wordName
-        binding.tvProgress.text = "${idx + 1} / ${cards.size}"
+        binding.tvProgress.text = getString(R.string.format_fraction_spaced, idx + 1, cards.size)
         binding.tvLangHint.text = getString(R.string.review_lang_hint)
 
         if (!card.phonetic.isNullOrEmpty()) {
@@ -215,7 +215,7 @@ class ReviewFragment : Fragment() {
 
         val example = card.examples.firstOrNull()?.cauViDu
         if (!example.isNullOrEmpty()) {
-            binding.tvAnswerExample.text = "\"$example\""
+            binding.tvAnswerExample.text = getString(R.string.format_quoted_text, example)
             binding.tvAnswerExample.visibility = View.VISIBLE
         } else {
             binding.tvAnswerExample.visibility = View.GONE

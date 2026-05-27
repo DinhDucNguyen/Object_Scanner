@@ -25,7 +25,13 @@ data class CollectionItem(
     @SerializedName("object_name") val objectName: String,
     val translation: String,
     val category: String,
-    @SerializedName("image_url") val imageUrl: String?
+    @SerializedName("language_code") val languageCode: String? = null,
+    @SerializedName("image_url") val imageUrl: String?,
+    val phonetic: String? = null,
+    @SerializedName("part_of_speech") val partOfSpeech: String? = null,
+    val definition: String? = null,
+    val examples: List<ViDuResponse> = emptyList(),
+    @SerializedName("audio_url") val audioUrl: String? = null
 )
 
 data class CollectionInsights(

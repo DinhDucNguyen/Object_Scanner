@@ -1,5 +1,3 @@
-import os
-
 import httpx
 from copy import deepcopy
 from datetime import datetime, timedelta
@@ -14,16 +12,15 @@ from app.models.object import Object
 from app.models.object_alias import ObjectAlias
 from app.models.translation import Translation
 from app.repositories.object_repo import normalize_object_code
+from app.services.gemini_service import GeminiService
 from app.utils.timezone import now_vietnam
-
-MYMEMORY_URL = "https://api.mymemory.translated.net/get"
-MYMEMORY_EMAIL = os.getenv("MYMEMORY_EMAIL")
 
 
 class DictionaryService:
     def __init__(self):
         self._cache: dict[tuple[str, str, str], tuple[datetime, dict]] = {}
         self._cache_ttl = timedelta(minutes=10)
+        self._gemini = GeminiService()
 
     # ------------------------------------------------------------------
     # Public
@@ -73,8 +70,8 @@ class DictionaryService:
                 self._set_cached(cache_key, response)
                 return response
 
-            # Nếu không thấy trong DB → dịch sang EN qua MyMemory rồi tìm lại
-            en_text = self._translate_mymemory(normalized, "vi", "en")
+            # Nếu không thấy trong DB → dịch sang EN qua Gemini rồi tìm lại
+            en_text = self._translate_gemini(normalized, "vi", "en")
             if en_text:
                 for candidate in self._singular_candidates(en_text):
                     found = self._find_existing_translation(db, candidate, "en", to_lang)
@@ -88,8 +85,8 @@ class DictionaryService:
                         self._set_cached(cache_key, response)
                         return response
 
-        # 3. Không có trong DB → dịch bằng MyMemory
-        translation = self._translate_mymemory(normalized, from_lang, to_lang)
+        # 3. Không có trong DB → dịch bằng Gemini
+        translation = self._translate_gemini(normalized, from_lang, to_lang)
         if not translation:
             return {"_error": "service_unavailable"}
 
@@ -113,7 +110,7 @@ class DictionaryService:
             "definitions": [],
             "from_lang": from_lang,
             "to_lang": to_lang,
-            "source": "mymemory",
+            "source": "gemini",
             "is_physical_object": False,
             "object_id": None,
             "object_code": None,
@@ -121,12 +118,14 @@ class DictionaryService:
             "can_save": False,
             "pending_review": False,
         }
-        self._upsert_lookup(
-            db, user_id, normalized, from_lang, to_lang, response,
-            translation_text=translation, phonetic=phonetic,
-        )
-        db.commit()
-        self._set_cached(cache_key, response)
+        # Chỉ cache từ/cụm từ ngắn — đoạn văn dài thì dịch xong trả về, không lưu DB
+        if len(normalized) <= 200:
+            self._upsert_lookup(
+                db, user_id, normalized, from_lang, to_lang, response,
+                translation_text=translation, phonetic=phonetic,
+            )
+            db.commit()
+            self._set_cached(cache_key, response)
         return response
 
     # ------------------------------------------------------------------
@@ -338,7 +337,7 @@ class DictionaryService:
         }
 
     # ------------------------------------------------------------------
-    # MyMemory + phonetic
+    # Gemini translate + phonetic
     # ------------------------------------------------------------------
 
     def _singular_candidates(self, word: str) -> list[str]:
@@ -355,35 +354,12 @@ class DictionaryService:
             candidates.append(w[:-1])
         return candidates
 
-    def _translate_mymemory(self, text: str, from_lang: str, to_lang: str) -> str | None:
-        import html, re
-        try:
-            with httpx.Client(timeout=10.0) as client:
-                params = {
-                    "q": text,
-                    "langpair": f"{from_lang}|{to_lang}",
-                }
-                if MYMEMORY_EMAIL:
-                    params["de"] = MYMEMORY_EMAIL
-                resp = client.get(MYMEMORY_URL, params=params)
-            data = resp.json()
-            if data.get("responseStatus") == 200:
-                raw = data["responseData"].get("translatedText", "")
-                # double-encoded entities: &amp;nbsp; -> &nbsp; -> \xa0
-                cleaned = html.unescape(html.unescape(raw))
-                # strip XML/HTML tags: <g id="...">text</g>
-                cleaned = re.sub(r"<[^>]+>", "", cleaned)
-                # strip non-breaking space
-                cleaned = cleaned.replace("\xa0", " ")
-                # strip leading article (A/An/The) và số thứ tự thừa từ MyMemory
-                cleaned = re.sub(r"^\d+\.\s*", "", cleaned)
-                cleaned = re.sub(r"^(A|An|The)\s+", "", cleaned, flags=re.IGNORECASE)
-                cleaned = cleaned.strip()
-                if cleaned and cleaned.upper() != text.upper():
-                    return cleaned
-        except Exception:
-            pass
-        return None
+    def _translate_gemini(self, text: str, from_lang: str, to_lang: str) -> str | None:
+        result = self._gemini.translate_text(text, from_lang, to_lang)
+        if not result or "_error" in result:
+            return None
+        translation = (result.get("translation") or "").strip()
+        return translation if translation and translation.lower() != text.lower() else None
 
     def _fetch_phonetic(self, word: str, lang: str) -> str | None:
         """IPA từ dictionaryapi.dev — chỉ cho EN từ đơn."""

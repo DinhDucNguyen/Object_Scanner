@@ -110,7 +110,7 @@ class CollectionInsightsFragment : Fragment() {
         binding.totalItemsText.text = insights.totalItems.toString()
         binding.reviewedItemsText.text = insights.reviewedItems.toString()
         binding.masteredItemsText.text = insights.masteredItems.toString()
-        binding.successRateText.text = "${(insights.successRate * 100).toInt()}%"
+        binding.successRateText.text = getString(R.string.format_percent_int, (insights.successRate * 100).toInt())
         binding.avgQualityText.text = String.format("%.1f", insights.averageQuality)
         binding.totalReviewsText.text = insights.totalReviews.toString()
     }

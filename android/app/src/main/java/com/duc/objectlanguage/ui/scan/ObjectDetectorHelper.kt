@@ -52,8 +52,6 @@ class ObjectDetectorHelper(
                 afd.declaredLength,
             )
             interpreter = Interpreter(model, Interpreter.Options().apply { setNumThreads(4) })
-            val outShape = interpreter!!.getOutputTensor(0).shape()
-            android.util.Log.d("ObjectDetector", "Model loaded OK: $modelName. Output shape: ${outShape.toList()}")
         }.onFailure {
             onResult(DetectionEvent.Failure("Không load được model: ${it.message}"))
         }
@@ -97,17 +95,6 @@ class ObjectDetectorHelper(
         }.onFailure {
             onResult(DetectionEvent.Failure("Lỗi nhận diện: ${it.message}"))
             return
-        }
-
-        // Debug: print best detection to tune threshold
-        val best = (0 until numDetections).maxByOrNull { outputBuffer[0][it][4] }
-        if (best != null) {
-            val bestScore = outputBuffer[0][best][4]
-            val bestClass = outputBuffer[0][best][5].toInt()
-            android.util.Log.d(
-                "ObjectDetector",
-                "Best detection: model=$modelName class=$bestClass (${labels.getOrElse(bestClass) { "unknown" }}) score=$bestScore",
-            )
         }
 
         val results = mutableListOf<DetectionResult>()
@@ -170,7 +157,6 @@ class ObjectDetectorHelper(
             .maxByOrNull { it.first }
             ?.let { (score, i) ->
                 val classId = outputBuffer[0][i][5].toInt()
-                android.util.Log.d("ObjectDetector", "YOLO on captured: ${labels.getOrElse(classId){"?"}} score=$score")
                 DetectionResult(
                     label = labels.getOrElse(classId) { "unknown" },
                     confidence = score,

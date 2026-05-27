@@ -102,6 +102,7 @@ class ProfileFragment : Fragment() {
         viewModel.loadStats()
         viewModel.loadCollections()
         animateEntrance()
+        restorePendingScrollPosition()
     }
 
     private fun animateEntrance() {
@@ -179,6 +180,7 @@ class ProfileFragment : Fragment() {
         binding.btnLangEN.setOnClickListener { setDisplayLanguage("en") }
         binding.frameAvatar.setOnClickListener { showAvatarOptions() }
         binding.tvUsername.setOnClickListener { showFullNameDialog() }
+        binding.btnEditFullName.setOnClickListener { showFullNameDialog() }
         binding.tvUsernameHandle.setOnClickListener { showUsernameDialog() }
         binding.tvBio.setOnClickListener { showBioDialog() }
         binding.btnMenu.setOnClickListener { showOverflowMenu() }
@@ -207,7 +209,7 @@ class ProfileFragment : Fragment() {
         }
 
         val sheet = BottomSheetDialog(requireContext())
-        val view = layoutInflater.inflate(R.layout.dialog_avatar_options, null)
+        val view = layoutInflater.inflate(R.layout.dialog_avatar_options, binding.root, false)
         sheet.setContentView(view)
 
         view.findViewById<View>(R.id.cardViewAvatar).setOnClickListener {
@@ -521,18 +523,41 @@ class ProfileFragment : Fragment() {
         binding.switchDarkMode.setOnCheckedChangeListener(null)
         binding.switchDarkMode.isChecked = isDark
         binding.switchDarkMode.setOnCheckedChangeListener { _, checked ->
+            saveScrollPositionForRecreate()
             prefs.edit().putBoolean("dark_mode", checked).apply()
             val app = requireActivity().application as ObjectLanguageApp
             if (app.tokenManager.isLoggedIn) {
-                // Dùng GlobalScope để request không bị cancel khi activity recreate
-                kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                app.applicationScope.launch {
                     app.repository.updateDarkMode(checked)
                 }
             }
-            // Gọi sau khi API đã được dispatch để không cancel coroutine
             AppCompatDelegate.setDefaultNightMode(
                 if (checked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
             )
+        }
+    }
+
+    private fun saveScrollPositionForRecreate() {
+        val prefs = requireContext().getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_RESTORE_PROFILE_SCROLL, true)
+            .putInt(KEY_PROFILE_SCROLL_Y, binding.root.scrollY)
+            .apply()
+    }
+
+    private fun restorePendingScrollPosition() {
+        val prefs = requireContext().getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+        if (!prefs.getBoolean(KEY_RESTORE_PROFILE_SCROLL, false)) return
+        val scrollY = prefs.getInt(KEY_PROFILE_SCROLL_Y, 0)
+        prefs.edit()
+            .remove(KEY_RESTORE_PROFILE_SCROLL)
+            .remove(KEY_PROFILE_SCROLL_Y)
+            .apply()
+
+        binding.root.post {
+            binding.root.post {
+                binding.root.scrollTo(0, scrollY)
+            }
         }
     }
 
@@ -590,6 +615,8 @@ class ProfileFragment : Fragment() {
     companion object {
         private const val AVATAR_JPEG_QUALITY = 86
         private const val MAX_AVATAR_SIZE_PX = 1024
+        private const val KEY_RESTORE_PROFILE_SCROLL = "restore_profile_scroll_after_recreate"
+        private const val KEY_PROFILE_SCROLL_Y = "profile_scroll_y"
         private val USERNAME_PATTERN = Regex("^[a-zA-Z0-9_]{3,50}$")
     }
 
