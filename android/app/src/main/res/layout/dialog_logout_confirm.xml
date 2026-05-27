@@ -6,43 +6,25 @@
     android:background="@drawable/bg_dialog_rounded"
     android:orientation="vertical">
 
-    <!-- Danger gradient header -->
+    <!-- Header -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="@drawable/bg_dialog_header_danger">
-
-        <View
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="-16dp"
-            android:layout_marginEnd="-16dp"
-            android:alpha="0.15"
-            android:background="@drawable/circle_bg" />
-
-        <View
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="bottom|start"
-            android:layout_marginStart="-10dp"
-            android:layout_marginBottom="-10dp"
-            android:alpha="0.10"
-            android:background="@drawable/circle_bg" />
+        android:layout_height="88dp"
+        android:background="@drawable/bg_logout_header">
 
         <FrameLayout
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="54dp"
+            android:layout_height="54dp"
             android:layout_gravity="center"
-            android:background="@drawable/bg_dialog_icon_circle">
+            android:background="@drawable/bg_logout_icon_circle">
 
             <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_person"
-                app:tint="@android:color/white" />
+                app:tint="@color/logout_accent" />
         </FrameLayout>
     </FrameLayout>
 
@@ -82,9 +64,10 @@
             android:layout_height="52dp"
             android:layout_marginTop="24dp"
             android:text="@string/profile_logout_confirm_yes"
+            android:textColor="@color/text_on_primary"
             android:textSize="15sp"
             android:textStyle="bold"
-            app:backgroundTint="@color/error"
+            app:backgroundTint="@color/logout_button"
             app:cornerRadius="16dp"
             app:icon="@drawable/ic_back"
             app:iconGravity="textStart"

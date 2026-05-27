@@ -14,6 +14,14 @@ class CollectionWordAdapter(
     private val onRemove: (translationId: Int) -> Unit
 ) : ListAdapter<CollectionItem, CollectionWordAdapter.ViewHolder>(DiffCallback()) {
 
+    private var canEdit: Boolean = true
+
+    fun setCanEdit(value: Boolean) {
+        if (canEdit == value) return
+        canEdit = value
+        notifyDataSetChanged()
+    }
+
     inner class ViewHolder(private val binding: ItemCollectionWordBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -21,6 +29,7 @@ class CollectionWordAdapter(
             binding.tvWord.text = item.translation
             binding.tvDefinition.visibility = View.GONE
             binding.tvCategory.text = item.category.uppercase(Locale.getDefault())
+            binding.btnRemove.visibility = if (canEdit) View.VISIBLE else View.GONE
             binding.btnRemove.setOnClickListener { onRemove(item.translationId) }
         }
     }

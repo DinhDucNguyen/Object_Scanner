@@ -23,7 +23,6 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentReviewBinding
 import com.duc.objectlanguage.ui.common.addPulseFeedback
 import com.duc.objectlanguage.ui.common.addScaleFeedback
-import com.duc.objectlanguage.utils.DefinitionFormatter
 
 class ReviewFragment : Fragment() {
 
@@ -212,7 +211,7 @@ class ReviewFragment : Fragment() {
 
         // Back: nghĩa tiếng Việt + ví dụ
         val rawDef = card.definition ?: ""
-        binding.tvAnswerDefinition.text = DefinitionFormatter.formatDefinition(requireContext(), rawDef)
+        binding.tvAnswerDefinition.text = rawDef
 
         val example = card.examples.firstOrNull()?.cauViDu
         if (!example.isNullOrEmpty()) {

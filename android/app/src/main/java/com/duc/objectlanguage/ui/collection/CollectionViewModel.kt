@@ -126,6 +126,67 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
             _isLoading.value = false
         }
     }
+
+    /**
+     * Update collection name
+     */
+    fun updateCollectionName(collectionId: Int, name: String) {
+        val trimmedName = name.trim()
+        if (trimmedName.isBlank()) {
+            _error.value = getApplication<Application>().getString(R.string.collection_name_empty)
+            return
+        }
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repo.updateCollection(collectionId, trimmedName)
+
+            result.fold(
+                onSuccess = {
+                    _successMessage.value = getApplication<Application>().getString(
+                        R.string.collection_name_updated,
+                        trimmedName
+                    )
+                    loadCollections()
+                    loadPublicCollections()
+                },
+                onFailure = { e ->
+                    _error.value = getApplication<Application>().getString(
+                        R.string.collection_name_update_error,
+                        e.message ?: ""
+                    )
+                }
+            )
+
+            _isLoading.value = false
+        }
+    }
+
+    /**
+     * Update collection privacy
+     */
+    fun updateCollectionPrivacy(collectionId: Int, isPublic: Boolean) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repo.updateCollectionPrivacy(collectionId, isPublic)
+
+            result.fold(
+                onSuccess = {
+                    _successMessage.value = getApplication<Application>().getString(R.string.collection_privacy_updated)
+                    loadCollections()
+                    loadPublicCollections()
+                },
+                onFailure = { e ->
+                    _error.value = getApplication<Application>().getString(
+                        R.string.collection_privacy_update_error,
+                        e.message ?: ""
+                    )
+                }
+            )
+
+            _isLoading.value = false
+        }
+    }
     
     /**
      * Delete collection

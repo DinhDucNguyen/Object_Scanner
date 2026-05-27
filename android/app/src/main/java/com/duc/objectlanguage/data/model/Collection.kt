@@ -15,6 +15,7 @@ data class CollectionDetail(
     val id: Int,
     val name: String,
     @SerializedName("is_public") val isPublic: Boolean,
+    @SerializedName("can_edit") val canEdit: Boolean = false,
     val items: List<CollectionItem>,
     @SerializedName("created_at") val createdAt: String?
 )
@@ -42,6 +43,14 @@ data class CollectionInsights(
 data class CreateCollectionRequest(
     val name: String,
     @SerializedName("is_public") val isPublic: Boolean = false
+)
+
+data class UpdateCollectionRequest(
+    val name: String
+)
+
+data class UpdateCollectionPrivacyRequest(
+    @SerializedName("is_public") val isPublic: Boolean
 )
 
 data class AddToCollectionRequest(

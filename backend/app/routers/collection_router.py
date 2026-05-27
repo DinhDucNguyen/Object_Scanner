@@ -7,7 +7,7 @@ from typing import List
 from app.db.session import get_db
 from app.services.collection_service import CollectionService
 from app.services.learning_service import LearningService
-from app.schemas.common import CollectionCreate, CollectionResponse, CollectionItemAdd, CollectionDetailResponse, CollectionInsightsResponse, ReviewCardResponse
+from app.schemas.common import CollectionCreate, CollectionResponse, CollectionItemAdd, CollectionDetailResponse, CollectionInsightsResponse, ReviewCardResponse, CollectionPrivacyUpdate, CollectionUpdate
 from app.dependencies.get_current_user import get_current_user_id
 
 router = APIRouter(prefix="/api/collections", tags=["Collections"])
@@ -30,6 +30,26 @@ def create_collection(
     user_id: int = Depends(get_current_user_id)
 ):
     return collection_service.create_collection(db, user_id, data)
+
+
+@router.patch("/{collection_id}", response_model=CollectionResponse)
+def update_collection(
+    collection_id: int,
+    data: CollectionUpdate,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id)
+):
+    return collection_service.update_collection(db, collection_id, user_id, data)
+
+
+@router.patch("/{collection_id}/privacy", response_model=CollectionResponse)
+def update_collection_privacy(
+    collection_id: int,
+    data: CollectionPrivacyUpdate,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id)
+):
+    return collection_service.update_collection_privacy(db, collection_id, user_id, data)
 
 
 @router.post("/{collection_id}/items")

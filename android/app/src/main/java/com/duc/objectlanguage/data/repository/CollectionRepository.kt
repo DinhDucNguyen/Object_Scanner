@@ -43,6 +43,29 @@ class CollectionRepository(private val tokenManager: TokenManager) {
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    /**
+     * Update collection name
+     */
+    suspend fun updateCollection(collectionId: Int, name: String): Result<Collection> = try {
+        val collection = api.updateCollection(collectionId, UpdateCollectionRequest(name))
+        Result.success(collection)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /**
+     * Update collection privacy
+     */
+    suspend fun updateCollectionPrivacy(collectionId: Int, isPublic: Boolean): Result<Collection> = try {
+        val collection = api.updateCollectionPrivacy(
+            collectionId,
+            UpdateCollectionPrivacyRequest(isPublic)
+        )
+        Result.success(collection)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
     
     /**
      * Delete collection

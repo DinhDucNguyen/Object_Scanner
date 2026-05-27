@@ -15,6 +15,8 @@ import java.util.Locale
 
 class CollectionAdapter(
     private val onCollectionClick: (Collection) -> Unit,
+    private val onRenameClick: (Collection) -> Unit,
+    private val onPrivacyClick: (Collection) -> Unit,
     private val onDeleteClick: (Collection) -> Unit
 ) : ListAdapter<Collection, CollectionAdapter.ViewHolder>(CollectionDiffCallback()) {
     
@@ -57,8 +59,18 @@ class CollectionAdapter(
             val progress = collectionProgressPercent(collection.itemCount)
             binding.collectionProgress.progress = progress
             binding.progressPercent.text = ctx.getString(R.string.collection_progress_percent, progress)
+            binding.privacyButton.text = if (collection.isPublic) {
+                ctx.getString(R.string.collection_privacy_public)
+            } else {
+                ctx.getString(R.string.collection_privacy_private)
+            }
+            binding.privacyButton.setIconResource(
+                if (collection.isPublic) R.drawable.ic_globe else R.drawable.ic_lock
+            )
 
             binding.root.setOnClickListener { onCollectionClick(collection) }
+            binding.renameButton.setOnClickListener { onRenameClick(collection) }
+            binding.privacyButton.setOnClickListener { onPrivacyClick(collection) }
             binding.deleteButton.setOnClickListener { onDeleteClick(collection) }
         }
 

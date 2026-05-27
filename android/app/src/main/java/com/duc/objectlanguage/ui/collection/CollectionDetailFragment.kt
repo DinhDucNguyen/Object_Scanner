@@ -37,8 +37,10 @@ class CollectionDetailFragment : Fragment() {
         val adapter = CollectionWordAdapter { translationId ->
             viewModel.removeFromCollection(collectionId, translationId)
         }
+        adapter.setCanEdit(!isPractice)
         binding.recyclerWords.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerWords.adapter = adapter
+        applyEditMode(!isPractice)
         binding.cardAddWord.setOnClickListener { openAddWordSource() }
         binding.fabAddWord.setOnClickListener { openAddWordSource() }
 
@@ -57,6 +59,8 @@ class CollectionDetailFragment : Fragment() {
             if (detail == null) return@observe
             binding.tvCollectionName.text = detail.name
             binding.tvWordCount.text = getString(R.string.collection_item_count_in_detail, detail.items.size)
+            adapter.setCanEdit(detail.canEdit)
+            applyEditMode(detail.canEdit)
             adapter.submitList(detail.items)
             binding.recyclerWords.visibility = View.VISIBLE
             binding.layoutEmpty.visibility = if (detail.items.isEmpty()) View.VISIBLE else View.GONE
@@ -116,7 +120,13 @@ class CollectionDetailFragment : Fragment() {
         }
     }
 
+    private fun applyEditMode(canEdit: Boolean) {
+        binding.cardAddWord.visibility = if (canEdit) View.VISIBLE else View.GONE
+        binding.fabAddWord.visibility = View.GONE
+    }
+
     private fun openAddWordSource() {
+        if (viewModel.collectionDetail.value?.canEdit != true) return
         val collectionName = viewModel.collectionDetail.value?.name ?: ""
         val sheet = BottomSheetDialog(requireContext())
         val view = layoutInflater.inflate(R.layout.dialog_add_word_source, null)

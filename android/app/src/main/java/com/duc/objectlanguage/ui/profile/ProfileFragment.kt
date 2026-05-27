@@ -38,6 +38,7 @@ import com.duc.objectlanguage.databinding.FragmentProfileBinding
 import com.duc.objectlanguage.utils.LocaleHelper
 import com.duc.objectlanguage.utils.PasswordValidator
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -90,7 +91,9 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        binding.tvUsername.text = app.tokenManager.username ?: getString(R.string.dashboard_default_user)
+        val initialUsername = app.tokenManager.username ?: getString(R.string.dashboard_default_user)
+        binding.tvUsername.text = initialUsername
+        binding.tvUsernameHandle.text = getString(R.string.profile_username_handle, initialUsername)
         updateLangButtons()
         setupDarkModeSwitch()
         setupClicks()
@@ -127,12 +130,14 @@ class ProfileFragment : Fragment() {
         viewModel.profile.observe(viewLifecycleOwner) { profile ->
             profile ?: return@observe
             val app = requireActivity().application as ObjectLanguageApp
-            binding.tvUsername.text = profile.username?.takeIf { it.isNotBlank() }
+            val username = profile.username?.takeIf { it.isNotBlank() }
                 ?: app.tokenManager.username
                 ?: getString(R.string.dashboard_default_user)
+            val displayName = profile.fullName?.takeIf { it.isNotBlank() } ?: username
+            binding.tvUsername.text = displayName
             binding.tvUsernameHandle.text = getString(
                 R.string.profile_username_handle,
-                binding.tvUsername.text.toString()
+                username
             )
             binding.tvBio.text = profile.bio?.takeIf { it.isNotBlank() }
                 ?: getString(R.string.profile_bio_placeholder)
@@ -173,7 +178,8 @@ class ProfileFragment : Fragment() {
         binding.btnLangVI.setOnClickListener { setDisplayLanguage("vi") }
         binding.btnLangEN.setOnClickListener { setDisplayLanguage("en") }
         binding.frameAvatar.setOnClickListener { showAvatarOptions() }
-        binding.tvUsername.setOnClickListener { showUsernameDialog() }
+        binding.tvUsername.setOnClickListener { showFullNameDialog() }
+        binding.tvUsernameHandle.setOnClickListener { showUsernameDialog() }
         binding.tvBio.setOnClickListener { showBioDialog() }
         binding.btnMenu.setOnClickListener { showOverflowMenu() }
         binding.btnLogout.setOnClickListener {
@@ -200,16 +206,21 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        val actions = arrayOf(
-            getString(R.string.profile_avatar_view),
-            getString(R.string.profile_avatar_change)
-        )
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.content_description_avatar))
-            .setItems(actions) { _, index ->
-                if (index == 0) showAvatarPreview() else pickImage.launch("image/*")
-            }
-            .show()
+        val sheet = BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.dialog_avatar_options, null)
+        sheet.setContentView(view)
+
+        view.findViewById<View>(R.id.cardViewAvatar).setOnClickListener {
+            sheet.dismiss()
+            showAvatarPreview()
+        }
+        view.findViewById<View>(R.id.cardChangeAvatar).setOnClickListener {
+            sheet.dismiss()
+            pickImage.launch("image/*")
+        }
+
+        sheet.show()
+        sheet.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
     private fun hasCustomAvatar(): Boolean {
@@ -374,40 +385,66 @@ class ProfileFragment : Fragment() {
             .show()
     }
 
-    private fun showUsernameDialog() {
-        val inputLayout = TextInputLayout(requireContext()).apply {
-            hint = getString(R.string.profile_username_hint)
-            setPadding(32, 12, 32, 0)
-        }
-        val input = TextInputEditText(inputLayout.context).apply {
-            setSingleLine(true)
-            setText(binding.tvUsername.text)
-            setSelection(text?.length ?: 0)
-        }
-        inputLayout.addView(input)
+    private fun showFullNameDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_full_name, null)
+        val inputLayout = dialogView.findViewById<TextInputLayout>(R.id.tilFullName)
+        val input = dialogView.findViewById<TextInputEditText>(R.id.etFullName)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnFullNameCancel)
+        val btnSave = dialogView.findViewById<MaterialButton>(R.id.btnFullNameSave)
+        val currentName = viewModel.profile.value?.fullName
+            ?.takeIf { it.isNotBlank() }
+            ?: binding.tvUsername.text.toString()
+        input.setText(currentName)
+        input.setSelection(input.text?.length ?: 0)
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.profile_username_dialog_title))
-            .setView(inputLayout)
-            .setPositiveButton(getString(R.string.btn_save), null)
-            .setNegativeButton(getString(R.string.btn_cancel), null)
+            .setView(dialogView)
             .create()
 
-        dialog.setOnShowListener {
-            dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val username = input.text?.toString()?.trim().orEmpty()
-                if (username.isBlank()) {
-                    inputLayout.error = getString(R.string.profile_username_required)
-                    return@setOnClickListener
-                }
-                if (!USERNAME_PATTERN.matches(username)) {
-                    inputLayout.error = getString(R.string.auth_invalid_username)
-                    return@setOnClickListener
-                }
-                inputLayout.error = null
-                viewModel.updateUsername(username)
-                dialog.dismiss()
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnSave.setOnClickListener {
+            val fullName = input.text?.toString()?.trim().orEmpty()
+            if (fullName.isBlank()) {
+                inputLayout.error = getString(R.string.profile_name_required)
+                input.requestFocus()
+                return@setOnClickListener
             }
+            inputLayout.error = null
+            viewModel.updateFullName(fullName)
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    private fun showUsernameDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_username, null)
+        val inputLayout = dialogView.findViewById<TextInputLayout>(R.id.tilUsername)
+        val input = dialogView.findViewById<TextInputEditText>(R.id.etUsername)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnUsernameCancel)
+        val btnSave = dialogView.findViewById<MaterialButton>(R.id.btnUsernameSave)
+        input.setText(viewModel.profile.value?.username ?: binding.tvUsernameHandle.text.toString().removePrefix("@"))
+        input.setSelection(input.text?.length ?: 0)
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnSave.setOnClickListener {
+            val username = input.text?.toString()?.trim().orEmpty()
+            if (username.isBlank()) {
+                inputLayout.error = getString(R.string.profile_username_required)
+                input.requestFocus()
+                return@setOnClickListener
+            }
+            if (!USERNAME_PATTERN.matches(username)) {
+                inputLayout.error = getString(R.string.auth_invalid_username)
+                input.requestFocus()
+                return@setOnClickListener
+            }
+            inputLayout.error = null
+            viewModel.updateUsername(username)
+            dialog.dismiss()
         }
         dialog.show()
     }

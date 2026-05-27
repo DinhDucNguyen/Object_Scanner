@@ -30,10 +30,18 @@
     <color name="warning_light">#2E1A0A</color>
     <color name="error">#FF5449</color>
     <color name="error_light">#2E0F0E</color>
+    <color name="logout_header_bg">#202433</color>
+    <color name="logout_icon_bg">#35252B</color>
+    <color name="logout_accent">#F0B0B0</color>
+    <color name="logout_button">#B85A5A</color>
 
     <!-- Utility -->
     <color name="divider">#2E3148</color>
     <color name="outline_variant">#2E3148</color>
+    <color name="switch_thumb_checked">#FFFFFF</color>
+    <color name="switch_thumb_unchecked">#E1E5F5</color>
+    <color name="switch_track_checked">#6EA0FF</color>
+    <color name="switch_track_unchecked">#4B5068</color>
     <color name="overlay_dark">#CC000000</color>
     <color name="overlay_soft">#80000000</color>
     <color name="glass_white">#1AFFFFFF</color>
@@ -62,6 +70,24 @@
     <color name="card_learned_icon">#5B8FFF</color>
     <color name="card_due_icon">#FACC15</color>
     <color name="card_mastered_icon">#A78BFA</color>
+
+    <!-- Review screen -->
+    <color name="review_chip_bg">#26385F</color>
+    <color name="review_chip_text">#B8CAFF</color>
+    <color name="review_answer_bg">#202433</color>
+    <color name="review_answer_stroke">#3A4158</color>
+    <color name="review_quality_again_bg">#B44A4A</color>
+    <color name="review_quality_again_text">#FFFFFF</color>
+    <color name="review_quality_again_stroke">#B44A4A</color>
+    <color name="review_quality_hard_bg">#B7791F</color>
+    <color name="review_quality_hard_text">#FFFFFF</color>
+    <color name="review_quality_hard_stroke">#B7791F</color>
+    <color name="review_quality_good_bg">#2F7D5B</color>
+    <color name="review_quality_good_text">#FFFFFF</color>
+    <color name="review_quality_good_stroke">#2F7D5B</color>
+    <color name="review_quality_easy_bg">#3B6FD8</color>
+    <color name="review_quality_easy_text">#FFFFFF</color>
+    <color name="review_quality_easy_stroke">#3B6FD8</color>
 
     <color name="violet">#A78BFA</color>
     <color name="violet_light">#1A1030</color>

@@ -6,7 +6,8 @@ from app.models.collection_item import CollectionItem
 from app.models.learning_progress import LearningProgress
 from app.schemas.common import (
     CollectionCreate, CollectionResponse, CollectionItemAdd,
-    CollectionDetailResponse, CollectionItemResponse, CollectionInsightsResponse
+    CollectionDetailResponse, CollectionItemResponse, CollectionInsightsResponse,
+    CollectionPrivacyUpdate, CollectionUpdate
 )
 from app.services.object_media_service import pick_primary_object_image
 from app.core.constants import SM2_MASTERED_MIN_REPETITIONS, SM2_MASTERED_MIN_INTERVAL_DAYS, SM2_BASELINE_EASINESS_FACTOR
@@ -33,6 +34,54 @@ class CollectionService:
         return CollectionResponse(
             id=result.id, name=result.ten_bo_suu_tap, is_public=result.cong_khai,
             item_count=0, created_at=result.ngay_tao
+        )
+
+    def update_collection(
+        self,
+        db: Session,
+        collection_id: int,
+        user_id: int,
+        data: CollectionUpdate
+    ):
+        collection = self.repo.get_by_id(db, collection_id)
+        if not collection or collection.user_id != user_id:
+            raise HTTPException(status_code=404, detail="Collection not found")
+
+        name = data.name.strip()
+        if not name:
+            raise HTTPException(status_code=400, detail="Collection name cannot be empty")
+
+        collection.ten_bo_suu_tap = name
+        db.commit()
+        db.refresh(collection)
+        return CollectionResponse(
+            id=collection.id,
+            name=collection.ten_bo_suu_tap,
+            is_public=collection.cong_khai,
+            item_count=len(collection.items),
+            created_at=collection.ngay_tao
+        )
+
+    def update_collection_privacy(
+        self,
+        db: Session,
+        collection_id: int,
+        user_id: int,
+        data: CollectionPrivacyUpdate
+    ):
+        collection = self.repo.get_by_id(db, collection_id)
+        if not collection or collection.user_id != user_id:
+            raise HTTPException(status_code=404, detail="Collection not found")
+
+        collection.cong_khai = data.is_public
+        db.commit()
+        db.refresh(collection)
+        return CollectionResponse(
+            id=collection.id,
+            name=collection.ten_bo_suu_tap,
+            is_public=collection.cong_khai,
+            item_count=len(collection.items),
+            created_at=collection.ngay_tao
         )
 
     def add_to_collection(self, db: Session, collection_id: int, data: CollectionItemAdd, user_id: int):
@@ -86,6 +135,7 @@ class CollectionService:
             id=collection.id,
             name=collection.ten_bo_suu_tap,
             is_public=collection.cong_khai,
+            can_edit=collection.user_id == user_id,
             items=item_responses,
             created_at=collection.ngay_tao
         )

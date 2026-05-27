@@ -68,6 +68,12 @@ class CollectionListFragment : Fragment() {
                 val bundle = Bundle().apply { putInt("collectionId", collection.id) }
                 findNavController().navigate(R.id.action_collectionList_to_collectionDetail, bundle)
             },
+            onRenameClick = { collection ->
+                showRenameDialog(collection)
+            },
+            onPrivacyClick = { collection ->
+                showPrivacyDialog(collection)
+            },
             onDeleteClick = { collection ->
                 showDeleteConfirmation(collection.id, collection.name)
             }
@@ -214,6 +220,67 @@ class CollectionListFragment : Fragment() {
             }
         dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelDelete)
             .setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun showRenameDialog(collection: com.duc.objectlanguage.data.model.Collection) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_collection_rename, null)
+        val nameInput = dialogView.findViewById<TextInputEditText>(R.id.collectionNameInput)
+        val title = dialogView.findViewById<android.widget.TextView>(R.id.tvRenameTitle)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancelDialog)
+        val btnSave = dialogView.findViewById<MaterialButton>(R.id.btnSaveDialog)
+
+        title.text = getString(R.string.collection_rename_title_for, collection.name)
+        nameInput.setText(collection.name)
+        nameInput.setSelection(collection.name.length)
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnSave.setOnClickListener {
+            viewModel.updateCollectionName(collection.id, nameInput.text?.toString() ?: "")
+            dialog.dismiss()
+        }
+
+        dialog.setOnShowListener {
+            nameInput.requestFocus()
+            dialog.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+        }
+        dialog.show()
+    }
+
+    private fun showPrivacyDialog(collection: com.duc.objectlanguage.data.model.Collection) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_collection_privacy, null)
+        val switchPublic = dialogView.findViewById<SwitchMaterial>(R.id.switchPublic)
+        val title = dialogView.findViewById<android.widget.TextView>(R.id.tvPrivacyTitle)
+        val status = dialogView.findViewById<android.widget.TextView>(R.id.tvPrivacyStatus)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancelDialog)
+        val btnSave = dialogView.findViewById<MaterialButton>(R.id.btnSaveDialog)
+
+        title.text = getString(R.string.collection_privacy_title_for, collection.name)
+        switchPublic.isChecked = collection.isPublic
+
+        fun bindStatus(isPublic: Boolean) {
+            status.text = if (isPublic) {
+                getString(R.string.collection_privacy_public_desc)
+            } else {
+                getString(R.string.collection_privacy_private_desc)
+            }
+        }
+        bindStatus(collection.isPublic)
+        switchPublic.setOnCheckedChangeListener { _, isChecked -> bindStatus(isChecked) }
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnSave.setOnClickListener {
+            viewModel.updateCollectionPrivacy(collection.id, switchPublic.isChecked)
+            dialog.dismiss()
+        }
         dialog.show()
     }
 

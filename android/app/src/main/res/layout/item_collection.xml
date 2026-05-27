@@ -35,16 +35,44 @@
                 android:orientation="vertical"
                 android:paddingEnd="14dp">
 
-                <TextView
-                    android:id="@+id/collectionName"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="Collection Name"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/collectionName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="Collection Name"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:layout_constrainedWidth="true"
+                        app:layout_constraintEnd_toStartOf="@id/renameButton"
+                        app:layout_constraintHorizontal_bias="0"
+                        app:layout_constraintHorizontal_chainStyle="packed"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageButton
+                        android:id="@+id/renameButton"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="6dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/collection_btn_rename"
+                        android:padding="6dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_pencil"
+                        app:layout_constraintBottom_toBottomOf="@id/collectionName"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/collectionName"
+                        app:layout_constraintTop_toTopOf="@id/collectionName"
+                        app:tint="@color/text_muted" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -141,23 +169,51 @@
             android:layout_marginTop="16dp"
             android:background="@color/surface_soft" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/deleteButton"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_gravity="end"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:minWidth="0dp"
-            android:paddingStart="10dp"
-            android:paddingEnd="4dp"
-            android:text="@string/collection_btn_delete"
-            android:textColor="@color/text_muted"
-            android:textSize="12sp"
-            app:icon="@drawable/ic_delete"
-            app:iconGravity="textStart"
-            app:iconPadding="4dp"
-            app:iconTint="@color/text_muted" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/privacyButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:minWidth="0dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="10dp"
+                android:text="@string/collection_privacy_private"
+                android:textColor="@color/primary_dark"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_lock"
+                app:iconGravity="textStart"
+                app:iconPadding="4dp"
+                app:iconTint="@color/primary_dark" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/deleteButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:minWidth="0dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="4dp"
+                android:text="@string/collection_btn_delete"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_delete"
+                app:iconGravity="textStart"
+                app:iconPadding="4dp"
+                app:iconTint="@color/text_muted" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

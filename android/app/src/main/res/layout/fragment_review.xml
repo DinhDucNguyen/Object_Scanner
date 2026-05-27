@@ -225,13 +225,13 @@
                         android:id="@+id/tvLangHint"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_icon_primary"
+                        android:background="@drawable/bg_review_chip"
                         android:paddingStart="12dp"
                         android:paddingTop="5dp"
                         android:paddingEnd="12dp"
                         android:paddingBottom="5dp"
                         android:text="@string/review_lang_hint"
-                        android:textColor="@color/primary"
+                        android:textColor="@color/review_chip_text"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -318,8 +318,8 @@
                             android:gravity="center"
                             android:text=""
                             android:textAlignment="center"
-                            android:textColor="@color/primary"
-                            android:textSize="21sp"
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -363,12 +363,12 @@
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
                     android:text="@string/review_quality_again"
-                    android:textColor="@color/error"
+                    android:textColor="@color/review_quality_again_text"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    app:backgroundTint="@color/error_light"
+                    app:backgroundTint="@color/review_quality_again_bg"
                     app:cornerRadius="18dp"
-                    app:strokeColor="@color/error"
+                    app:strokeColor="@color/review_quality_again_stroke"
                     app:strokeWidth="1dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -378,12 +378,12 @@
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
                     android:text="@string/review_quality_hard"
-                    android:textColor="@color/warning"
+                    android:textColor="@color/review_quality_hard_text"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    app:backgroundTint="@color/warning_light"
+                    app:backgroundTint="@color/review_quality_hard_bg"
                     app:cornerRadius="18dp"
-                    app:strokeColor="@color/warning"
+                    app:strokeColor="@color/review_quality_hard_stroke"
                     app:strokeWidth="1dp" />
 
             </LinearLayout>
@@ -400,12 +400,12 @@
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
                     android:text="@string/review_quality_good"
-                    android:textColor="@color/success"
+                    android:textColor="@color/review_quality_good_text"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    app:backgroundTint="@color/success_light"
+                    app:backgroundTint="@color/review_quality_good_bg"
                     app:cornerRadius="18dp"
-                    app:strokeColor="@color/success"
+                    app:strokeColor="@color/review_quality_good_stroke"
                     app:strokeWidth="1dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -415,11 +415,13 @@
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
                     android:text="@string/review_quality_easy"
-                    android:textColor="@color/text_on_primary"
+                    android:textColor="@color/review_quality_easy_text"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    app:backgroundTint="@color/primary"
-                    app:cornerRadius="18dp" />
+                    app:backgroundTint="@color/review_quality_easy_bg"
+                    app:cornerRadius="18dp"
+                    app:strokeColor="@color/review_quality_easy_stroke"
+                    app:strokeWidth="1dp" />
 
             </LinearLayout>
 

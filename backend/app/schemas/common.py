@@ -96,6 +96,12 @@ class CollectionCreate(BaseModel):
     name: str
     is_public: bool = False
 
+class CollectionUpdate(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+
+class CollectionPrivacyUpdate(BaseModel):
+    is_public: bool
+
 class CollectionResponse(BaseModel):
     id: int
     name: str
@@ -126,6 +132,7 @@ class CollectionDetailResponse(BaseModel):
     id: int
     name: str
     is_public: bool
+    can_edit: bool = False
     items: List[CollectionItemResponse]
     created_at: Optional[datetime] = None
 

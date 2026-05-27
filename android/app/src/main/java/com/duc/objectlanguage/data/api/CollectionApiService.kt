@@ -20,6 +20,18 @@ interface CollectionApiService {
     
     @POST("api/collections")
     suspend fun createCollection(@Body request: CreateCollectionRequest): Collection
+
+    @PATCH("api/collections/{id}")
+    suspend fun updateCollection(
+        @Path("id") collectionId: Int,
+        @Body request: UpdateCollectionRequest
+    ): Collection
+
+    @PATCH("api/collections/{id}/privacy")
+    suspend fun updateCollectionPrivacy(
+        @Path("id") collectionId: Int,
+        @Body request: UpdateCollectionPrivacyRequest
+    ): Collection
     
     @DELETE("api/collections/{id}")
     suspend fun deleteCollection(@Path("id") collectionId: Int)
