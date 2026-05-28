@@ -60,18 +60,13 @@ app.include_router(dictionary_router.router)
 app.include_router(admin_router.router, prefix="/api")
 app.include_router(streak_router.router)
 
-try:
-    os.makedirs("uploads/scans", exist_ok=True)
-    os.makedirs("uploads/objects", exist_ok=True)
-    os.makedirs("uploads/avatars", exist_ok=True)
-    os.makedirs("uploads/tts", exist_ok=True)
-    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-except OSError:
-    pass
-
-_static_admin = os.path.join(os.path.dirname(__file__), "static/admin")
-if os.path.isdir(_static_admin):
-    app.mount("/admin-panel", StaticFiles(directory=_static_admin, html=True), name="admin-panel")
+os.makedirs("uploads/scans", exist_ok=True)
+os.makedirs("uploads/objects", exist_ok=True)
+os.makedirs("uploads/avatars", exist_ok=True)
+os.makedirs("uploads/tts", exist_ok=True)
+os.makedirs("static/admin", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/admin-panel", StaticFiles(directory="static/admin", html=True), name="admin-panel")
 
 @app.get("/")
 def read_root():

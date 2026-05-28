@@ -3,16 +3,8 @@ import logging
 import re
 from google import genai
 from google.genai import types
+from google.api_core.exceptions import ResourceExhausted
 from app.core.config import settings
-
-try:
-    from google.api_core.exceptions import ResourceExhausted
-except (ModuleNotFoundError, ImportError):
-    try:
-        from google.genai.errors import ClientError as ResourceExhausted
-    except (ModuleNotFoundError, ImportError):
-        class ResourceExhausted(Exception):
-            pass
 
 logger = logging.getLogger(__name__)
 
