@@ -1648,13 +1648,76 @@
       return { yolo: 'YOLO', gemini: 'Gemini', admin: 'Admin' }[source] || source || '—';
     }
 
+    function trainingCoverageLabel(coverage) {
+      return {
+        custom_yolo: 'Đã có YOLO custom',
+        coco_known: 'Đã có COCO',
+        db_only: 'Có DB, chưa có model',
+        new_gemini: 'Object mới từ Gemini',
+      }[coverage] || coverage || 'Chưa rõ model';
+    }
+
+    function trainingCoverageClass(coverage) {
+      return {
+        custom_yolo: 'coverage-custom',
+        coco_known: 'coverage-coco',
+        db_only: 'coverage-db',
+        new_gemini: 'coverage-new',
+      }[coverage] || 'coverage-unknown';
+    }
+
+    function trainingRecommendationLabel(value) {
+      return {
+        high_priority: 'Ưu tiên train',
+        recommended: 'Nên train',
+        optional: 'Train thêm nếu cần',
+        not_needed: 'Không cần train',
+      }[value] || value || 'Chưa rõ';
+    }
+
+    function trainingRecommendationClass(value) {
+      return {
+        high_priority: 'recommend-high',
+        recommended: 'recommend-yes',
+        optional: 'recommend-optional',
+        not_needed: 'recommend-no',
+      }[value] || 'recommend-unknown';
+    }
+
+    function trainingFilterValue(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    }
+
+    let trainingFilterTimer = null;
+    function debouncedLoadTrainingData() {
+      clearTimeout(trainingFilterTimer);
+      trainingFilterTimer = setTimeout(loadTrainingData, 250);
+    }
+
+    function buildTrainingSummaryPath() {
+      const params = new URLSearchParams();
+      const filters = {
+        search: trainingFilterValue('td-search'),
+        recommendation: trainingFilterValue('td-recommendation-filter'),
+        model_coverage: trainingFilterValue('td-coverage-filter'),
+        status: trainingFilterValue('td-status-filter'),
+        source: trainingFilterValue('td-source-filter'),
+      };
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.set(key, value);
+      });
+      const query = params.toString();
+      return `/training-summary${query ? `?${query}` : ''}`;
+    }
+
     async function loadTrainingData() {
       const grid = document.getElementById('td-grid');
       const empty = document.getElementById('td-empty');
       grid.innerHTML = '<div class="text-muted p-3"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải...</div>';
       empty.style.display = 'none';
       try {
-        const records = await apiJSON('/training-summary');
+        const records = await apiJSON(buildTrainingSummaryPath());
         if (!records || records.length === 0) {
           grid.innerHTML = '';
           empty.style.display = '';
@@ -1666,23 +1729,30 @@
           if (pendingEl) pendingEl.textContent = '0';
           if (approvedEl) approvedEl.textContent = '0';
           if (rejectedEl) rejectedEl.textContent = '0';
+          const priorityEl = document.getElementById('td-train-priority');
+          if (priorityEl) priorityEl.textContent = '0';
           return;
         }
         const totalImages = records.reduce((s, r) => s + (r.total_images || 0), 0);
         const totalPending = records.reduce((s, r) => s + ((r.status_counts || {}).cho_duyet || 0), 0);
         const totalApproved = records.reduce((s, r) => s + ((r.status_counts || {}).da_duyet || 0), 0);
         const totalRejected = records.reduce((s, r) => s + ((r.status_counts || {}).tu_choi || 0), 0);
+        const priorityObjects = records.filter(r => ['high_priority', 'recommended'].includes(r.training_recommendation)).length;
         document.getElementById('td-total-objects').textContent = records.length;
         document.getElementById('td-total-images').textContent = totalImages;
         const pendingEl = document.getElementById('td-pending-images');
         const approvedEl = document.getElementById('td-approved-images');
         const rejectedEl = document.getElementById('td-rejected-images');
+        const priorityEl = document.getElementById('td-train-priority');
         if (pendingEl) pendingEl.textContent = totalPending;
         if (approvedEl) approvedEl.textContent = totalApproved;
         if (rejectedEl) rejectedEl.textContent = totalRejected;
+        if (priorityEl) priorityEl.textContent = priorityObjects;
 
         grid.innerHTML = records.map(r => {
           const counts = r.status_counts || {};
+          const coverageBadge = `<span class="td-meta-badge ${trainingCoverageClass(r.model_coverage)}">${escHtml(trainingCoverageLabel(r.model_coverage))}</span>`;
+          const recommendationBadge = `<span class="td-meta-badge ${trainingRecommendationClass(r.training_recommendation)}">${escHtml(trainingRecommendationLabel(r.training_recommendation))}</span>`;
           const thumbs = (r.images || []).map(img => `
             <div class="td-thumb-wrap">
               <img src="${img.url}" alt="" title="${trainingSourceLabel(img.source)} • ${trainingStatusLabel(img.status)}" onclick="zoomImage('${img.url}')"
@@ -1717,6 +1787,10 @@
               </button>
             </div>
             ${r.category ? `<div style="padding:0 1rem .4rem;font-size:.75rem;color:#64748b;">${escHtml(r.category)}</div>` : ''}
+            <div class="td-meta-row">
+              ${recommendationBadge}
+              ${coverageBadge}
+            </div>
             <div style="padding:0 1rem .4rem;display:flex;gap:5px;flex-wrap:wrap;font-size:.72rem;">
               <span class="badge text-bg-warning">Chờ: ${counts.cho_duyet || 0}</span>
               <span class="badge text-bg-success">Duyệt: ${counts.da_duyet || 0}</span>

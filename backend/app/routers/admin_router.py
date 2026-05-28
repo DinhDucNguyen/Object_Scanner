@@ -69,9 +69,23 @@ def list_predictions(
 
 
 @router.get("/training-summary")
-def training_summary(db: Session = Depends(get_db)):
+def training_summary(
+    model_coverage: Optional[str] = Query(default=None, description="custom_yolo | coco_known | db_only | new_gemini"),
+    recommendation: Optional[str] = Query(default=None, description="high_priority | recommended | optional | not_needed"),
+    status: Optional[str] = Query(default=None, description="cho_duyet | da_duyet | tu_choi"),
+    source: Optional[str] = Query(default=None, description="yolo | gemini | admin"),
+    search: Optional[str] = Query(default=None),
+    db: Session = Depends(get_db),
+):
     """Trả JSON tóm tắt dữ liệu training — dùng cho UI dashboard."""
-    return admin_service.training_summary(db)
+    return admin_service.training_summary(
+        db,
+        model_coverage=model_coverage,
+        recommendation=recommendation,
+        status=status,
+        source=source,
+        search=search,
+    )
 
 
 @router.get("/predictions/export-training")

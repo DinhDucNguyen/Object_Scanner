@@ -5,3 +5,7 @@ backend/.gsd/
 
 # Local database recovery/export backups
 db_backups/
+backend/backups/
+
+# Claude Code worktrees (temporary agent workspaces)
+.claude/worktrees/

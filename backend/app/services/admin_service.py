@@ -28,6 +28,7 @@ from app.models.object_alias import ObjectAlias
 from app.models.object_media import ObjectMedia
 from app.models.scan_history import ScanHistory
 from app.models.training_image import (
+    NguonAnhHuanLuyen,
     TrainingDatasetImage,
     TrainingDatasetVersion,
     TrainingImage,
@@ -40,6 +41,7 @@ from app.models.user import User
 from app.models.review_log import ReviewLog
 from app.services.tts_service import TTSService
 from app.services.gemini_service import GeminiService
+from app.services.scan_service import COCO_CLASSES, YOLO_CUSTOM_CLASSES
 from app.services.training_image_service import TrainingImageService
 from app.repositories.object_repo import normalize_object_code
 from app.utils.timezone import now_vietnam
@@ -58,6 +60,10 @@ from app.schemas.admin import (
     DashboardStats,
     ScanHistoryAdminItem, UserStatsAdminResponse,
 )
+
+
+CUSTOM_YOLO_CODES = {normalize_object_code(label) for label in YOLO_CUSTOM_CLASSES}
+COCO_MODEL_CODES = {normalize_object_code(label) for label in COCO_CLASSES}
 
 
 class AdminService:
@@ -197,7 +203,16 @@ class AdminService:
             for group in self.training_summary(db, only_approved=True)
         ]
 
-    def training_summary(self, db: Session, only_approved: bool = False) -> list[dict]:
+    def training_summary(
+        self,
+        db: Session,
+        only_approved: bool = False,
+        model_coverage: str | None = None,
+        recommendation: str | None = None,
+        status: str | None = None,
+        source: str | None = None,
+        search: str | None = None,
+    ) -> list[dict]:
         """Return training images grouped by label for the admin Training Data tab."""
         query = (
             db.query(TrainingImage)
@@ -210,18 +225,50 @@ class AdminService:
         )
         if only_approved:
             query = query.filter(TrainingImage.trang_thai == TrangThaiAnhHuanLuyen.da_duyet)
+        if status:
+            try:
+                query = query.filter(TrainingImage.trang_thai == TrangThaiAnhHuanLuyen(status))
+            except ValueError:
+                pass
+        if source:
+            try:
+                query = query.filter(TrainingImage.nguon_du_lieu == NguonAnhHuanLuyen(source))
+            except ValueError:
+                pass
 
         groups: dict[str, dict] = {}
+        search_text = search.strip().lower() if search else None
         for item in query.all():
             code = self._training_label(item)
             if not code:
                 continue
+            coverage = self._training_model_coverage(code, item)
+            advice = self._training_recommendation(coverage)
+            if model_coverage and coverage != model_coverage:
+                continue
+            if recommendation and advice != recommendation:
+                continue
+            if search_text:
+                haystack = " ".join(
+                    str(part or "").lower()
+                    for part in [
+                        code,
+                        item.nhan,
+                        item.object.ma_doi_tuong if item.object else None,
+                        item.object.category.ten_danh_muc if item.object and item.object.category else None,
+                    ]
+                )
+                if search_text not in haystack:
+                    continue
 
             if code not in groups:
                 groups[code] = {
                     "object_code": code,
                     "label": code,
                     "category": item.object.category.ten_danh_muc if item.object and item.object.category else None,
+                    "model_coverage": coverage,
+                    "training_recommendation": advice,
+                    "training_priority": self._training_priority(advice),
                     "translations": self._training_group_translations(item.object),
                     "images": [],
                     "status_counts": {"cho_duyet": 0, "da_duyet": 0, "tu_choi": 0},
@@ -242,6 +289,7 @@ class AdminService:
 
         records.sort(
             key=lambda r: (
+                r["training_priority"],
                 r["status_counts"].get("da_duyet", 0),
                 r["total_images"],
                 r["object_code"],
@@ -428,6 +476,32 @@ class AdminService:
             return normalize_object_code(item.nhan)
         return None
 
+    def _training_model_coverage(self, code: str, item: TrainingImage) -> str:
+        normalized = normalize_object_code(code)
+        if normalized in CUSTOM_YOLO_CODES:
+            return "custom_yolo"
+        if normalized in COCO_MODEL_CODES:
+            return "coco_known"
+        if item.object or item.doi_tuong_id:
+            return "db_only"
+        return "new_gemini"
+
+    def _training_recommendation(self, coverage: str) -> str:
+        return {
+            "new_gemini": "high_priority",
+            "db_only": "recommended",
+            "custom_yolo": "optional",
+            "coco_known": "not_needed",
+        }.get(coverage, "recommended")
+
+    def _training_priority(self, recommendation: str) -> int:
+        return {
+            "high_priority": 4,
+            "recommended": 3,
+            "optional": 2,
+            "not_needed": 1,
+        }.get(recommendation, 0)
+
     def _training_status(self, item: TrainingImage) -> str:
         if hasattr(item.trang_thai, "value"):
             return item.trang_thai.value
@@ -458,16 +532,21 @@ class AdminService:
         *,
         dataset_versions: list[str] | None = None,
     ) -> dict:
+        code = self._training_label(item)
+        coverage = self._training_model_coverage(code or "", item)
+        recommendation = self._training_recommendation(coverage)
         return {
             "id": item.id,
             "scan_id": item.scan_id,
             "prediction_id": item.du_doan_id,
-            "object_code": self._training_label(item),
+            "object_code": code,
             "label": item.nhan,
             "image_url": item.url_anh,
             "url": item.url_anh,
             "source": item.nguon_du_lieu.value if hasattr(item.nguon_du_lieu, "value") else (str(item.nguon_du_lieu) if item.nguon_du_lieu else None),
             "status": self._training_status(item),
+            "model_coverage": coverage,
+            "training_recommendation": recommendation,
             "confidence": item.do_tin_cay,
             "quality_score": item.diem_chat_luong,
             "dataset_versions": dataset_versions if dataset_versions is not None else self._dataset_versions(item),

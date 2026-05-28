@@ -469,6 +469,37 @@
         <span><i class="bi bi-hourglass-split text-warning me-1"></i>Chờ duyệt: <strong id="td-pending-images">—</strong></span>
         <span><i class="bi bi-check-circle text-success me-1"></i>Đã duyệt: <strong id="td-approved-images">—</strong></span>
         <span><i class="bi bi-x-circle text-danger me-1"></i>Từ chối: <strong id="td-rejected-images">—</strong></span>
+        <span><i class="bi bi-lightning-charge text-danger me-1"></i>Nên train: <strong id="td-train-priority">—</strong></span>
+      </div>
+      <div class="td-filter-bar">
+        <input id="td-search" type="search" class="form-control form-control-sm" placeholder="Tìm nhãn, object, danh mục..."
+          oninput="debouncedLoadTrainingData()">
+        <select id="td-recommendation-filter" class="form-select form-select-sm" onchange="loadTrainingData()">
+          <option value="">Tất cả khuyến nghị</option>
+          <option value="high_priority">Ưu tiên train</option>
+          <option value="recommended">Nên train</option>
+          <option value="optional">Train thêm nếu cần</option>
+          <option value="not_needed">Không cần train</option>
+        </select>
+        <select id="td-coverage-filter" class="form-select form-select-sm" onchange="loadTrainingData()">
+          <option value="">Tất cả model</option>
+          <option value="new_gemini">Object mới từ Gemini</option>
+          <option value="db_only">Có DB, chưa có model</option>
+          <option value="custom_yolo">Đã có YOLO custom</option>
+          <option value="coco_known">Đã có COCO</option>
+        </select>
+        <select id="td-status-filter" class="form-select form-select-sm" onchange="loadTrainingData()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="cho_duyet">Chờ duyệt</option>
+          <option value="da_duyet">Đã duyệt</option>
+          <option value="tu_choi">Từ chối</option>
+        </select>
+        <select id="td-source-filter" class="form-select form-select-sm" onchange="loadTrainingData()">
+          <option value="">Tất cả nguồn</option>
+          <option value="gemini">Gemini</option>
+          <option value="yolo">YOLO</option>
+          <option value="admin">Admin</option>
+        </select>
       </div>
       <div id="td-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;"></div>
       <div id="td-empty" class="text-center text-muted py-5" style="display:none;">
