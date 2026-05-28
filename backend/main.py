@@ -60,13 +60,14 @@ app.include_router(dictionary_router.router)
 app.include_router(admin_router.router, prefix="/api")
 app.include_router(streak_router.router)
 
-_is_writable = os.access("/", os.W_OK) or os.access("/tmp", os.W_OK)
-if _is_writable:
+try:
     os.makedirs("uploads/scans", exist_ok=True)
     os.makedirs("uploads/objects", exist_ok=True)
     os.makedirs("uploads/avatars", exist_ok=True)
     os.makedirs("uploads/tts", exist_ok=True)
     app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+except OSError:
+    pass
 
 _static_admin = os.path.join(os.path.dirname(__file__), "static/admin")
 if os.path.isdir(_static_admin):
