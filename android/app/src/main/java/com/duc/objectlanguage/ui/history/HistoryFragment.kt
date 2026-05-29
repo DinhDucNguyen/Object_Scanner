@@ -84,9 +84,9 @@ class HistoryFragment : Fragment() {
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (dy <= 0) return
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState != RecyclerView.SCROLL_STATE_IDLE) return
                 val lastVisible = layoutManager.findLastVisibleItemPosition()
                 if (lastVisible >= adapter.itemCount - 4) {
                     viewModel.loadMore()
@@ -119,6 +119,7 @@ class HistoryFragment : Fragment() {
                 selectedToDate = null
                 updateDateButtons()
                 updateFilterChips()
+                binding.recyclerView.scrollToPosition(0)
                 viewModel.setPeriod(period)
             }
         }

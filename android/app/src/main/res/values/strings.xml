@@ -48,6 +48,10 @@
     <string name="login_subtitle">Scan vật thể, học tiếng Anh</string>
     <string name="login_button">Đăng nhập</string>
     <string name="login_register_link">Chưa có tài khoản? Đăng ký ngay</string>
+    <string name="login_or_divider">hoặc</string>
+    <string name="login_with_google">Tiếp tục với Google</string>
+    <!-- Thay bằng Web Client ID lấy từ Google Cloud Console -->
+    <string name="google_web_client_id">1091856866030-omvsn1u9guf7lnlmumu9oofhotjmgeou.apps.googleusercontent.com</string>
     <string name="register_title">Tạo tài khoản</string>
     <string name="register_button">Tạo tài khoản</string>
     <string name="register_login_link">Đã có tài khoản? Đăng nhập</string>
@@ -116,7 +120,7 @@
     <string name="dashboard_streak_welcome_milestone">Từ đầu tiên, chuỗi đầu tiên.</string>
 
     <!-- Scan -->
-    <string name="scan_overlay">Đưa vật thể vào khung hình rồi nhấn chụp</string>
+    <string name="scan_overlay">Canh vật thể trong màn hình rồi nhấn chụp</string>
     <string name="scan_analyzing">Đang nhận diện...\nVui lòng chờ một chút</string>
     <string name="scan_btn_play">Nghe phát âm</string>
     <string name="scan_btn_learn">Lưu</string>
@@ -336,6 +340,13 @@
     <string name="review_session_title">Phiên ôn tập</string>
     <string name="review_session_subtitle">Lật thẻ, tự đánh giá, rồi để hệ thống hẹn lần ôn tiếp theo.</string>
     <string name="review_finished_hint">Bạn có thể quay lại sau hoặc quét thêm vật thể mới để mở rộng vốn từ.</string>
+    <string name="review_summary_total_label">Đã ôn</string>
+    <string name="review_summary_rate_label">Nhớ tốt</string>
+    <string name="review_summary_remembered_label">Ổn + Dễ</string>
+    <string name="review_summary_needs_review_label">Cần ôn lại</string>
+    <string name="review_summary_total_value">%d từ</string>
+    <string name="review_summary_remembered_value">%d lần</string>
+    <string name="review_summary_needs_review_value">%d lần</string>
     <string name="review_btn_scan_more">Quét thêm từ mới</string>
     <string name="review_btn_go_to_collections">Ôn tập bộ sưu tập</string>
     <string name="review_answer_label">Nghĩa và ví dụ</string>
@@ -716,8 +727,8 @@
     <string name="language_vi_short">VI</string>
     <string name="language_pair_en_vi">EN &lt;-&gt; VI</string>
     <string name="scan_model_label">Model</string>
-    <string name="scan_model_custom">Custom YOLO</string>
-    <string name="scan_model_coco">COCO</string>
+    <string name="scan_model_custom">YOLOv8 Custom</string>
+    <string name="scan_model_coco">COCO v8n</string>
     <string name="scan_definition_title">Định nghĩa</string>
     <string name="placeholder_word">word</string>
     <string name="placeholder_object">Object</string>

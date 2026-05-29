@@ -56,6 +56,9 @@ class ReviewFragment : Fragment() {
         viewModel.finishedMessage.observe(viewLifecycleOwner) { message ->
             binding.tvFinished.text = message
         }
+        viewModel.sessionSummary.observe(viewLifecycleOwner) { summary ->
+            updateSessionSummary(summary)
+        }
 
         viewModel.finished.observe(viewLifecycleOwner) { done ->
             if (done) {
@@ -171,6 +174,14 @@ class ReviewFragment : Fragment() {
         viewModel.submitAnswer(quality)
     }
 
+    private fun updateSessionSummary(summary: ReviewSessionSummary) {
+        binding.layoutSessionSummary.visibility = if (summary.total > 0) View.VISIBLE else View.GONE
+        binding.tvReviewTotal.text = getString(R.string.review_summary_total_value, summary.total)
+        binding.tvReviewRemembered.text = getString(R.string.review_summary_remembered_value, summary.remembered)
+        binding.tvReviewNeedsReview.text = getString(R.string.review_summary_needs_review_value, summary.needsReview)
+        binding.tvReviewRate.text = getString(R.string.format_percent_int, summary.rememberedPercent)
+    }
+
     private fun vibrateReview(quality: Int) {
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             requireContext().getSystemService<VibratorManager>()?.defaultVibrator
@@ -237,4 +248,5 @@ class ReviewFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }

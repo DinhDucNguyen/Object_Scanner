@@ -189,3 +189,7 @@ class AvatarUploadResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+class GoogleLoginRequest(BaseModel):
+    id_token: str

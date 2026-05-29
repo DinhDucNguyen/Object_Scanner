@@ -2,11 +2,13 @@ package com.duc.objectlanguage.ui.scan
 
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
+import android.app.Dialog
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.Matrix
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -14,9 +16,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.databinding.DialogScanPreviewBinding
 import com.duc.objectlanguage.databinding.FragmentScanBinding
 import com.duc.objectlanguage.ui.common.GuestUpsellDialog
 import com.duc.objectlanguage.ui.common.addPulseFeedback
@@ -44,6 +47,8 @@ import java.io.File
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class ScanFragment : Fragment() {
 
@@ -443,11 +448,16 @@ class ScanFragment : Fragment() {
                             bitmap.recycle()
                         }
                         
+                        val framedBitmap = cropBitmapToPreviewAspect(rotatedBitmap)
+                        if (framedBitmap !== rotatedBitmap) {
+                            rotatedBitmap.recycle()
+                        }
+
                         // Convert sang JPEG bytes
-                        val jpegBytes = bitmapToJpegBytes(rotatedBitmap)
+                        val jpegBytes = bitmapToJpegBytes(framedBitmap)
                         
                         // YOLO runs after the user confirms the preview.
-                        showPreviewDialog(jpegBytes, rotatedBitmap)
+                        showPreviewDialog(jpegBytes, framedBitmap)
                     } catch (e: Exception) {
                         image.close()
                         Toast.makeText(requireContext(), getString(R.string.scan_error_process_image, e.message), Toast.LENGTH_LONG).show()
@@ -486,43 +496,94 @@ class ScanFragment : Fragment() {
     }
 
     private fun showPreviewDialog(imageBytes: ByteArray, previewBitmap: Bitmap? = null) {
-        // Dùng bitmap đã có hoặc decode từ bytes
         val bitmap = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
         lastScannedBitmap = bitmap
 
-        // Tạo ImageView cho preview
-        val imageView = ImageView(requireContext()).apply {
-            setImageBitmap(bitmap)
-            adjustViewBounds = true
-            scaleType = ImageView.ScaleType.FIT_CENTER
-            setPadding(32, 32, 32, 32)
+        val dialogBinding = DialogScanPreviewBinding.inflate(layoutInflater)
+        val dialog = Dialog(requireContext()).apply {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(dialogBinding.root)
+            setCancelable(true)
+            setCanceledOnTouchOutside(true)
+            setOnCancelListener { restartCameraIfPermitted() }
         }
 
-        // Tạo dialog
-        AlertDialog.Builder(requireContext())
-            .setTitle(getString(R.string.scan_preview_title))
-            .setView(imageView)
-            .setPositiveButton(getString(R.string.scan_preview_scan_now)) { dialog, _ ->
-                dialog.dismiss()
-                lifecycleScope.launch {
-                    val yoloResult = withContext(Dispatchers.Default) {
-                        val bmp = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                        detectorHelper?.detectBitmap(bmp)
-                    }
-                    viewModel.scanWithDetection(yoloResult, imageBytes)
+        dialogBinding.previewImage.setImageBitmap(bitmap)
+        fitPreviewImageToBitmap(dialogBinding.previewImage, bitmap)
+        dialogBinding.btnScanNow.setOnClickListener {
+            dialog.dismiss()
+            lifecycleScope.launch {
+                val yoloResult = withContext(Dispatchers.Default) {
+                    val bmp = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                    detectorHelper?.detectBitmap(bmp)
                 }
+                viewModel.scanWithDetection(yoloResult, imageBytes)
             }
-            .setNeutralButton(getString(R.string.scan_preview_crop_again)) { dialog, _ ->
-                dialog.dismiss()
-                launchCrop(imageBytes)
-            }
-            .setNegativeButton(getString(R.string.scan_preview_retake)) { dialog, _ ->
-                dialog.dismiss()
-                restartCameraIfPermitted()
-            }
-            .setOnCancelListener { restartCameraIfPermitted() }
-            .setCancelable(true)
-            .show()
+        }
+        dialogBinding.btnCropAgain.setOnClickListener {
+            dialog.dismiss()
+            launchCrop(imageBytes)
+        }
+        dialogBinding.btnRetakePreview.setOnClickListener {
+            dialog.dismiss()
+            restartCameraIfPermitted()
+        }
+
+        dialog.show()
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setDimAmount(0.62f)
+            setLayout(
+                (resources.displayMetrics.widthPixels * 0.92f).roundToInt(),
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+    }
+
+    private fun fitPreviewImageToBitmap(imageView: View, bitmap: Bitmap) {
+        val metrics = resources.displayMetrics
+        val density = metrics.density
+        val maxWidth = (metrics.widthPixels * 0.72f).roundToInt()
+        val maxHeight = (metrics.heightPixels * 0.48f).roundToInt()
+        val minWidth = (220f * density).roundToInt()
+        val minHeight = (260f * density).roundToInt()
+
+        val aspect = bitmap.width.toFloat() / bitmap.height.toFloat()
+        var targetHeight = maxHeight
+        var targetWidth = (targetHeight * aspect).roundToInt()
+        if (targetWidth > maxWidth) {
+            targetWidth = maxWidth
+            targetHeight = (targetWidth / aspect).roundToInt()
+        }
+
+        imageView.layoutParams = imageView.layoutParams.apply {
+            width = targetWidth.coerceAtLeast(minWidth).coerceAtMost(maxWidth)
+            height = targetHeight.coerceAtLeast(minHeight).coerceAtMost(maxHeight)
+        }
+    }
+
+    private fun cropBitmapToPreviewAspect(bitmap: Bitmap): Bitmap {
+        val previewWidth = binding.previewView.width
+        val previewHeight = binding.previewView.height
+        if (previewWidth <= 0 || previewHeight <= 0) return bitmap
+
+        val targetAspect = previewWidth.toFloat() / previewHeight.toFloat()
+        val sourceAspect = bitmap.width.toFloat() / bitmap.height.toFloat()
+        if (abs(targetAspect - sourceAspect) < 0.01f) return bitmap
+
+        val cropWidth: Int
+        val cropHeight: Int
+        if (sourceAspect > targetAspect) {
+            cropHeight = bitmap.height
+            cropWidth = (bitmap.height * targetAspect).roundToInt().coerceIn(1, bitmap.width)
+        } else {
+            cropWidth = bitmap.width
+            cropHeight = (bitmap.width / targetAspect).roundToInt().coerceIn(1, bitmap.height)
+        }
+
+        val left = ((bitmap.width - cropWidth) / 2f).roundToInt()
+        val top = ((bitmap.height - cropHeight) / 2f).roundToInt()
+        return Bitmap.createBitmap(bitmap, left, top, cropWidth, cropHeight)
     }
 
     private fun openGalleryWithPermission() {
@@ -639,7 +700,7 @@ class ScanFragment : Fragment() {
     private fun hideCameraControls() {
         val cameraViews = listOf(
             binding.cameraOverlay, binding.modelSelectorContainer,
-            binding.scanFrame, binding.cameraControls,
+            binding.cameraControls,
             binding.btnCapture, binding.btnGallery, binding.tvGuestCounter
         )
         cameraViews.forEach { v ->
@@ -666,7 +727,7 @@ class ScanFragment : Fragment() {
 
                 val cameraViews = mutableListOf(
                     binding.cameraOverlay, binding.modelSelectorContainer,
-                    binding.scanFrame, binding.cameraControls,
+                    binding.cameraControls,
                     binding.btnCapture, binding.btnGallery
                 )
                 if (viewModel.isGuest) cameraViews.add(binding.tvGuestCounter)

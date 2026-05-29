@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 // ====== AUTH ======
 
 data class LoginRequest(val username: String, val password: String)
+data class GoogleLoginRequest(@SerializedName("id_token") val idToken: String)
 data class RegisterRequest(
     val username: String,
     val email: String,

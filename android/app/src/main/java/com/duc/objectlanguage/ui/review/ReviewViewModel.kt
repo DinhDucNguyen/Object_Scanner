@@ -14,6 +14,29 @@ import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import com.duc.objectlanguage.utils.LocaleHelper
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+
+data class ReviewSessionSummary(
+    val total: Int = 0,
+    val again: Int = 0,
+    val hard: Int = 0,
+    val good: Int = 0,
+    val easy: Int = 0
+) {
+    val remembered: Int get() = good + easy
+    val needsReview: Int get() = again + hard
+    val rememberedPercent: Int
+        get() = if (total == 0) 0 else (remembered * 100f / total).roundToInt()
+
+    fun record(quality: Int): ReviewSessionSummary {
+        return when {
+            quality >= 5 -> copy(total = total + 1, easy = easy + 1)
+            quality >= 4 -> copy(total = total + 1, good = good + 1)
+            quality >= 3 -> copy(total = total + 1, hard = hard + 1)
+            else -> copy(total = total + 1, again = again + 1)
+        }
+    }
+}
 
 class ReviewViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -38,6 +61,9 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     private val _finishedMessage = MutableLiveData<String>()
     val finishedMessage: LiveData<String> = _finishedMessage
 
+    private val _sessionSummary = MutableLiveData(ReviewSessionSummary())
+    val sessionSummary: LiveData<ReviewSessionSummary> = _sessionSummary
+
     private val _activeCollectionId = MutableLiveData(0)
     val activeCollectionId: LiveData<Int> = _activeCollectionId
 
@@ -53,6 +79,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             _isLoading.value = true
             _finished.value = false
             _currentIndex.value = 0
+            _sessionSummary.value = ReviewSessionSummary()
             val result = if (collectionId > 0) {
                 if (practice) collectionRepo.getCollectionReviewCardsPractice(collectionId)
                 else collectionRepo.getCollectionReviewCards(collectionId)
@@ -92,6 +119,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             val result = repo.submitReview(card.progressId, quality)
             result.fold(
                 onSuccess = {
+                    _sessionSummary.value = (_sessionSummary.value ?: ReviewSessionSummary()).record(quality)
                     _message.value = if (quality >= 3) {
                         localizedString(R.string.review_msg_good)
                     } else {

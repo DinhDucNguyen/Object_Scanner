@@ -11,7 +11,7 @@ from app.schemas.user import (
     ForgotPasswordRequest, ForgotPasswordResponse, VerifyOtpRequest,
     ResetPasswordRequest, ChangePasswordRequest,
     ProfileUpdateRequest, AvatarUploadResponse,
-    MessageResponse,
+    MessageResponse, GoogleLoginRequest,
 )
 from app.dependencies.get_current_user import get_current_user_id
 
@@ -109,3 +109,10 @@ def change_password(
 ):
     """Đổi mật khẩu cho user đã đăng nhập (cần JWT)."""
     return user_service.change_password(db, user_id, data)
+
+
+@router.post("/google", response_model=TokenResponse)
+@limiter.limit("10/minute")
+def google_login(request: Request, data: GoogleLoginRequest, db: Session = Depends(get_db)):
+    """Đăng nhập / đăng ký bằng Google idToken từ Android."""
+    return user_service.google_login(db, data.id_token)

@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.ImageDecoder
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -30,7 +31,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.ui.common.navigateWithSlide
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.ApiConfig
@@ -94,6 +99,7 @@ class ProfileFragment : Fragment() {
         val initialUsername = app.tokenManager.username ?: getString(R.string.dashboard_default_user)
         binding.tvUsername.text = initialUsername
         binding.tvUsernameHandle.text = getString(R.string.profile_username_handle, initialUsername)
+        showAvatarLoading()
         updateLangButtons()
         setupDarkModeSwitch()
         setupClicks()
@@ -143,19 +149,7 @@ class ProfileFragment : Fragment() {
             binding.tvBio.text = profile.bio?.takeIf { it.isNotBlank() }
                 ?: getString(R.string.profile_bio_placeholder)
 
-            val avatarUrl = profile.avatarUrl
-            if (!avatarUrl.isNullOrBlank() && avatarUrl != "default_avatar.png") {
-                Glide.with(this)
-                    .load(resolveMediaUrl(avatarUrl))
-                    .transform(CenterCrop())
-                    .placeholder(R.drawable.ic_person)
-                    .error(R.drawable.ic_person)
-                    .into(binding.ivAvatar)
-                binding.ivAvatar.setPadding(0, 0, 0, 0)
-                binding.ivAvatar.imageTintList = null
-            } else {
-                showDefaultAvatar()
-            }
+            bindProfileAvatar(profile.avatarUrl)
         }
         viewModel.message.observe(viewLifecycleOwner) { msg ->
             msg ?: return@observe
@@ -590,6 +584,7 @@ class ProfileFragment : Fragment() {
             LocaleHelper.setLocale(requireContext(), lang)
             val msgRes = if (lang == "en") R.string.profile_language_changed_en else R.string.profile_language_changed_vi
             Toast.makeText(requireContext(), getString(msgRes), Toast.LENGTH_SHORT).show()
+            saveScrollPositionForRecreate()
             requireActivity().recreate()
         }
     }
@@ -601,10 +596,63 @@ class ProfileFragment : Fragment() {
     }
 
     private fun showDefaultAvatar() {
-        val padding = (20 * resources.displayMetrics.density).toInt()
+        val padding = (22 * resources.displayMetrics.density).toInt()
+        Glide.with(binding.ivAvatar).clear(binding.ivAvatar)
+        binding.ivAvatar.scaleType = ImageView.ScaleType.CENTER
         binding.ivAvatar.setImageResource(R.drawable.ic_person)
         binding.ivAvatar.setPadding(padding, padding, padding, padding)
         binding.ivAvatar.imageTintList = ContextCompat.getColorStateList(requireContext(), R.color.primary)
+    }
+
+    private fun showAvatarLoading() {
+        Glide.with(binding.ivAvatar).clear(binding.ivAvatar)
+        binding.ivAvatar.scaleType = ImageView.ScaleType.CENTER_CROP
+        binding.ivAvatar.setImageDrawable(null)
+        binding.ivAvatar.setPadding(0, 0, 0, 0)
+        binding.ivAvatar.imageTintList = null
+        binding.ivAvatar.clearColorFilter()
+    }
+
+    private fun bindProfileAvatar(avatarUrl: String?) {
+        if (avatarUrl.isNullOrBlank() || avatarUrl == "default_avatar.png") {
+            showDefaultAvatar()
+            return
+        }
+
+        binding.ivAvatar.scaleType = ImageView.ScaleType.CENTER_CROP
+        binding.ivAvatar.setPadding(0, 0, 0, 0)
+        binding.ivAvatar.imageTintList = null
+        binding.ivAvatar.clearColorFilter()
+
+        Glide.with(this)
+            .load(resolveMediaUrl(avatarUrl))
+            .transform(CenterCrop())
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    showDefaultAvatar()
+                    return true
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable,
+                    model: Any,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    binding.ivAvatar.scaleType = ImageView.ScaleType.CENTER_CROP
+                    binding.ivAvatar.setPadding(0, 0, 0, 0)
+                    binding.ivAvatar.imageTintList = null
+                    binding.ivAvatar.clearColorFilter()
+                    return false
+                }
+            })
+            .into(binding.ivAvatar)
     }
 
     override fun onDestroyView() {

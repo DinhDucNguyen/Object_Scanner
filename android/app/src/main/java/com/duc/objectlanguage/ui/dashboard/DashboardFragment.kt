@@ -260,6 +260,7 @@ class DashboardFragment : Fragment() {
             duration = 900
             interpolator = DecelerateInterpolator()
             addUpdateListener {
+                if (!isAdded) return@addUpdateListener
                 view.text = getString(R.string.format_number_suffix, it.animatedValue as Int, suffix)
             }
             start()

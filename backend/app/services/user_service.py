@@ -29,6 +29,9 @@ OTP_EXPIRE_MINUTES = 5
 # email -> {"otp": str, "expires_at": datetime}
 _otp_store: dict[str, dict] = {}
 
+from app.core.config import settings as _settings
+GOOGLE_CLIENT_ID = _settings.GOOGLE_CLIENT_ID or ""
+
 
 class UserService:
     def __init__(self):
@@ -268,3 +271,55 @@ class UserService:
         db.commit()
 
         return {"message": "Đổi mật khẩu thành công"}
+
+    def google_login(self, db: Session, id_token: str) -> dict:
+        try:
+            from google.oauth2 import id_token as google_id_token
+            from google.auth.transport import requests as google_requests
+            idinfo = google_id_token.verify_oauth2_token(
+                id_token,
+                google_requests.Request(),
+                GOOGLE_CLIENT_ID,
+            )
+        except Exception as e:
+            logger.warning("google_login: invalid token: %s", e)
+            raise HTTPException(401, "Google token không hợp lệ")
+
+        email = idinfo.get("email", "").lower().strip()
+        full_name = idinfo.get("name", "")
+        if not email:
+            raise HTTPException(400, "Không lấy được email từ Google")
+
+        user = self.repo.get_by_email(db, email)
+        if user:
+            status_name = user.trang_thai_obj.ten_trang_thai if user.trang_thai_obj else ""
+            if status_name != "hoat_dong":
+                raise HTTPException(403, "Tài khoản đã bị khóa")
+        else:
+            role = self.repo.get_role_by_name(db, "nguoi_dung")
+            status = self.repo.get_status_by_name(db, "hoat_dong")
+            if not role or not status:
+                raise HTTPException(500, "Hệ thống chưa khởi tạo dữ liệu vai trò / trạng thái")
+
+            base_username = email.split("@")[0].replace(".", "_")[:45]
+            username = base_username
+            counter = 1
+            while self.repo.get_by_username(db, username):
+                username = f"{base_username}_{counter}"
+                counter += 1
+
+            user = User(
+                ten_dang_nhap=username,
+                email=email,
+                mat_khau_ma_hoa=hash_password(__import__('os').urandom(32).hex()),
+                vai_tro_id=role.id,
+                trang_thai_id=status.id,
+            )
+            profile = Profile(ho_ten=full_name)
+            settings = UserSettings()
+            self.repo.create(db, user, profile, settings)
+
+        user.lan_dang_nhap_cuoi = now_vietnam()
+        db.commit()
+
+        return self._generate_tokens(user)

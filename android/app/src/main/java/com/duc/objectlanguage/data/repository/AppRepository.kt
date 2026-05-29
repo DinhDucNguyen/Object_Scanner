@@ -36,6 +36,24 @@ class AppRepository(private val tokenManager: TokenManager) {
         }
     }
 
+    suspend fun googleLogin(idToken: String): Result<TokenResponse> {
+        return try {
+            val response = api.googleLogin(GoogleLoginRequest(idToken))
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                tokenManager.accessToken = body.accessToken
+                tokenManager.refreshToken = body.refreshToken
+                tokenManager.username = body.user.username
+                tokenManager.userId = body.user.id
+                Result.success(body)
+            } else {
+                Result.failure(Exception(apiError(response, "Đăng nhập Google thất bại")))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+        }
+    }
+
     suspend fun register(username: String, email: String, password: String, fullName: String? = null): Result<String> {
         return try {
             val response = api.register(RegisterRequest(username, email, password, fullName))

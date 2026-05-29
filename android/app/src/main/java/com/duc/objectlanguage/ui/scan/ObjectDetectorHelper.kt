@@ -15,7 +15,7 @@ data class DetectionResult(
     val label: String,
     val confidence: Float,
     val boundingBox: RectF,
-    val modelName: String = "best_float32.tflite",
+    val modelName: String = "yolov8_custom_float32.tflite",
 )
 
 sealed interface DetectionEvent {
@@ -32,7 +32,7 @@ class ObjectDetectorHelper(
     private val context: Context,
     private val threshold: Float = 0.5f,
     private val maxResults: Int = 3,
-    private val modelName: String = "best_float32.tflite",
+    private val modelName: String = "yolov8_custom_float32.tflite",
     val onResult: (DetectionEvent) -> Unit,
 ) {
     private var interpreter: Interpreter? = null
@@ -85,7 +85,7 @@ class ObjectDetectorHelper(
         }
         inputBuffer.rewind()
 
-        // YOLOv10 output: [1, 300, 6] → [x1, y1, x2, y2, score, class_id]
+        // YOLOv8 output: [1, 300, 6] -> [x1, y1, x2, y2, score, class_id]
         val outShape = interp.getOutputTensor(0).shape()
         val numDetections = outShape[1]
         val outputBuffer = Array(1) { Array(numDetections) { FloatArray(6) } }
@@ -177,8 +177,8 @@ class ObjectDetectorHelper(
     }
 
     companion object {
-        const val CUSTOM_MODEL = "best_float32.tflite"
-        const val COCO_MODEL = "yolov10n_int8.tflite"
+        const val CUSTOM_MODEL = "yolov8_custom_float32.tflite"
+        const val COCO_MODEL = "yolov8n_int8.tflite"
 
         val SCHOOL_SUPPLIES_LABELS = listOf(
             "backpack", "calculator", "eraser", "notebook", "pen",
@@ -204,6 +204,6 @@ class ObjectDetectorHelper(
             if (modelName == COCO_MODEL) COCO_LABELS else SCHOOL_SUPPLIES_LABELS
 
         fun displayNameForModel(modelName: String): String =
-            if (modelName == COCO_MODEL) "COCO YOLOv10n" else "YOLOv10 Custom"
+            if (modelName == COCO_MODEL) "COCO YOLOv8n" else "YOLOv8 Custom"
     }
 }

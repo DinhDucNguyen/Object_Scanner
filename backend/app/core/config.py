@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: Optional[str] = None
     SMTP_FROM: str = "no-reply@objectscanner.app"
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: Optional[str] = None
+
     @field_validator("DEBUG", mode="before")
     @classmethod
     def parse_debug_mode(cls, value):

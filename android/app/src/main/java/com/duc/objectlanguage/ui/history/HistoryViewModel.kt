@@ -50,21 +50,19 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     private var toDate: String? = null
     private var offset = 0
     private var canLoadMore = true
-    private var pendingReload = false
+    private var loadJob: Job? = null
     private var searchJob: Job? = null
 
     fun load(reset: Boolean = true) {
-        if (_isLoading.value == true) {
-            if (reset) pendingReload = true
-            return
-        }
         if (reset) {
+            // Cancel any in-flight load so rapid filter/scroll changes don't stack up
+            loadJob?.cancel()
             offset = 0
             canLoadMore = true
         }
         if (!canLoadMore) return
 
-        viewModelScope.launch {
+        loadJob = viewModelScope.launch {
             _isLoading.value = true
             val result = repo.getHistory(
                 limit = pageSize,
@@ -87,14 +85,12 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                 }
             )
             _isLoading.value = false
-            if (pendingReload) {
-                pendingReload = false
-                load(reset = true)
-            }
         }
     }
 
     fun loadMore() {
+        // Don't load more while a reset load is in progress
+        if (_isLoading.value == true) return
         load(reset = false)
     }
 
@@ -108,7 +104,6 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun setPeriod(value: String) {
-        if (period == value) return
         period = value
         fromDate = null
         toDate = null

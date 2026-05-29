@@ -11,24 +11,23 @@ logger = logging.getLogger(__name__)
 
 class GeminiService:
     def __init__(self):
-        # Quick scan — model nhẹ, quota cao (500 RPD), dùng cho bước nhận diện nhanh
+        # Quick scan — chỉ nhận diện object_code/confidence, ưu tiên model nhẹ để tránh tốn thời gian.
         self.models_to_try = [
             "gemini-3.1-flash-lite",
-            "gemini-3-flash",
-            "gemini-3.5-flash",
-            "gemini-2.5-flash",
         ]
-        # Full identify — model mạnh hơn, dùng khi confidence thấp hoặc DB miss cần sinh vocab
+        # Full identify — dùng khi confidence thấp hoặc DB miss cần sinh vocab đầy đủ.
         self.vision_full_models = [
-            "gemini-3-flash",
+            "gemini-3-flash-preview",
+            "gemini-3.1-flash-lite",
             "gemini-3.5-flash",
             "gemini-2.5-flash",
         ]
-        # Text-only (translate, dictionary, example) — nhẹ trước, không tranh quota scan
+        # Text-only (translate, dictionary, example) — nhẹ trước, giữ 2.5 flash cuối vì hay quá tải.
         self.translate_models = [
-            "gemini-2.5-flash-lite",
             "gemini-3.1-flash-lite",
-            "gemini-3-flash",
+            "gemini-3-flash-preview",
+            "gemini-2.5-flash-lite",
+            "gemini-3.5-flash",
             "gemini-2.5-flash",
             "gemini-1.5-flash-8b",
             "gemini-1.5-flash",  
