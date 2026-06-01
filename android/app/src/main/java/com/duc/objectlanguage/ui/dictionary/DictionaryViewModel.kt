@@ -43,6 +43,8 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
     private val _history = MutableLiveData<List<DictionaryHistoryItem>>(emptyList())
     val history: LiveData<List<DictionaryHistoryItem>> = _history
 
+    var savedInputText: String = ""
+
     private var translateJob: Job? = null
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
     private var lastRequestKey: String? = null

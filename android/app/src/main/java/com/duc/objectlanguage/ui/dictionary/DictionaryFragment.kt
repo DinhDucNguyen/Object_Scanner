@@ -10,7 +10,7 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.DictionaryHistoryItem
 import com.duc.objectlanguage.databinding.FragmentDictionaryBinding
@@ -24,7 +24,8 @@ class DictionaryFragment : Fragment() {
 
     private var _binding: FragmentDictionaryBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: DictionaryViewModel by viewModels()
+    private val viewModel: DictionaryViewModel by activityViewModels()
+    private var isRestoringState = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,9 +43,35 @@ class DictionaryFragment : Fragment() {
         setupListeners()
         setupObservers()
         viewModel.loadHistory()
-        arguments?.getString("initialText")?.takeIf { it.isNotBlank() }?.let {
-            binding.etInput.setText(it)
+
+        // Restore text — dùng flag để tránh afterTextChanged gọi clearResult()
+        val initialText = arguments?.getString("initialText")?.takeIf { it.isNotBlank() }
+            ?: viewModel.savedInputText.takeIf { it.isNotBlank() }
+        if (initialText != null) {
+            isRestoringState = true
+            binding.etInput.setText(initialText)
             binding.etInput.setSelection(binding.etInput.text?.length ?: 0)
+            isRestoringState = false
+        }
+
+        // Restore kết quả dịch nếu ViewModel đang có — LiveData không tự re-emit khi Fragment recreate
+        viewModel.result.value?.let { result ->
+            binding.groupEmptyState.visibility = View.GONE
+            binding.cardResult.alpha = 1f
+            binding.cardResult.translationY = 0f
+            binding.cardResult.visibility = View.VISIBLE
+            binding.tvTranslation.text = result.translation
+            binding.tvToLang.text = langLabel(result.toLang)
+            val hasPhonetic = !result.phonetic.isNullOrBlank()
+            val enIsSource = result.fromLang.lowercase() == "en"
+            binding.tvInputPhonetic.visibility = if (hasPhonetic && enIsSource) View.VISIBLE else View.GONE
+            if (hasPhonetic && enIsSource) binding.tvInputPhonetic.text = result.phonetic
+            binding.tvPhonetic.visibility = if (hasPhonetic && !enIsSource) View.VISIBLE else View.GONE
+            if (hasPhonetic && !enIsSource) binding.tvPhonetic.text = result.phonetic
+            binding.btnPlayAudio.visibility =
+                if (viewModel.pronunciationTargetSource(result) != null && enIsSource) View.VISIBLE else View.GONE
+            binding.btnPlayAudioResult.visibility =
+                if (viewModel.pronunciationTargetResult(result) != null && !enIsSource) View.VISIBLE else View.GONE
         }
     }
 
@@ -60,9 +87,11 @@ class DictionaryFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {
                 val text = s?.toString() ?: ""
+                viewModel.savedInputText = text
                 val hasText = text.isNotBlank()
                 binding.btnClearInput.visibility = if (hasText) View.VISIBLE else View.GONE
                 binding.btnTranslate.visibility = if (hasText) View.VISIBLE else View.GONE
+                if (isRestoringState) return
                 if (!hasText) {
                     viewModel.clearResult()
                     binding.cardResult.visibility = View.GONE
@@ -71,7 +100,10 @@ class DictionaryFragment : Fragment() {
                     binding.layoutRecentChips.visibility =
                         if (binding.chipGroupRecent.childCount > 0) View.VISIBLE else View.GONE
                 } else {
-                    viewModel.clearResult()
+                    // Chỉ clearResult nếu đang thực sự có kết quả — tránh reset UI khi text không đổi
+                    if (viewModel.result.value != null) {
+                        viewModel.clearResult()
+                    }
                     binding.layoutRecentChips.visibility = View.GONE
                     binding.groupEmptyState.visibility = View.GONE
                 }
@@ -163,16 +195,23 @@ class DictionaryFragment : Fragment() {
             if (result != null) {
                 binding.groupEmptyState.visibility = View.GONE
                 viewModel.loadHistory()
-                // Animate card vào nếu đang ẩn
                 if (binding.cardResult.visibility != View.VISIBLE) {
-                    binding.cardResult.alpha = 0f
-                    binding.cardResult.translationY = 28f
-                    binding.cardResult.visibility = View.VISIBLE
-                    binding.cardResult.animate()
-                        .alpha(1f).translationY(0f)
-                        .setDuration(300)
-                        .setInterpolator(OvershootInterpolator(1.2f))
-                        .start()
+                    if (viewModel.isLoading.value == true) {
+                        // Kết quả mới — animate vào
+                        binding.cardResult.alpha = 0f
+                        binding.cardResult.translationY = 28f
+                        binding.cardResult.visibility = View.VISIBLE
+                        binding.cardResult.animate()
+                            .alpha(1f).translationY(0f)
+                            .setDuration(300)
+                            .setInterpolator(OvershootInterpolator(1.2f))
+                            .start()
+                    } else {
+                        // Restore sau khi switch tab — hiện ngay không animate
+                        binding.cardResult.alpha = 1f
+                        binding.cardResult.translationY = 0f
+                        binding.cardResult.visibility = View.VISIBLE
+                    }
                 }
 
                 binding.tvTranslation.text = result.translation
