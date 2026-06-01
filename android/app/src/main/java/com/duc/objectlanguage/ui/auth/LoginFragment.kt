@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentLoginBinding
+import com.duc.objectlanguage.ui.common.addRaisedButtonFeedback
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -41,10 +42,10 @@ class LoginFragment : Fragment() {
                 if (idToken != null) {
                     sendGoogleTokenToBackend(idToken)
                 } else {
-                    Toast.makeText(requireContext(), "Không lấy được token từ Google", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.auth_google_token_error), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: ApiException) {
-                Toast.makeText(requireContext(), "Google Sign-In thất bại: ${e.statusCode}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.auth_google_signin_failed, e.statusCode), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -66,6 +67,8 @@ class LoginFragment : Fragment() {
 
         val app = requireActivity().application as ObjectLanguageApp
         val repo = app.repository
+
+        binding.btnLogin.addRaisedButtonFeedback()
 
         binding.btnLogin.setOnClickListener {
             val user = binding.etUsername.text.toString().trim()

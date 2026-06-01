@@ -22,7 +22,7 @@ import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentReviewBinding
 import com.duc.objectlanguage.ui.common.addPulseFeedback
-import com.duc.objectlanguage.ui.common.addScaleFeedback
+import com.duc.objectlanguage.ui.common.addRaisedButtonFeedback
 
 class ReviewFragment : Fragment() {
 
@@ -51,7 +51,18 @@ class ReviewFragment : Fragment() {
             }
         }
 
-        viewModel.cards.observe(viewLifecycleOwner) { updateCard() }
+        viewModel.cards.observe(viewLifecycleOwner) { cards ->
+            if (cards.isEmpty() && viewModel.isLoading.value == false && viewModel.finished.value != true) {
+                binding.cardContent.visibility = View.GONE
+                binding.buttonRow.visibility = View.GONE
+                binding.layoutFinished.visibility = View.VISIBLE
+                binding.tvFinished.text = getString(R.string.review_no_cards_due)
+                updateFinishedButtons()
+                animateFinished()
+            } else {
+                updateCard()
+            }
+        }
         viewModel.currentIndex.observe(viewLifecycleOwner) { updateCard() }
         viewModel.finishedMessage.observe(viewLifecycleOwner) { message ->
             binding.tvFinished.text = message
@@ -77,11 +88,11 @@ class ReviewFragment : Fragment() {
             }
         }
 
-        binding.btnReveal.addScaleFeedback()
-        binding.btnAgain.addScaleFeedback()
-        binding.btnHard.addScaleFeedback()
-        binding.btnGood.addScaleFeedback()
-        binding.btnEasy.addScaleFeedback()
+        binding.btnReveal.addRaisedButtonFeedback()
+        binding.btnAgain.addRaisedButtonFeedback()
+        binding.btnHard.addRaisedButtonFeedback()
+        binding.btnGood.addRaisedButtonFeedback()
+        binding.btnEasy.addRaisedButtonFeedback()
 
         binding.btnReveal.setOnClickListener {
             val flipOut = ObjectAnimator.ofFloat(binding.cardFlashcard, "rotationY", 0f, 90f).apply { duration = 200 }

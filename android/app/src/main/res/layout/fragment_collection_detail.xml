@@ -180,6 +180,19 @@
                         android:text="@string/collection_empty_title_detail"
                         android:textAppearance="@style/TextAppearance.App.BodyMedium" />
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnEmptyAddWord"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="14dp"
+                        android:text="@string/collection_empty_detail_action"
+                        android:textAllCaps="false"
+                        app:backgroundTint="@color/primary"
+                        app:cornerRadius="16dp"
+                        app:icon="@drawable/ic_book"
+                        app:iconGravity="textStart"
+                        app:iconTint="@android:color/white" />
+
                 </LinearLayout>
 
             </LinearLayout>

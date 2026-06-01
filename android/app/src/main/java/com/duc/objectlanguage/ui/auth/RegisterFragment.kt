@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentRegisterBinding
+import com.duc.objectlanguage.ui.common.addRaisedButtonFeedback
 import com.duc.objectlanguage.utils.PasswordValidator
 import kotlinx.coroutines.launch
 
@@ -32,6 +33,8 @@ class RegisterFragment : Fragment() {
         animateEntrance()
 
         val repo = (requireActivity().application as ObjectLanguageApp).repository
+
+        binding.btnRegister.addRaisedButtonFeedback()
 
         binding.btnRegister.setOnClickListener {
             val fullName = binding.etFullName.text.toString().trim()
@@ -67,6 +70,11 @@ class RegisterFragment : Fragment() {
             }
 
             binding.btnRegister.isEnabled = false
+            binding.etFullName.isEnabled = false
+            binding.etUsername.isEnabled = false
+            binding.etEmail.isEnabled = false
+            binding.etPassword.isEnabled = false
+            binding.etConfirmPassword.isEnabled = false
             binding.progressBar.visibility = View.VISIBLE
 
             lifecycleScope.launch {
@@ -74,11 +82,20 @@ class RegisterFragment : Fragment() {
                 if (_binding == null) return@launch
                 binding.progressBar.visibility = View.GONE
                 binding.btnRegister.isEnabled = true
+                binding.etFullName.isEnabled = true
+                binding.etUsername.isEnabled = true
+                binding.etEmail.isEnabled = true
+                binding.etPassword.isEnabled = true
+                binding.etConfirmPassword.isEnabled = true
 
                 result.fold(
-                    onSuccess = { message ->
-                        Toast.makeText(requireContext(), getString(R.string.auth_register_success, message), Toast.LENGTH_SHORT).show()
-                        findNavController().navigate(R.id.action_register_to_login)
+                    onSuccess = {
+                        Toast.makeText(requireContext(), getString(R.string.auth_registration_otp_sent), Toast.LENGTH_SHORT).show()
+                        val bundle = Bundle().apply {
+                            putString("email", email)
+                            putString("mode", "register")
+                        }
+                        findNavController().navigate(R.id.action_register_to_verifyOtp, bundle)
                     },
                     onFailure = {
                         Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()

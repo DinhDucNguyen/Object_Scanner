@@ -11,14 +11,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Scanned Image — full display, no crop -->
+        <!-- Scanned Image — capped height so vocab card is visible without scrolling -->
         <ImageView
             android:id="@+id/ivScannedImage"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:minHeight="220dp"
+            android:layout_height="240dp"
             android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
             android:background="@color/surface"
             android:contentDescription="@string/history_scanned_image" />
 

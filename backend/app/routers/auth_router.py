@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from sqlalchemy.orm import Session
 from app.core.limiter import limiter
+from app.utils.upload import read_upload_bytes
 
 from app.db.session import get_db
 from app.services.user_service import UserService
@@ -14,6 +15,7 @@ from app.schemas.user import (
     MessageResponse, GoogleLoginRequest,
 )
 from app.dependencies.get_current_user import get_current_user_id
+from app.schemas.user import DeleteAccountRequest
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 user_service = UserService()
@@ -23,6 +25,17 @@ user_service = UserService()
 @limiter.limit("5/minute")
 def register(request: Request, data: UserCreate, db: Session = Depends(get_db)):
     return user_service.register(db, data)
+
+
+@router.post("/register/resend-otp", response_model=MessageResponse)
+@limiter.limit("3/minute")
+def resend_registration_otp(request: Request, data: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    return user_service.resend_registration_otp(db, data)
+
+
+@router.post("/register/verify-otp", response_model=MessageResponse)
+def verify_registration_otp(data: VerifyOtpRequest, db: Session = Depends(get_db)):
+    return user_service.verify_registration_otp(db, data)
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -59,7 +72,9 @@ async def upload_avatar(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    image_bytes = await file.read()
+    if file.content_type and not file.content_type.startswith("image/"):
+        raise HTTPException(400, "File phải là ảnh")
+    image_bytes = await read_upload_bytes(file)
     return user_service.upload_avatar(db, user_id, image_bytes, file.filename or "avatar.jpg")
 
 
@@ -116,3 +131,13 @@ def change_password(
 def google_login(request: Request, data: GoogleLoginRequest, db: Session = Depends(get_db)):
     """Đăng nhập / đăng ký bằng Google idToken từ Android."""
     return user_service.google_login(db, data.id_token)
+
+
+@router.delete("/account", response_model=MessageResponse)
+def delete_account(
+    data: DeleteAccountRequest,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    """Xóa tài khoản vĩnh viễn — yêu cầu xác nhận mật khẩu."""
+    return user_service.delete_account(db, user_id, data.password)

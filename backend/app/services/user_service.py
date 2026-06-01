@@ -24,10 +24,11 @@ from app.services.email_service import EmailService
 from app.utils.cloudinary_helper import upload_image
 from app.utils.timezone import now_vietnam
 
-OTP_EXPIRE_MINUTES = 5
+OTP_EXPIRE_MINUTES = 1
 
 # email -> {"otp": str, "expires_at": datetime}
 _otp_store: dict[str, dict] = {}
+_registration_otp_store: dict[str, dict] = {}
 
 from app.core.config import settings as _settings
 GOOGLE_CLIENT_ID = _settings.GOOGLE_CLIENT_ID or ""
@@ -53,10 +54,12 @@ class UserService:
         }
 
     def register(self, db: Session, data: UserCreate) -> dict:
-        if self.repo.get_by_email(db, data.email):
+        existing_email = self.repo.get_by_email(db, data.email)
+        if existing_email and bool(existing_email.email_da_xac_thuc):
             raise HTTPException(400, "Email đã được sử dụng")
 
-        if self.repo.get_by_username(db, data.username):
+        existing_username = self.repo.get_by_username(db, data.username)
+        if existing_username and (not existing_email or existing_username.id != existing_email.id):
             raise HTTPException(400, "Tên đăng nhập đã được sử dụng")
 
         role = self.repo.get_role_by_name(db, "nguoi_dung")
@@ -64,9 +67,18 @@ class UserService:
         if not role or not status:
             raise HTTPException(500, "Hệ thống chưa khởi tạo dữ liệu vai trò / trạng thái")
 
+        if existing_email:
+            # Không ghi đè — chỉ gửi lại OTP để tránh người khác chiếm tài khoản
+            self._send_registration_otp(existing_email.email)
+            return {"message": "Email đã đăng ký nhưng chưa xác thực. Đã gửi lại mã OTP."}
+
+        # Gửi OTP trước — nếu thất bại thì không tạo user
+        self._send_registration_otp(data.email)
+
         user = User(
             ten_dang_nhap=data.username,
             email=data.email,
+            email_da_xac_thuc=False,
             mat_khau_ma_hoa=hash_password(data.password),
             vai_tro_id=role.id,
             trang_thai_id=status.id,
@@ -74,13 +86,16 @@ class UserService:
         profile = Profile(ho_ten=data.full_name)
         settings = UserSettings()
         self.repo.create(db, user, profile, settings)
+        return {"message": "Mã OTP đã được gửi đến email. Vui lòng xác thực để hoàn tất đăng ký."}
 
-        return {"message": "Đăng ký thành công"}
 
     def login(self, db: Session, data: UserLogin):
         user = self.repo.get_by_username(db, data.username)
         if not user or not verify_password(data.password, user.mat_khau_ma_hoa):
             raise HTTPException(401, "Sai tên đăng nhập hoặc mật khẩu")
+
+        if not bool(user.email_da_xac_thuc):
+            raise HTTPException(403, "Vui lòng xác thực email trước khi đăng nhập")
 
         status_name = user.trang_thai_obj.ten_trang_thai if user.trang_thai_obj else ""
         if status_name != "hoat_dong":
@@ -90,6 +105,19 @@ class UserService:
         db.commit()
 
         return self._generate_tokens(user)
+
+    def _send_registration_otp(self, email: str) -> None:
+        normalized = email.lower()
+        otp_code = str(random.randint(100000, 999999))
+        _registration_otp_store[normalized] = {
+            "otp": otp_code,
+            "expires_at": now_vietnam() + timedelta(minutes=OTP_EXPIRE_MINUTES),
+        }
+        ok = EmailService().send_otp(normalized, otp_code, purpose="register")
+        logger.debug("register: sent OTP to %s, result=%s", normalized, ok)
+        if not ok:
+            _registration_otp_store.pop(normalized, None)
+            raise HTTPException(500, "Không thể gửi email. Vui lòng kiểm tra lại địa chỉ email.")
 
     def refresh_token(self, db: Session, refresh_token: str):
         payload = decode_token(refresh_token)
@@ -211,11 +239,24 @@ class UserService:
             "dark_mode": bool(settings.che_do_toi),
         }
 
+    def delete_account(self, db: Session, user_id: int, password: str) -> dict:
+        user = self.repo.get_by_id(db, user_id)
+        if not user:
+            raise HTTPException(404, "Không tìm thấy người dùng")
+        if not verify_password(password, user.mat_khau_ma_hoa):
+            raise HTTPException(400, "Mật khẩu không đúng")
+        db.delete(user)
+        db.commit()
+        return {"message": "Tài khoản đã được xóa vĩnh viễn"}
+
     def forgot_password(self, db: Session, data: ForgotPasswordRequest) -> dict:
         user = self.repo.get_by_email(db, data.email)
         if not user:
             logger.debug("forgot_password: email not found: %s", data.email)
             raise ValueError("Email không tồn tại")
+
+        if not bool(user.email_da_xac_thuc):
+            raise HTTPException(400, "Email chưa được xác thực. Vui lòng xác thực email trước.")
 
         email = user.email.lower()
         otp_code = str(random.randint(100000, 999999))
@@ -224,7 +265,7 @@ class UserService:
             "expires_at": now_vietnam() + timedelta(minutes=OTP_EXPIRE_MINUTES),
         }
 
-        ok = EmailService().send_otp(email, otp_code)
+        ok = EmailService().send_otp(email, otp_code, purpose="reset")
         logger.debug("forgot_password: sent OTP to %s, result=%s", email, ok)
         masked = self._mask_email(email)
         return {"message": "Mã OTP đã được gửi", "email": email, "masked_email": masked}
@@ -243,6 +284,29 @@ class UserService:
         if not entry or entry["otp"] != data.otp_code or entry["expires_at"] < now_vietnam():
             raise HTTPException(400, "OTP không hợp lệ hoặc đã hết hạn")
         return {"message": "OTP hợp lệ", "valid": True}
+
+    def resend_registration_otp(self, db: Session, data: ForgotPasswordRequest) -> dict:
+        user = self.repo.get_by_email(db, data.email)
+        if not user:
+            raise HTTPException(404, "Email chưa được đăng ký")
+        if bool(user.email_da_xac_thuc):
+            raise HTTPException(400, "Email đã được xác thực")
+        self._send_registration_otp(user.email)
+        return {"message": "Đã gửi lại mã OTP"}
+
+    def verify_registration_otp(self, db: Session, data: VerifyOtpRequest) -> dict:
+        entry = _registration_otp_store.get(data.email)
+        if not entry or entry["otp"] != data.otp_code or entry["expires_at"] < now_vietnam():
+            raise HTTPException(400, "OTP không hợp lệ hoặc đã hết hạn")
+
+        user = self.repo.get_by_email(db, data.email)
+        if not user:
+            raise HTTPException(404, "Email chưa được đăng ký")
+
+        user.email_da_xac_thuc = True
+        db.commit()
+        _registration_otp_store.pop(data.email, None)
+        return {"message": "Xác thực email thành công. Vui lòng đăng nhập."}
 
     def reset_password(self, db: Session, data: ResetPasswordRequest) -> dict:
         entry = _otp_store.get(data.email)
@@ -286,12 +350,17 @@ class UserService:
             raise HTTPException(401, "Google token không hợp lệ")
 
         email = idinfo.get("email", "").lower().strip()
+        email_verified = bool(idinfo.get("email_verified"))
         full_name = idinfo.get("name", "")
         if not email:
             raise HTTPException(400, "Không lấy được email từ Google")
 
+        if not email_verified:
+            raise HTTPException(401, "Email Google chưa được xác thực")
+
         user = self.repo.get_by_email(db, email)
         if user:
+            user.email_da_xac_thuc = True
             status_name = user.trang_thai_obj.ten_trang_thai if user.trang_thai_obj else ""
             if status_name != "hoat_dong":
                 raise HTTPException(403, "Tài khoản đã bị khóa")
@@ -311,6 +380,7 @@ class UserService:
             user = User(
                 ten_dang_nhap=username,
                 email=email,
+                email_da_xac_thuc=True,
                 mat_khau_ma_hoa=hash_password(__import__('os').urandom(32).hex()),
                 vai_tro_id=role.id,
                 trang_thai_id=status.id,

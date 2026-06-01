@@ -127,6 +127,9 @@ dependencies {
     // Encrypted SharedPreferences
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
+    // PhotoView - pinch-to-zoom image
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+
     // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 

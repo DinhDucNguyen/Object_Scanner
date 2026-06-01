@@ -54,7 +54,10 @@ class ForgotPasswordFragment : Fragment() {
                             putString("email", res.email)
                             putString("masked_email", res.maskedEmail)
                         }
-                        findNavController().navigate(R.id.action_forgotPassword_to_verifyOtp, bundle)
+                        val navOptions = androidx.navigation.NavOptions.Builder()
+                            .setPopUpTo(R.id.verifyOtpFragment, true)
+                            .build()
+                        findNavController().navigate(R.id.action_forgotPassword_to_verifyOtp, bundle, navOptions)
                     },
                     onFailure = {
                         Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()

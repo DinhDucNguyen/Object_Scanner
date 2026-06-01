@@ -51,7 +51,7 @@
     <string name="login_or_divider">hoặc</string>
     <string name="login_with_google">Tiếp tục với Google</string>
     <!-- Thay bằng Web Client ID lấy từ Google Cloud Console -->
-    <string name="google_web_client_id">1091856866030-omvsn1u9guf7lnlmumu9oofhotjmgeou.apps.googleusercontent.com</string>
+    <string name="google_web_client_id" translatable="false">1091856866030-omvsn1u9guf7lnlmumu9oofhotjmgeou.apps.googleusercontent.com</string>
     <string name="register_title">Tạo tài khoản</string>
     <string name="register_button">Tạo tài khoản</string>
     <string name="register_login_link">Đã có tài khoản? Đăng nhập</string>
@@ -143,10 +143,18 @@
     <string name="scan_error_read_cropped_image">Lỗi đọc ảnh đã cắt: %s</string>
     <string name="scan_error_gemini_quota">Gemini đã hết quota, vui lòng thử lại sau.</string>
     <string name="scan_error_not_recognized">Không nhận diện được vật thể, vui lòng chụp rõ hơn.</string>
+    <string name="scan_error_title_quota">Tạm hết lượt AI</string>
+    <string name="scan_error_title_not_recognized">Chưa nhận diện được</string>
+    <string name="scan_error_action_gallery">Chọn ảnh khác</string>
     <string name="scan_error_camera_detail">Lỗi camera: %s</string>
     <string name="scan_error_process_image">Lỗi xử lý ảnh: %s</string>
     <string name="scan_error_capture">Lỗi chụp ảnh: %s</string>
     <string name="scan_error_open_crop">Không mở được trình cắt ảnh: %s</string>
+    <string name="scan_audio_load_error">Không tải được audio</string>
+    <string name="scan_audio_play_error">Không phát được audio</string>
+    <string name="scan_add_collection_empty">Chưa có bộ sưu tập nào. Tạo bộ sưu tập trong mục Tài khoản nhé!</string>
+    <string name="scan_add_to_collection_title">Thêm vào bộ sưu tập</string>
+    <string name="scan_add_to_collection_error">Lỗi: %s</string>
     <string name="scan_preview_title">Vật thể có rõ ràng không?</string>
     <string name="scan_preview_scan_now">Quét ngay</string>
     <string name="scan_preview_crop_again">Cắt lại</string>
@@ -164,7 +172,7 @@
     <string name="dictionary_translate_button">Dịch</string>
     <string name="dictionary_empty_prompt">Nhập văn bản để bắt đầu</string>
     <string name="dictionary_save_word">Lưu vào danh sách học</string>
-    <string name="dictionary_swap_format">%1$s &lt;-&gt; %2$s</string>
+    <string name="dictionary_swap_format">%1$s ⇄ %2$s</string>
     <string name="dictionary_history_title">Lịch sử tra từ</string>
     <string name="dictionary_history_subtitle">Các từ bạn đã tra gần đây</string>
     <string name="dictionary_recent_label">Gần đây</string>
@@ -174,12 +182,25 @@
     <string name="dictionary_history_delete">Xóa khỏi lịch sử</string>
     <string name="dictionary_history_search_hint">Tìm kiếm lịch sử...</string>
     <string name="dictionary_history_no_results">Không tìm thấy kết quả</string>
+    <string name="dictionary_error_translate">Lỗi dịch</string>
+    <string name="dictionary_warn_wrong_lang_vi_in_en">Bạn đang nhập tiếng Việt nhưng chọn dịch từ tiếng Anh. Thử đổi ngôn ngữ nguồn nhé!</string>
+    <string name="dictionary_warn_wrong_lang_en_in_vi">Bạn đang nhập tiếng Anh nhưng chọn dịch từ tiếng Việt. Thử đổi ngôn ngữ nguồn nhé!</string>
+    <string name="dictionary_warn_swap_action">Đổi ngay</string>
+    <string name="dictionary_error_cannot_save_word">Từ này chưa thể lưu</string>
+    <string name="dictionary_saved_word">Đã lưu từ vựng</string>
+    <string name="dictionary_error_save_word">Lỗi lưu từ vựng</string>
+    <string name="dictionary_error_pronunciation_too_long">Câu quá dài nên không tạo phát âm</string>
+    <string name="dictionary_error_audio_load">Không tải được audio</string>
+    <string name="dictionary_error_audio_play">Lỗi phát audio</string>
 
     <!-- Explore -->
     <string name="explore_title">Khám phá</string>
     <string name="explore_subtitle">Học từ vựng theo chủ đề</string>
     <string name="explore_empty_title">Chưa có chủ đề</string>
     <string name="explore_empty_subtitle">Hãy thêm danh mục trong hệ thống</string>
+    <string name="explore_empty_scan_cta">Quét vật thể để học</string>
+    <string name="explore_load_error">Lỗi tải chủ đề</string>
+    <string name="category_detail_load_error">Lỗi tải từ vựng</string>
     <string name="explore_word_count">%1$d từ</string>
     <string name="category_detail_hint">Chạm vào từ để xem chi tiết</string>
     <string name="category_detail_empty">Chưa có từ vựng</string>
@@ -199,10 +220,16 @@
     <string name="auth_fill_all_fields">Vui lòng nhập đầy đủ thông tin</string>
     <string name="auth_invalid_username">Tên đăng nhập phải từ 3-50 ký tự, chỉ gồm chữ, số và underscore</string>
     <string name="auth_invalid_email">Email không hợp lệ</string>
+    <string name="auth_google_token_error">Không lấy được token từ Google</string>
+    <string name="auth_google_signin_failed">Đăng nhập Google thất bại: %d</string>
     <string name="auth_password_mismatch">Mật khẩu xác nhận không khớp</string>
     <string name="auth_reset_success">Đặt lại mật khẩu thành công!</string>
     <string name="otp_resend_btn">Gửi lại mã OTP</string>
+    <string name="otp_countdown">Mã hết hạn sau %ds</string>
+    <string name="otp_expired">Mã đã hết hạn. Vui lòng gửi lại.</string>
     <string name="auth_register_success">%1$s! Vui lòng đăng nhập.</string>
+    <string name="auth_registration_otp_sent">Mã OTP đã được gửi đến email. Vui lòng xác thực để hoàn tất đăng ký.</string>
+    <string name="auth_registration_verified">Xác thực email thành công. Vui lòng đăng nhập.</string>
     <string name="auth_otp_required">Vui lòng nhập đủ 6 số</string>
     <string name="auth_otp_resent">Đã gửi lại mã OTP</string>
     <string name="auth_otp_sent_to">Mã đã gửi đến: %1$s</string>
@@ -328,10 +355,23 @@
     <string name="pronunciation_error_unknown">Lỗi không xác định</string>
 
     <!-- Review -->
+    <string name="review_no_cards_due">Chưa có từ nào cần ôn hôm nay.\nQuét thêm vật thể để bắt đầu học!</string>
     <string name="review_finished">Hoàn thành!\nKhông còn từ nào cần ôn.</string>
     <string name="review_try_another_mode">Thử chế độ ôn tập khác</string>
     <string name="review_no_words_none">Không còn từ nào cần ôn.</string>
     <string name="review_no_words_start">Chưa có từ nào trong danh sách ôn tập.\nHãy quét một vật thể để bắt đầu.</string>
+    <string name="review_no_words_collection">Bộ sưu tập này chưa có từ để ôn</string>
+    <string name="review_audio_load_error">Không tải được audio</string>
+    <string name="review_audio_play_error">Không phát được audio</string>
+    <string name="test_no_cards_quiz">Chưa có thẻ để làm quiz.</string>
+    <string name="test_no_cards_typing">Chưa có thẻ để luyện gõ.</string>
+    <string name="test_no_cards_listening">Chưa có thẻ để luyện nghe.</string>
+    <string name="test_no_cards_matching">Chưa có thẻ để chơi ghép hình.</string>
+    <string name="test_no_image_cards_matching">Các từ đã ôn chưa có ảnh chuẩn để ghép hình.</string>
+    <string name="test_no_cards_pronunciation">Chưa có từ để luyện phát âm.</string>
+    <string name="test_load_quiz_error">Không tải được quiz: %s</string>
+    <string name="test_load_game_error">Không tải được trò chơi: %s</string>
+    <string name="test_load_practice_error">Không tải được bài luyện: %s</string>
     <string name="review_finished_today">Hôm nay đã ôn xong.\nKhông còn từ nào cần ôn.</string>
     <string name="review_msg_good">✓ Tốt lắm!</string>
     <string name="review_msg_again">Sẽ ôn lại sớm</string>
@@ -391,6 +431,9 @@
     <!-- History -->
     <string name="history_empty_title">Chưa quét vật thể nào</string>
     <string name="history_empty">Hãy dùng camera để quét đồ vật xung quanh bạn!</string>
+    <string name="history_empty_scan_cta">Quét vật thể đầu tiên</string>
+    <string name="history_load_error">Không tải được lịch sử</string>
+    <string name="history_delete_error">Không xoá được lịch sử</string>
     <string name="history_image">Ảnh lịch sử quét</string>
     <string name="history_search_hint">Tìm vật thể đã quét</string>
     <string name="history_filter_all">Tất cả</string>
@@ -467,6 +510,7 @@
     <string name="collection_search_hint">Tìm kiếm bộ sưu tập...</string>
     <string name="collection_empty_title">Chưa có bộ sưu tập</string>
     <string name="collection_empty_subtitle">Tạo bộ sưu tập đầu tiên\nđể sắp xếp từ vựng của bạn</string>
+    <string name="collection_empty_create_cta">Tạo bộ sưu tập</string>
     <string name="collection_item_count">%d từ</string>
     <string name="collection_created_date">Tạo %s</string>
     <string name="collection_progress_label">TIẾN ĐỘ</string>
@@ -484,6 +528,7 @@
     <string name="collection_add_word_subtitle">Bắt đầu mở rộng vốn từ của bạn</string>
     <string name="collection_add_word_toast">Quét hoặc tra từ mới, rồi lưu vào bộ sưu tập này nhé!</string>
     <string name="collection_empty_title_detail">Bộ sưu tập trống</string>
+    <string name="collection_empty_detail_action">Thêm từ vào bộ sưu tập</string>
     <string name="collection_audio_load_error">Không tải được âm thanh</string>
     <string name="collection_audio_play_error">Không phát được âm thanh</string>
     <string name="collection_cd_add">Thêm bộ sưu tập</string>
@@ -528,6 +573,7 @@
     <string name="collection_by_owner">bởi %s</string>
     <string name="collection_community_empty_title">Chưa có bộ sưu tập công khai</string>
     <string name="collection_community_empty_subtitle">Hãy là người đầu tiên chia sẻ!</string>
+    <string name="collection_community_empty_cta">Tạo bộ sưu tập để chia sẻ</string>
     <string name="collection_added_to">Đã thêm vào \"%s\"</string>
     <string name="collection_add_to">Thêm vào \"%s\"</string>
     <string name="collection_add_source_scan">Quét vật thể mới</string>
@@ -631,12 +677,20 @@
     <string name="profile_logout_confirm_title">Đăng xuất</string>
     <string name="profile_logout_confirm_msg">Bạn có chắc muốn đăng xuất không?</string>
     <string name="profile_logout_confirm_yes">Đăng xuất</string>
+    <string name="profile_btn_delete_account">Xóa tài khoản</string>
+    <string name="profile_delete_account_title">Xóa tài khoản</string>
+    <string name="profile_delete_account_msg">Toàn bộ dữ liệu của bạn (lịch sử, bộ sưu tập, tiến trình học) sẽ bị xóa vĩnh viễn và không thể khôi phục.</string>
+    <string name="profile_delete_account_password_hint">Nhập mật khẩu để xác nhận</string>
+    <string name="profile_delete_account_confirm">Xóa vĩnh viễn</string>
+    <string name="profile_delete_account_success">Tài khoản đã được xóa</string>
+    <string name="profile_delete_account_wrong_password">Mật khẩu không đúng</string>
     <string name="profile_bio_placeholder">Nhấn để thêm giới thiệu...</string>
     <string name="profile_bio_dialog_title">Giới thiệu bản thân</string>
     <string name="profile_bio_hint">Viết vài dòng về bạn...</string>
     <string name="profile_edit_bio_title">Chỉnh sửa giới thiệu</string>
     <string name="profile_menu_change_password">Đổi mật khẩu</string>
     <string name="profile_menu_notifications">Cài đặt thông báo</string>
+    <string name="profile_menu_delete_account">Xóa tài khoản</string>
     <string name="profile_change_password_title">Đổi mật khẩu</string>
     <string name="profile_change_password_subtitle">Cập nhật mật khẩu mới để bảo vệ tài khoản học tập của bạn.</string>
     <string name="profile_change_password_save">Cập nhật</string>
@@ -726,9 +780,14 @@
     <string name="language_en_short">EN</string>
     <string name="language_vi_short">VI</string>
     <string name="language_pair_en_vi">EN &lt;-&gt; VI</string>
-    <string name="scan_model_label">Model</string>
-    <string name="scan_model_custom">YOLOv8 Custom</string>
-    <string name="scan_model_coco">COCO v8n</string>
+    <string name="scan_model_label">Chế độ</string>
+    <string name="scan_model_custom">Model Custom</string>
+    <string name="scan_model_coco">Model COCO</string>
+    <string name="scan_options_action">Tùy chọn model</string>
+    <string name="scan_model_options_title">Tùy chọn nhận diện</string>
+    <string name="scan_model_options_subtitle">Mặc định dùng Model COCO. Chỉ đổi khi bạn muốn demo hoặc thử model custom của đồ án.</string>
+    <string name="scan_model_coco_desc">Model phổ biến, nhận diện nhiều vật thể hằng ngày.</string>
+    <string name="scan_model_custom_desc">Model custom của đồ án, ưu tiên nhóm đồ dùng học tập đã huấn luyện riêng.</string>
     <string name="scan_definition_title">Định nghĩa</string>
     <string name="placeholder_word">word</string>
     <string name="placeholder_object">Object</string>

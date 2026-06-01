@@ -24,8 +24,8 @@ class LearningService:
         progress, created = self.ensure_in_learning(db, translation_id, user_id)
         db.commit()
         if not created:
-            return {"message": "Da co trong danh sach hoc"}
-        return {"message": "Da them vao danh sach hoc", "id": progress.id}
+            return {"message": "Đã có trong danh sách học"}
+        return {"message": "Đã thêm vào danh sách học", "id": progress.id}
 
     def ensure_in_learning(self, db: Session, translation_id: int, user_id: int):
         existing = self.repo.get_by_user_and_translation(db, user_id, translation_id)

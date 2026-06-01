@@ -124,10 +124,15 @@
                     android:orientation="horizontal">
 
                     <LinearLayout
+                        android:id="@+id/statCollections"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
+                        android:minHeight="58dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -153,10 +158,15 @@
                         android:background="@color/divider" />
 
                     <LinearLayout
+                        android:id="@+id/statDueReviews"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
+                        android:minHeight="58dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -182,10 +192,15 @@
                         android:background="@color/divider" />
 
                     <LinearLayout
+                        android:id="@+id/statStreak"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?android:attr/selectableItemBackgroundBorderless"
                         android:gravity="center"
+                        android:minHeight="58dp"
                         android:orientation="vertical">
 
                         <TextView

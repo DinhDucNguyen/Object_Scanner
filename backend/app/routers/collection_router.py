@@ -88,7 +88,7 @@ def delete_collection(
 ):
     """Delete a collection"""
     collection_service.delete_collection(db, collection_id, user_id)
-    return {"message": "Collection deleted successfully"}
+    return {"message": "Đã xóa bộ sưu tập"}
 
 
 @router.delete("/{collection_id}/items/{translation_id}")
@@ -100,7 +100,7 @@ def remove_from_collection(
 ):
     """Remove item from collection using composite PK (collection_id + translation_id)"""
     collection_service.remove_from_collection(db, collection_id, translation_id, user_id)
-    return {"message": "Item removed from collection"}
+    return {"message": "Đã xóa từ khỏi bộ sưu tập"}
 
 
 @router.get("/{collection_id}/review", response_model=List[ReviewCardResponse])

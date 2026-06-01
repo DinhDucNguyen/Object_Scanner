@@ -107,12 +107,14 @@ class DictionaryFragment : Fragment() {
 
         binding.btnPlayAudio.addPulseFeedback()
         binding.btnPlayAudio.setOnClickListener {
-            viewModel.playAudio(viewModel.pronunciationTarget(viewModel.result.value))
+            // EN→VI: phát âm từ nguồn người nhập
+            viewModel.playAudio(viewModel.pronunciationTargetSource(viewModel.result.value))
         }
 
         binding.btnPlayAudioResult.addPulseFeedback()
         binding.btnPlayAudioResult.setOnClickListener {
-            viewModel.playAudio(viewModel.pronunciationTarget(viewModel.result.value))
+            // VI→EN: phát âm kết quả dịch tiếng Anh
+            viewModel.playAudio(viewModel.pronunciationTargetResult(viewModel.result.value))
         }
 
         binding.btnShowHistory.setOnClickListener {
@@ -199,11 +201,10 @@ class DictionaryFragment : Fragment() {
                 binding.containerDefinitions.visibility = View.GONE
                 binding.btnSaveWord.visibility = View.GONE
 
-                val hasPronunciation = viewModel.pronunciationTarget(result) != null
                 binding.btnPlayAudio.visibility =
-                    if (hasPronunciation && enIsSource) View.VISIBLE else View.GONE
+                    if (viewModel.pronunciationTargetSource(result) != null && enIsSource) View.VISIBLE else View.GONE
                 binding.btnPlayAudioResult.visibility =
-                    if (hasPronunciation && !enIsSource) View.VISIBLE else View.GONE
+                    if (viewModel.pronunciationTargetResult(result) != null && !enIsSource) View.VISIBLE else View.GONE
             } else if (viewModel.isLoading.value != true) {
                 binding.cardResult.visibility = View.GONE
                 binding.btnPlayAudio.visibility = View.GONE
@@ -213,6 +214,15 @@ class DictionaryFragment : Fragment() {
                 if (binding.etInput.text.isNullOrEmpty()) {
                     binding.groupEmptyState.visibility = View.VISIBLE
                 }
+            }
+        }
+
+        viewModel.warning.observe(viewLifecycleOwner) { warn ->
+            if (warn != null) {
+                com.google.android.material.snackbar.Snackbar.make(binding.root, warn, com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+                    .setAction(getString(R.string.dictionary_warn_swap_action)) { viewModel.swapLanguages() }
+                    .show()
+                viewModel.clearWarning()
             }
         }
 
@@ -246,8 +256,8 @@ class DictionaryFragment : Fragment() {
     }
 
     private fun langLabel(code: String): String = when (code.lowercase()) {
-        "vi" -> "VI"
-        "en" -> "EN"
+        "vi" -> "🇻🇳 VI"
+        "en" -> "🇬🇧 EN"
         else -> code.uppercase()
     }
 

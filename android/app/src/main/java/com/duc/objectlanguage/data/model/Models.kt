@@ -30,6 +30,11 @@ data class ChangePasswordRequest(
     @SerializedName("current_password") val currentPassword: String,
     @SerializedName("new_password") val newPassword: String
 )
+
+data class DeleteAccountRequest(
+    @SerializedName("password") val password: String
+)
+
 data class MessageResponse(val message: String)
 
 data class TokenResponse(

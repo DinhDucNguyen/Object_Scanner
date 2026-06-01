@@ -52,6 +52,9 @@ class HistoryFragment : Fragment() {
         binding.btnBack.setOnClickListener {
             findNavController().popBackStack()
         }
+        binding.btnEmptyScan.setOnClickListener {
+            findNavController().navigate(R.id.scanFragment)
+        }
 
         setupList()
         setupFilters()

@@ -7,8 +7,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.asLiveData
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.StreakDataStore
 import com.duc.objectlanguage.data.model.HistoryItem
+import com.duc.objectlanguage.ui.common.localizedString
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -80,8 +83,9 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                     canLoadMore = newItems.size == pageSize
                 },
                 onFailure = {
+                    if (it is CancellationException) return@launch
                     if (reset) _items.value = emptyList()
-                    _error.value = it.message ?: "Khong tai duoc lich su"
+                    _error.value = it.message ?: localizedString(R.string.history_load_error)
                 }
             )
             _isLoading.value = false
@@ -135,7 +139,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                     _items.value = (_items.value ?: emptyList()).filterNot { it.id == item.id }
                     _message.value = message
                 },
-                onFailure = { _error.value = it.message ?: "Khong xoa duoc lich su" }
+                onFailure = { _error.value = it.message ?: localizedString(R.string.history_delete_error) }
             )
         }
     }

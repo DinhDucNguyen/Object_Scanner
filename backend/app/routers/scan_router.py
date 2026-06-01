@@ -17,6 +17,8 @@ from app.schemas.common import ScanRequest, ScanResponse, TranslationResponse
 from app.dependencies.get_current_user import get_optional_user_id
 from app.utils.image import compress_image
 from app.core.constants import MAX_IMAGE_UPLOAD_BYTES
+from app.core.limiter import limiter
+from app.utils.upload import read_upload_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -24,12 +26,6 @@ router = APIRouter(prefix="/api", tags=["Scan"])
 scan_service = ScanService()
 gemini_service = GeminiService()
 tts_service = TTSService()
-
-@router.get("/scan/test")
-def test_endpoint():
-    """Test endpoint - no auth required"""
-    return {"status": "ok", "message": "Scan API is working"}
-
 
 @router.post("/scan", response_model=ScanResponse)
 def scan_object(
@@ -46,6 +42,7 @@ def scan_object(
 
 
 @router.post("/scan/image", response_model=ScanResponse)
+@limiter.limit("10/minute")
 async def scan_image(
     request: Request,
     file: UploadFile = File(...),
@@ -56,7 +53,7 @@ async def scan_image(
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(400, "File phải là ảnh (JPEG, PNG, ...)")
     
-    image_bytes = await file.read()
+    image_bytes = await read_upload_bytes(file)
     if len(image_bytes) > MAX_IMAGE_UPLOAD_BYTES:
         raise HTTPException(400, "Ảnh quá lớn, tối đa 10MB")
     
@@ -80,7 +77,9 @@ def get_translations(object_code: str, db: Session = Depends(get_db)):
 
 
 @router.get("/objects/{object_code}/examples")
+@limiter.limit("20/minute")
 def get_example_sentences(
+    request: Request,
     object_code: str,
     lang: str = Query(default="en", description="Language code"),
     count: int = Query(default=3, ge=1, le=3),
@@ -91,7 +90,9 @@ def get_example_sentences(
 
 
 @router.get("/tts/{word}")
+@limiter.limit("30/minute")
 def text_to_speech(
+    request: Request,
     word: str,
     lang: str = Query(default="en", description="Language code"),
 ):

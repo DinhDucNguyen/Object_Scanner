@@ -48,6 +48,8 @@
     <string name="login_subtitle">Learn vocabulary through object recognition</string>
     <string name="login_button">Log in</string>
     <string name="login_register_link">No account yet? Register now</string>
+    <string name="login_or_divider">or</string>
+    <string name="login_with_google">Continue with Google</string>
     <string name="register_title">Create account</string>
     <string name="register_button">Create account</string>
     <string name="register_login_link">Already have an account? Log in</string>
@@ -149,10 +151,18 @@
     <string name="scan_error_read_cropped_image">Cropped image read error: %s</string>
     <string name="scan_error_gemini_quota">Gemini quota has been exceeded. Please try again later.</string>
     <string name="scan_error_not_recognized">Could not recognize the object. Please take a clearer photo.</string>
+    <string name="scan_error_title_quota">AI temporarily unavailable</string>
+    <string name="scan_error_title_not_recognized">Not recognized yet</string>
+    <string name="scan_error_action_gallery">Choose another photo</string>
     <string name="scan_error_camera_detail">Camera error: %s</string>
     <string name="scan_error_process_image">Image processing error: %s</string>
     <string name="scan_error_capture">Capture error: %s</string>
     <string name="scan_error_open_crop">Could not open crop tool: %s</string>
+    <string name="scan_audio_load_error">Could not load audio</string>
+    <string name="scan_audio_play_error">Could not play audio</string>
+    <string name="scan_add_collection_empty">No collections yet. Create one from your account page first.</string>
+    <string name="scan_add_to_collection_title">Add to collection</string>
+    <string name="scan_add_to_collection_error">Error: %s</string>
     <string name="scan_preview_title">Is the object clear?</string>
     <string name="scan_preview_scan_now">Scan now</string>
     <string name="scan_preview_crop_again">Crop again</string>
@@ -170,7 +180,7 @@
     <string name="dictionary_translate_button">Translate</string>
     <string name="dictionary_empty_prompt">Enter text to get started</string>
     <string name="dictionary_save_word">Save to learning list</string>
-    <string name="dictionary_swap_format">%1$s &lt;-&gt; %2$s</string>
+    <string name="dictionary_swap_format">%1$s ⇄ %2$s</string>
     <string name="dictionary_history_title">Search history</string>
     <string name="dictionary_history_subtitle">Words you\'ve recently looked up</string>
     <string name="dictionary_recent_label">Recent</string>
@@ -180,12 +190,25 @@
     <string name="dictionary_history_delete">Remove from history</string>
     <string name="dictionary_history_search_hint">Search history...</string>
     <string name="dictionary_history_no_results">No results found</string>
+    <string name="dictionary_error_translate">Translation failed</string>
+    <string name="dictionary_warn_wrong_lang_vi_in_en">You typed Vietnamese but selected English as source. Try swapping the language!</string>
+    <string name="dictionary_warn_wrong_lang_en_in_vi">You typed English but selected Vietnamese as source. Try swapping the language!</string>
+    <string name="dictionary_warn_swap_action">Swap</string>
+    <string name="dictionary_error_cannot_save_word">This word cannot be saved yet</string>
+    <string name="dictionary_saved_word">Saved word</string>
+    <string name="dictionary_error_save_word">Could not save word</string>
+    <string name="dictionary_error_pronunciation_too_long">This sentence is too long for pronunciation</string>
+    <string name="dictionary_error_audio_load">Could not load audio</string>
+    <string name="dictionary_error_audio_play">Could not play audio</string>
 
     <!-- Explore -->
     <string name="explore_title">Explore</string>
     <string name="explore_subtitle">Learn vocabulary by topic</string>
     <string name="explore_empty_title">No topics yet</string>
     <string name="explore_empty_subtitle">Add categories in the system</string>
+    <string name="explore_empty_scan_cta">Scan an object to learn</string>
+    <string name="explore_load_error">Could not load topics</string>
+    <string name="category_detail_load_error">Could not load vocabulary</string>
     <string name="explore_word_count">%1$d words</string>
     <string name="category_detail_hint">Tap a word to view details</string>
     <string name="category_detail_empty">No vocabulary yet</string>
@@ -205,10 +228,16 @@
     <string name="auth_fill_all_fields">Please fill in all fields</string>
     <string name="auth_invalid_username">Username must be 3-50 characters, letters, numbers and underscore only</string>
     <string name="auth_invalid_email">Invalid email address</string>
+    <string name="auth_google_token_error">Could not retrieve Google token</string>
+    <string name="auth_google_signin_failed">Google Sign-In failed: %d</string>
     <string name="auth_password_mismatch">Passwords do not match</string>
     <string name="auth_reset_success">Password reset successfully!</string>
     <string name="otp_resend_btn">Resend OTP</string>
+    <string name="otp_countdown">Code expires in %ds</string>
+    <string name="otp_expired">Code expired. Please resend.</string>
     <string name="auth_register_success">%1$s! Please log in.</string>
+    <string name="auth_registration_otp_sent">OTP code sent to your email. Please verify to finish registration.</string>
+    <string name="auth_registration_verified">Email verified successfully. Please log in.</string>
     <string name="auth_otp_required">Please enter all 6 digits</string>
     <string name="auth_otp_resent">OTP code resent</string>
     <string name="auth_otp_sent_to">Code sent to: %1$s</string>
@@ -334,10 +363,23 @@
     <string name="pronunciation_error_unknown">Unknown error</string>
 
     <!-- Review -->
+    <string name="review_no_cards_due">No words due for review today.\nScan more objects to start learning!</string>
     <string name="review_finished">All done!\nNo more words to review.</string>
     <string name="review_try_another_mode">Try another review mode</string>
     <string name="review_no_words_none">No words left to review.</string>
     <string name="review_no_words_start">No words in your review list yet.\nScan an object to get started.</string>
+    <string name="review_no_words_collection">This collection has no words to review yet</string>
+    <string name="review_audio_load_error">Could not load audio</string>
+    <string name="review_audio_play_error">Could not play audio</string>
+    <string name="test_no_cards_quiz">No cards available for quiz yet.</string>
+    <string name="test_no_cards_typing">No cards available for typing practice yet.</string>
+    <string name="test_no_cards_listening">No cards available for listening practice yet.</string>
+    <string name="test_no_cards_matching">No cards available for matching yet.</string>
+    <string name="test_no_image_cards_matching">Your reviewed words do not have standard images yet.</string>
+    <string name="test_no_cards_pronunciation">No words available for pronunciation practice yet.</string>
+    <string name="test_load_quiz_error">Could not load quiz: %s</string>
+    <string name="test_load_game_error">Could not load game: %s</string>
+    <string name="test_load_practice_error">Could not load practice: %s</string>
     <string name="review_finished_today">All done for today!\nNo more words to review.</string>
     <string name="review_msg_good">✓ Great job!</string>
     <string name="review_msg_again">Will review again soon</string>
@@ -397,6 +439,9 @@
     <!-- History -->
     <string name="history_empty">No scan history yet</string>
     <string name="history_empty_title">No scan history yet</string>
+    <string name="history_empty_scan_cta">Scan your first object</string>
+    <string name="history_load_error">Could not load history</string>
+    <string name="history_delete_error">Could not delete history</string>
     <string name="history_image">Scan history image</string>
     <string name="history_search_hint">Search scanned objects</string>
     <string name="history_filter_all">All</string>
@@ -469,6 +514,7 @@
     <string name="collection_search_hint">Search collections...</string>
     <string name="collection_empty_title">No collections yet</string>
     <string name="collection_empty_subtitle">Create your first collection\nand organize your vocabulary</string>
+    <string name="collection_empty_create_cta">Create collection</string>
     <string name="collection_item_count">%d words</string>
     <string name="collection_created_date">Created %s</string>
     <string name="collection_progress_label">PROGRESS</string>
@@ -491,6 +537,7 @@
     <string name="collection_add_word_subtitle">Start expanding your vocabulary</string>
     <string name="collection_add_word_toast">Scan or look up a new word, then save it to this collection.</string>
     <string name="collection_empty_title_detail">This collection is empty</string>
+    <string name="collection_empty_detail_action">Add words to collection</string>
     <string name="collection_cd_add">Add collection</string>
     <string name="collection_dialog_create_title">Create collection</string>
     <string name="collection_dialog_subtitle">Start your new learning journey</string>
@@ -535,6 +582,7 @@
     <string name="collection_by_owner">by %s</string>
     <string name="collection_community_empty_title">No public collections yet</string>
     <string name="collection_community_empty_subtitle">Be the first to share your collection!</string>
+    <string name="collection_community_empty_cta">Create a collection to share</string>
     <string name="collection_add_to">Add to \"%s\"</string>
     <string name="collection_added_to">Added to \"%s\"</string>
 
@@ -636,12 +684,20 @@
     <string name="profile_logout_confirm_title">Log out</string>
     <string name="profile_logout_confirm_msg">Are you sure you want to log out?</string>
     <string name="profile_logout_confirm_yes">Log out</string>
+    <string name="profile_btn_delete_account">Delete account</string>
+    <string name="profile_delete_account_title">Delete account</string>
+    <string name="profile_delete_account_msg">All your data (history, collections, learning progress) will be permanently deleted and cannot be recovered.</string>
+    <string name="profile_delete_account_password_hint">Enter password to confirm</string>
+    <string name="profile_delete_account_confirm">Delete permanently</string>
+    <string name="profile_delete_account_success">Account has been deleted</string>
+    <string name="profile_delete_account_wrong_password">Incorrect password</string>
     <string name="profile_bio_placeholder">Tap to add a bio...</string>
     <string name="profile_bio_dialog_title">About you</string>
     <string name="profile_bio_hint">Write a few lines about yourself...</string>
     <string name="profile_edit_bio_title">Edit bio</string>
     <string name="profile_menu_change_password">Change password</string>
     <string name="profile_menu_notifications">Notification settings</string>
+    <string name="profile_menu_delete_account">Delete account</string>
     <string name="profile_change_password_title">Change password</string>
     <string name="profile_change_password_subtitle">Update your password to keep your learning account protected.</string>
     <string name="profile_change_password_save">Update</string>
@@ -720,9 +776,14 @@
     <string name="language_en_short">EN</string>
     <string name="language_vi_short">VI</string>
     <string name="language_pair_en_vi">EN &lt;-&gt; VI</string>
-    <string name="scan_model_label">Model</string>
-    <string name="scan_model_custom">YOLOv8 Custom</string>
-    <string name="scan_model_coco">COCO v8n</string>
+    <string name="scan_model_label">Mode</string>
+    <string name="scan_model_custom">Custom Model</string>
+    <string name="scan_model_coco">COCO Model</string>
+    <string name="scan_options_action">Model options</string>
+    <string name="scan_model_options_title">Recognition options</string>
+    <string name="scan_model_options_subtitle">COCO Model is the default. Change this only when demoing or trying the project custom model.</string>
+    <string name="scan_model_coco_desc">General model for many everyday objects.</string>
+    <string name="scan_model_custom_desc">Project custom model, focused on the trained school-supplies classes.</string>
     <string name="scan_definition_title">Definition</string>
     <string name="placeholder_word">word</string>
     <string name="placeholder_object">Object</string>

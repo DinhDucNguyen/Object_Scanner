@@ -193,3 +193,7 @@ class MessageResponse(BaseModel):
 
 class GoogleLoginRequest(BaseModel):
     id_token: str
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str

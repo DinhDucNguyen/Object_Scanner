@@ -1,10 +1,14 @@
 package com.duc.objectlanguage.ui.history
 
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -17,6 +21,7 @@ import com.duc.objectlanguage.databinding.FragmentHistoryDetailBinding
 import com.duc.objectlanguage.ui.common.addPulseFeedback
 import com.duc.objectlanguage.ui.common.addScaleFeedback
 import com.duc.objectlanguage.utils.DefinitionFormatter
+import com.github.chrisbanes.photoview.PhotoView
 
 class HistoryDetailFragment : Fragment() {
 
@@ -130,6 +135,9 @@ class HistoryDetailFragment : Fragment() {
             .placeholder(R.drawable.ic_image_placeholder)
             .error(R.drawable.ic_image_placeholder)
             .into(binding.ivScannedImage)
+        binding.ivScannedImage.setOnClickListener {
+            if (!imageUrl.isNullOrBlank()) showImageFullscreen(imageUrl)
+        }
     }
 
     private fun bindReviewStatus(view: TextView, status: String?) {
@@ -214,6 +222,28 @@ class HistoryDetailFragment : Fragment() {
     private fun formatDate(raw: String?): String {
         if (raw.isNullOrEmpty()) return ""
         return raw.replace("T", " ").substringBefore(".")
+    }
+
+    private fun showImageFullscreen(imageUrl: String) {
+        val dialog = Dialog(requireContext())
+        val photoView = PhotoView(requireContext()).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            setOnOutsidePhotoTapListener { dialog.dismiss() }
+        }
+        Glide.with(this).load(imageUrl).into(photoView)
+        dialog.setContentView(FrameLayout(requireContext()).apply {
+            setBackgroundColor(Color.BLACK)
+            addView(photoView)
+        })
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.show()
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
     }
 
     override fun onDestroyView() {

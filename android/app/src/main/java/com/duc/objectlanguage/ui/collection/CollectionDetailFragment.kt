@@ -54,6 +54,7 @@ class CollectionDetailFragment : Fragment() {
         applyEditMode(!isPractice)
         binding.cardAddWord.setOnClickListener { openAddWordSource() }
         binding.fabAddWord.setOnClickListener { openAddWordSource() }
+        binding.btnEmptyAddWord.setOnClickListener { openAddWordSource() }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
@@ -133,6 +134,7 @@ class CollectionDetailFragment : Fragment() {
 
     private fun applyEditMode(canEdit: Boolean) {
         binding.cardAddWord.visibility = if (canEdit) View.VISIBLE else View.GONE
+        binding.btnEmptyAddWord.visibility = if (canEdit) View.VISIBLE else View.GONE
         binding.fabAddWord.visibility = View.GONE
     }
 
@@ -168,6 +170,7 @@ class CollectionDetailFragment : Fragment() {
         detailBinding.tvWordTitle.text = item.translation
         detailBinding.tvWordCategory.text = item.category.uppercase(Locale.getDefault())
         detailBinding.tvObjectName.text = item.objectName.replace("_", " ")
+            .split(" ").joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
 
         if (item.phonetic.isNullOrBlank()) {
             detailBinding.tvWordPhonetic.visibility = View.GONE

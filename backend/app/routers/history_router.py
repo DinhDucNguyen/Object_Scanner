@@ -7,6 +7,7 @@ from app.db.session import get_db
 from app.services.history_service import HistoryFeedbackService
 from app.dependencies.get_current_user import get_current_user_id
 from app.schemas.common import LichSuQuetResponse
+from app.utils.upload import read_upload_bytes
 
 router = APIRouter(prefix="/api", tags=["History"])
 history_service = HistoryFeedbackService()
@@ -49,7 +50,7 @@ def delete_history(
     deleted = history_service.delete_history(db, user_id, scan_id)
     if not deleted:
         raise HTTPException(404, "History item not found")
-    return {"message": "Da xoa lich su quet"}
+    return {"message": "Đã xóa lịch sử quét"}
 
 
 @router.get("/predictions/{scan_id}")
@@ -74,7 +75,9 @@ async def save_lich_su_quet(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    image_bytes = await image.read() if image else None
+    if image and image.content_type and not image.content_type.startswith("image/"):
+        raise HTTPException(400, "File phải là ảnh")
+    image_bytes = await read_upload_bytes(image) if image else None
     base_url = str(request.base_url).rstrip("/")
     return history_service.save_with_image(
         db,

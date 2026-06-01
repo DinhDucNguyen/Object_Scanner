@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Request
 from pydantic import BaseModel
 from typing import List, Optional
 import httpx
@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.dependencies.get_current_user import get_current_user_id, get_optional_user_id
+from app.core.limiter import limiter
 from app.services.dictionary_service import DictionaryService
 
 logger = logging.getLogger(__name__)
@@ -64,7 +65,9 @@ class DictionaryHistoryItem(BaseModel):
 
 
 @router.post("/translate", response_model=TranslateResponse)
+@limiter.limit("20/minute")
 def translate(
+    request: Request,
     req: TranslateRequest,
     db: Session = Depends(get_db),
     user_id: Optional[int] = Depends(get_optional_user_id),
@@ -142,7 +145,7 @@ async def lookup_word(
         raise
     except Exception as e:
         logger.error(f"Dictionary lookup error: {e}")
-        raise HTTPException(500, f"Dictionary lookup failed: {str(e)}")
+        raise HTTPException(500, "Không thể tra từ lúc này, vui lòng thử lại sau.")
 
 
 async def _lookup_english(word: str) -> DictionaryResponse:

@@ -511,13 +511,16 @@
                     android:layout_height="58dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
+                    android:elevation="4dp"
+                    android:stateListAnimator="@animator/btn_press_scale"
                     android:text="@string/review_quality_again"
                     android:textColor="@color/review_quality_again_text"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     app:backgroundTint="@color/review_quality_again_bg"
                     app:cornerRadius="18dp"
-                    app:strokeColor="@color/review_quality_again_stroke"
+                    app:rippleColor="#44000000"
+                    app:strokeColor="#7A2020"
                     app:strokeWidth="1dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -526,13 +529,16 @@
                     android:layout_height="58dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
+                    android:elevation="4dp"
+                    android:stateListAnimator="@animator/btn_press_scale"
                     android:text="@string/review_quality_hard"
                     android:textColor="@color/review_quality_hard_text"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     app:backgroundTint="@color/review_quality_hard_bg"
                     app:cornerRadius="18dp"
-                    app:strokeColor="@color/review_quality_hard_stroke"
+                    app:rippleColor="#44000000"
+                    app:strokeColor="#7A4F10"
                     app:strokeWidth="1dp" />
 
             </LinearLayout>
@@ -548,13 +554,16 @@
                     android:layout_height="58dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
+                    android:elevation="4dp"
+                    android:stateListAnimator="@animator/btn_press_scale"
                     android:text="@string/review_quality_good"
                     android:textColor="@color/review_quality_good_text"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     app:backgroundTint="@color/review_quality_good_bg"
                     app:cornerRadius="18dp"
-                    app:strokeColor="@color/review_quality_good_stroke"
+                    app:rippleColor="#44000000"
+                    app:strokeColor="#1A5238"
                     app:strokeWidth="1dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -563,13 +572,16 @@
                     android:layout_height="58dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
+                    android:elevation="4dp"
+                    android:stateListAnimator="@animator/btn_press_scale"
                     android:text="@string/review_quality_easy"
                     android:textColor="@color/review_quality_easy_text"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     app:backgroundTint="@color/review_quality_easy_bg"
                     app:cornerRadius="18dp"
-                    app:strokeColor="@color/review_quality_easy_stroke"
+                    app:rippleColor="#44000000"
+                    app:strokeColor="#1A3E8A"
                     app:strokeWidth="1dp" />
 
             </LinearLayout>

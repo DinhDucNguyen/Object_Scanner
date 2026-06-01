@@ -4,6 +4,7 @@ import com.duc.objectlanguage.data.model.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -16,8 +17,17 @@ interface ApiService {
     @POST("api/auth/register")
     suspend fun register(@Body req: RegisterRequest): Response<MessageResponse>
 
+    @POST("api/auth/register/resend-otp")
+    suspend fun resendRegistrationOtp(@Body req: ForgotPasswordRequest): Response<MessageResponse>
+
+    @POST("api/auth/register/verify-otp")
+    suspend fun verifyRegistrationOtp(@Body req: VerifyOtpRequest): Response<MessageResponse>
+
     @POST("api/auth/refresh")
     suspend fun refreshToken(@Body req: RefreshRequest): Response<TokenResponse>
+
+    @POST("api/auth/refresh")
+    fun refreshTokenSync(@Body req: RefreshRequest): Call<TokenResponse>
 
     @POST("api/auth/google")
     suspend fun googleLogin(@Body req: GoogleLoginRequest): Response<TokenResponse>
@@ -33,6 +43,9 @@ interface ApiService {
 
     @PUT("api/auth/change-password")
     suspend fun changePassword(@Body req: ChangePasswordRequest): Response<MessageResponse>
+
+    @DELETE("api/auth/account")
+    suspend fun deleteAccount(@Body req: DeleteAccountRequest): Response<MessageResponse>
 
     // ====== SCAN ======
     @POST("api/scan")

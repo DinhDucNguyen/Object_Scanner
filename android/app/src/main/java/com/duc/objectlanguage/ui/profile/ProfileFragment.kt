@@ -170,6 +170,9 @@ class ProfileFragment : Fragment() {
         binding.cardAnalytics.setOnClickListener { findNavController().navigateWithSlide(R.id.analyticsFragment) }
         binding.cardStreak.setOnClickListener { findNavController().navigateWithSlide(R.id.streakFragment) }
         binding.cardCollection.setOnClickListener { findNavController().navigateWithSlide(R.id.collectionListFragment) }
+        binding.statCollections.setOnClickListener { findNavController().navigateWithSlide(R.id.collectionListFragment) }
+        binding.statDueReviews.setOnClickListener { findNavController().navigateWithSlide(R.id.reviewFragment) }
+        binding.statStreak.setOnClickListener { findNavController().navigateWithSlide(R.id.streakFragment) }
         binding.btnLangVI.setOnClickListener { setDisplayLanguage("vi") }
         binding.btnLangEN.setOnClickListener { setDisplayLanguage("en") }
         binding.frameAvatar.setOnClickListener { showAvatarOptions() }
@@ -194,6 +197,47 @@ class ProfileFragment : Fragment() {
                 .setOnClickListener { dialog.dismiss() }
             dialog.show()
         }
+    }
+
+    private fun showDeleteAccountDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_account, null)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        val etPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etPassword)
+
+        dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDelete)
+            .setOnClickListener {
+                val password = etPassword.text.toString()
+                if (password.isEmpty()) {
+                    etPassword.error = getString(R.string.profile_delete_account_password_hint)
+                    return@setOnClickListener
+                }
+                val app = requireActivity().application as ObjectLanguageApp
+                val btn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDelete)
+                btn.isEnabled = false
+                lifecycleScope.launch {
+                    val result = app.repository.deleteAccount(password)
+                    if (_binding == null) return@launch
+                    result.fold(
+                        onSuccess = {
+                            dialog.dismiss()
+                            Toast.makeText(requireContext(), getString(R.string.profile_delete_account_success), Toast.LENGTH_SHORT).show()
+                            resetGraphToGuestScan()
+                        },
+                        onFailure = {
+                            btn.isEnabled = true
+                            Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                        }
+                    )
+                }
+            }
+
+        dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelDelete)
+            .setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
     }
 
     private fun showAvatarOptions() {
@@ -484,8 +528,24 @@ class ProfileFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            viewModel.changePassword(current, new)
-            dialog.dismiss()
+            btnSave.isEnabled = false
+            btnCancel.isEnabled = false
+            val app = requireActivity().application as ObjectLanguageApp
+            lifecycleScope.launch {
+                val result = app.repository.changePassword(current, new)
+                if (_binding == null) return@launch
+                result.fold(
+                    onSuccess = {
+                        Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    },
+                    onFailure = {
+                        btnSave.isEnabled = true
+                        btnCancel.isEnabled = true
+                        tilCurrent.error = it.message
+                    }
+                )
+            }
         }
         dialog.show()
     }
@@ -494,16 +554,12 @@ class ProfileFragment : Fragment() {
         val popup = PopupMenu(requireContext(), binding.btnMenu)
         popup.menu.add(0, 1, 0, getString(R.string.profile_menu_change_password))
         popup.menu.add(0, 2, 1, getString(R.string.profile_menu_notifications))
+        popup.menu.add(0, 3, 2, getString(R.string.profile_menu_delete_account))
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                1 -> {
-                    showChangePasswordDialog()
-                    true
-                }
-                2 -> {
-                    findNavController().navigateWithSlide(R.id.notificationSettingsFragment)
-                    true
-                }
+                1 -> { showChangePasswordDialog(); true }
+                2 -> { findNavController().navigateWithSlide(R.id.notificationSettingsFragment); true }
+                3 -> { showDeleteAccountDialog(); true }
                 else -> false
             }
         }

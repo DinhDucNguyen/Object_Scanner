@@ -237,6 +237,8 @@
                 android:id="@+id/btnRegister"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:elevation="5dp"
+                android:stateListAnimator="@animator/btn_press_scale"
                 android:text="@string/register_button"
                 android:textColor="@color/text_on_primary"
                 android:textSize="16sp"
@@ -246,7 +248,10 @@
                 app:icon="@drawable/ic_auth_arrow_right"
                 app:iconGravity="textEnd"
                 app:iconPadding="8dp"
-                app:iconTint="@color/text_on_primary" />
+                app:iconTint="@color/text_on_primary"
+                app:rippleColor="#44000000"
+                app:strokeColor="#003298"
+                app:strokeWidth="1dp" />
 
             <ProgressBar
                 android:id="@+id/progressBar"

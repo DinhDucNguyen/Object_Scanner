@@ -23,6 +23,48 @@ fun View.addScaleFeedback(scale: Float = 0.93f, duration: Long = 100) {
     }
 }
 
+fun View.addRaisedButtonFeedback(
+    pressedScale: Float = 0.97f,
+    baseElevationDp: Float = 2f,
+    liftedTranslationDp: Float = 8f,
+    pressedTranslationDp: Float = 1f
+) {
+    val density = resources.displayMetrics.density
+    val baseElevation = baseElevationDp * density
+    val liftedTranslation = liftedTranslationDp * density
+    val pressedTranslation = pressedTranslationDp * density
+
+    stateListAnimator = null
+    elevation = baseElevation
+    translationZ = liftedTranslation
+
+    setOnTouchListener { v, event ->
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                v.animate()
+                    .scaleX(pressedScale)
+                    .scaleY(pressedScale)
+                    .translationY(1.5f * density)
+                    .translationZ(pressedTranslation)
+                    .setDuration(90)
+                    .setInterpolator(DecelerateInterpolator())
+                    .start()
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                v.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .translationY(0f)
+                    .translationZ(liftedTranslation)
+                    .setDuration(140)
+                    .setInterpolator(OvershootInterpolator(1.15f))
+                    .start()
+            }
+        }
+        false
+    }
+}
+
 fun View.addPulseFeedback(scale: Float = 0.93f, scaleDuration: Long = 100) {
     setOnTouchListener { v, event ->
         when (event.action) {
