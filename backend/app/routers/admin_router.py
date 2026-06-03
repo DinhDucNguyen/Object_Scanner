@@ -29,6 +29,7 @@ from app.services.admin_service import AdminService
 from app.services.object_media_service import set_primary_object_image
 from app.utils.timezone import now_vietnam
 from app.utils.cloudinary_helper import upload_image
+from app.utils.upload import read_upload_bytes
 from app.dependencies.get_current_user import require_admin_user_id
 from app.schemas.admin import (
     PredictionListItem,
@@ -393,7 +394,7 @@ async def add_object_media(
     if image:
         if image.content_type and not image.content_type.startswith("image/"):
             raise HTTPException(400, "File phai la anh")
-        image_bytes = await image.read()
+        image_bytes = await read_upload_bytes(image)
         final_url = upload_image(image_bytes, folder="object_scanner/objects")
         if final_url is None:
             os.makedirs(OBJECT_UPLOAD_DIR, exist_ok=True)

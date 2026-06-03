@@ -24,7 +24,7 @@ from app.services.email_service import EmailService
 from app.utils.cloudinary_helper import upload_image
 from app.utils.timezone import now_vietnam
 
-OTP_EXPIRE_MINUTES = 1
+OTP_EXPIRE_MINUTES = 5
 
 # email -> {"otp": str, "expires_at": datetime}
 _otp_store: dict[str, dict] = {}
@@ -52,6 +52,14 @@ class UserService:
                 "role": user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else "nguoi_dung",
             },
         }
+
+    def _ensure_user_can_authenticate(self, user: User) -> None:
+        if not bool(user.email_da_xac_thuc):
+            raise HTTPException(403, "Vui lòng xác thực email trước khi đăng nhập")
+
+        status_name = user.trang_thai_obj.ten_trang_thai if user.trang_thai_obj else ""
+        if status_name != "hoat_dong":
+            raise HTTPException(403, "Tài khoản đã bị khóa")
 
     def register(self, db: Session, data: UserCreate) -> dict:
         existing_email = self.repo.get_by_email(db, data.email)
@@ -94,12 +102,7 @@ class UserService:
         if not user or not verify_password(data.password, user.mat_khau_ma_hoa):
             raise HTTPException(401, "Sai tên đăng nhập hoặc mật khẩu")
 
-        if not bool(user.email_da_xac_thuc):
-            raise HTTPException(403, "Vui lòng xác thực email trước khi đăng nhập")
-
-        status_name = user.trang_thai_obj.ten_trang_thai if user.trang_thai_obj else ""
-        if status_name != "hoat_dong":
-            raise HTTPException(403, "Tài khoản đã bị khóa")
+        self._ensure_user_can_authenticate(user)
 
         user.lan_dang_nhap_cuoi = now_vietnam()
         db.commit()
@@ -124,10 +127,15 @@ class UserService:
         if payload is None or payload.get("type") != "refresh":
             raise HTTPException(401, "Refresh token không hợp lệ hoặc đã hết hạn")
 
-        user_id = payload.get("sub")
-        user = self.repo.get_by_id(db, int(user_id))
+        try:
+            user_id = int(payload.get("sub"))
+        except (TypeError, ValueError):
+            raise HTTPException(401, "Refresh token không hợp lệ hoặc đã hết hạn")
+
+        user = self.repo.get_by_id(db, user_id)
         if not user:
             raise HTTPException(404, "User not found")
+        self._ensure_user_can_authenticate(user)
 
         return self._generate_tokens(user)
 
@@ -267,6 +275,9 @@ class UserService:
 
         ok = EmailService().send_otp(email, otp_code, purpose="reset")
         logger.debug("forgot_password: sent OTP to %s, result=%s", email, ok)
+        if not ok:
+            _otp_store.pop(email, None)
+            raise HTTPException(500, "Không thể gửi email. Vui lòng kiểm tra lại địa chỉ email.")
         masked = self._mask_email(email)
         return {"message": "Mã OTP đã được gửi", "email": email, "masked_email": masked}
 

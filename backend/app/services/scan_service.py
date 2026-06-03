@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import uuid
 
@@ -22,6 +23,7 @@ from app.utils.timezone import now_vietnam
 
 
 UPLOAD_DIR = "uploads/scans"
+logger = logging.getLogger(__name__)
 
 # Các class YOLO custom đã train — không cần thêm training data
 YOLO_CUSTOM_CLASSES = {

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional
 import httpx
 import logging
@@ -34,6 +34,14 @@ class TranslateRequest(BaseModel):
     text: str
     from_lang: str = "en"
     to_lang: str = "vi"
+
+    @field_validator("from_lang", "to_lang")
+    @classmethod
+    def validate_language_code(cls, value: str) -> str:
+        normalized = (value or "").strip().lower()
+        if normalized not in {"en", "vi"}:
+            raise ValueError("Ngôn ngữ chỉ hỗ trợ 'en' hoặc 'vi'")
+        return normalized
 
 
 class TranslateResponse(BaseModel):

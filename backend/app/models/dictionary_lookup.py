@@ -1,6 +1,7 @@
 # pyrefly: ignore [missing-import]
 from sqlalchemy import Column, Integer, String, ForeignKey, TIMESTAMP, Enum
 # pyrefly: ignore [missing-import]
+from sqlalchemy.orm import relationship
 from app.db.session import Base
 from app.utils.timezone import now_vietnam
 import enum
@@ -23,4 +24,6 @@ class DictionaryLookup(Base):
     lan_tra_cuoi = Column(TIMESTAMP, default=now_vietnam)
     ket_qua_dich = Column(String(500), nullable=True)
     phien_am = Column(String(100), nullable=True)
-    den_ngon_ngu = Column(String(10), nullable=True)
+    den_ngon_ngu_id = Column(Integer, ForeignKey("NgonNgu.id", ondelete="SET NULL"), nullable=True)
+
+    den_ngon_ngu_obj = relationship("Language", foreign_keys=[den_ngon_ngu_id])

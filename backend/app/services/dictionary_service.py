@@ -177,7 +177,7 @@ class DictionaryService:
                     )
                     image_url = media.url if media else None
 
-                    to_lang = lookup.den_ngon_ngu or "vi"
+                    to_lang = (lookup.den_ngon_ngu_obj.ma_ngon_ngu if lookup.den_ngon_ngu_obj else None) or "vi"
                     target = self._find_target_translation(db, obj.id, to_lang)
                     if not target:
                         target = (
@@ -203,7 +203,7 @@ class DictionaryService:
                 "doi_tuong_id": lookup.doi_tuong_id,
                 "object_code": object_code,
                 "image_url": image_url,
-                "den_ngon_ngu": lookup.den_ngon_ngu or "vi",
+                "den_ngon_ngu": (lookup.den_ngon_ngu_obj.ma_ngon_ngu if lookup.den_ngon_ngu_obj else None) or "vi",
             })
         return result
 
@@ -406,6 +406,7 @@ class DictionaryService:
             return
 
         lang = db.query(Language).filter(Language.ma_ngon_ngu == from_lang).first()
+        to_lang_obj = db.query(Language).filter(Language.ma_ngon_ngu == to_lang).first()
         existing = (
             db.query(DictionaryLookup)
             .filter(
@@ -429,7 +430,7 @@ class DictionaryService:
         if existing:
             existing.lan_tra_cuoi = now_vietnam()
             existing.doi_tuong_id = obj_id
-            existing.den_ngon_ngu = to_lang
+            existing.den_ngon_ngu_id = to_lang_obj.id if to_lang_obj else None
             if not obj_id:
                 existing.ket_qua_dich = trans_text[:500] if trans_text else None
                 existing.phien_am = ipa[:100] if ipa else None
@@ -441,7 +442,7 @@ class DictionaryService:
                 doi_tuong_id=obj_id,
                 nguon_du_lieu=source,
                 lan_tra_cuoi=now_vietnam(),
-                den_ngon_ngu=to_lang,
+                den_ngon_ngu_id=to_lang_obj.id if to_lang_obj else None,
                 ket_qua_dich=(trans_text[:500] if trans_text and not obj_id else None),
                 phien_am=(ipa[:100] if ipa and not obj_id else None),
             ))

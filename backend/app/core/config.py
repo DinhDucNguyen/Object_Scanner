@@ -6,7 +6,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "mysql+pymysql://object_app:ObjectApp123456@localhost:3306/HeThongHocNgonNgu?charset=utf8mb4"
+    DATABASE_URL: str
     
     # App
     APP_NAME: str = "LengoLens API"

@@ -46,7 +46,7 @@ class EmailService:
                 {otp_code}
             </div>
             <p style="color:#888;font-size:13px;">
-                Mã có hiệu lực trong <strong>1 phút</strong>.<br>
+                Mã có hiệu lực trong <strong>5 phút</strong>.<br>
                 {note}
             </p>
         </div>

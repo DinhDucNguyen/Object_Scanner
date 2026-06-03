@@ -10,6 +10,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("google_genai").setLevel(logging.WARNING)
 logging.getLogger("google_genai.models").setLevel(logging.WARNING)
 from fastapi.exceptions import RequestValidationError
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -36,9 +37,16 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    body = await request.body()
-    logger.error(f"[422] {request.method} {request.url} | body={body!r} | errors={exc.errors()}")
-    return JSONResponse(status_code=422, content={"detail": exc.errors()})
+    errors = []
+    for error in exc.errors():
+        sanitized = dict(error)
+        sanitized.pop("input", None)
+        if "ctx" in sanitized and "error" in sanitized["ctx"]:
+            sanitized["ctx"] = dict(sanitized["ctx"])
+            sanitized["ctx"]["error"] = str(sanitized["ctx"]["error"])
+        errors.append(sanitized)
+    logger.error("[422] %s %s | errors=%s", request.method, request.url.path, errors)
+    return JSONResponse(status_code=422, content=jsonable_encoder({"detail": errors}))
 
 cors_allow_origins = settings.CORS_ALLOW_ORIGINS
 cors_allow_credentials = "*" not in cors_allow_origins

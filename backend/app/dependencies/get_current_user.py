@@ -14,24 +14,38 @@ optional_security_scheme = HTTPBearer(auto_error=False)
 
 def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
+    db: Session = Depends(get_db),
 ) -> int:
     """
     Parse JWT token từ header Authorization: Bearer <token>.
     Trả về user_id nếu token hợp lệ, raise 401 nếu không.
     """
-    return _extract_user_id(credentials)
+    return _get_authenticated_user(db, credentials).id
 
 
 def get_current_user(
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
 ) -> User:
+    return _get_authenticated_user(db, credentials)
+
+
+def _get_authenticated_user(db: Session, credentials: HTTPAuthorizationCredentials) -> User:
+    user_id = _extract_user_id(credentials)
     user = db.query(User).filter(
         User.id == user_id,
         User.thoi_gian_xoa.is_(None),
     ).first()
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
+
+    if not bool(user.email_da_xac_thuc):
+        raise HTTPException(status_code=403, detail="Vui lòng xác thực email trước khi đăng nhập")
+
+    status_name = (user.trang_thai_obj.ten_trang_thai if user.trang_thai_obj else "").strip()
+    if status_name != "hoat_dong":
+        raise HTTPException(status_code=403, detail="Tài khoản đã bị khóa")
+
     return user
 
 
@@ -46,6 +60,7 @@ def require_admin_user_id(user: User = Depends(get_current_user)) -> int:
 
 def get_optional_user_id(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security_scheme),
+    db: Session = Depends(get_db),
 ) -> Optional[int]:
     """
     Optional auth — trả về user_id nếu có token, None nếu không.
@@ -54,7 +69,7 @@ def get_optional_user_id(
     if credentials is None:
         return None
     try:
-        return _extract_user_id(credentials)
+        return _get_authenticated_user(db, credentials).id
     except HTTPException:
         return None
 

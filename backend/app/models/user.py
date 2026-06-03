@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, TIMESTAMP, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, TIMESTAMP, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.session import Base
 from app.utils.timezone import now_vietnam
@@ -10,6 +10,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     ten_dang_nhap = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
+    email_da_xac_thuc = Column(Boolean, nullable=False, default=False, server_default="0")
     mat_khau_ma_hoa = Column(String(255), nullable=False)
     vai_tro_id = Column(Integer, ForeignKey("VaiTro.id"), nullable=False)
     trang_thai_id = Column(Integer, ForeignKey("TrangThaiNguoiDung.id"), nullable=False)

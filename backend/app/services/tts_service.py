@@ -11,8 +11,9 @@ logger = logging.getLogger("uvicorn.error")
 
 
 class TTSService:
-    def __init__(self, cache_dir: str = "uploads/tts"):
+    def __init__(self, cache_dir: str = "uploads/tts", max_cache_files: int = 1000):
         self.cache_dir = Path(cache_dir)
+        self.max_cache_files = max_cache_files
 
     def get_audio_url(self, text: str, lang_code: str = "en") -> str | None:
         text = (text or "").strip()
@@ -43,6 +44,7 @@ class TTSService:
 
             cache_path.parent.mkdir(parents=True, exist_ok=True)
             cache_path.write_bytes(audio_bytes)
+            self._cleanup_cache()
             logger.info("TTS source=gtts_saved text=%r lang=%s bytes=%d file=%s", text, lang, len(audio_bytes), cache_path)
             return audio_bytes
         except Exception as e:
@@ -57,3 +59,17 @@ class TTSService:
         slug = re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")[:48] or "tts"
         digest = hashlib.sha1(f"{lang_code}:{text}".encode("utf-8")).hexdigest()[:12]
         return self.cache_dir / lang_code / f"{slug}_{digest}.mp3"
+
+    def _cleanup_cache(self) -> None:
+        try:
+            files = sorted(
+                self.cache_dir.glob("*/*.mp3"),
+                key=lambda path: path.stat().st_mtime,
+            )
+            overflow = len(files) - self.max_cache_files
+            if overflow <= 0:
+                return
+            for path in files[:overflow]:
+                path.unlink(missing_ok=True)
+        except Exception as e:
+            logger.warning("TTS cache cleanup skipped: %s", e)
