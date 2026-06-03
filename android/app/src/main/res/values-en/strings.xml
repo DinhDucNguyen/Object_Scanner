@@ -754,6 +754,7 @@
     <string name="btn_create">Create</string>
     <string name="btn_save">Save</string>
     <string name="btn_cancel">Cancel</string>
+    <string name="press_back_again_to_exit">Press back again to exit</string>
     <string name="btn_delete">Delete</string>
     <string name="btn_close">Close</string>
     <string name="btn_back">Back</string>

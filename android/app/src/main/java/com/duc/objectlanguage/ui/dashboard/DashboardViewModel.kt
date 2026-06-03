@@ -13,6 +13,7 @@ import com.duc.objectlanguage.data.model.StatsResponse
 import com.duc.objectlanguage.data.repository.CollectionRepository
 import java.util.Calendar
 import kotlin.random.Random
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -57,7 +58,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             val result = repo.getStats()
             result.fold(
                 onSuccess = { _stats.value = it },
-                onFailure = { _error.value = it.message }
+                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message }
             )
             _isLoading.value = false
         }

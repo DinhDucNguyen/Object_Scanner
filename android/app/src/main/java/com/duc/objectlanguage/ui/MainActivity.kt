@@ -28,6 +28,7 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.ActivityMainBinding
 import com.duc.objectlanguage.ui.common.GuestUpsellDialog
 import com.duc.objectlanguage.utils.LocaleHelper
+import android.widget.Toast
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -35,6 +36,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var isApplyingAccountLanguage = false
     private var currentTabId = R.id.scanFragment
+    private var previousTabId: Int? = null
+    private var backPressedTime = 0L
+    private var isBackNavigation = false
 
     private val validatedNetworks = mutableSetOf<Network>()
 
@@ -259,10 +263,6 @@ class MainActivity : AppCompatActivity() {
     private fun navigateToBottomDestination(itemId: Int, navController: NavController, tabs: List<NavTab>): Boolean {
         if (navController.currentDestination?.id == itemId) return true
 
-        if (navController.popBackStack(itemId, false)) {
-            return true
-        }
-
         val tabOrder = listOf(
             R.id.dashboardFragment,
             R.id.dictionaryFragment,
@@ -278,17 +278,57 @@ class MainActivity : AppCompatActivity() {
         return try {
             val options = NavOptions.Builder()
                 .setLaunchSingleTop(true)
+                // Pop hết về start destination để giữ back stack gọn — chỉ 1 bước back giữa tabs
                 .setPopUpTo(navController.graph.startDestinationId, false)
                 .setEnterAnim(if (goingRight) R.anim.nav_slide_in_right else R.anim.nav_slide_in_left)
                 .setExitAnim(if (goingRight) R.anim.nav_slide_out_left else R.anim.nav_slide_out_right)
                 .setPopEnterAnim(R.anim.nav_slide_in_left)
                 .setPopExitAnim(R.anim.nav_slide_out_right)
                 .build()
+            if (!isBackNavigation) previousTabId = fromTabId.takeIf { it != -1 }
             navController.navigate(itemId, null, options)
             syncTabSelection(itemId, tabs)
             true
         } catch (_: IllegalArgumentException) {
             false
+        }
+    }
+
+    @Suppress("OVERRIDE_DEPRECATION")
+    override fun onBackPressed() {
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
+        val currentDest = navController.currentDestination?.id ?: -1
+        val currentTab = bottomNavItemForDestination(currentDest)
+
+        // Nếu đang ở sub-screen (quiz, history detail...) thì để NavController xử lý bình thường
+        if (currentDest != currentTab) {
+            if (!navController.popBackStack()) super.onBackPressed()
+            return
+        }
+
+        // Đang ở tab root — về tab trước đó nếu có, không thì để super xử lý (thoát app)
+        val prev = previousTabId
+        if (prev != null && prev != currentTab) {
+            previousTabId = null
+            val tabs = listOf(
+                NavTab(binding.navTabHome, binding.navIconHome, binding.navLabelHome, R.id.dashboardFragment),
+                NavTab(binding.navTabDictionary, binding.navIconDictionary, binding.navLabelDictionary, R.id.dictionaryFragment),
+                NavTab(binding.navTabScan, binding.navIconScan, binding.navLabelScan, R.id.scanFragment, isScan = true),
+                NavTab(binding.navTabReview, binding.navIconReview, binding.navLabelReview, R.id.reviewFragment),
+                NavTab(binding.navTabProfile, binding.navIconProfile, binding.navLabelProfile, R.id.profileFragment),
+            )
+            isBackNavigation = true
+            navigateToBottomDestination(prev, navController, tabs)
+            isBackNavigation = false
+        } else {
+            val now = System.currentTimeMillis()
+            if (now - backPressedTime < 2000) {
+                super.onBackPressed()
+            } else {
+                backPressedTime = now
+                Toast.makeText(this, getString(R.string.press_back_again_to_exit), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

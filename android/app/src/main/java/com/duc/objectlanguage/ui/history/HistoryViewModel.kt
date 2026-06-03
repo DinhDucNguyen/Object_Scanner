@@ -29,9 +29,10 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
 
     fun loadAvatarUrl() {
         viewModelScope.launch {
-            repo.getProfile().getOrNull()?.avatarUrl?.let { url ->
-                if (url.isNotBlank() && url != "default_avatar.png") _avatarUrl.value = url
-            }
+            runCatching { repo.getProfile().getOrNull() }
+                .getOrNull()?.avatarUrl?.let { url ->
+                    if (url.isNotBlank() && url != "default_avatar.png") _avatarUrl.value = url
+                }
         }
     }
 
@@ -139,7 +140,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                     _items.value = (_items.value ?: emptyList()).filterNot { it.id == item.id }
                     _message.value = message
                 },
-                onFailure = { _error.value = it.message ?: localizedString(R.string.history_delete_error) }
+                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: localizedString(R.string.history_delete_error) }
             )
         }
     }

@@ -13,6 +13,7 @@ import com.duc.objectlanguage.data.model.HistoryDetail
 import com.duc.objectlanguage.data.model.TranslationResponse
 import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.utils.AudioPlayerManager
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class HistoryDetailViewModel(application: Application) : AndroidViewModel(application) {
@@ -42,7 +43,7 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
             _isLoading.value = true
             repo.getTranslationsByCode(objectCode).fold(
                 onSuccess = { _translations.value = it },
-                onFailure = { _translations.value = emptyList() }
+                onFailure = { if (it is CancellationException) return@launch; _translations.value = emptyList() }
             )
             _isLoading.value = false
         }
@@ -62,7 +63,8 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
                     _translations.value = it.translations
                 },
                 onFailure = {
-                    _error.value = it.message ?: "Khong tai duoc chi tiet lich su"
+                    if (it is CancellationException) return@launch
+                    _error.value = getApplication<Application>().getString(R.string.history_load_error)
                     if (fallbackObjectCode.isNotBlank()) loadTranslations(fallbackObjectCode)
                 }
             )
@@ -77,20 +79,26 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
         }
 
         viewModelScope.launch {
-            val bytes = audioUrl
-                ?.takeIf { it.isNotBlank() }
-                ?.let { repo.getAudioByUrl(it) }
-                ?: word
+            try {
+                val bytes = audioUrl
                     ?.takeIf { it.isNotBlank() }
-                    ?.let { repo.getTtsAudio(it, lang) }
+                    ?.let { repo.getAudioByUrl(it) }
+                    ?: word
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let { repo.getTtsAudio(it, lang) }
 
-            if (bytes == null) {
+                if (bytes == null) {
+                    _error.value = getApplication<Application>().getString(R.string.history_audio_load_error)
+                    return@launch
+                }
+
+                audioPlayer.playMp3(bytes) {
+                    _error.value = getApplication<Application>().getString(R.string.history_audio_play_error)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
                 _error.value = getApplication<Application>().getString(R.string.history_audio_load_error)
-                return@launch
-            }
-
-            audioPlayer.playMp3(bytes) {
-                _error.value = getApplication<Application>().getString(R.string.history_audio_play_error)
             }
         }
     }

@@ -12,6 +12,7 @@ import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.data.model.CollectionDetail
 import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.utils.AudioPlayerManager
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 /**
@@ -263,7 +264,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
             val result = repo.getPublicCollections()
             result.fold(
                 onSuccess = { _publicCollections.value = it },
-                onFailure = { _error.value = it.message }
+                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message }
             )
         }
     }

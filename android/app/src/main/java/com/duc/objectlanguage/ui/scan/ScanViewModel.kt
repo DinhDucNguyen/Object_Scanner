@@ -19,6 +19,7 @@ import com.duc.objectlanguage.utils.AudioPlayerManager
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -164,7 +165,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
             },
-            onFailure = { _error.value = it.message }
+            onFailure = { if (it is CancellationException) throw it; _error.value = it.message }
         )
         _isLoading.value = false
     }

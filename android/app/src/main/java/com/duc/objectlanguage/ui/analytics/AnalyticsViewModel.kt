@@ -9,6 +9,7 @@ import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.model.AnalyticsResponse
 import com.duc.objectlanguage.data.model.StatsResponse
 import com.duc.objectlanguage.data.model.StreakResponse
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class AnalyticsViewModel(application: Application) : AndroidViewModel(application) {
@@ -37,17 +38,17 @@ class AnalyticsViewModel(application: Application) : AndroidViewModel(applicatio
 
             repo.getStats().fold(
                 onSuccess = { _stats.value = it },
-                onFailure = { _error.value = it.message ?: "Không tải được thống kê" }
+                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: "Không tải được thống kê" }
             )
 
             repo.getAnalytics().fold(
                 onSuccess = { _analytics.value = it },
-                onFailure = { _error.value = it.message ?: "Không tải được biểu đồ" }
+                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: "Không tải được biểu đồ" }
             )
 
             repo.getStreak().fold(
                 onSuccess = { _streak.value = it },
-                onFailure = { _error.value = it.message ?: "Không tải được chuỗi học" }
+                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: "Không tải được chuỗi học" }
             )
 
             _isLoading.value = false

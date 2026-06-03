@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.data.repository
 
+import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.ConnectException
@@ -11,6 +12,7 @@ internal fun userFacingException(
     throwable: Throwable,
     fallback: String = "Có lỗi xảy ra, vui lòng thử lại"
 ): Exception {
+    if (throwable is CancellationException) throw throwable
     val message = when (throwable) {
         is UnknownHostException ->
             "Không tìm thấy máy chủ. Kiểm tra Wi-Fi và địa chỉ backend."

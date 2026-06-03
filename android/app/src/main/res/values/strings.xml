@@ -757,6 +757,7 @@
     <string name="btn_create">Tạo</string>
     <string name="btn_save">Lưu</string>
     <string name="btn_cancel">Hủy</string>
+    <string name="press_back_again_to_exit">Nhấn back lần nữa để thoát</string>
     <string name="btn_delete">Xóa</string>
     <string name="btn_close">Đóng</string>
     <string name="btn_back">Quay lại</string>
