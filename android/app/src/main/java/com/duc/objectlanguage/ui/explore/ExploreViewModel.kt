@@ -6,7 +6,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.CategoryData
+import com.duc.objectlanguage.ui.common.localizedString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -30,7 +32,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             if (result.isSuccess) {
                 _categories.postValue(result.getOrNull().orEmpty())
             } else {
-                _error.postValue(result.exceptionOrNull()?.message ?: "Loi tai chu de")
+                _error.postValue(result.exceptionOrNull()?.message ?: localizedString(R.string.explore_load_error))
             }
             _isLoading.postValue(false)
         }

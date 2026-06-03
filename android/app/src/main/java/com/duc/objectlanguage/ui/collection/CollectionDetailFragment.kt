@@ -13,11 +13,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.duc.objectlanguage.R
-import com.duc.objectlanguage.data.local.ApiConfig
 import com.duc.objectlanguage.data.model.CollectionItem
 import com.duc.objectlanguage.databinding.DialogCollectionWordDetailBinding
 import com.duc.objectlanguage.databinding.FragmentCollectionDetailBinding
 import com.duc.objectlanguage.utils.DefinitionFormatter
+import com.duc.objectlanguage.utils.resolveMediaUrl
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
@@ -72,10 +72,12 @@ class CollectionDetailFragment : Fragment() {
             binding.tvCollectionName.text = detail.name
             binding.tvWordCount.text = getString(R.string.collection_item_count_in_detail, detail.items.size)
             adapter.setCanEdit(detail.canEdit)
-            applyEditMode(detail.canEdit)
+            applyEditMode(detail.canEdit, detail.items.isEmpty())
             adapter.submitList(detail.items)
             binding.recyclerWords.visibility = View.VISIBLE
             binding.layoutEmpty.visibility = if (detail.items.isEmpty()) View.VISIBLE else View.GONE
+            binding.btnReviewCollection.isEnabled = detail.items.isNotEmpty()
+            binding.btnReviewCollection.alpha = if (detail.items.isNotEmpty()) 1f else 0.45f
         }
 
         viewModel.error.observe(viewLifecycleOwner) { err ->
@@ -132,8 +134,8 @@ class CollectionDetailFragment : Fragment() {
         }
     }
 
-    private fun applyEditMode(canEdit: Boolean) {
-        binding.cardAddWord.visibility = if (canEdit) View.VISIBLE else View.GONE
+    private fun applyEditMode(canEdit: Boolean, isEmpty: Boolean = false) {
+        binding.cardAddWord.visibility = if (canEdit && !isEmpty) View.VISIBLE else View.GONE
         binding.btnEmptyAddWord.visibility = if (canEdit) View.VISIBLE else View.GONE
         binding.fabAddWord.visibility = View.GONE
     }
@@ -222,12 +224,6 @@ class CollectionDetailFragment : Fragment() {
         detailBinding.btnCloseWordDetail.setOnClickListener { sheet.dismiss() }
         sheet.setContentView(detailBinding.root)
         sheet.show()
-    }
-
-    private fun resolveMediaUrl(path: String): String {
-        val trimmed = path.trim()
-        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed
-        return "${ApiConfig.baseUrl.trimEnd('/')}/${trimmed.trimStart('/')}"
     }
 
     override fun onDestroyView() {

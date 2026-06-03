@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.duc.objectlanguage.R
+import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.databinding.FragmentCollectionListBinding
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -28,6 +29,7 @@ class CollectionListFragment : Fragment() {
     private val viewModel: CollectionViewModel by viewModels()
     private lateinit var adapter: CollectionAdapter
     private lateinit var publicAdapter: PublicCollectionAdapter
+    private var showingCommunity = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -114,12 +116,14 @@ class CollectionListFragment : Fragment() {
     }
 
     private fun showMyCollections() {
+        showingCommunity = false
         binding.myCollectionsContainer.visibility = View.VISIBLE
         binding.communityContainer.visibility = View.GONE
-        binding.fabAddCollection.show()
+        updateCreateFabVisibility(viewModel.filteredCollections.value.orEmpty())
     }
 
     private fun showCommunityCollections() {
+        showingCommunity = true
         binding.myCollectionsContainer.visibility = View.GONE
         binding.communityContainer.visibility = View.VISIBLE
         binding.fabAddCollection.hide()
@@ -128,6 +132,9 @@ class CollectionListFragment : Fragment() {
 
     private fun setupFab() {
         binding.fabAddCollection.setOnClickListener {
+            showCreateCollectionDialog()
+        }
+        binding.btnEmptyCreateCollection.setOnClickListener {
             showCreateCollectionDialog()
         }
     }
@@ -140,6 +147,7 @@ class CollectionListFragment : Fragment() {
             }
             binding.recyclerViewCollections.visibility = if (collections.isEmpty()) View.GONE else View.VISIBLE
             binding.emptyStateLayout.visibility = if (collections.isEmpty()) View.VISIBLE else View.GONE
+            updateCreateFabVisibility(collections)
         }
 
         viewModel.publicCollections.observe(viewLifecycleOwner) { collections ->
@@ -180,6 +188,14 @@ class CollectionListFragment : Fragment() {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
                 viewModel.clearSuccessMessage()
             }
+        }
+    }
+
+    private fun updateCreateFabVisibility(collections: List<Collection>) {
+        if (showingCommunity || collections.isEmpty()) {
+            binding.fabAddCollection.hide()
+        } else {
+            binding.fabAddCollection.show()
         }
     }
 

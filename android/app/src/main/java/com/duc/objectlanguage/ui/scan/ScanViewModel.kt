@@ -14,6 +14,7 @@ import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.model.ScanResponse
 import com.duc.objectlanguage.data.model.TranslationResponse
 import com.duc.objectlanguage.data.repository.CollectionRepository
+import com.duc.objectlanguage.ui.common.localizedString
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
@@ -147,9 +148,9 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             onSuccess = {
                 when {
                     it.source == "gemini_quota_exceeded" ->
-                        _error.value = "Gemini đã hết quota. Vui lòng thử lại sau."
+                        _error.value = localizedString(R.string.scan_error_gemini_quota)
                     it.source == "gemini_failed" || it.objectCode == "unknown" ->
-                        _error.value = "Không nhận diện được vật thể. Hãy chụp rõ hơn."
+                        _error.value = localizedString(R.string.scan_error_not_recognized)
                     else -> {
                         if (_detectionSource.value == null) _detectionSource.value = "Gemini Vision AI"
                         _scanResult.value = it
@@ -276,10 +277,10 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                 ?: repo.getTtsAudio(word, lang)
             if (bytes != null) {
                 audioPlayer.playMp3(bytes) {
-                    _error.value = "Không phát được audio"
+                    _error.value = localizedString(R.string.scan_audio_play_error)
                 }
             } else {
-                _error.value = "Không tải được audio"
+                _error.value = localizedString(R.string.scan_audio_load_error)
             }
         }
     }
@@ -289,7 +290,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             val result = repo.addToLearning(translationId)
             result.fold(
                 onSuccess = { _addedMsg.value = it },
-                onFailure = { _addedMsg.value = "Lỗi: ${it.message}" }
+                onFailure = { _addedMsg.value = localizedString(R.string.scan_add_to_collection_error, it.message.orEmpty()) }
             )
         }
     }
@@ -305,25 +306,31 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearAddedMsg() { _addedMsg.value = null }
 
+    fun clearError() { _error.value = null }
+
     fun showAddToCollectionDialog(translationId: Int, context: Context) {
         viewModelScope.launch {
             val result = collectionRepo.getCollections()
             val collections = result.getOrNull()
             if (collections.isNullOrEmpty()) {
-                _addedMsg.value = "Chưa có bộ sưu tập nào. Tạo bộ sưu tập trong mục Tài khoản nhé!"
+                _addedMsg.value = localizedString(R.string.scan_add_collection_empty)
                 return@launch
             }
             val labels = collections.map { it.name }.toTypedArray()
             AlertDialog.Builder(context)
-                .setTitle("Thêm vào bộ sưu tập")
+                .setTitle(localizedString(R.string.scan_add_to_collection_title))
                 .setItems(labels) { _, which ->
                     val collectionId = collections[which].id
                     viewModelScope.launch {
                         val r = collectionRepo.addToCollection(collectionId, translationId)
-                        _addedMsg.value = if (r.isSuccess) "Đã thêm vào \"${collections[which].name}\"" else "Lỗi: ${r.exceptionOrNull()?.message}"
+                        _addedMsg.value = if (r.isSuccess) {
+                            localizedString(R.string.collection_added_to, collections[which].name)
+                        } else {
+                            localizedString(R.string.scan_add_to_collection_error, r.exceptionOrNull()?.message.orEmpty())
+                        }
                     }
                 }
-                .setNegativeButton("Huỷ", null)
+                .setNegativeButton(localizedString(R.string.btn_cancel), null)
                 .show()
         }
     }

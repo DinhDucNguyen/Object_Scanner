@@ -152,6 +152,8 @@
         <item name="android:letterSpacing">0.01</item>
         <item name="android:paddingStart">24dp</item>
         <item name="android:paddingEnd">24dp</item>
+        <item name="android:stateListAnimator">@animator/btn_press_scale</item>
+        <item name="rippleColor">#33000000</item>
     </style>
 
     <style name="Widget.App.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton">
@@ -159,11 +161,13 @@
         <item name="cornerRadius">16dp</item>
         <item name="android:textColor">@color/primary</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:stateListAnimator">@animator/btn_press_scale</item>
     </style>
 
     <style name="Widget.App.Button.Ghost" parent="Widget.Material3.Button.TextButton">
         <item name="android:textColor">@color/primary</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:stateListAnimator">@animator/btn_press_scale</item>
     </style>
 
     <!-- Chip Styles -->

@@ -6,8 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.ApiConfig
 import com.duc.objectlanguage.data.model.ObjectData
+import com.duc.objectlanguage.ui.common.localizedString
 import java.net.URLEncoder
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +36,7 @@ class CategoryDetailViewModel(application: Application) : AndroidViewModel(appli
             if (result.isSuccess) {
                 _objects.postValue(result.getOrNull().orEmpty())
             } else {
-                _error.postValue(result.exceptionOrNull()?.message ?: "Loi tai tu vung")
+                _error.postValue(result.exceptionOrNull()?.message ?: localizedString(R.string.category_detail_load_error))
             }
             _isLoading.postValue(false)
         }

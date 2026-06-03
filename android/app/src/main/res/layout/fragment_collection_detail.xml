@@ -180,6 +180,14 @@
                         android:text="@string/collection_empty_title_detail"
                         android:textAppearance="@style/TextAppearance.App.BodyMedium" />
 
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center"
+                        android:text="@string/collection_empty_detail_hint"
+                        android:textAppearance="@style/TextAppearance.App.BodySmall" />
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnEmptyAddWord"
                         android:layout_width="wrap_content"

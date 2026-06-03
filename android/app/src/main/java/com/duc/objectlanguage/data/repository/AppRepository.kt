@@ -66,7 +66,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
 
         }
 
@@ -102,7 +102,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
 
         }
 
@@ -128,7 +128,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
 
         }
 
@@ -142,7 +142,7 @@ class AppRepository(private val tokenManager: TokenManager) {
             if (response.isSuccessful) Result.success(response.body()?.message ?: "Đã gửi lại mã OTP")
             else Result.failure(Exception(apiError(response, "Gửi lại OTP thất bại")))
         } catch (e: Exception) {
-            Result.failure(Exception("KhÃ´ng thá»ƒ káº¿t ná»‘i server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
         }
     }
 
@@ -150,9 +150,9 @@ class AppRepository(private val tokenManager: TokenManager) {
         return try {
             val response = api.verifyRegistrationOtp(VerifyOtpRequest(email, otpCode))
             if (response.isSuccessful) Result.success(response.body()?.message ?: "Xác thực email thành công")
-            else Result.failure(Exception(apiError(response, "OTP khÃ´ng há»£p lá»‡ hoáº·c Ä‘Ã£ háº¿t háº¡n")))
+            else Result.failure(Exception(apiError(response, "OTP không hợp lệ hoặc đã hết hạn")))
         } catch (e: Exception) {
-            Result.failure(Exception("KhÃ´ng thá»ƒ káº¿t ná»‘i server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
         }
     }
 
@@ -183,7 +183,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
 
         }
 
@@ -203,7 +203,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
 
         }
 
@@ -223,7 +223,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
 
         }
 
@@ -243,7 +243,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
 
         }
 
@@ -261,7 +261,7 @@ class AppRepository(private val tokenManager: TokenManager) {
                 Result.failure(Exception(apiError(response, "Xóa tài khoản thất bại")))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Không thể kết nối server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
         }
     }
 
@@ -297,7 +297,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Lỗi scan: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể quét lúc này"))
 
         }
 
@@ -329,7 +329,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Lỗi scan: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể quét lúc này"))
 
         }
 
@@ -411,7 +411,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Không kết nối được server: ${e.message}"))
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
 
         }
 
@@ -435,7 +435,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được dữ liệu ôn tập"))
 
         }
 
@@ -455,7 +455,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không gửi được kết quả ôn tập"))
 
         }
 
@@ -479,7 +479,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được thống kê"))
 
         }
 
@@ -499,11 +499,11 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
 
-            else Result.failure(Exception("Loi tai chu de: ${response.code()}"))
+            else Result.failure(Exception("Không tải được chủ đề (${response.code()})"))
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Loi tai chu de: ${e.message}"))
+            Result.failure(userFacingException(e, "Không tải được chủ đề"))
 
         }
 
@@ -519,11 +519,11 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
 
-            else Result.failure(Exception("Loi tai tu vung: ${response.code()}"))
+            else Result.failure(Exception("Không tải được từ vựng (${response.code()})"))
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Loi tai tu vung: ${e.message}"))
+            Result.failure(userFacingException(e, "Không tải được từ vựng"))
 
         }
 
@@ -539,11 +539,11 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
 
-            else Result.failure(Exception("Loi tai danh sach object: ${response.code()}"))
+            else Result.failure(Exception("Không tải được danh sách vật thể (${response.code()})"))
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Loi tai danh sach object: ${e.message}"))
+            Result.failure(userFacingException(e, "Không tải được danh sách vật thể"))
 
         }
 
@@ -581,7 +581,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được lịch sử"))
 
         }
 
@@ -601,7 +601,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được từ vựng"))
 
         }
 
@@ -617,11 +617,11 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
 
-            else Result.failure(Exception("Khong tim thay lich su"))
+            else Result.failure(Exception("Không tìm thấy lịch sử"))
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được chi tiết lịch sử"))
 
         }
 
@@ -637,13 +637,13 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             response.body()?.close()
 
-            if (response.isSuccessful) Result.success("Da xoa lich su quet")
+            if (response.isSuccessful) Result.success("Đã xoá lịch sử quét")
 
-            else Result.failure(Exception("Xoa lich su that bai"))
+            else Result.failure(Exception("Xoá lịch sử thất bại"))
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không xoá được lịch sử"))
 
         }
 
@@ -667,7 +667,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Lỗi tra từ: ${e.message}"))
+            Result.failure(userFacingException(e, "Không tra được từ lúc này"))
 
         }
 
@@ -723,7 +723,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Lỗi tải lịch sử: ${e.message}"))
+            Result.failure(userFacingException(e, "Không tải được lịch sử"))
 
         }
 
@@ -743,7 +743,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Lỗi xóa: ${e.message}"))
+            Result.failure(userFacingException(e, "Không xoá được lịch sử"))
 
         }
 
@@ -767,7 +767,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được hồ sơ"))
 
         }
 
@@ -795,7 +795,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không cập nhật được hồ sơ"))
 
         }
 
@@ -819,7 +819,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được ảnh đại diện"))
 
         }
 
@@ -839,7 +839,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được cài đặt"))
 
         }
 
@@ -859,7 +859,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không cập nhật được cài đặt"))
 
         }
 
@@ -879,7 +879,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không cập nhật được cài đặt"))
 
         }
 
@@ -903,7 +903,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được thống kê"))
 
         }
 
@@ -957,7 +957,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(Exception("Lỗi lưu lịch sử: ${e.message}"))
+            Result.failure(userFacingException(e, "Không lưu được lịch sử quét"))
 
         }
 
@@ -981,7 +981,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được streak"))
 
         }
 
@@ -1003,7 +1003,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không ghi được streak"))
 
         }
 
@@ -1023,7 +1023,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không tải được lịch streak"))
 
         }
 
@@ -1045,7 +1045,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         } catch (e: Exception) {
 
-            Result.failure(e)
+            Result.failure(userFacingException(e, "Không đồng bộ được streak"))
 
         }
 

@@ -6,8 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.ReviewCardResponse
 import com.duc.objectlanguage.data.model.ReviewRequest
+import com.duc.objectlanguage.ui.common.localizedString
 import kotlinx.coroutines.launch
 
 data class PronunciationWord(
@@ -64,7 +66,7 @@ class PronunciationViewModel(application: Application) : AndroidViewModel(applic
             result.fold(
                 onSuccess = { cards ->
                     if (cards.isEmpty()) {
-                        _error.value = "No words available for pronunciation practice!"
+                        _error.value = localizedString(R.string.test_no_cards_pronunciation)
                         _finished.value = true
                         _isLoading.value = false
                         return@fold
@@ -89,7 +91,7 @@ class PronunciationViewModel(application: Application) : AndroidViewModel(applic
                     }
                 },
                 onFailure = { throwable ->
-                    _error.value = "Failed to load practice: ${throwable.message}"
+                    _error.value = localizedString(R.string.test_load_practice_error, throwable.message.orEmpty())
                     _finished.value = true
                 }
             )

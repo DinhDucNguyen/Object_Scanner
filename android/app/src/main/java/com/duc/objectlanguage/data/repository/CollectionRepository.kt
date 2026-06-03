@@ -21,7 +21,7 @@ class CollectionRepository(private val tokenManager: TokenManager) {
         val collections = api.getCollections()
         Result.success(collections)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
     
     /**
@@ -31,7 +31,7 @@ class CollectionRepository(private val tokenManager: TokenManager) {
         val detail = api.getCollectionDetail(collectionId)
         Result.success(detail)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
     
     /**
@@ -41,7 +41,7 @@ class CollectionRepository(private val tokenManager: TokenManager) {
         val collection = api.createCollection(CreateCollectionRequest(name, isPublic))
         Result.success(collection)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
 
     /**
@@ -51,7 +51,7 @@ class CollectionRepository(private val tokenManager: TokenManager) {
         val collection = api.updateCollection(collectionId, UpdateCollectionRequest(name))
         Result.success(collection)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
 
     /**
@@ -64,7 +64,7 @@ class CollectionRepository(private val tokenManager: TokenManager) {
         )
         Result.success(collection)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
     
     /**
@@ -74,7 +74,7 @@ class CollectionRepository(private val tokenManager: TokenManager) {
         api.deleteCollection(collectionId)
         Result.success(Unit)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
     
     /**
@@ -84,7 +84,7 @@ class CollectionRepository(private val tokenManager: TokenManager) {
         api.addToCollection(collectionId, AddToCollectionRequest(translationId))
         Result.success(Unit)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
     
     /**
@@ -94,7 +94,7 @@ class CollectionRepository(private val tokenManager: TokenManager) {
         api.removeFromCollection(collectionId, translationId)
         Result.success(Unit)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
     
     /**
@@ -104,27 +104,27 @@ class CollectionRepository(private val tokenManager: TokenManager) {
         val insights = api.getCollectionInsights(collectionId)
         Result.success(insights)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
 
     suspend fun getCollectionReviewCards(collectionId: Int): Result<List<ReviewCardResponse>> = try {
         val cards = api.getCollectionReviewCards(collectionId)
         Result.success(cards)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
 
     suspend fun getCollectionReviewCardsPractice(collectionId: Int): Result<List<ReviewCardResponse>> = try {
         val cards = api.getCollectionReviewCards(collectionId, practice = true)
         Result.success(cards)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
 
     suspend fun getPublicCollections(): Result<List<Collection>> = try {
         val collections = api.getPublicCollections()
         Result.success(collections)
     } catch (e: Exception) {
-        Result.failure(e)
+        Result.failure(userFacingException(e))
     }
 }

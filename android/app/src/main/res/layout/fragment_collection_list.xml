@@ -238,6 +238,7 @@
                     android:layout_marginTop="18dp"
                     android:text="@string/collection_community_empty_cta"
                     android:textAllCaps="false"
+                    android:visibility="gone"
                     app:backgroundTint="@color/primary"
                     app:cornerRadius="16dp"
                     app:icon="@drawable/ic_folder_outline"

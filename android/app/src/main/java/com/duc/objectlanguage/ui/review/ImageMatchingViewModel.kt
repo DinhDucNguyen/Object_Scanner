@@ -6,8 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.ReviewCardResponse
 import com.duc.objectlanguage.data.model.ReviewRequest
+import com.duc.objectlanguage.ui.common.localizedString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -71,7 +73,7 @@ class ImageMatchingViewModel(application: Application) : AndroidViewModel(applic
             result.fold(
                 onSuccess = { cards ->
                     if (cards.isEmpty()) {
-                        _error.value = "No cards available for matching game!"
+                        _error.value = localizedString(R.string.test_no_cards_matching)
                         _finished.value = true
                         _isLoading.value = false
                         return@fold
@@ -79,7 +81,7 @@ class ImageMatchingViewModel(application: Application) : AndroidViewModel(applic
 
                     allReviewCards = cards.filter { !it.imageUrl.isNullOrBlank() }
                     if (allReviewCards.isEmpty()) {
-                        _error.value = "No reviewed words have standard images yet!"
+                        _error.value = localizedString(R.string.test_no_image_cards_matching)
                         _finished.value = true
                         _isLoading.value = false
                         return@fold
@@ -92,7 +94,7 @@ class ImageMatchingViewModel(application: Application) : AndroidViewModel(applic
                     _gameStarted.value = true
                 },
                 onFailure = { throwable ->
-                    _error.value = "Failed to load game: ${throwable.message}"
+                    _error.value = localizedString(R.string.test_load_game_error, throwable.message.orEmpty())
                     _finished.value = true
                 }
             )

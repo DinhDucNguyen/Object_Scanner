@@ -136,6 +136,7 @@
     <string name="scan_cd_gallery">Choose from gallery</string>
     <string name="scan_cd_capture">Capture image</string>
     <string name="scan_pending">Pending admin review</string>
+    <string name="scan_pending_collection_hint">This word is waiting for admin review, so it cannot be saved to a collection yet. After approval, add it from History.</string>
     <string name="scan_label_definition">DEFINITION</string>
     <string name="scan_label_example">Usage examples</string>
     <string name="scan_label_also_known_as">Also known as</string>
@@ -233,7 +234,7 @@
     <string name="auth_password_mismatch">Passwords do not match</string>
     <string name="auth_reset_success">Password reset successfully!</string>
     <string name="otp_resend_btn">Resend OTP</string>
-    <string name="otp_countdown">Code expires in %ds</string>
+    <string name="otp_countdown">Code expires in %s</string>
     <string name="otp_expired">Code expired. Please resend.</string>
     <string name="auth_register_success">%1$s! Please log in.</string>
     <string name="auth_registration_otp_sent">OTP code sent to your email. Please verify to finish registration.</string>
@@ -386,6 +387,7 @@
     <string name="review_error_format">Error: %s</string>
     <string name="scan_added_to_review">Added to today\'s review</string>
     <string name="review_session_title">Review session</string>
+    <string name="review_collection_title">Review: %s</string>
     <string name="review_session_subtitle">Flip the card, rate yourself, and let the system schedule the next review.</string>
     <string name="review_finished_hint">Come back later or scan a new object to grow your vocabulary.</string>
     <string name="review_summary_total_label">Reviewed</string>
@@ -537,6 +539,7 @@
     <string name="collection_add_word_subtitle">Start expanding your vocabulary</string>
     <string name="collection_add_word_toast">Scan or look up a new word, then save it to this collection.</string>
     <string name="collection_empty_title_detail">This collection is empty</string>
+    <string name="collection_empty_detail_hint">Scan a new object or choose a saved scan from history to add the first word.</string>
     <string name="collection_empty_detail_action">Add words to collection</string>
     <string name="collection_cd_add">Add collection</string>
     <string name="collection_dialog_create_title">Create collection</string>
@@ -581,7 +584,7 @@
     <string name="collection_privacy_update_error">Could not update privacy: %s</string>
     <string name="collection_by_owner">by %s</string>
     <string name="collection_community_empty_title">No public collections yet</string>
-    <string name="collection_community_empty_subtitle">Be the first to share your collection!</string>
+    <string name="collection_community_empty_subtitle">Create a collection in My collections, then make it Public to share it here.</string>
     <string name="collection_community_empty_cta">Create a collection to share</string>
     <string name="collection_add_to">Add to \"%s\"</string>
     <string name="collection_added_to">Added to \"%s\"</string>
@@ -781,9 +784,9 @@
     <string name="scan_model_coco">COCO Model</string>
     <string name="scan_options_action">Model options</string>
     <string name="scan_model_options_title">Recognition options</string>
-    <string name="scan_model_options_subtitle">COCO Model is the default. Change this only when demoing or trying the project custom model.</string>
+    <string name="scan_model_options_subtitle">Choose the model that best fits the image you want to recognize.</string>
     <string name="scan_model_coco_desc">General model for many everyday objects.</string>
-    <string name="scan_model_custom_desc">Project custom model, focused on the trained school-supplies classes.</string>
+    <string name="scan_model_custom_desc">Custom model focused on trained school-supplies classes.</string>
     <string name="scan_definition_title">Definition</string>
     <string name="placeholder_word">word</string>
     <string name="placeholder_object">Object</string>

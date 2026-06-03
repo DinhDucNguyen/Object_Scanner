@@ -23,6 +23,7 @@ class VerifyOtpFragment : Fragment() {
     private var mode: String = "reset_password"
     private var countDownTimer: CountDownTimer? = null
     private var otpExpired = false
+    private val otpDurationMillis = 5 * 60 * 1000L
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentVerifyOtpBinding.inflate(inflater, container, false)
@@ -120,11 +121,13 @@ class VerifyOtpFragment : Fragment() {
         binding.btnVerify.isEnabled = true
         binding.tvCountdown.setTextColor(requireContext().getColor(R.color.text_muted))
 
-        countDownTimer = object : CountDownTimer(60_000L, 1_000L) {
+        countDownTimer = object : CountDownTimer(otpDurationMillis, 1_000L) {
             override fun onTick(millisUntilFinished: Long) {
                 if (_binding == null) return
-                val secs = (millisUntilFinished / 1000).toInt()
-                binding.tvCountdown.text = getString(R.string.otp_countdown, secs)
+                val totalSeconds = (millisUntilFinished / 1000).toInt()
+                val minutes = totalSeconds / 60
+                val seconds = totalSeconds % 60
+                binding.tvCountdown.text = getString(R.string.otp_countdown, "%d:%02d".format(minutes, seconds))
             }
 
             override fun onFinish() {

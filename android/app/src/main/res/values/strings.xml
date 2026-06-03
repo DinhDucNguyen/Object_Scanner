@@ -128,6 +128,7 @@
     <string name="scan_cd_gallery">Chọn ảnh từ thư viện</string>
     <string name="scan_cd_capture">Chụp ảnh</string>
     <string name="scan_pending">Đang chờ admin kiểm duyệt</string>
+    <string name="scan_pending_collection_hint">Từ này đang chờ kiểm duyệt nên chưa thể lưu vào bộ sưu tập. Sau khi admin duyệt, bạn có thể thêm từ từ Lịch sử.</string>
     <string name="scan_label_definition">ĐỊNH NGHĨA</string>
     <string name="scan_label_example">Ví dụ sử dụng</string>
     <string name="scan_label_also_known_as">Còn gọi là</string>
@@ -225,7 +226,7 @@
     <string name="auth_password_mismatch">Mật khẩu xác nhận không khớp</string>
     <string name="auth_reset_success">Đặt lại mật khẩu thành công!</string>
     <string name="otp_resend_btn">Gửi lại mã OTP</string>
-    <string name="otp_countdown">Mã hết hạn sau %ds</string>
+    <string name="otp_countdown">Mã hết hạn sau %s</string>
     <string name="otp_expired">Mã đã hết hạn. Vui lòng gửi lại.</string>
     <string name="auth_register_success">%1$s! Vui lòng đăng nhập.</string>
     <string name="auth_registration_otp_sent">Mã OTP đã được gửi đến email. Vui lòng xác thực để hoàn tất đăng ký.</string>
@@ -378,6 +379,7 @@
     <string name="review_error_format">Lỗi: %s</string>
     <string name="scan_added_to_review">Đã thêm vào ôn tập hôm nay</string>
     <string name="review_session_title">Phiên ôn tập</string>
+    <string name="review_collection_title">Ôn tập: %s</string>
     <string name="review_session_subtitle">Lật thẻ, tự đánh giá, rồi để hệ thống hẹn lần ôn tiếp theo.</string>
     <string name="review_finished_hint">Bạn có thể quay lại sau hoặc quét thêm vật thể mới để mở rộng vốn từ.</string>
     <string name="review_summary_total_label">Đã ôn</string>
@@ -528,6 +530,7 @@
     <string name="collection_add_word_subtitle">Bắt đầu mở rộng vốn từ của bạn</string>
     <string name="collection_add_word_toast">Quét hoặc tra từ mới, rồi lưu vào bộ sưu tập này nhé!</string>
     <string name="collection_empty_title_detail">Bộ sưu tập trống</string>
+    <string name="collection_empty_detail_hint">Quét vật thể mới hoặc chọn từ trong lịch sử quét để thêm từ đầu tiên.</string>
     <string name="collection_empty_detail_action">Thêm từ vào bộ sưu tập</string>
     <string name="collection_audio_load_error">Không tải được âm thanh</string>
     <string name="collection_audio_play_error">Không phát được âm thanh</string>
@@ -572,7 +575,7 @@
     <string name="collection_privacy_update_error">Không cập nhật được quyền riêng tư: %s</string>
     <string name="collection_by_owner">bởi %s</string>
     <string name="collection_community_empty_title">Chưa có bộ sưu tập công khai</string>
-    <string name="collection_community_empty_subtitle">Hãy là người đầu tiên chia sẻ!</string>
+    <string name="collection_community_empty_subtitle">Tạo bộ sưu tập ở tab Của tôi, rồi bật Công khai để chia sẻ tại đây.</string>
     <string name="collection_community_empty_cta">Tạo bộ sưu tập để chia sẻ</string>
     <string name="collection_added_to">Đã thêm vào \"%s\"</string>
     <string name="collection_add_to">Thêm vào \"%s\"</string>
@@ -785,9 +788,9 @@
     <string name="scan_model_coco">Model COCO</string>
     <string name="scan_options_action">Tùy chọn model</string>
     <string name="scan_model_options_title">Tùy chọn nhận diện</string>
-    <string name="scan_model_options_subtitle">Mặc định dùng Model COCO. Chỉ đổi khi bạn muốn demo hoặc thử model custom của đồ án.</string>
+    <string name="scan_model_options_subtitle">Chọn model phù hợp với ảnh bạn muốn nhận diện.</string>
     <string name="scan_model_coco_desc">Model phổ biến, nhận diện nhiều vật thể hằng ngày.</string>
-    <string name="scan_model_custom_desc">Model custom của đồ án, ưu tiên nhóm đồ dùng học tập đã huấn luyện riêng.</string>
+    <string name="scan_model_custom_desc">Model riêng, ưu tiên nhóm đồ dùng học tập đã huấn luyện.</string>
     <string name="scan_definition_title">Định nghĩa</string>
     <string name="placeholder_word">word</string>
     <string name="placeholder_object">Object</string>

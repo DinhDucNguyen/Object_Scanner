@@ -44,7 +44,7 @@ interface ApiService {
     @PUT("api/auth/change-password")
     suspend fun changePassword(@Body req: ChangePasswordRequest): Response<MessageResponse>
 
-    @DELETE("api/auth/account")
+    @HTTP(method = "DELETE", path = "api/auth/account", hasBody = true)
     suspend fun deleteAccount(@Body req: DeleteAccountRequest): Response<MessageResponse>
 
     // ====== SCAN ======

@@ -20,9 +20,9 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.duc.objectlanguage.R
-import com.duc.objectlanguage.data.local.ApiConfig
 import com.duc.objectlanguage.databinding.FragmentDashboardBinding
 import com.duc.objectlanguage.ui.common.addScaleFeedback
+import com.duc.objectlanguage.utils.resolveMediaUrl
 import com.google.android.material.snackbar.Snackbar
 
 class DashboardFragment : Fragment() {
@@ -247,12 +247,6 @@ class DashboardFragment : Fragment() {
         viewModel.loadStreak()
         viewModel.loadTopCollections()
         viewModel.loadProfileSummary()
-    }
-
-    private fun resolveMediaUrl(path: String): String {
-        val trimmed = path.trim()
-        return if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) trimmed
-        else "${ApiConfig.baseUrl.trimEnd('/')}/${trimmed.trimStart('/')}"
     }
 
     private fun animateCounter(view: TextView, from: Int, to: Int, suffix: String = "") {

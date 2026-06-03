@@ -36,6 +36,9 @@ class ExploreFragment : Fragment() {
         }
         binding.recyclerViewCategories.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewCategories.adapter = adapter
+        binding.btnEmptyScan.setOnClickListener {
+            findNavController().navigate(R.id.scanFragment)
+        }
 
         viewModel.categories.observe(viewLifecycleOwner) { categories ->
             val wasEmpty = adapter.itemCount == 0

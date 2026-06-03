@@ -28,7 +28,7 @@ import java.util.Calendar
 import java.util.Locale
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
-import com.duc.objectlanguage.data.local.ApiConfig
+import com.duc.objectlanguage.utils.resolveMediaUrl
 
 class HistoryFragment : Fragment() {
 
@@ -217,12 +217,6 @@ class HistoryFragment : Fragment() {
                 binding.ivAvatar.imageTintList = null
             }
         }
-    }
-
-    private fun resolveMediaUrl(path: String): String {
-        val trimmed = path.trim()
-        return if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) trimmed
-        else "${ApiConfig.baseUrl.trimEnd('/')}/${trimmed.trimStart('/')}"
     }
 
     private fun updateFilterChips() {

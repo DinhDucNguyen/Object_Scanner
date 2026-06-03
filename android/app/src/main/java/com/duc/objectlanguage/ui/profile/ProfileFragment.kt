@@ -38,10 +38,10 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
-import com.duc.objectlanguage.data.local.ApiConfig
 import com.duc.objectlanguage.databinding.FragmentProfileBinding
 import com.duc.objectlanguage.utils.LocaleHelper
 import com.duc.objectlanguage.utils.PasswordValidator
+import com.duc.objectlanguage.utils.resolveMediaUrl
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -224,6 +224,7 @@ class ProfileFragment : Fragment() {
                         onSuccess = {
                             dialog.dismiss()
                             Toast.makeText(requireContext(), getString(R.string.profile_delete_account_success), Toast.LENGTH_SHORT).show()
+                            app.repository.logout()
                             resetGraphToGuestScan()
                         },
                         onFailure = {
@@ -643,12 +644,6 @@ class ProfileFragment : Fragment() {
             saveScrollPositionForRecreate()
             requireActivity().recreate()
         }
-    }
-
-    private fun resolveMediaUrl(path: String): String {
-        val trimmed = path.trim()
-        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed
-        return "${ApiConfig.baseUrl.trimEnd('/')}/${trimmed.trimStart('/')}"
     }
 
     private fun showDefaultAvatar() {

@@ -1,7 +1,6 @@
 package com.duc.objectlanguage.ui.review
 
 import android.app.Application
-import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,8 +10,8 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.ReviewCardResponse
 import com.duc.objectlanguage.data.repository.CollectionRepository
+import com.duc.objectlanguage.ui.common.localizedString
 import com.duc.objectlanguage.utils.AudioPlayerManager
-import com.duc.objectlanguage.utils.LocaleHelper
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -91,7 +90,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
                     _cards.value = cards
                     if (cards.isEmpty()) {
                         _finishedMessage.value = if (collectionId > 0) {
-                            "Bộ sưu tập này chưa có từ để ôn"
+                            localizedString(R.string.review_no_words_collection)
                         } else {
                             val stats = repo.getStats().getOrNull()
                             when {
@@ -151,19 +150,14 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
                 ?.let { repo.getAudioByUrl(it) }
                 ?: repo.getTtsAudio(word, lang)
             if (bytes == null) {
-                _message.value = "Không tải được audio"
+                _message.value = localizedString(R.string.review_audio_load_error)
                 return@launch
             }
 
             audioPlayer.playMp3(bytes) {
-                _message.value = "Không phát được audio"
+                _message.value = localizedString(R.string.review_audio_play_error)
             }
         }
-    }
-
-    private fun localizedString(@StringRes resId: Int, vararg args: Any): String {
-        val context = LocaleHelper.applyLocale(getApplication<Application>())
-        return if (args.isEmpty()) context.getString(resId) else context.getString(resId, *args)
     }
 
     override fun onCleared() {

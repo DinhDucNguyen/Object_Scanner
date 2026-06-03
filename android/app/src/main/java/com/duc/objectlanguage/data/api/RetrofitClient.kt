@@ -29,18 +29,16 @@ object RetrofitClient {
 
     val api: ApiService
         get() {
-            if (_api == null) {
-                _api = buildRetrofit().create(ApiService::class.java)
+            return _api ?: buildRetrofit().create(ApiService::class.java).also {
+                _api = it
             }
-            return _api!!
         }
 
     val collectionApi: CollectionApiService
         get() {
-            if (_collectionApi == null) {
-                _collectionApi = buildRetrofit().create(CollectionApiService::class.java)
+            return _collectionApi ?: buildRetrofit().create(CollectionApiService::class.java).also {
+                _collectionApi = it
             }
-            return _collectionApi!!
         }
 
     private fun buildRetrofit(): Retrofit {
@@ -103,12 +101,12 @@ object RetrofitClient {
                     .build()
                     .create(ApiService::class.java)
 
-                val refreshResponse = kotlinx.coroutines.runBlocking {
-                    refreshApi.refreshToken(com.duc.objectlanguage.data.model.RefreshRequest(refreshToken))
-                }
+                val refreshResponse = refreshApi
+                    .refreshTokenSync(com.duc.objectlanguage.data.model.RefreshRequest(refreshToken))
+                    .execute()
 
-                if (refreshResponse.isSuccessful && refreshResponse.body() != null) {
-                    val newTokens = refreshResponse.body()!!
+                val newTokens = refreshResponse.body()
+                if (refreshResponse.isSuccessful && newTokens != null) {
                     tokenManager?.accessToken = newTokens.accessToken
                     tokenManager?.refreshToken = newTokens.refreshToken
 

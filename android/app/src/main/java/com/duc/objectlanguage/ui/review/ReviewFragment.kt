@@ -152,7 +152,7 @@ class ReviewFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        collectionName?.let { requireActivity().title = "Ôn tập: $it" }
+        collectionName?.let { requireActivity().title = getString(R.string.review_collection_title, it) }
         if (viewModel.cards.value.isNullOrEmpty() && viewModel.finished.value != true) {
             viewModel.loadCards(collectionId, isPractice, collectionName)
         }

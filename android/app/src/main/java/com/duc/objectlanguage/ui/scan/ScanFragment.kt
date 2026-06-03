@@ -41,6 +41,8 @@ import com.duc.objectlanguage.ui.common.addScaleFeedback
 import com.duc.objectlanguage.ui.common.performLightHaptic
 import com.duc.objectlanguage.ui.common.playSuccessBounce
 import com.duc.objectlanguage.utils.DefinitionFormatter
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.yalantis.ucrop.UCrop
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -61,7 +63,7 @@ class ScanFragment : Fragment() {
     private lateinit var cameraExecutor: ExecutorService
     private var detectorHelper: ObjectDetectorHelper? = null
     private var latestDetection: DetectionResult? = null
-    private var selectedModelName = ObjectDetectorHelper.CUSTOM_MODEL
+    private var selectedModelName = ObjectDetectorHelper.COCO_MODEL
     private var lastScannedBitmap: Bitmap? = null
 
     private val requestCameraPermission = registerForActivityResult(
@@ -156,6 +158,7 @@ class ScanFragment : Fragment() {
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.btnCapture.isEnabled = !loading
             if (loading) {
+                hideScanError()
                 binding.loadingContainer.alpha = 0f
                 binding.loadingContainer.scaleX = 0.82f
                 binding.loadingContainer.scaleY = 0.82f
@@ -183,13 +186,19 @@ class ScanFragment : Fragment() {
             if (result != null) {
                 if (result.source == "gemini_quota_exceeded") {
                     viewModel.clearResult()
-                    Toast.makeText(requireContext(), getString(R.string.scan_error_gemini_quota), Toast.LENGTH_LONG).show()
+                    showScanError(
+                        getString(R.string.scan_error_title_quota),
+                        getString(R.string.scan_error_gemini_quota)
+                    )
                     return@observe
                 }
 
                 if (result.source == "gemini_failed" || result.objectCode == "unknown") {
                     viewModel.clearResult()
-                    Toast.makeText(requireContext(), getString(R.string.scan_error_not_recognized), Toast.LENGTH_LONG).show()
+                    showScanError(
+                        getString(R.string.scan_error_title_not_recognized),
+                        getString(R.string.scan_error_not_recognized)
+                    )
                     return@observe
                 }
 
@@ -253,7 +262,9 @@ class ScanFragment : Fragment() {
                         }
                         if (isPending) {
                             binding.btnAddToCollection.visibility = View.GONE
+                            binding.tvPendingCollectionHint.visibility = View.VISIBLE
                         } else {
+                            binding.tvPendingCollectionHint.visibility = View.GONE
                             binding.btnAddToCollection.visibility = View.VISIBLE
                             binding.btnAddToCollection.setOnClickListener {
                                 binding.btnAddToCollection.playSuccessBounce()
@@ -263,6 +274,7 @@ class ScanFragment : Fragment() {
                     } else {
                         binding.btnPlayAudio.visibility = View.GONE
                         binding.btnAddToCollection.visibility = View.GONE
+                        binding.tvPendingCollectionHint.visibility = if (isPending) View.VISIBLE else View.GONE
                     }
                 } else {
                     binding.tvObjectName.text = result.objectCode.replaceFirstChar { it.uppercase() }
@@ -271,6 +283,7 @@ class ScanFragment : Fragment() {
                     binding.cardDefinition.visibility = View.GONE
                     binding.btnPlayAudio.visibility = View.GONE
                     binding.btnAddToCollection.visibility = View.GONE
+                    binding.tvPendingCollectionHint.visibility = if (isPending) View.VISIBLE else View.GONE
                 }
 
                 showAliases(result.aliases)
@@ -315,7 +328,18 @@ class ScanFragment : Fragment() {
 
         viewModel.error.observe(viewLifecycleOwner) { err ->
             if (err != null) {
-                Toast.makeText(requireContext(), err, Toast.LENGTH_LONG).show()
+                when (err) {
+                    getString(R.string.scan_error_gemini_quota) -> showScanError(
+                        getString(R.string.scan_error_title_quota),
+                        err
+                    )
+                    getString(R.string.scan_error_not_recognized) -> showScanError(
+                        getString(R.string.scan_error_title_not_recognized),
+                        err
+                    )
+                    else -> Toast.makeText(requireContext(), err, Toast.LENGTH_LONG).show()
+                }
+                viewModel.clearError()
                 if (viewModel.scanResult.value == null) restartCameraIfPermitted()
             }
         }
@@ -354,38 +378,42 @@ class ScanFragment : Fragment() {
 
         binding.btnCapture.addScaleFeedback(scale = 0.88f)
         binding.btnCapture.setOnClickListener {
+            hideScanError()
             binding.btnCapture.performLightHaptic()
             playShutterFlash()
             captureImage()
         }
 
         binding.btnGallery.setOnClickListener {
+            hideScanError()
             openGalleryWithPermission()
+        }
+
+        binding.btnScanErrorGallery.setOnClickListener {
+            hideScanError()
+            openGalleryWithPermission()
+        }
+
+        binding.btnScanErrorRetake.setOnClickListener {
+            binding.btnScanErrorRetake.performLightHaptic()
+            hideScanError()
+            viewModel.clearResult()
+            restartCameraIfPermitted()
         }
 
         binding.btnRetake.addScaleFeedback()
         binding.btnRetake.setOnClickListener {
             binding.btnRetake.performLightHaptic()
+            hideScanError()
             viewModel.clearResult()
             restartCameraIfPermitted()
         }
 
-        binding.modelToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            val modelName = selectedModelFromToggle(checkedId)
-            if (modelName != selectedModelName || detectorHelper == null) {
-                selectedModelName = modelName
-                initDetector(modelName)
-            }
+        binding.btnScanOptions.setOnClickListener {
+            binding.btnScanOptions.performLightHaptic()
+            showModelOptionsSheet()
         }
     }
-
-    private fun selectedModelFromToggle(checkedId: Int = binding.modelToggleGroup.checkedButtonId): String =
-        if (checkedId == R.id.btnCocoModel) {
-            ObjectDetectorHelper.COCO_MODEL
-        } else {
-            ObjectDetectorHelper.CUSTOM_MODEL
-        }
 
     private fun initDetector(modelName: String) {
         detectorHelper?.close()
@@ -397,6 +425,68 @@ class ScanFragment : Fragment() {
                 Log.e("ObjectDetector", "YOLO load failed: ${event.message}")
             }
         }
+    }
+
+    private fun showModelOptionsSheet() {
+        val sheet = BottomSheetDialog(requireContext())
+        val view = layoutInflater.inflate(R.layout.dialog_scan_model_options, binding.root, false)
+        val radioGroup = view.findViewById<android.widget.RadioGroup>(R.id.radioModelGroup)
+        radioGroup.check(
+            if (selectedModelName == ObjectDetectorHelper.COCO_MODEL) {
+                R.id.radioCocoModel
+            } else {
+                R.id.radioCustomModel
+            }
+        )
+        radioGroup.setOnCheckedChangeListener { _, checkedId ->
+            val modelName = if (checkedId == R.id.radioCustomModel) {
+                ObjectDetectorHelper.CUSTOM_MODEL
+            } else {
+                ObjectDetectorHelper.COCO_MODEL
+            }
+            if (modelName != selectedModelName || detectorHelper == null) {
+                selectedModelName = modelName
+                initDetector(modelName)
+            }
+            sheet.dismiss()
+        }
+        view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCloseModelOptions)
+            .setOnClickListener { sheet.dismiss() }
+        sheet.setContentView(view)
+        sheet.behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when (newState) {
+                    BottomSheetBehavior.STATE_EXPANDED -> syncScanOptionsIcon(1f)
+                    BottomSheetBehavior.STATE_HIDDEN,
+                    BottomSheetBehavior.STATE_COLLAPSED -> syncScanOptionsIcon(0f)
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                syncScanOptionsIcon(slideOffset.coerceIn(0f, 1f))
+            }
+        })
+        sheet.setOnDismissListener { resetScanOptionsIcon() }
+        sheet.show()
+    }
+
+    private fun syncScanOptionsIcon(progress: Float) {
+        binding.btnScanOptions.animate().cancel()
+        val scale = 1f - (0.06f * progress)
+        binding.btnScanOptions.rotation = 180f * progress
+        binding.btnScanOptions.scaleX = scale
+        binding.btnScanOptions.scaleY = scale
+    }
+
+    private fun resetScanOptionsIcon() {
+        binding.btnScanOptions.animate().cancel()
+        binding.btnScanOptions.animate()
+            .rotation(0f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(180)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
     }
 
     private fun startCamera() {
@@ -414,7 +504,6 @@ class ScanFragment : Fragment() {
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
 
-            selectedModelName = selectedModelFromToggle()
             initDetector(selectedModelName)
 
             try {
@@ -471,6 +560,26 @@ class ScanFragment : Fragment() {
                 }
             }
         )
+    }
+
+    private fun showScanError(title: String, message: String) {
+        binding.tvScanErrorTitle.text = title
+        binding.tvScanErrorMessage.text = message
+        binding.scanErrorCard.alpha = 0f
+        binding.scanErrorCard.translationY = 18f
+        binding.scanErrorCard.visibility = View.VISIBLE
+        binding.scanErrorCard.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(220)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+    }
+
+    private fun hideScanError() {
+        binding.scanErrorCard.visibility = View.GONE
+        binding.scanErrorCard.alpha = 1f
+        binding.scanErrorCard.translationY = 0f
     }
 
     private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
@@ -699,7 +808,7 @@ class ScanFragment : Fragment() {
 
     private fun hideCameraControls() {
         val cameraViews = listOf(
-            binding.cameraOverlay, binding.modelSelectorContainer,
+            binding.cameraOverlay, binding.btnScanOptions,
             binding.cameraControls,
             binding.btnCapture, binding.btnGallery, binding.tvGuestCounter
         )
@@ -726,7 +835,7 @@ class ScanFragment : Fragment() {
                 binding.resultCard.alpha = 1f
 
                 val cameraViews = mutableListOf(
-                    binding.cameraOverlay, binding.modelSelectorContainer,
+                    binding.cameraOverlay, binding.btnScanOptions,
                     binding.cameraControls,
                     binding.btnCapture, binding.btnGallery
                 )

@@ -306,6 +306,19 @@
                 android:text="@string/history_empty"
                 android:textAppearance="@style/TextAppearance.App.BodyMedium" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEmptyScan"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginTop="18dp"
+                android:text="@string/history_empty_scan_cta"
+                android:textAllCaps="false"
+                app:backgroundTint="@color/primary"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/ic_camera"
+                app:iconGravity="textStart"
+                app:iconTint="@android:color/white" />
+
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>

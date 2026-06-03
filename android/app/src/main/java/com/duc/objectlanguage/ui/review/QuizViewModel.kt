@@ -6,8 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.ReviewCardResponse
 import com.duc.objectlanguage.data.model.ReviewRequest
+import com.duc.objectlanguage.ui.common.localizedString
 import kotlinx.coroutines.launch
 
 data class QuizQuestion(
@@ -65,7 +67,7 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
             result.fold(
                 onSuccess = { cards ->
                     if (cards.isEmpty()) {
-                        _error.value = "No cards available for quiz!"
+                        _error.value = localizedString(R.string.test_no_cards_quiz)
                         _finished.value = true
                         _isLoading.value = false
                         return@fold
@@ -86,7 +88,7 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 },
                 onFailure = { throwable ->
-                    _error.value = "Failed to load quiz: ${throwable.message}"
+                    _error.value = localizedString(R.string.test_load_quiz_error, throwable.message.orEmpty())
                     _finished.value = true
                 }
             )

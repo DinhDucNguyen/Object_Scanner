@@ -37,87 +37,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/modelSelectorContainer"
-        android:layout_width="wrap_content"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnScanOptions"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="48dp"
         android:layout_height="44dp"
-        android:layout_marginBottom="14dp"
-        android:background="@drawable/bg_model_toggle"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="12dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="4dp"
-        android:paddingBottom="4dp"
-        app:layout_constraintBottom_toTopOf="@id/cameraControls"
+        android:layout_marginEnd="24dp"
+        android:contentDescription="@string/scan_options_action"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        app:backgroundTint="@color/overlay_soft"
+        app:cornerRadius="22dp"
+        app:icon="@drawable/ic_settings"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="20dp"
+        app:iconTint="@color/text_on_primary"
+        app:layout_constraintBottom_toBottomOf="@id/cameraControls"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="@string/scan_model_label"
-            android:textColor="@color/text_on_primary"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:alpha="0.86" />
-
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/modelToggleGroup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:checkedButton="@id/btnCustomModel"
-            app:selectionRequired="true"
-            app:singleSelection="true">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCustomModel"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:text="@string/scan_model_custom"
-                android:textAllCaps="false"
-                android:textColor="@color/model_toggle_text"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                app:backgroundTint="@color/model_toggle_background"
-                app:cornerRadius="16dp"
-                app:rippleColor="@color/glass_white"
-                app:strokeColor="@color/model_toggle_stroke"
-                app:strokeWidth="1dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCocoModel"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:text="@string/scan_model_coco"
-                android:textAllCaps="false"
-                android:textColor="@color/model_toggle_text"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                app:backgroundTint="@color/model_toggle_background"
-                app:cornerRadius="16dp"
-                app:rippleColor="@color/glass_white"
-                app:strokeColor="@color/model_toggle_stroke"
-                app:strokeWidth="1dp" />
-
-        </com.google.android.material.button.MaterialButtonToggleGroup>
-
-    </LinearLayout>
+        app:layout_constraintTop_toTopOf="@id/cameraControls"
+        app:strokeColor="@color/glass_stroke"
+        app:strokeWidth="1dp" />
 
     <TextView
         android:id="@+id/tvGuestCounter"
@@ -166,6 +109,76 @@
             android:textColor="@color/text_on_primary"
             android:textSize="14sp" />
     </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/scanErrorCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/surface"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="10dp"
+        app:layout_constraintBottom_toTopOf="@id/btnScanOptions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:strokeColor="@color/divider"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <TextView
+                android:id="@+id/tvScanErrorTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvScanErrorMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:lineSpacingMultiplier="1.2"
+                android:textAppearance="@style/TextAppearance.App.BodyMedium" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="end"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnScanErrorGallery"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:text="@string/scan_error_action_gallery"
+                    android:textAllCaps="false"
+                    android:textColor="@color/primary"
+                    app:cornerRadius="14dp"
+                    app:strokeColor="@color/primary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnScanErrorRetake"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/scan_btn_retake"
+                    android:textAllCaps="false"
+                    app:backgroundTint="@color/primary"
+                    app:cornerRadius="14dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cameraControls"
@@ -488,6 +501,16 @@
                     app:iconGravity="textStart"
                     app:iconTint="@color/text_on_primary"
                     app:backgroundTint="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tvPendingCollectionHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="@string/scan_pending_collection_hint"
+                    android:textAppearance="@style/TextAppearance.App.BodySmall"
+                    android:visibility="gone" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRetake"
