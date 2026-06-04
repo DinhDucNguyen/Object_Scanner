@@ -28,7 +28,7 @@
 - **Kotlin** — MVVM, ViewBinding, Navigation Component
 - **Retrofit** + OkHttp — gọi REST API
 - **Room** — local database
-- **ML Kit** — label detection hỗ trợ nhận diện on-device
+- **ML Kit ImageLabeling** — nhận diện và phân loại vật thể on-device (fallback sau YOLO)
 - **CameraX** — camera preview và chụp ảnh
 - **Glide** — load và cache ảnh
 - **Material Design 3**
