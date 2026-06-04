@@ -54,18 +54,23 @@ Object_Scanner/
 │   └── app/src/main/
 │       ├── java/.../ui/            # Fragments, ViewModels
 │       ├── java/.../data/          # Repository, API, Room, Models
+│       ├── java/.../utils/         # Helper functions
+│       ├── java/.../workers/       # Background workers
 │       └── res/                    # Layouts, strings, drawables
 ├── backend/                        # FastAPI server
 │   ├── app/
 │   │   ├── routers/                # API endpoints
 │   │   ├── services/               # Business logic
+│   │   ├── repositories/           # Data access layer
 │   │   ├── schemas/                # Pydantic models
 │   │   ├── models/                 # SQLAlchemy models
-│   │   └── core/                   # Config, DB, security
+│   │   ├── db/                     # Database session
+│   │   ├── dependencies/           # FastAPI dependencies
+│   │   ├── utils/                  # Helper functions
+│   │   └── core/                   # Config, security
 │   ├── alembic/                    # Database migrations
 │   ├── main.py
 │   └── requirements.txt
-├── docs/                           # Tài liệu bổ sung, class diagram
 └── README.md
 ```
 
