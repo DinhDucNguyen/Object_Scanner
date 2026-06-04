@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(python -m alembic upgrade head)",
-      "Bash(python -m app.db.seed)",
-      "Bash(grep -r \"getAnalytics\\\\|analytics\\\\|/analytics\" \"d:\\\\\\\\Object_Scanner\\\\\\\\android\" --include=\"*.kt\")"
-    ]
-  }
-}
