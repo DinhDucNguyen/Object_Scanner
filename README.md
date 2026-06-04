@@ -28,7 +28,7 @@
 - **Kotlin** — MVVM, ViewBinding, Navigation Component
 - **Retrofit** + OkHttp — gọi REST API
 - **Room** — local database
-- **ML Kit** — object detection on-device
+- **ML Kit** — label detection hỗ trợ nhận diện on-device
 - **CameraX** — camera preview và chụp ảnh
 - **Glide** — load và cache ảnh
 - **Material Design 3**
@@ -157,7 +157,7 @@ Hoặc build APK từ terminal:
 ```bash
 cd android
 ./gradlew assembleDebug      # Debug APK — kết nối HTTP local
-./gradlew assembleRelease    # Release APK — chỉ HTTPS
+./gradlew assembleRelease    # Release APK — chặn cleartext, cần server HTTPS
 ```
 
 APK output: `android/app/build/outputs/apk/`
@@ -202,7 +202,7 @@ Không cần làm gì thêm — app tự load model khi khởi động.
 | `POST` | `/api/scan` | Quét và nhận diện vật thể |
 | `GET` | `/api/history` | Lịch sử quét |
 | `GET` | `/api/review` | Lấy danh sách thẻ ôn tập hôm nay |
-| `POST` | `/api/review/{id}/submit` | Nộp kết quả ôn tập |
+| `POST` | `/api/review/{progress_id}` | Nộp kết quả ôn tập |
 | `GET` | `/api/review/count` | Số từ cần ôn hôm nay |
 | `GET` | `/api/collections` | Danh sách bộ sưu tập |
 | `GET` | `/api/streak` | Thông tin chuỗi ngày học |
