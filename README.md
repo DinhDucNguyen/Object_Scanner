@@ -10,7 +10,7 @@
 
 | Tính năng | Mô tả |
 |-----------|-------|
-| **Quét vật thể** | Camera nhận diện qua YOLOv10 on-device → ML Kit → Gemini API fallback |
+| **Quét vật thể** | Camera nhận diện qua YOLOv8 on-device → ML Kit → Gemini API fallback |
 | **Từ vựng chi tiết** | Tên tiếng Anh, phiên âm IPA, định nghĩa, câu ví dụ, phát âm TTS |
 | **Bộ sưu tập** | Tạo và quản lý bộ từ vựng cá nhân theo chủ đề |
 | **Ôn tập flashcard** | Spaced repetition SM-2, badge đếm từ cần ôn hôm nay |
@@ -179,7 +179,7 @@ alembic current         # Kiểm tra version đang chạy
 Version hiện tại: `0016_user_email_verified`
 
 ### Model YOLO
-Model nhận diện vật thể đã được train sẵn trên Google Colab và đặt tại:
+Model YOLOv8 nhận diện vật thể đã được train sẵn trên Google Colab và đặt tại:
 ```
 android/app/src/main/assets/best.tflite
 ```
