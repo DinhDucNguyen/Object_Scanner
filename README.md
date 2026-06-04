@@ -28,12 +28,20 @@
 ## Tech Stack
 
 ### Android
-- **Kotlin** — MVVM, ViewBinding, Navigation Component
+- **Kotlin** — MVVM, ViewBinding, Navigation Component, Coroutines
+- **TensorFlow Lite** — chạy model YOLOv8 on-device
+- **ML Kit** — Object Detection + ImageLabeling (fallback sau YOLO)
+- **CameraX** — camera preview và chụp ảnh
 - **Retrofit** + OkHttp — gọi REST API
 - **Room** — local database
-- **ML Kit ImageLabeling** — nhận diện và phân loại vật thể on-device (fallback sau YOLO)
-- **CameraX** — camera preview và chụp ảnh
+- **DataStore** — lưu preferences
+- **WorkManager** — background workers
 - **Glide** — load và cache ảnh
+- **MPAndroidChart** — biểu đồ thống kê
+- **Lottie** — animation
+- **UCrop** — crop ảnh trước khi quét
+- **Shimmer** — loading skeleton
+- **Google Sign-In** — đăng nhập Google
 - **Material Design 3**
 
 ### Backend
@@ -43,6 +51,8 @@
 - **Gemini API** — nhận diện vật thể và sinh từ vựng
 - **Cloudinary** — lưu trữ ảnh
 - **gTTS** — text-to-speech
+- **slowapi** — rate limiting
+- **google-auth** — xác thực Google token
 
 ---
 
