@@ -79,6 +79,9 @@
     <string name="dashboard_default_user">bạn</string>
     <string name="dashboard_greeting">Chào bạn!</string>
     <string name="dashboard_greeting_named">Chào %s!</string>
+    <string name="dashboard_greeting_morning">Chào buổi sáng, %s!</string>
+    <string name="dashboard_greeting_afternoon">Chào buổi chiều, %s!</string>
+    <string name="dashboard_greeting_evening">Chào buổi tối, %s!</string>
     <string name="dashboard_greeting_subtitle">Sẵn sàng học từ vựng mới chưa?</string>
     <string name="dashboard_brand_name">LengoLens.</string>
     <string name="dashboard_search_hint">Tra từ hoặc quét đồ vật…</string>
@@ -762,6 +765,7 @@
     <string name="btn_create">Tạo</string>
     <string name="btn_save">Lưu</string>
     <string name="btn_cancel">Hủy</string>
+    <string name="btn_retry">Thử lại</string>
     <string name="press_back_again_to_exit">Nhấn back lần nữa để thoát</string>
     <string name="btn_delete">Xóa</string>
     <string name="btn_close">Đóng</string>

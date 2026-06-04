@@ -87,6 +87,9 @@
     <string name="dashboard_default_user">there</string>
     <string name="dashboard_greeting">Hello!</string>
     <string name="dashboard_greeting_named">Hello %s!</string>
+    <string name="dashboard_greeting_morning">Good morning, %s!</string>
+    <string name="dashboard_greeting_afternoon">Good afternoon, %s!</string>
+    <string name="dashboard_greeting_evening">Good evening, %s!</string>
     <string name="dashboard_greeting_subtitle">Ready to learn a new word?</string>
     <string name="dashboard_brand_name">LengoLens.</string>
     <string name="dashboard_search_hint">Search or scan an object…</string>
@@ -759,6 +762,7 @@
     <string name="btn_create">Create</string>
     <string name="btn_save">Save</string>
     <string name="btn_cancel">Cancel</string>
+    <string name="btn_retry">Retry</string>
     <string name="press_back_again_to_exit">Press back again to exit</string>
     <string name="btn_delete">Delete</string>
     <string name="btn_close">Close</string>

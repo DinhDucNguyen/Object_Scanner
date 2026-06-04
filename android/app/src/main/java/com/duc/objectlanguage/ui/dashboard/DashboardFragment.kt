@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -119,7 +118,12 @@ class DashboardFragment : Fragment() {
 
         viewModel.error.observe(viewLifecycleOwner) { err ->
             if (err != null) {
-                Toast.makeText(requireContext(), err, Toast.LENGTH_LONG).show()
+                Snackbar.make(binding.root, err, Snackbar.LENGTH_LONG)
+                    .setAction(getString(R.string.btn_retry)) {
+                        viewModel.loadStats()
+                        viewModel.loadStreak()
+                    }
+                    .show()
             }
         }
 
@@ -136,7 +140,13 @@ class DashboardFragment : Fragment() {
             }
         }
         viewModel.displayName.observe(viewLifecycleOwner) { name ->
-            binding.tvDashboardGreeting.text = getString(R.string.dashboard_greeting_named, name)
+            val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+            val greetingRes = when {
+                hour in 6..11 -> R.string.dashboard_greeting_morning
+                hour < 18 -> R.string.dashboard_greeting_afternoon
+                else -> R.string.dashboard_greeting_evening
+            }
+            binding.tvDashboardGreeting.text = getString(greetingRes, name)
         }
 
         viewModel.loadStats()

@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.snackbar.Snackbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.duc.objectlanguage.ObjectLanguageApp
@@ -55,8 +55,9 @@ class SaveToCollectionBottomSheet : BottomSheetDialogFragment() {
                     }
                 },
                 onFailure = {
-                    Toast.makeText(requireContext(), getString(R.string.collection_load_error), Toast.LENGTH_SHORT).show()
-                    dismiss()
+                    Snackbar.make(binding.root, getString(R.string.collection_load_error), Snackbar.LENGTH_LONG)
+                        .setAction(getString(R.string.btn_retry)) { loadCollections() }
+                        .show()
                 }
             )
         }
@@ -66,10 +67,16 @@ class SaveToCollectionBottomSheet : BottomSheetDialogFragment() {
         lifecycleScope.launch {
             val result = repo.addToCollection(collection.id, translationId)
             if (result.isSuccess) {
-                Toast.makeText(requireContext(), getString(R.string.collection_saved_to, collection.name), Toast.LENGTH_SHORT).show()
+                Snackbar.make(
+                    requireActivity().findViewById(android.R.id.content),
+                    getString(R.string.collection_saved_to, collection.name),
+                    Snackbar.LENGTH_SHORT
+                ).show()
                 dismiss()
             } else {
-                Toast.makeText(requireContext(), getString(R.string.collection_save_error), Toast.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, getString(R.string.collection_save_error), Snackbar.LENGTH_LONG)
+                    .setAction(getString(R.string.btn_retry)) { saveToCollection(collection) }
+                    .show()
             }
         }
     }

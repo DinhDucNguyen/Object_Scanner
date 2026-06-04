@@ -283,27 +283,17 @@ class MainActivity : AppCompatActivity() {
     private fun navigateToBottomDestination(itemId: Int, navController: NavController, tabs: List<NavTab>): Boolean {
         if (navController.currentDestination?.id == itemId) return true
 
-        val tabOrder = listOf(
-            R.id.dashboardFragment,
-            R.id.dictionaryFragment,
-            R.id.scanFragment,
-            R.id.reviewFragment,
-            R.id.profileFragment
-        )
         val fromTabId = bottomNavItemForDestination(navController.currentDestination?.id ?: -1) ?: -1
-        val fromIndex = tabOrder.indexOf(fromTabId)
-        val toIndex = tabOrder.indexOf(itemId)
-        val goingRight = toIndex > fromIndex
 
         return try {
             val options = NavOptions.Builder()
                 .setLaunchSingleTop(true)
                 // Pop hết về start destination để giữ back stack gọn — chỉ 1 bước back giữa tabs
                 .setPopUpTo(navController.graph.startDestinationId, false)
-                .setEnterAnim(if (goingRight) R.anim.nav_slide_in_right else R.anim.nav_slide_in_left)
-                .setExitAnim(if (goingRight) R.anim.nav_slide_out_left else R.anim.nav_slide_out_right)
-                .setPopEnterAnim(R.anim.nav_slide_in_left)
-                .setPopExitAnim(R.anim.nav_slide_out_right)
+                .setEnterAnim(R.anim.nav_tab_fade_in)
+                .setExitAnim(R.anim.nav_tab_fade_out)
+                .setPopEnterAnim(R.anim.nav_tab_fade_in)
+                .setPopExitAnim(R.anim.nav_tab_fade_out)
                 .build()
             if (!isBackNavigation) previousTabId = fromTabId.takeIf { it != -1 }
             navController.navigate(itemId, null, options)

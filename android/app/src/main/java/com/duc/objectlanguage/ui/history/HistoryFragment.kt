@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -200,14 +199,16 @@ class HistoryFragment : Fragment() {
 
         viewModel.message.observe(viewLifecycleOwner) { message ->
             if (message != null) {
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                 viewModel.clearMessage()
             }
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
             if (error != null) {
-                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG)
+                    .setAction(getString(R.string.btn_retry)) { viewModel.load() }
+                    .show()
                 viewModel.clearError()
             }
         }
