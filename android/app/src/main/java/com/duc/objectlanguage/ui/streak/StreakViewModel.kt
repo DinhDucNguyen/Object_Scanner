@@ -91,6 +91,7 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun loadFromServer() {
+        _error.value = null
         viewModelScope.launch {
             repository.getStreak()
                 .onSuccess { remote -> applyServerStreak(remote) }
@@ -102,6 +103,7 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun loadCalendar() {
+        _error.value = null
         viewModelScope.launch {
             repository.getStreakCalendar(30)
                 .onSuccess { response -> _calendarDays.postValue(response.days) }

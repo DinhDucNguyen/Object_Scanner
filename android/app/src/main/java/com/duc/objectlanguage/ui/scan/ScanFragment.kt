@@ -461,6 +461,9 @@ class ScanFragment : Fragment() {
                     BottomSheetBehavior.STATE_EXPANDED -> syncScanOptionsIcon(1f)
                     BottomSheetBehavior.STATE_HIDDEN,
                     BottomSheetBehavior.STATE_COLLAPSED -> syncScanOptionsIcon(0f)
+                    BottomSheetBehavior.STATE_DRAGGING,
+                    BottomSheetBehavior.STATE_HALF_EXPANDED,
+                    BottomSheetBehavior.STATE_SETTLING -> Unit
                 }
             }
 
@@ -879,7 +882,7 @@ class ScanFragment : Fragment() {
                     (12 * resources.displayMetrics.density).toInt(),
                     (5 * resources.displayMetrics.density).toInt()
                 )
-                background = resources.getDrawable(R.drawable.bg_chip_surface, requireContext().theme)
+                background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_chip_surface)
                 val lp = android.widget.LinearLayout.LayoutParams(
                     android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
                     android.widget.LinearLayout.LayoutParams.WRAP_CONTENT

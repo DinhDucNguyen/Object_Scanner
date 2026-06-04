@@ -78,6 +78,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        @Suppress("DEPRECATION")
         overridePendingTransition(0, 0)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -313,7 +314,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @Suppress("OVERRIDE_DEPRECATION")
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController

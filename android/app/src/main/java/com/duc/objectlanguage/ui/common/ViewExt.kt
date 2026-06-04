@@ -13,6 +13,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.duc.objectlanguage.R
 
+@Suppress("ClickableViewAccessibility")
 fun View.addScaleFeedback(scale: Float = 0.93f, duration: Long = 100) {
     setOnTouchListener { v, event ->
         when (event.action) {
@@ -23,6 +24,7 @@ fun View.addScaleFeedback(scale: Float = 0.93f, duration: Long = 100) {
     }
 }
 
+@Suppress("ClickableViewAccessibility")
 fun View.addRaisedButtonFeedback(
     pressedScale: Float = 0.97f,
     baseElevationDp: Float = 2f,
@@ -65,6 +67,7 @@ fun View.addRaisedButtonFeedback(
     }
 }
 
+@Suppress("ClickableViewAccessibility")
 fun View.addPulseFeedback(scale: Float = 0.93f, scaleDuration: Long = 100) {
     setOnTouchListener { v, event ->
         when (event.action) {

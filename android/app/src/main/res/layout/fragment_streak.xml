@@ -2,8 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -161,7 +160,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/streak_today_done"
                             android:textColor="@color/success"
-                            android:textSize="9sp"
+                            android:textSize="11sp"
                             android:textStyle="bold" />
 
                     </LinearLayout>
@@ -236,13 +235,13 @@
                         android:orientation="horizontal"
                         android:layout_marginBottom="4dp">
 
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_sun_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_mon_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_tue_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_wed_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_thu_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_fri_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_sat_short" android:textColor="@color/text_muted" android:textSize="10sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_sun_short" android:textColor="@color/text_muted" android:textSize="11sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_mon_short" android:textColor="@color/text_muted" android:textSize="11sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_tue_short" android:textColor="@color/text_muted" android:textSize="11sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_wed_short" android:textColor="@color/text_muted" android:textSize="11sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_thu_short" android:textColor="@color/text_muted" android:textSize="11sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_fri_short" android:textColor="@color/text_muted" android:textSize="11sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/weekday_sat_short" android:textColor="@color/text_muted" android:textSize="11sp" android:textStyle="bold"/>
 
                     </LinearLayout>
 
@@ -512,6 +511,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:gravity="center_horizontal"
                 android:layout_marginBottom="24dp">

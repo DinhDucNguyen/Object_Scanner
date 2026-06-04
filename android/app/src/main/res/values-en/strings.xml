@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">LengoLens</string>
 
     <!-- Onboarding -->
@@ -129,7 +129,7 @@
 
     <!-- Scan -->
     <string name="scan_overlay">Place the object on screen, then capture</string>
-    <string name="scan_analyzing">Recognizing...\nPlease wait a moment</string>
+    <string name="scan_analyzing">Recognizing…\nPlease wait a moment</string>
     <string name="scan_btn_play">Play audio</string>
     <string name="scan_btn_learn">Save</string>
     <string name="scan_btn_retake">Scan again</string>
@@ -176,8 +176,8 @@
     <string name="dictionary_subtitle">Translate quickly and save words to learn</string>
     <string name="dictionary_input_label">Source text</string>
     <string name="dictionary_result_label">Translation result</string>
-    <string name="dictionary_input_hint">Enter text to translate...</string>
-    <string name="dictionary_loading">Translating...</string>
+    <string name="dictionary_input_hint">Enter text to translate…</string>
+    <string name="dictionary_loading">Translating…</string>
     <string name="dictionary_translate_button">Translate</string>
     <string name="dictionary_empty_prompt">Enter text to get started</string>
     <string name="dictionary_save_word">Save to learning list</string>
@@ -189,7 +189,7 @@
     <string name="dictionary_object_code_label">Object code:</string>
     <string name="dictionary_play_audio">Play pronunciation</string>
     <string name="dictionary_history_delete">Remove from history</string>
-    <string name="dictionary_history_search_hint">Search history...</string>
+    <string name="dictionary_history_search_hint">Search history…</string>
     <string name="dictionary_history_no_results">No results found</string>
     <string name="dictionary_error_translate">Translation failed</string>
     <string name="dictionary_warn_wrong_lang_vi_in_en">You typed Vietnamese but selected English as source. Try swapping the language!</string>
@@ -227,7 +227,7 @@
 
     <!-- Auth validation -->
     <string name="auth_fill_all_fields">Please fill in all fields</string>
-    <string name="auth_invalid_username">Username must be 3-50 characters, letters, numbers and underscore only</string>
+    <string name="auth_invalid_username">Username must be 3–50 characters, letters, numbers and underscore only</string>
     <string name="auth_invalid_email">Invalid email address</string>
     <string name="auth_google_token_error">Could not retrieve Google token</string>
     <string name="auth_google_signin_failed">Google Sign-In failed: %d</string>
@@ -316,9 +316,9 @@
     <!-- Pronunciation -->
     <string name="test_pronunciation_word_counter">Word %1$d/%2$d</string>
     <string name="test_pronunciation_tap_to_practice">Tap microphone to practice</string>
-    <string name="test_pronunciation_listening">🎤 Listening...</string>
-    <string name="test_pronunciation_speaking_detected">🎤 Speaking detected...</string>
-    <string name="test_pronunciation_processing">Processing...</string>
+    <string name="test_pronunciation_listening">🎤 Listening…</string>
+    <string name="test_pronunciation_speaking_detected">🎤 Speaking detected…</string>
+    <string name="test_pronunciation_processing">Processing…</string>
     <string name="test_pronunciation_you_said">You said: \"%1$s\"</string>
     <string name="test_pronunciation_score">Score: %1$d%%</string>
     <string name="test_pronunciation_feedback_excellent">🌟 Perfect! Excellent pronunciation!</string>
@@ -337,9 +337,9 @@
     <string name="test_pronunciation_error_unknown">Unknown error</string>
     <string name="pronunciation_word_counter">Word %1$d/%2$d</string>
     <string name="pronunciation_tap_mic">Tap microphone to practice</string>
-    <string name="pronunciation_listening">🎤 Listening...</string>
-    <string name="pronunciation_speaking">🎤 Speaking detected...</string>
-    <string name="pronunciation_processing">Processing...</string>
+    <string name="pronunciation_listening">🎤 Listening…</string>
+    <string name="pronunciation_speaking">🎤 Speaking detected…</string>
+    <string name="pronunciation_processing">Processing…</string>
     <string name="pronunciation_you_said">You said: \"%1$s\"</string>
     <string name="pronunciation_score">Score: %1$d%%</string>
     <string name="pronunciation_feedback_perfect">🌟 Perfect! Excellent pronunciation!</string>
@@ -422,7 +422,7 @@
     <string name="quiz_choose_answer">Choose the correct answer:</string>
     <string name="quiz_submit">Submit answer</string>
     <string name="typing_instruction">Type the English translation:</string>
-    <string name="typing_answer_hint">Type your answer here...</string>
+    <string name="typing_answer_hint">Type your answer here…</string>
     <string name="hint_first_letter">First letter</string>
     <string name="hint_word_length">Word length</string>
     <string name="action_skip">Skip</string>
@@ -431,7 +431,7 @@
     <string name="listening_play_audio">Play audio</string>
     <string name="listening_play_slow">Play slow</string>
     <string name="listening_repeat_count">Played: 0 times</string>
-    <string name="listening_answer_hint">Type what you heard...</string>
+    <string name="listening_answer_hint">Type what you heard…</string>
     <string name="image_matching_instruction">Match images with words</string>
     <string name="pronunciation_instruction">Practice pronunciation</string>
     <string name="pronunciation_listen_model">Listen to model</string>
@@ -517,7 +517,7 @@
     <string name="streak_stat_today_label">Reviews today</string>
 
     <!-- Collections -->
-    <string name="collection_search_hint">Search collections...</string>
+    <string name="collection_search_hint">Search collections…</string>
     <string name="collection_empty_title">No collections yet</string>
     <string name="collection_empty_subtitle">Create your first collection\nand organize your vocabulary</string>
     <string name="collection_empty_create_cta">Create collection</string>
@@ -549,7 +549,7 @@
     <string name="collection_dialog_create_title">Create collection</string>
     <string name="collection_dialog_subtitle">Start your new learning journey</string>
     <string name="collection_dialog_name_hint">Collection name</string>
-    <string name="collection_dialog_name_subtitle">E.g. English conversation, JLPT N3...</string>
+    <string name="collection_dialog_name_subtitle">E.g. English conversation, JLPT N3…</string>
     <string name="collection_dialog_delete_title">Delete collection</string>
     <string name="collection_dialog_delete_msg">Are you sure you want to delete \"%s\"?</string>
     <string name="collection_audio_load_error">Could not load audio</string>
@@ -699,9 +699,9 @@
     <string name="profile_delete_account_confirm">Delete permanently</string>
     <string name="profile_delete_account_success">Account has been deleted</string>
     <string name="profile_delete_account_wrong_password">Incorrect password</string>
-    <string name="profile_bio_placeholder">Tap to add a bio...</string>
+    <string name="profile_bio_placeholder">Tap to add a bio…</string>
     <string name="profile_bio_dialog_title">About you</string>
-    <string name="profile_bio_hint">Write a few lines about yourself...</string>
+    <string name="profile_bio_hint">Write a few lines about yourself…</string>
     <string name="profile_edit_bio_title">Edit bio</string>
     <string name="profile_menu_change_password">Change password</string>
     <string name="profile_menu_notifications">Notification settings</string>
@@ -734,7 +734,7 @@
     <string name="profile_username_dialog_subtitle">This name is used to sign in and appears as @username.</string>
     <string name="profile_username_hint">Enter a new username</string>
     <string name="profile_username_required">Please enter a username</string>
-    <string name="profile_username_rule_hint">3-50 characters, letters, numbers and underscore only.</string>
+    <string name="profile_username_rule_hint">3–50 characters, letters, numbers and underscore only.</string>
     <string name="profile_edit_username">Edit username</string>
     <string name="profile_avatar_updated">Avatar updated</string>
     <string name="profile_avatar_view">View photo</string>
@@ -784,7 +784,7 @@
     <string name="value_time_1900">19:00</string>
     <string name="language_en_short">EN</string>
     <string name="language_vi_short">VI</string>
-    <string name="language_pair_en_vi">EN &lt;-&gt; VI</string>
+    <string name="language_pair_en_vi">EN ↔ VI</string>
     <string name="scan_model_label">Mode</string>
     <string name="scan_model_custom">Custom Model</string>
     <string name="scan_model_coco">COCO Model</string>
@@ -800,9 +800,9 @@
     <string name="placeholder_collection_name">Collection Name</string>
     <string name="placeholder_collection_owner">by username</string>
     <string name="placeholder_collection_count_zero">0 words</string>
-    <string name="placeholder_collection_created">Created --</string>
+    <string name="placeholder_collection_created">Created —</string>
     <string name="placeholder_confidence">90%</string>
-    <string name="placeholder_date">2024-01-01</string>
+    <string name="placeholder_date" tools:ignore="TypographyDashes">2024-01-01</string>
     <string name="placeholder_review_progress">1 / 10</string>
     <string name="placeholder_example_index">01</string>
     <string name="collection_word_category_placeholder">CATEGORY</string>

@@ -58,6 +58,13 @@ android {
         viewBinding = true
         buildConfig = true
     }
+
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     androidResources {
         noCompress.add("tflite")
     }

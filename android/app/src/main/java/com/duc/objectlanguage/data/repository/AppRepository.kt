@@ -1081,7 +1081,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
         return try {
 
-            val json = JsonParser().parse(raw)
+            val json = JsonParser.parseString(raw)
 
             if (!json.isJsonObject) return raw
 
@@ -1136,4 +1136,3 @@ class AppRepository(private val tokenManager: TokenManager) {
     }
 
 }
-

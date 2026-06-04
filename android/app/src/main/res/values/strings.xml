@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">LengoLens</string>
 
     <!-- Onboarding -->
@@ -81,7 +81,7 @@
     <string name="dashboard_greeting_named">Chào %s!</string>
     <string name="dashboard_greeting_subtitle">Sẵn sàng học từ vựng mới chưa?</string>
     <string name="dashboard_brand_name">LengoLens.</string>
-    <string name="dashboard_search_hint">Tra từ hoặc quét đồ vật...</string>
+    <string name="dashboard_search_hint">Tra từ hoặc quét đồ vật…</string>
     <string name="dashboard_mastery_label">Mức độ thành thạo</string>
     <string name="dashboard_mastery_short">Thành thạo</string>
     <string name="dashboard_mastery_hint">Cố lên, sắp giỏi rồi!</string>
@@ -121,14 +121,14 @@
 
     <!-- Scan -->
     <string name="scan_overlay">Canh vật thể trong màn hình rồi nhấn chụp</string>
-    <string name="scan_analyzing">Đang nhận diện...\nVui lòng chờ một chút</string>
+    <string name="scan_analyzing">Đang nhận diện…\nVui lòng chờ một chút</string>
     <string name="scan_btn_play">Nghe phát âm</string>
     <string name="scan_btn_learn">Lưu</string>
     <string name="scan_btn_retake">Quét lại</string>
     <string name="scan_cd_gallery">Chọn ảnh từ thư viện</string>
     <string name="scan_cd_capture">Chụp ảnh</string>
     <string name="scan_pending">Đang chờ admin kiểm duyệt</string>
-    <string name="scan_pending_collection_hint">Từ này đang chờ kiểm duyệt nên chưa thể lưu vào bộ sưu tập. Sau khi admin duyệt, bạn có thể thêm từ từ Lịch sử.</string>
+    <string name="scan_pending_collection_hint">Từ này đang chờ kiểm duyệt nên chưa thể lưu vào bộ sưu tập. Sau khi admin duyệt, bạn có thể thêm từ Lịch sử.</string>
     <string name="scan_label_definition">ĐỊNH NGHĨA</string>
     <string name="scan_label_example">Ví dụ sử dụng</string>
     <string name="scan_label_also_known_as">Còn gọi là</string>
@@ -168,8 +168,8 @@
     <string name="dictionary_subtitle">Dịch nhanh và lưu từ cần học</string>
     <string name="dictionary_input_label">Văn bản nguồn</string>
     <string name="dictionary_result_label">Kết quả dịch</string>
-    <string name="dictionary_input_hint">Nhập văn bản để dịch...</string>
-    <string name="dictionary_loading">Đang dịch...</string>
+    <string name="dictionary_input_hint">Nhập văn bản để dịch…</string>
+    <string name="dictionary_loading">Đang dịch…</string>
     <string name="dictionary_translate_button">Dịch</string>
     <string name="dictionary_empty_prompt">Nhập văn bản để bắt đầu</string>
     <string name="dictionary_save_word">Lưu vào danh sách học</string>
@@ -181,7 +181,7 @@
     <string name="dictionary_object_code_label">Mã đối tượng:</string>
     <string name="dictionary_play_audio">Nghe phát âm</string>
     <string name="dictionary_history_delete">Xóa khỏi lịch sử</string>
-    <string name="dictionary_history_search_hint">Tìm kiếm lịch sử...</string>
+    <string name="dictionary_history_search_hint">Tìm kiếm lịch sử…</string>
     <string name="dictionary_history_no_results">Không tìm thấy kết quả</string>
     <string name="dictionary_error_translate">Lỗi dịch</string>
     <string name="dictionary_warn_wrong_lang_vi_in_en">Bạn đang nhập tiếng Việt nhưng chọn dịch từ tiếng Anh. Thử đổi ngôn ngữ nguồn nhé!</string>
@@ -219,7 +219,7 @@
 
     <!-- Auth validation -->
     <string name="auth_fill_all_fields">Vui lòng nhập đầy đủ thông tin</string>
-    <string name="auth_invalid_username">Tên đăng nhập phải từ 3-50 ký tự, chỉ gồm chữ, số và underscore</string>
+    <string name="auth_invalid_username">Tên đăng nhập phải từ 3–50 ký tự, chỉ gồm chữ, số và underscore</string>
     <string name="auth_invalid_email">Email không hợp lệ</string>
     <string name="auth_google_token_error">Không lấy được token từ Google</string>
     <string name="auth_google_signin_failed">Đăng nhập Google thất bại: %d</string>
@@ -308,9 +308,9 @@
     <!-- Pronunciation -->
     <string name="test_pronunciation_word_counter">Từ %1$d/%2$d</string>
     <string name="test_pronunciation_tap_to_practice">Chạm vào mic để luyện tập</string>
-    <string name="test_pronunciation_listening">🎤 Đang nghe...</string>
-    <string name="test_pronunciation_speaking_detected">🎤 Phát hiện giọng nói...</string>
-    <string name="test_pronunciation_processing">Đang xử lý...</string>
+    <string name="test_pronunciation_listening">🎤 Đang nghe…</string>
+    <string name="test_pronunciation_speaking_detected">🎤 Phát hiện giọng nói…</string>
+    <string name="test_pronunciation_processing">Đang xử lý…</string>
     <string name="test_pronunciation_you_said">Bạn nói: \"%1$s\"</string>
     <string name="test_pronunciation_score">Điểm: %1$d%%</string>
     <string name="test_pronunciation_feedback_excellent">🌟 Hoàn hảo! Phát âm xuất sắc!</string>
@@ -329,9 +329,9 @@
     <string name="test_pronunciation_error_unknown">Lỗi không xác định</string>
     <string name="pronunciation_word_counter">Từ %1$d/%2$d</string>
     <string name="pronunciation_tap_mic">Chạm vào mic để luyện tập</string>
-    <string name="pronunciation_listening">🎤 Đang nghe...</string>
-    <string name="pronunciation_speaking">🎤 Phát hiện giọng nói...</string>
-    <string name="pronunciation_processing">Đang xử lý...</string>
+    <string name="pronunciation_listening">🎤 Đang nghe…</string>
+    <string name="pronunciation_speaking">🎤 Phát hiện giọng nói…</string>
+    <string name="pronunciation_processing">Đang xử lý…</string>
     <string name="pronunciation_you_said">Bạn nói: \"%1$s\"</string>
     <string name="pronunciation_score">Điểm: %1$d%%</string>
     <string name="pronunciation_feedback_perfect">🌟 Hoàn hảo! Phát âm xuất sắc!</string>
@@ -414,7 +414,7 @@
     <string name="quiz_choose_answer">Chọn đáp án đúng:</string>
     <string name="quiz_submit">Nộp đáp án</string>
     <string name="typing_instruction">Gõ bản dịch tiếng Anh:</string>
-    <string name="typing_answer_hint">Nhập câu trả lời...</string>
+    <string name="typing_answer_hint">Nhập câu trả lời…</string>
     <string name="hint_first_letter">Chữ cái đầu</string>
     <string name="hint_word_length">Độ dài từ</string>
     <string name="action_skip">Bỏ qua</string>
@@ -423,7 +423,7 @@
     <string name="listening_play_audio">Phát âm thanh</string>
     <string name="listening_play_slow">Phát chậm</string>
     <string name="listening_repeat_count">Đã nghe: 0 lần</string>
-    <string name="listening_answer_hint">Nhập từ bạn nghe được...</string>
+    <string name="listening_answer_hint">Nhập từ bạn nghe được…</string>
     <string name="image_matching_instruction">Ghép ảnh với từ đúng</string>
     <string name="pronunciation_instruction">Luyện phát âm</string>
     <string name="pronunciation_listen_model">Nghe mẫu</string>
@@ -513,7 +513,7 @@
     <string name="streak_stat_today_label">Lượt ôn hôm nay</string>
 
     <!-- Collections -->
-    <string name="collection_search_hint">Tìm kiếm bộ sưu tập...</string>
+    <string name="collection_search_hint">Tìm kiếm bộ sưu tập…</string>
     <string name="collection_empty_title">Chưa có bộ sưu tập</string>
     <string name="collection_empty_subtitle">Tạo bộ sưu tập đầu tiên\nđể sắp xếp từ vựng của bạn</string>
     <string name="collection_empty_create_cta">Tạo bộ sưu tập</string>
@@ -542,7 +542,7 @@
     <string name="collection_dialog_create_title">Tạo bộ sưu tập</string>
     <string name="collection_dialog_subtitle">Khởi đầu hành trình học tập mới của bạn</string>
     <string name="collection_dialog_name_hint">Tên bộ sưu tập</string>
-    <string name="collection_dialog_name_subtitle">Ví dụ: Tiếng Anh giao tiếp, JLPT N3...</string>
+    <string name="collection_dialog_name_subtitle">Ví dụ: Tiếng Anh giao tiếp, JLPT N3…</string>
     <string name="collection_dialog_delete_title">Xóa bộ sưu tập</string>
     <string name="collection_dialog_delete_msg">Bạn có chắc muốn xóa \"%s\"?</string>
     <string name="collection_add_to_title">Thêm vào bộ sưu tập</string>
@@ -692,9 +692,9 @@
     <string name="profile_delete_account_confirm">Xóa vĩnh viễn</string>
     <string name="profile_delete_account_success">Tài khoản đã được xóa</string>
     <string name="profile_delete_account_wrong_password">Mật khẩu không đúng</string>
-    <string name="profile_bio_placeholder">Nhấn để thêm giới thiệu...</string>
+    <string name="profile_bio_placeholder">Nhấn để thêm giới thiệu…</string>
     <string name="profile_bio_dialog_title">Giới thiệu bản thân</string>
-    <string name="profile_bio_hint">Viết vài dòng về bạn...</string>
+    <string name="profile_bio_hint">Viết vài dòng về bạn…</string>
     <string name="profile_edit_bio_title">Chỉnh sửa giới thiệu</string>
     <string name="profile_menu_change_password">Đổi mật khẩu</string>
     <string name="profile_menu_notifications">Cài đặt thông báo</string>
@@ -727,7 +727,7 @@
     <string name="profile_username_dialog_subtitle">Tên này dùng để đăng nhập và hiển thị dưới dạng @username.</string>
     <string name="profile_username_hint">Nhập tên đăng nhập mới</string>
     <string name="profile_username_required">Vui lòng nhập tên đăng nhập</string>
-    <string name="profile_username_rule_hint">3-50 ký tự, chỉ gồm chữ, số và dấu gạch dưới.</string>
+    <string name="profile_username_rule_hint">3–50 ký tự, chỉ gồm chữ, số và dấu gạch dưới.</string>
     <string name="profile_edit_username">Sửa tên đăng nhập</string>
     <string name="profile_avatar_updated">Đã cập nhật ảnh đại diện</string>
     <string name="profile_avatar_view">Xem ảnh</string>
@@ -788,7 +788,7 @@
     <string name="value_time_1900">19:00</string>
     <string name="language_en_short">EN</string>
     <string name="language_vi_short">VI</string>
-    <string name="language_pair_en_vi">EN &lt;-&gt; VI</string>
+    <string name="language_pair_en_vi">EN ↔ VI</string>
     <string name="scan_model_label">Chế độ</string>
     <string name="scan_model_custom">Model Custom</string>
     <string name="scan_model_coco">Model COCO</string>
@@ -804,9 +804,9 @@
     <string name="placeholder_collection_name">Collection Name</string>
     <string name="placeholder_collection_owner">by username</string>
     <string name="placeholder_collection_count_zero">0 từ</string>
-    <string name="placeholder_collection_created">Tạo --</string>
+    <string name="placeholder_collection_created">Tạo —</string>
     <string name="placeholder_confidence">90%</string>
-    <string name="placeholder_date">2024-01-01</string>
+    <string name="placeholder_date" tools:ignore="TypographyDashes">2024-01-01</string>
     <string name="placeholder_review_progress">1 / 10</string>
     <string name="placeholder_example_index">01</string>
     <string name="collection_word_category_placeholder">DANH MỤC</string>
