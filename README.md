@@ -10,15 +10,18 @@
 
 | Tính năng | Mô tả |
 |-----------|-------|
-| **Quét vật thể** | Camera nhận diện qua YOLOv8 on-device → ML Kit → Gemini API fallback |
+| **Quét vật thể** | Camera nhận diện qua YOLOv8 on-device → ML Kit ImageLabeling → Gemini API fallback |
 | **Từ vựng chi tiết** | Tên tiếng Anh, phiên âm IPA, định nghĩa, câu ví dụ, phát âm TTS |
 | **Bộ sưu tập** | Tạo và quản lý bộ từ vựng cá nhân theo chủ đề |
 | **Ôn tập flashcard** | Spaced repetition SM-2, badge đếm từ cần ôn hôm nay |
 | **Chuỗi ngày học** | Streak tracking, calendar lịch sử, milestone |
+| **Thống kê học tập** | Biểu đồ tiến độ, tỉ lệ ghi nhớ, lịch sử ôn tập |
 | **Tra từ điển** | Dịch và lưu từ không cần camera |
 | **Khám phá chủ đề** | Từ vựng theo danh mục có sẵn |
+| **Thông báo** | Nhắc nhở ôn tập hàng ngày, cài đặt thời gian thông báo |
+| **Onboarding** | Hướng dẫn tính năng cho người dùng mới |
 | **Đăng nhập** | Email/password + Google Sign-In, JWT auth |
-| **Admin panel** | Quản lý dữ liệu qua giao diện web tĩnh tại `/static/admin/` |
+| **Admin panel** | Duyệt ảnh training, quản lý object/category/translation, export dataset YOLO |
 
 ---
 
