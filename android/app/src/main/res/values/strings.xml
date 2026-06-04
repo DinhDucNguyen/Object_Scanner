@@ -93,6 +93,9 @@
     <string name="dashboard_hunt_subtitle">Chọn một món ở gần bạn, quét bằng camera rồi lưu vào bộ từ ôn tập.</string>
     <string name="dashboard_mission_first_scan_title">Quét vật thể đầu tiên</string>
     <string name="dashboard_mission_first_scan_subtitle">Thử với một món trên bàn học để bắt đầu bộ từ của bạn.</string>
+    <string name="dashboard_first_use_title">Bắt đầu học ngay</string>
+    <string name="dashboard_first_use_subtitle">Chụp ảnh vật thể xung quanh để lưu từ vựng đầu tiên của bạn.</string>
+    <string name="dashboard_first_use_cta">Quét ngay</string>
     <string name="dashboard_mission_review_title">Ôn lại %d từ sắp quên</string>
     <string name="dashboard_mission_review_subtitle">Hoàn thành ôn tập trước, rồi quét thêm đồ vật mới.</string>
     <string name="dashboard_mission_scan_title">Tìm món này ngoài đời</string>

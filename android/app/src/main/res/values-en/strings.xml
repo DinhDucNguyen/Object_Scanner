@@ -99,6 +99,9 @@
     <string name="dashboard_hunt_subtitle">Pick something nearby, scan it with the camera, and save it to your review set.</string>
     <string name="dashboard_mission_first_scan_title">Scan your first object</string>
     <string name="dashboard_mission_first_scan_subtitle">Try something on your desk to start your word list.</string>
+    <string name="dashboard_first_use_title">Start learning now</string>
+    <string name="dashboard_first_use_subtitle">Take a photo of something nearby to save your first vocabulary word.</string>
+    <string name="dashboard_first_use_cta">Scan now</string>
     <string name="dashboard_mission_review_title">Review %d words before  you forget them</string>
     <string name="dashboard_mission_review_subtitle">Finish your reviews first, then scan more objects.</string>
     <string name="dashboard_mission_scan_title">Find this object in real life</string>

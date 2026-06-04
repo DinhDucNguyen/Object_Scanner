@@ -47,11 +47,15 @@ class DashboardFragment : Fragment() {
         }
         binding.cardDashboardSearch.addScaleFeedback()
         binding.btnScanNow.addScaleFeedback()
+        binding.btnFirstUseScan.addScaleFeedback()
         binding.ivDashboardAvatar.addScaleFeedback()
         binding.ivDashboardAvatar.setOnClickListener {
             selectBottomTab(R.id.profileFragment)
         }
 
+        binding.btnFirstUseScan.setOnClickListener {
+            openScan()
+        }
         binding.btnScanNow.setOnClickListener {
             if (missionOpensReview) openReview() else openScan()
         }
@@ -99,10 +103,12 @@ class DashboardFragment : Fragment() {
                 animateProgress(binding.progressMastery, pct)
                 animateCounter(binding.tvProgressPct, 0, pct, suffix = "%")
                 bindMission(stats.dueToday, stats.totalScans)
-                hasStartedLearning = stats.totalScans > 0 ||
+                val startedLearning = stats.totalScans > 0 ||
                     stats.totalLearned > 0 ||
                     stats.mastered > 0 ||
                     stats.dueToday > 0
+                hasStartedLearning = startedLearning
+                bindFirstUseCard(show = !startedLearning)
                 latestStreakSummary?.let { bindStreakSummary(it) }
             }
         }
@@ -277,6 +283,27 @@ class DashboardFragment : Fragment() {
             interpolator = DecelerateInterpolator()
             start()
         }
+    }
+
+    private fun bindFirstUseCard(show: Boolean) {
+        if (!show) {
+            binding.cardFirstUse.visibility = View.GONE
+            return
+        }
+        if (binding.cardFirstUse.visibility == View.VISIBLE) {
+            binding.cardFirstUse.alpha = 1f
+            binding.cardFirstUse.translationY = 0f
+            return
+        }
+        binding.cardFirstUse.visibility = View.VISIBLE
+        binding.cardFirstUse.alpha = 0f
+        binding.cardFirstUse.translationY = 24f
+        binding.cardFirstUse.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(320)
+            .setInterpolator(DecelerateInterpolator(1.6f))
+            .start()
     }
 
     private fun animateDashboardEntrance() {
