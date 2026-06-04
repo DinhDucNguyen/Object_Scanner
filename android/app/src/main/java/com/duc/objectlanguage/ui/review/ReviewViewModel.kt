@@ -63,6 +63,9 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     private val _sessionSummary = MutableLiveData(ReviewSessionSummary())
     val sessionSummary: LiveData<ReviewSessionSummary> = _sessionSummary
 
+    private val _answerRevealed = MutableLiveData(false)
+    val answerRevealed: LiveData<Boolean> = _answerRevealed
+
     private val _activeCollectionId = MutableLiveData(0)
     val activeCollectionId: LiveData<Int> = _activeCollectionId
 
@@ -70,15 +73,28 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     val activeCollectionName: LiveData<String?> = _activeCollectionName
 
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
+    private var activePractice = false
 
-    fun loadCards(collectionId: Int = 0, practice: Boolean = false, collectionName: String? = null) {
+    fun loadCards(collectionId: Int = 0, practice: Boolean = false, collectionName: String? = null, forceRefresh: Boolean = false) {
         _activeCollectionId.value = collectionId
         _activeCollectionName.value = collectionName
+        activePractice = practice
+        if (collectionId > 0 && forceRefresh) {
+            ReviewSessionStore.clear(collectionId, practice)
+        }
+        if (collectionId > 0 && !forceRefresh) {
+            val cached = ReviewSessionStore.get(collectionId, practice)
+            if (cached != null) {
+                restoreSession(cached)
+                return
+            }
+        }
         viewModelScope.launch {
             _isLoading.value = true
             _finished.value = false
             _currentIndex.value = 0
             _sessionSummary.value = ReviewSessionSummary()
+            _answerRevealed.value = false
             val result = if (collectionId > 0) {
                 if (practice) collectionRepo.getCollectionReviewCardsPractice(collectionId)
                 else collectionRepo.getCollectionReviewCards(collectionId)
@@ -108,6 +124,43 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    private fun restoreSession(state: ReviewSessionState) {
+        _activeCollectionId.value = state.collectionId
+        _activeCollectionName.value = state.collectionName
+        activePractice = state.practice
+        _cards.value = state.cards
+        _currentIndex.value = state.currentIndex.coerceIn(0, state.cards.lastIndex.coerceAtLeast(0))
+        _sessionSummary.value = state.summary
+        state.finishedMessage?.let { _finishedMessage.value = it }
+        _answerRevealed.value = state.answerRevealed
+        _finished.value = state.finished
+        _isLoading.value = false
+    }
+
+    private fun saveSession() {
+        val collectionId = _activeCollectionId.value ?: 0
+        if (collectionId <= 0) return
+        val cardList = _cards.value ?: return
+        ReviewSessionStore.save(
+            ReviewSessionState(
+                collectionId = collectionId,
+                practice = activePractice,
+                collectionName = _activeCollectionName.value,
+                cards = cardList,
+                currentIndex = (_currentIndex.value ?: 0).coerceAtLeast(0),
+                answerRevealed = _answerRevealed.value ?: false,
+                finished = _finished.value ?: false,
+                finishedMessage = _finishedMessage.value,
+                summary = _sessionSummary.value ?: ReviewSessionSummary()
+            )
+        )
+    }
+
+    fun revealAnswer() {
+        _answerRevealed.value = true
+        saveSession()
+    }
+
     fun submitAnswer(quality: Int) {
         val cardList = _cards.value ?: return
         val idx = _currentIndex.value ?: 0
@@ -126,11 +179,14 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
                     }
                     val nextIdx = idx + 1
                     if (nextIdx < cardList.size) {
+                        _answerRevealed.value = false
                         _currentIndex.value = nextIdx
                     } else {
+                        _answerRevealed.value = false
                         _finishedMessage.value = localizedString(R.string.review_finished)
                         _finished.value = true
                     }
+                    saveSession()
                 },
                 onFailure = {
                     _message.value = localizedString(R.string.review_error_format, it.message.orEmpty())

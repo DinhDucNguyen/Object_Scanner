@@ -51,10 +51,7 @@ class DictionaryHistoryDetailBottomSheet : BottomSheetDialogFragment() {
         val item = Gson().fromJson(json, DictionaryHistoryItem::class.java) ?: return
         bindItem(item)
 
-        binding.btnDeleteHistory.setOnClickListener {
-            onDeleted?.invoke(item.id)
-            dismiss()
-        }
+
     }
 
     private fun bindItem(item: DictionaryHistoryItem) {
@@ -66,11 +63,22 @@ class DictionaryHistoryDetailBottomSheet : BottomSheetDialogFragment() {
         binding.tvFromLangBadge.text = fromLang
         binding.tvToLangBadge.text = item.denNgonNgu.uppercase()
 
+        // EN→VI: phonetic của từ nguồn tiếng Anh → hiện dưới tvDetailWord
+        // VI→EN: phonetic của kết quả tiếng Anh → hiện dưới tvDetailTranslation
+        val isViToEn = item.denNgonNgu == "en"
         if (!item.phienAm.isNullOrBlank()) {
-            binding.tvDetailPhonetic.text = item.phienAm
-            binding.tvDetailPhonetic.visibility = View.VISIBLE
+            if (isViToEn) {
+                binding.tvDetailPhonetic.visibility = View.GONE
+                binding.tvPhoneticTranslation.text = item.phienAm
+                binding.tvPhoneticTranslation.visibility = View.VISIBLE
+            } else {
+                binding.tvDetailPhonetic.text = item.phienAm
+                binding.tvDetailPhonetic.visibility = View.VISIBLE
+                binding.tvPhoneticTranslation.visibility = View.GONE
+            }
         } else {
             binding.tvDetailPhonetic.visibility = View.GONE
+            binding.tvPhoneticTranslation.visibility = View.GONE
         }
 
         val repo = (requireActivity().application as ObjectLanguageApp).repository

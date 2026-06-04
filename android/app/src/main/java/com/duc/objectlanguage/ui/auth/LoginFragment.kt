@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentLoginBinding
+import com.duc.objectlanguage.ui.MainActivity
 import com.duc.objectlanguage.ui.common.addRaisedButtonFeedback
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -175,5 +176,6 @@ class LoginFragment : Fragment() {
 
     private fun resetGraphToDashboard() {
         findNavController().navigate(R.id.action_login_to_dashboard)
+        (requireActivity() as? MainActivity)?.updateReviewBadge()
     }
 }

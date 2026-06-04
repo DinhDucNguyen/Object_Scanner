@@ -33,6 +33,8 @@ class ReviewFragment : Fragment() {
     private val collectionId: Int by lazy { arguments?.getInt("collectionId") ?: 0 }
     private val collectionName: String? by lazy { arguments?.getString("collectionName") }
     private val isPractice: Boolean by lazy { arguments?.getBoolean("isPractice") ?: false }
+    private val forceRefreshOnStart: Boolean by lazy { arguments?.getBoolean("forceRefresh") ?: false }
+    private var initialLoadRequested = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentReviewBinding.inflate(inflater, container, false)
@@ -64,6 +66,9 @@ class ReviewFragment : Fragment() {
             }
         }
         viewModel.currentIndex.observe(viewLifecycleOwner) { updateCard() }
+        viewModel.answerRevealed.observe(viewLifecycleOwner) { revealed ->
+            applyAnswerVisibility(revealed)
+        }
         viewModel.finishedMessage.observe(viewLifecycleOwner) { message ->
             binding.tvFinished.text = message
         }
@@ -104,6 +109,7 @@ class ReviewFragment : Fragment() {
                     binding.layoutAnswer.visibility = View.VISIBLE
                     binding.btnReveal.visibility = View.GONE
                     binding.buttonRow.visibility = View.VISIBLE
+                    viewModel.revealAnswer()
                     flipIn.start()
                 }
             })
@@ -130,7 +136,7 @@ class ReviewFragment : Fragment() {
             findNavController().popBackStack()
         }
         binding.btnRetryCollection.setOnClickListener {
-            viewModel.loadCards(collectionId, practice = true, collectionName)
+            viewModel.loadCards(collectionId, practice = isPractice, collectionName, forceRefresh = true)
         }
 
         animateEntrance()
@@ -156,7 +162,13 @@ class ReviewFragment : Fragment() {
         super.onResume()
         collectionName?.let { requireActivity().title = getString(R.string.review_collection_title, it) }
         if (viewModel.cards.value.isNullOrEmpty() && viewModel.finished.value != true) {
-            viewModel.loadCards(collectionId, isPractice, collectionName)
+            viewModel.loadCards(
+                collectionId = collectionId,
+                practice = isPractice,
+                collectionName = collectionName,
+                forceRefresh = forceRefreshOnStart && !initialLoadRequested
+            )
+            initialLoadRequested = true
         }
     }
 
@@ -252,10 +264,15 @@ class ReviewFragment : Fragment() {
         // Reset về trạng thái front
         binding.cardContent.visibility = View.VISIBLE
         binding.layoutFinished.visibility = View.GONE
-        binding.layoutAnswer.visibility = View.GONE
-        binding.btnReveal.visibility = View.VISIBLE
-        binding.buttonRow.visibility = View.GONE
         binding.cardFlashcard.rotationY = 0f
+        applyAnswerVisibility(viewModel.answerRevealed.value == true)
+    }
+
+    private fun applyAnswerVisibility(revealed: Boolean) {
+        if (_binding == null) return
+        binding.layoutAnswer.visibility = if (revealed) View.VISIBLE else View.GONE
+        binding.btnReveal.visibility = if (revealed) View.GONE else View.VISIBLE
+        binding.buttonRow.visibility = if (revealed) View.VISIBLE else View.GONE
     }
 
     private fun currentCard() =

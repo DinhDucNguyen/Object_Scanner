@@ -204,6 +204,14 @@
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null" />
+        <argument
+            android:name="isPractice"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <argument
+            android:name="forceRefresh"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 
     <fragment

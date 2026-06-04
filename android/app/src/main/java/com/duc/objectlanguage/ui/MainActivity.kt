@@ -27,7 +27,9 @@ import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.ActivityMainBinding
 import com.duc.objectlanguage.ui.common.GuestUpsellDialog
+import com.duc.objectlanguage.ui.review.ReviewSessionStore
 import com.duc.objectlanguage.utils.LocaleHelper
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.widget.Toast
 import kotlinx.coroutines.launch
 
@@ -310,6 +312,9 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         val currentDest = navController.currentDestination?.id ?: -1
         val currentTab = bottomNavItemForDestination(currentDest)
+        if (handleCollectionReviewBack(currentDest, navController)) {
+            return
+        }
 
         // Nếu đang ở sub-screen (quiz, history detail...) thì để NavController xử lý bình thường
         if (currentDest != currentTab) {
@@ -340,6 +345,69 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, getString(R.string.press_back_again_to_exit), Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun handleCollectionReviewBack(currentDest: Int, navController: NavController): Boolean {
+        if (currentDest != R.id.reviewFragment) return false
+        val collectionId = navController.currentBackStackEntry
+            ?.arguments
+            ?.getInt("collectionId", 0) ?: 0
+        val practice = navController.currentBackStackEntry
+            ?.arguments
+            ?.getBoolean("isPractice", false) ?: false
+
+        if (!ReviewSessionStore.hasActiveSession(collectionId, practice)) {
+            if (collectionId > 0) {
+                if (!navController.popBackStack()) {
+                    navController.navigate(R.id.collectionListFragment)
+                }
+                return true
+            }
+            return false
+        }
+
+        val dialogView = layoutInflater.inflate(R.layout.dialog_review_leave, null)
+        dialogView.findViewById<android.widget.TextView>(R.id.tvLeaveTitle)
+            .text = getString(R.string.review_leave_collection_title)
+        dialogView.findViewById<android.widget.TextView>(R.id.tvLeaveMessage)
+            .text = getString(R.string.review_leave_collection_message)
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnLeaveConfirm).apply {
+            text = getString(R.string.review_leave_collection_confirm)
+            setOnClickListener {
+                dialog.dismiss()
+                ReviewSessionStore.clear(collectionId, practice)
+                if (collectionId > 0) {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(R.id.collectionListFragment)
+                    }
+                } else {
+                    val prev = previousTabId
+                    if (prev != null) {
+                        previousTabId = null
+                        val tabs = listOf(
+                            NavTab(binding.navTabHome, binding.navIconHome, binding.navLabelHome, R.id.dashboardFragment),
+                            NavTab(binding.navTabDictionary, binding.navIconDictionary, binding.navLabelDictionary, R.id.dictionaryFragment),
+                            NavTab(binding.navTabScan, binding.navIconScan, binding.navLabelScan, R.id.scanFragment, isScan = true),
+                            NavTab(binding.navTabReview, binding.navIconReview, binding.navLabelReview, R.id.reviewFragment),
+                            NavTab(binding.navTabProfile, binding.navIconProfile, binding.navLabelProfile, R.id.profileFragment),
+                        )
+                        navigateToBottomDestination(prev, navController, tabs)
+                    } else {
+                        super.onBackPressed()
+                    }
+                }
+            }
+        }
+        dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnLeaveStay).apply {
+            text = getString(R.string.review_leave_collection_stay)
+            setOnClickListener { dialog.dismiss() }
+        }
+        dialog.show()
+        return true
     }
 
     override fun onResume() {

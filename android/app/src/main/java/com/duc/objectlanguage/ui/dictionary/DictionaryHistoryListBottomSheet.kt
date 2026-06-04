@@ -7,8 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.DictionaryHistoryItem
 import com.duc.objectlanguage.databinding.DialogDictionaryHistoryListBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -53,14 +56,22 @@ class DictionaryHistoryListBottomSheet : BottomSheetDialogFragment() {
         binding.tvHistoryListEmpty.visibility = View.GONE
         binding.rvHistoryList.visibility = View.VISIBLE
         binding.rvHistoryList.layoutManager = LinearLayoutManager(requireContext())
-        adapter = DictionaryHistoryAdapter { item ->
-            DictionaryHistoryDetailBottomSheet.newInstance(item).apply {
-                setOnDeletedListener { id ->
-                    onItemDeleted?.invoke(id)
-                    removeItem(id)
+        adapter = DictionaryHistoryAdapter(
+            onItemClick = { item ->
+                DictionaryHistoryDetailBottomSheet.newInstance(item).apply {
+                    setOnDeletedListener { id ->
+                        onItemDeleted?.invoke(id)
+                        removeItem(id)
+                    }
+                }.show(childFragmentManager, "dict_history_detail")
+            },
+            onSwipeDelete = { item ->
+                adapter?.slideOutOpenedItem {
+                    onItemDeleted?.invoke(item.id)
+                    removeItem(item.id)
                 }
-            }.show(childFragmentManager, "dict_history_detail")
-        }.also {
+            }
+        ).also {
             it.submitList(items.toList())
             binding.rvHistoryList.adapter = it
         }
@@ -115,6 +126,18 @@ class DictionaryHistoryListBottomSheet : BottomSheetDialogFragment() {
             binding.tvHistoryNoResults.visibility = View.GONE
             binding.tvHistoryListEmpty.visibility = View.VISIBLE
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Tắt window dim — dim mặc định của dialog gây tối toàn bộ content phía trên khi touch
+        dialog?.window?.setDimAmount(0f)
+
+        val sheet = (dialog as? BottomSheetDialog)
+            ?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) ?: return
+        val behavior = BottomSheetBehavior.from(sheet)
+        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        behavior.isDraggable = false
     }
 
     override fun onDestroyView() {

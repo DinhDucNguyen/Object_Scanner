@@ -39,6 +39,7 @@ import com.bumptech.glide.request.target.Target
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentProfileBinding
+import com.duc.objectlanguage.ui.MainActivity
 import com.duc.objectlanguage.utils.LocaleHelper
 import com.duc.objectlanguage.utils.PasswordValidator
 import com.duc.objectlanguage.utils.resolveMediaUrl
@@ -192,6 +193,7 @@ class ProfileFragment : Fragment() {
                     dialog.dismiss()
                     val app = requireActivity().application as ObjectLanguageApp
                     app.repository.logout()
+                    (requireActivity() as? MainActivity)?.updateReviewBadge()
                     resetGraphToGuestScan()
                 }
             dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelLogout)
@@ -226,6 +228,7 @@ class ProfileFragment : Fragment() {
                             dialog.dismiss()
                             Toast.makeText(requireContext(), getString(R.string.profile_delete_account_success), Toast.LENGTH_SHORT).show()
                             app.repository.logout()
+                            (requireActivity() as? MainActivity)?.updateReviewBadge()
                             resetGraphToGuestScan()
                         },
                         onFailure = {
@@ -495,8 +498,10 @@ class ProfileFragment : Fragment() {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_change_password, null)
         val tilCurrent = dialogView.findViewById<TextInputLayout>(R.id.tilCurrentPassword)
         val tilNew = dialogView.findViewById<TextInputLayout>(R.id.tilNewPassword)
+        val tilConfirm = dialogView.findViewById<TextInputLayout>(R.id.tilConfirmPassword)
         val etCurrent = dialogView.findViewById<TextInputEditText>(R.id.etCurrentPassword)
         val etNew = dialogView.findViewById<TextInputEditText>(R.id.etNewPassword)
+        val etConfirm = dialogView.findViewById<TextInputEditText>(R.id.etConfirmPassword)
         val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnPasswordCancel)
         val btnSave = dialogView.findViewById<MaterialButton>(R.id.btnPasswordSave)
         val dialog = MaterialAlertDialogBuilder(requireContext())
@@ -507,9 +512,11 @@ class ProfileFragment : Fragment() {
         btnSave.setOnClickListener {
             tilCurrent.error = null
             tilNew.error = null
+            tilConfirm.error = null
 
             val current = etCurrent.text?.toString()?.trim() ?: ""
             val new = etNew.text?.toString()?.trim() ?: ""
+            val confirm = etConfirm.text?.toString()?.trim() ?: ""
             when {
                 current.isBlank() -> {
                     tilCurrent.error = getString(R.string.profile_current_password_required)
@@ -519,6 +526,16 @@ class ProfileFragment : Fragment() {
                 new.isBlank() -> {
                     tilNew.error = getString(R.string.profile_new_password_required)
                     etNew.requestFocus()
+                    return@setOnClickListener
+                }
+                confirm.isBlank() -> {
+                    tilConfirm.error = getString(R.string.profile_confirm_password_required)
+                    etConfirm.requestFocus()
+                    return@setOnClickListener
+                }
+                new != confirm -> {
+                    tilConfirm.error = getString(R.string.profile_confirm_password_mismatch)
+                    etConfirm.requestFocus()
                     return@setOnClickListener
                 }
             }
@@ -538,13 +555,13 @@ class ProfileFragment : Fragment() {
                 if (_binding == null) return@launch
                 result.fold(
                     onSuccess = {
-                        Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.profile_change_password_success), Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
                     },
                     onFailure = {
                         btnSave.isEnabled = true
                         btnCancel.isEnabled = true
-                        tilCurrent.error = it.message
+                        tilCurrent.error = getString(R.string.profile_change_password_wrong_current)
                     }
                 )
             }

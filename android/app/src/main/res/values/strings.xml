@@ -187,6 +187,8 @@
     <string name="dictionary_object_code_label">Mã đối tượng:</string>
     <string name="dictionary_play_audio">Nghe phát âm</string>
     <string name="dictionary_history_delete">Xóa khỏi lịch sử</string>
+    <string name="dictionary_history_delete_confirm_title">Xóa lịch sử tra từ</string>
+    <string name="dictionary_history_delete_confirm_message">Xóa \"%s\" khỏi lịch sử tra từ?</string>
     <string name="dictionary_history_search_hint">Tìm kiếm lịch sử…</string>
     <string name="dictionary_history_no_results">Không tìm thấy kết quả</string>
     <string name="dictionary_error_translate">Lỗi dịch</string>
@@ -406,6 +408,14 @@
     <string name="review_btn_reveal">Xem đáp án</string>
     <string name="review_btn_wrong">Sai</string>
     <string name="review_btn_correct">Đúng</string>
+    <string name="review_leave_collection_title">Bạn đang ôn tập</string>
+    <string name="review_leave_collection_message">Phiên ôn bộ sưu tập hiện tại sẽ được giữ lại. Bạn có thể quay lại và tiếp tục từ thẻ đang học.</string>
+    <string name="review_leave_collection_stay">Tiếp tục ôn</string>
+    <string name="review_leave_collection_confirm">Rời phiên</string>
+    <string name="review_resume_collection_title">Bạn đang ôn bộ sưu tập này</string>
+    <string name="review_resume_collection_message">Bạn có một phiên ôn dở trong \"%s\". Bạn muốn tiếp tục từ thẻ đang học hay bắt đầu một phiên mới?</string>
+    <string name="review_resume_collection_continue">Ôn tiếp</string>
+    <string name="review_resume_collection_new">Ôn mới</string>
     <string name="review_lang_hint">English</string>
     <string name="review_quality_again">Quên</string>
     <string name="review_quality_hard">Khó</string>
@@ -708,6 +718,9 @@
     <string name="profile_change_password_title">Đổi mật khẩu</string>
     <string name="profile_change_password_subtitle">Cập nhật mật khẩu mới để bảo vệ tài khoản học tập của bạn.</string>
     <string name="profile_change_password_save">Cập nhật</string>
+    <string name="profile_change_password_success">Đổi mật khẩu thành công</string>
+    <string name="profile_change_password_wrong_current">Mật khẩu hiện tại không đúng</string>
+    <string name="profile_change_password_failed">Đổi mật khẩu thất bại</string>
     <string name="profile_current_password_hint">Mật khẩu hiện tại</string>
     <string name="profile_new_password_hint">Mật khẩu mới</string>
     <string name="profile_password_rules_title">Mật khẩu mới cần có</string>
@@ -748,6 +761,9 @@
     <string name="profile_password_required">Vui lòng nhập đầy đủ thông tin</string>
     <string name="profile_current_password_required">Vui lòng nhập mật khẩu hiện tại</string>
     <string name="profile_new_password_required">Vui lòng nhập mật khẩu mới</string>
+    <string name="profile_confirm_password_hint">Xác nhận mật khẩu mới</string>
+    <string name="profile_confirm_password_required">Vui lòng xác nhận mật khẩu mới</string>
+    <string name="profile_confirm_password_mismatch">Mật khẩu xác nhận không khớp</string>
     <string name="profile_password_min_length">Mật khẩu mới phải có ít nhất 8 ký tự</string>
     <string name="profile_password_lowercase_required">Mật khẩu mới phải có ít nhất 1 chữ thường</string>
     <string name="profile_password_uppercase_required">Mật khẩu mới phải có ít nhất 1 chữ viết hoa</string>

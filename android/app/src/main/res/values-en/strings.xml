@@ -195,6 +195,8 @@
     <string name="dictionary_object_code_label">Object code:</string>
     <string name="dictionary_play_audio">Play pronunciation</string>
     <string name="dictionary_history_delete">Remove from history</string>
+    <string name="dictionary_history_delete_confirm_title">Remove from history</string>
+    <string name="dictionary_history_delete_confirm_message">Remove \"%s\" from lookup history?</string>
     <string name="dictionary_history_search_hint">Search history…</string>
     <string name="dictionary_history_no_results">No results found</string>
     <string name="dictionary_error_translate">Translation failed</string>
@@ -414,6 +416,14 @@
     <string name="review_btn_reveal">Show answer</string>
     <string name="review_btn_wrong">Wrong</string>
     <string name="review_btn_correct">Correct</string>
+    <string name="review_leave_collection_title">Review in progress</string>
+    <string name="review_leave_collection_message">Your current collection review session will be kept. You can come back and continue from this card.</string>
+    <string name="review_leave_collection_stay">Keep reviewing</string>
+    <string name="review_leave_collection_confirm">Leave session</string>
+    <string name="review_resume_collection_title">You are reviewing this collection</string>
+    <string name="review_resume_collection_message">You have an unfinished review session in \"%s\". Continue from your current card or start a new session?</string>
+    <string name="review_resume_collection_continue">Continue</string>
+    <string name="review_resume_collection_new">Start new</string>
     <string name="review_lang_hint">English</string>
     <string name="review_quality_again">Again</string>
     <string name="review_quality_hard">Hard</string>
@@ -715,6 +725,9 @@
     <string name="profile_change_password_title">Change password</string>
     <string name="profile_change_password_subtitle">Update your password to keep your learning account protected.</string>
     <string name="profile_change_password_save">Update</string>
+    <string name="profile_change_password_success">Password updated successfully</string>
+    <string name="profile_change_password_wrong_current">Current password is incorrect</string>
+    <string name="profile_change_password_failed">Failed to change password</string>
     <string name="profile_current_password_hint">Current password</string>
     <string name="profile_new_password_hint">New password</string>
     <string name="profile_password_rules_title">New password needs</string>
@@ -755,6 +768,9 @@
     <string name="profile_password_required">Please fill in all fields</string>
     <string name="profile_current_password_required">Please enter your current password</string>
     <string name="profile_new_password_required">Please enter a new password</string>
+    <string name="profile_confirm_password_hint">Confirm new password</string>
+    <string name="profile_confirm_password_required">Please confirm your new password</string>
+    <string name="profile_confirm_password_mismatch">Passwords do not match</string>
     <string name="profile_password_min_length">New password must be at least 8 characters</string>
     <string name="profile_password_lowercase_required">New password needs at least 1 lowercase letter</string>
     <string name="profile_password_uppercase_required">New password needs at least 1 uppercase letter</string>

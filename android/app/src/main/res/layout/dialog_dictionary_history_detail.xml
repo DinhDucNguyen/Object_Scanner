@@ -228,27 +228,17 @@
         </LinearLayout>
 
 
-        <!-- Delete button — danger style -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- Phonetic below translation (VI→EN only) -->
+        <TextView
+            android:id="@+id/tvPhoneticTranslation"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/bg_delete_warning"
-            android:orientation="horizontal">
+            android:layout_marginTop="6dp"
+            android:textColor="@color/primary"
+            android:textSize="15sp"
+            android:textStyle="italic"
+            android:visibility="gone" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDeleteHistory"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="@string/dictionary_history_delete"
-                android:textColor="@color/error"
-                android:textStyle="bold"
-                app:cornerRadius="10dp"
-                app:icon="@drawable/ic_delete"
-                app:iconGravity="textStart"
-                app:iconTint="@color/error" />
-        </LinearLayout>
 
     </LinearLayout>
 

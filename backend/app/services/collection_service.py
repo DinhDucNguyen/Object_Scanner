@@ -10,7 +10,11 @@ from app.schemas.common import (
     CollectionPrivacyUpdate, CollectionUpdate
 )
 from app.services.object_media_service import pick_primary_object_image
-from app.core.constants import SM2_MASTERED_MIN_REPETITIONS, SM2_MASTERED_MIN_INTERVAL_DAYS, SM2_BASELINE_EASINESS_FACTOR
+from app.core.constants import (
+    SM2_COLLECTION_MASTERED_MIN_REPETITIONS,
+    SM2_MASTERED_MIN_INTERVAL_DAYS,
+    SM2_BASELINE_EASINESS_FACTOR,
+)
 
 
 class CollectionService:
@@ -183,16 +187,21 @@ class CollectionService:
         ).all()
 
         total_items = len(translation_ids)
-        reviewed_items = len(progress_list)
+        reviewed_progress = [p for p in progress_list if (p.so_lan_lap or 0) > 0]
+        reviewed_items = len(reviewed_progress)
         mastered_items = sum(
-            1 for p in progress_list
-            if p.so_lan_lap >= SM2_MASTERED_MIN_REPETITIONS and p.khoang_lap > SM2_MASTERED_MIN_INTERVAL_DAYS
+            1 for p in reviewed_progress
+            if p.so_lan_lap >= SM2_COLLECTION_MASTERED_MIN_REPETITIONS
+            and p.khoang_lap >= SM2_MASTERED_MIN_INTERVAL_DAYS
         )
-        avg_quality = sum(float(p.do_de_nho) for p in progress_list) / len(progress_list) if progress_list else 0.0
+        avg_quality = (
+            sum(float(p.do_de_nho) for p in reviewed_progress) / reviewed_items
+            if reviewed_items else 0.0
+        )
         total_reviews = sum(p.so_lan_lap for p in progress_list)
-        successful = sum(1 for p in progress_list if float(p.do_de_nho) >= SM2_BASELINE_EASINESS_FACTOR)
-        success_rate = successful / len(progress_list) if progress_list else 0.0
-        last_review = max((p.lan_on_cuoi for p in progress_list), default=None)
+        successful = sum(1 for p in reviewed_progress if float(p.do_de_nho) >= SM2_BASELINE_EASINESS_FACTOR)
+        success_rate = successful / reviewed_items if reviewed_items else 0.0
+        last_review = max((p.lan_on_cuoi for p in reviewed_progress), default=None)
 
         return CollectionInsightsResponse(
             collection_id=collection_id,

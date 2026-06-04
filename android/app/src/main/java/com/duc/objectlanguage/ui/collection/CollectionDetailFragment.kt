@@ -16,6 +16,7 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.CollectionItem
 import com.duc.objectlanguage.databinding.DialogCollectionWordDetailBinding
 import com.duc.objectlanguage.databinding.FragmentCollectionDetailBinding
+import com.duc.objectlanguage.ui.review.ReviewSessionStore
 import com.duc.objectlanguage.utils.DefinitionFormatter
 import com.duc.objectlanguage.utils.resolveMediaUrl
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -100,17 +101,58 @@ class CollectionDetailFragment : Fragment() {
             if (detail == null || detail.items.isEmpty()) {
                 Toast.makeText(requireContext(), R.string.collection_empty_words, Toast.LENGTH_SHORT).show()
             } else {
-                val args = Bundle().apply {
-                    putInt("collectionId", collectionId)
-                    putString("collectionName", detail.name)
-                    putBoolean("isPractice", true)
-                }
-                findNavController().navigate(R.id.reviewFragment, args)
+                startCollectionReview(detail.name)
             }
         }
 
         viewModel.loadCollectionDetail(collectionId)
         animateEntrance()
+    }
+
+    private fun startCollectionReview(collectionName: String) {
+        if (ReviewSessionStore.hasActiveSession(collectionId, practice = true)) {
+            val dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_review_resume, null)
+            dialogView.findViewById<android.widget.TextView>(R.id.tvResumeTitle)
+                .text = getString(R.string.review_resume_collection_title)
+            dialogView.findViewById<android.widget.TextView>(R.id.tvResumeMessage)
+                .text = getString(R.string.review_resume_collection_message, collectionName)
+            val dialog = android.app.AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create()
+            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+            dialogView.findViewById<MaterialButton>(R.id.btnResumeContinue).apply {
+                text = getString(R.string.review_resume_collection_continue)
+                setOnClickListener {
+                    dialog.dismiss()
+                    navigateToCollectionReview(collectionName, forceRefresh = false)
+                }
+            }
+            dialogView.findViewById<MaterialButton>(R.id.btnResumeNew).apply {
+                text = getString(R.string.review_resume_collection_new)
+                setOnClickListener {
+                    dialog.dismiss()
+                    navigateToCollectionReview(collectionName, forceRefresh = true)
+                }
+            }
+            dialogView.findViewById<MaterialButton>(R.id.btnResumeCancel).apply {
+                text = getString(R.string.btn_cancel)
+                setOnClickListener { dialog.dismiss() }
+            }
+            dialog.show()
+        } else {
+            navigateToCollectionReview(collectionName, forceRefresh = false)
+        }
+    }
+
+    private fun navigateToCollectionReview(collectionName: String, forceRefresh: Boolean) {
+        val args = Bundle().apply {
+            putInt("collectionId", collectionId)
+            putString("collectionName", collectionName)
+            putBoolean("isPractice", true)
+            putBoolean("forceRefresh", forceRefresh)
+        }
+        findNavController().navigate(R.id.reviewFragment, args)
     }
 
     override fun onResume() {
