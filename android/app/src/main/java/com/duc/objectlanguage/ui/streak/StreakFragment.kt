@@ -339,7 +339,8 @@ class StreakFragment : Fragment() {
         if (days.isEmpty()) return
 
         val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        val firstCal = Calendar.getInstance().apply { time = fmt.parse(days.first().date)!! }
+        val firstDate = fmt.parse(days.first().date) ?: return
+        val firstCal = Calendar.getInstance().apply { time = firstDate }
         // DAY_OF_WEEK: 1=CN, 2=T2 ... 7=T7 → offset 0-based
         val firstDow = firstCal.get(Calendar.DAY_OF_WEEK) - 1
         val todayStr = fmt.format(Calendar.getInstance().time)

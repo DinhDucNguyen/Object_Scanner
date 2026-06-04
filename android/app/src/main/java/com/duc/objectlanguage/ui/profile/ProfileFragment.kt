@@ -66,8 +66,9 @@ class ProfileFragment : Fragment() {
     }
 
     private val cropAvatar = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-            UCrop.getOutput(result.data!!)?.let { croppedUri ->
+        val data = result.data
+        if (result.resultCode == Activity.RESULT_OK && data != null) {
+            UCrop.getOutput(data)?.let { croppedUri ->
                 uploadSelectedAvatar(croppedUri)
             }
             return@registerForActivityResult

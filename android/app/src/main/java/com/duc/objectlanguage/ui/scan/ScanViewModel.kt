@@ -192,7 +192,10 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             .filter { !it.cauViDu.isNullOrBlank() }
             .distinctBy { it.cauViDu?.trim() }
             .take(3)
-            .map { ExampleItem(en = it.cauViDu!!.trim(), vi = it.dichNghia?.trim()) }
+            .mapNotNull { example ->
+                val sentence = example.cauViDu?.trim()?.takeIf { it.isNotBlank() }
+                sentence?.let { ExampleItem(en = it, vi = example.dichNghia?.trim()) }
+            }
         if (stored.isNotEmpty()) _examples.value = stored
         else if (result.pendingReview) _examples.value = emptyList()
         else loadExamplesFromGemini(t.wordName, t.languageCode ?: "en")
@@ -222,9 +225,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         )
         
         // Check exact match trong mapping
-        if (mappings.containsKey(normalized)) {
-            return mappings[normalized]!!
-        }
+        mappings[normalized]?.let { return it }
         
         // Fallback: lowercase + replace spaces/hyphens
         return normalized

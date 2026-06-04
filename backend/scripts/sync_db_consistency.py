@@ -46,8 +46,6 @@ CATEGORY_BY_OBJECT_CODE = {
     "microphone_arm_stand": 1,  # Điện tử
     "pen": 2,                   # Đồ dùng học tập
     "ballpoint_pen": 2,         # Đồ dùng học tập
-    "travel_mug": 3,            # Nhà bếp
-    "thermal_mug": 3,           # Nhà bếp
     "eyeglasses": 8,            # Phụ kiện
     "first_aid_cabinet": 16,    # Đồ gia dụng
     "bear_figurine": 16,        # Đồ gia dụng

@@ -69,8 +69,9 @@ class HistoryDetailFragment : Fragment() {
         }
         binding.btnAddHistoryToCollection.setOnClickListener {
             currentTranslationId?.let { translationId ->
-                if (targetCollectionId > 0 && !targetCollectionName.isNullOrBlank()) {
-                    viewModel.addToCollectionDirect(translationId, targetCollectionId, targetCollectionName!!)
+                val collectionName = targetCollectionName
+                if (targetCollectionId > 0 && !collectionName.isNullOrBlank()) {
+                    viewModel.addToCollectionDirect(translationId, targetCollectionId, collectionName)
                 } else {
                     SaveToCollectionBottomSheet.newInstance(translationId)
                         .show(childFragmentManager, "save_to_collection")

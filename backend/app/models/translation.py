@@ -29,6 +29,10 @@ class Translation(Base):
     da_xac_nhan = Column(Boolean, default=False)
     ngay_tao = Column(TIMESTAMP, default=now_vietnam)
     thoi_gian_xoa = Column(DateTime, nullable=True)
+    du_doan_ai_id = Column(Integer, ForeignKey("DuDoanAI.id", ondelete="SET NULL"), nullable=True, index=True)
+    nguoi_tao_id = Column(Integer, ForeignKey("NguoiDung.id", ondelete="SET NULL"), nullable=True)
+    nguoi_duyet_id = Column(Integer, ForeignKey("NguoiDung.id", ondelete="SET NULL"), nullable=True)
+    thoi_gian_duyet = Column(DateTime, nullable=True)
 
     __table_args__ = (
         UniqueConstraint("doi_tuong_id", "ngon_ngu_id", name="unique_trans"),

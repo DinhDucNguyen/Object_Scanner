@@ -118,8 +118,9 @@ class ScanFragment : Fragment() {
     private val cropLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-            val croppedUri = UCrop.getOutput(result.data!!) ?: return@registerForActivityResult
+        val data = result.data
+        if (result.resultCode == Activity.RESULT_OK && data != null) {
+            val croppedUri = UCrop.getOutput(data) ?: return@registerForActivityResult
             try {
                 val stream = requireContext().contentResolver.openInputStream(croppedUri)
                 val croppedBytes = stream?.readBytes()

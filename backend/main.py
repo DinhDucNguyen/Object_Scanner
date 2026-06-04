@@ -19,7 +19,7 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.limiter import limiter
 from app.routers import auth_router, scan_router, review_router, collection_router, history_router, data_router, dictionary_router
-from app.routers import admin_router
+from app.routers import admin_router, prediction_router, training_router
 from app.routers import streak_router
 
 logger = logging.getLogger("uvicorn.error")
@@ -69,6 +69,8 @@ app.include_router(history_router.router)
 app.include_router(data_router.router)
 app.include_router(dictionary_router.router)
 app.include_router(admin_router.router, prefix="/api")
+app.include_router(prediction_router.router, prefix="/api")
+app.include_router(training_router.router, prefix="/api")
 app.include_router(streak_router.router)
 
 os.makedirs("uploads/scans", exist_ok=True)
@@ -82,6 +84,10 @@ app.mount("/admin-panel", StaticFiles(directory="static/admin", html=True), name
 @app.get("/")
 def read_root():
     return {"message": f"Welcome to {settings.APP_NAME}"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
 
 @app.get("/admin")
 def admin_redirect():

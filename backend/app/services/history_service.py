@@ -13,6 +13,7 @@ from app.schemas.common import AIPredictionCreate, LichSuQuetResponse
 from app.services.learning_service import LearningService
 from app.services.training_image_service import TrainingImageService
 from app.utils.cloudinary_helper import upload_image
+from app.utils.image import check_image_quality
 from app.utils.timezone import now_vietnam
 
 UPLOAD_DIR = "uploads/scans"
@@ -131,6 +132,8 @@ class HistoryFeedbackService:
             else:
                 learning_status = "no_translation"
 
+        quality_ok, quality_reason, quality_score = check_image_quality(image_bytes) if image_bytes else (True, None, 100)
+
         image_url: str | None = None
         if image_bytes:
             image_url = upload_image(image_bytes)
@@ -160,6 +163,9 @@ class HistoryFeedbackService:
                 nhan=obj.ma_doi_tuong if obj else object_code,
                 nguon_du_lieu=training_source,
                 do_tin_cay=confidence,
+                nguoi_dung_id=nguoi_dung_id,
+                ghi_chu=quality_reason,
+                diem_chat_luong=quality_score,
             )
         db.commit()
 

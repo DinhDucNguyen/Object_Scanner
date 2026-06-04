@@ -44,9 +44,9 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.login(LoginRequest(username, password))
 
-            if (response.isSuccessful && response.body() != null) {
+            val body = response.body()
 
-                val body = response.body()!!
+            if (response.isSuccessful && body != null) {
 
                 tokenManager.accessToken = body.accessToken
 
@@ -80,9 +80,9 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.googleLogin(GoogleLoginRequest(idToken))
 
-            if (response.isSuccessful && response.body() != null) {
+            val body = response.body()
 
-                val body = response.body()!!
+            if (response.isSuccessful && body != null) {
 
                 tokenManager.accessToken = body.accessToken
 
@@ -283,13 +283,15 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.scanByCode(request)
 
-            if (response.isSuccessful && response.body() != null) {
+            val body = response.body()
 
-                Result.success(response.body()!!)
+            if (response.isSuccessful && body != null) {
+
+                Result.success(body)
 
             } else {
 
-                val errorStr = response.errorBody()?.string() ?: "Unknown API error"
+                val errorStr = parseApiError(response.errorBody()?.string()) ?: "Máy chủ chưa trả thông tin lỗi"
 
                 Result.failure(Exception("Không tìm thấy vật thể: $errorStr (Code: ${response.code()})"))
 
@@ -315,13 +317,15 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.scanByImage(part)
 
-            if (response.isSuccessful && response.body() != null) {
+            val responseBody = response.body()
 
-                Result.success(response.body()!!)
+            if (response.isSuccessful && responseBody != null) {
+
+                Result.success(responseBody)
 
             } else {
 
-                val errorStr = response.errorBody()?.string() ?: "Unknown API error"
+                val errorStr = parseApiError(response.errorBody()?.string()) ?: "Máy chủ chưa trả thông tin lỗi"
 
                 Result.failure(Exception("Không nhận diện được vật thể: $errorStr (Code: ${response.code()})"))
 
@@ -441,7 +445,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
 
-            else Result.failure(Exception("Lỗi tải review"))
+            else Result.failure(Exception("Không tải được dữ liệu ôn tập"))
 
         } catch (e: Exception) {
 
@@ -459,9 +463,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.submitReview(progressId, ReviewRequest(quality))
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Lỗi submit"))
+            bodyResult(response, "Không gửi được kết quả ôn tập")
 
         } catch (e: Exception) {
 
@@ -483,9 +485,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.getStats()
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Lỗi tải stats"))
+            bodyResult(response, "Không tải được thống kê")
 
         } catch (e: Exception) {
 
@@ -625,9 +625,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.getHistoryDetail(scanId)
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Không tìm thấy lịch sử"))
+            bodyResult(response, "Không tìm thấy lịch sử")
 
         } catch (e: Exception) {
 
@@ -671,9 +669,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.lookupWord(word, fromLang, toLang)
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception(response.errorBody()?.string() ?: "Không tìm thấy từ"))
+            bodyResult(response, "Không tìm thấy từ")
 
         } catch (e: Exception) {
 
@@ -691,9 +687,11 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.translate(TranslateRequest(text, fromLang, toLang))
 
-            if (response.isSuccessful && response.body() != null) {
+            val body = response.body()
 
-                Result.success(response.body()!!)
+            if (response.isSuccessful && body != null) {
+
+                Result.success(body)
 
             } else {
 
@@ -727,9 +725,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.getDictionaryHistory(limit)
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception(response.errorBody()?.string() ?: "Lỗi tải lịch sử"))
+            bodyResult(response, "Không tải được lịch sử")
 
         } catch (e: Exception) {
 
@@ -771,9 +767,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.getProfile()
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception(apiError(response, "Lỗi tải profile")))
+            bodyResult(response, "Không tải được hồ sơ")
 
         } catch (e: Exception) {
 
@@ -791,9 +785,9 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.updateProfile(ProfileUpdateRequest(username, fullName, bio))
 
-            if (response.isSuccessful && response.body() != null) {
+            val profile = response.body()
 
-                val profile = response.body()!!
+            if (response.isSuccessful && profile != null) {
 
                 profile.username?.takeIf { it.isNotBlank() }?.let { tokenManager.username = it }
 
@@ -823,9 +817,11 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.uploadAvatar(part)
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!.avatarUrl)
+            val avatar = response.body()?.avatarUrl
 
-            else Result.failure(Exception(apiError(response, "Upload avatar thất bại")))
+            if (response.isSuccessful && avatar != null) Result.success(avatar)
+
+            else Result.failure(Exception(apiError(response, "Không tải được ảnh đại diện")))
 
         } catch (e: Exception) {
 
@@ -843,9 +839,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.getSettings()
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Lỗi tải cài đặt"))
+            bodyResult(response, "Không tải được cài đặt")
 
         } catch (e: Exception) {
 
@@ -863,9 +857,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.updateSettings(UserSettingsUpdate(displayLanguage = displayLanguage))
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Cập nhật thất bại"))
+            bodyResult(response, "Không cập nhật được cài đặt")
 
         } catch (e: Exception) {
 
@@ -883,9 +875,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.updateSettings(UserSettingsUpdate(darkMode = darkMode))
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Cập nhật thất bại"))
+            bodyResult(response, "Không cập nhật được cài đặt")
 
         } catch (e: Exception) {
 
@@ -907,9 +897,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.getAnalytics()
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Lỗi tải analytics"))
+            bodyResult(response, "Không tải được thống kê")
 
         } catch (e: Exception) {
 
@@ -955,9 +943,11 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.saveLichSuQue(codePart, confidencePart, trainingSourcePart, imagePart)
 
-            if (response.isSuccessful && response.body() != null) {
+            val body = response.body()
 
-                Result.success(response.body()!!)
+            if (response.isSuccessful && body != null) {
+
+                Result.success(body)
 
             } else {
 
@@ -985,9 +975,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.getStreak()
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Lỗi tải streak"))
+            bodyResult(response, "Không tải được chuỗi ngày học")
 
         } catch (e: Exception) {
 
@@ -1007,9 +995,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.recordStreak()
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Lỗi ghi streak"))
+            bodyResult(response, "Không ghi được chuỗi ngày học")
 
         } catch (e: Exception) {
 
@@ -1027,9 +1013,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.getStreakCalendar(days)
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Lỗi tải lịch streak"))
+            bodyResult(response, "Không tải được lịch chuỗi ngày học")
 
         } catch (e: Exception) {
 
@@ -1049,9 +1033,7 @@ class AppRepository(private val tokenManager: TokenManager) {
 
             val response = api.syncStreak(req)
 
-            if (response.isSuccessful && response.body() != null) Result.success(response.body()!!)
-
-            else Result.failure(Exception("Lỗi đồng bộ streak"))
+            bodyResult(response, "Không đồng bộ được chuỗi ngày học")
 
         } catch (e: Exception) {
 
@@ -1070,6 +1052,24 @@ class AppRepository(private val tokenManager: TokenManager) {
         val detail = parseApiError(raw)
 
         return if (detail.isNullOrBlank()) "$fallback (${response.code()})" else detail
+
+    }
+
+
+
+    private fun <T> bodyResult(response: Response<T>, fallback: String): Result<T> {
+
+        val body = response.body()
+
+        return if (response.isSuccessful && body != null) {
+
+            Result.success(body)
+
+        } else {
+
+            Result.failure(Exception(apiError(response, fallback)))
+
+        }
 
     }
 

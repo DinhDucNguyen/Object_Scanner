@@ -188,6 +188,11 @@ class ObjectListItem(BaseModel):
     pending_translation_count: int = 0
     has_image: bool = False
     aliases: List[ObjectAliasItem] = []
+    nguon_tao: Optional[str] = None
+    nguoi_tao_id: Optional[int] = None
+    du_doan_ai_id: Optional[int] = None
+    nguoi_duyet_id: Optional[int] = None
+    thoi_gian_duyet: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -202,6 +207,11 @@ class ObjectDetailResponse(BaseModel):
     pending_translation_count: int = 0
     has_image: bool = False
     aliases: List[ObjectAliasItem] = []
+    nguon_tao: Optional[str] = None
+    nguoi_tao_id: Optional[int] = None
+    du_doan_ai_id: Optional[int] = None
+    nguoi_duyet_id: Optional[int] = None
+    thoi_gian_duyet: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -239,6 +249,10 @@ class TranslationAdminResponse(BaseModel):
     da_xac_nhan: bool = False
     example_count: int = 0
     examples: List[ExampleItem] = []
+    du_doan_ai_id: Optional[int] = None
+    nguoi_tao_id: Optional[int] = None
+    nguoi_duyet_id: Optional[int] = None
+    thoi_gian_duyet: Optional[datetime] = None
 
     class Config:
         from_attributes = True

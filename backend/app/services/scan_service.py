@@ -19,6 +19,7 @@ from app.services.gemini_service import GeminiService
 from app.services.training_image_service import TrainingImageService
 from app.services.tts_service import TTSService
 from app.utils.cloudinary_helper import upload_image
+from app.utils.image import check_image_quality
 from app.utils.timezone import now_vietnam
 
 
@@ -232,6 +233,7 @@ class ScanService:
         image_bytes: bytes,
         base_url: str | None,
     ) -> tuple[ScanHistory, AIPrediction]:
+        _, quality_reason, quality_score = check_image_quality(image_bytes)
         image_url = self._save_scan_image(image_bytes, base_url)
         scan = ScanHistory(
             nguoi_dung_id=nguoi_dung_id,
@@ -269,6 +271,8 @@ class ScanService:
             nhan=object_code,
             nguon_du_lieu="gemini",
             do_tin_cay=1.0,
+            ghi_chu=quality_reason,
+            diem_chat_luong=quality_score,
         )
         db.commit()
         return scan, prediction
@@ -301,6 +305,7 @@ class ScanService:
         image_bytes: bytes,
         base_url: str | None,
     ) -> tuple[ScanHistory, AIPrediction, dict]:
+        _, quality_reason, quality_score = check_image_quality(image_bytes)
         image_url = self._save_scan_image(image_bytes, base_url)
         source_payload = self._prediction_payload(source_prediction)
         scan = ScanHistory(
@@ -345,7 +350,8 @@ class ScanService:
             nhan=object_code,
             nguon_du_lieu="gemini",
             do_tin_cay=1.0,
-            ghi_chu="Additional image for pending review",
+            ghi_chu=quality_reason,
+            diem_chat_luong=quality_score,
         )
         db.commit()
         return scan, prediction, source_payload

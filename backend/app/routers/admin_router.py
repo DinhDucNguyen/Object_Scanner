@@ -1,23 +1,21 @@
 """
-Admin Moderation Router
-=======================
-REST API để admin kiểm duyệt từ vựng do Gemini đề xuất.
+Admin Router
+============
+REST API quản trị chung: dashboard, danh mục, đối tượng, bản dịch, người dùng,
+ảnh đối tượng và lịch sử quét.
 
 Endpoints:
-  GET  /api/admin/predictions                    — Danh sách (lọc theo trạng thái)
-  GET  /api/admin/predictions/export-training         — Xuất JSONL flat (1 dòng/prediction)
-  GET  /api/admin/predictions/export-training-grouped — Xuất JSONL gom nhóm theo object + ảnh đa góc
-  GET  /api/admin/predictions/{id}               — Chi tiết kèm vocab_payload
-  PATCH /api/admin/training-images/{lich_su_quet_id}/unlink   — Bỏ ảnh khỏi pool training
-  PATCH /api/admin/training-images/{lich_su_quet_id}/reassign — Chuyển ảnh sang đối tượng khác
-  POST /api/admin/predictions/{id}/approve       — Duyệt → insert DoiTuong/BanDich/ViDu
-  POST /api/admin/predictions/{id}/reject        — Từ chối
-  GET  /api/admin/stats                          — Thống kê nhanh
+  GET  /api/admin/dashboard
+  CRUD /api/admin/categories
+  CRUD /api/admin/objects
+  CRUD /api/admin/translations
+  CRUD /api/admin/users
+  CRUD /api/admin/scan-history
 """
 import os
 import uuid
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, Response, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -32,13 +30,6 @@ from app.utils.cloudinary_helper import upload_image
 from app.utils.upload import read_upload_bytes
 from app.dependencies.get_current_user import require_admin_nguoi_dung_id
 from app.schemas.admin import (
-    PredictionListItem,
-    PredictionDetailResponse,
-    ApproveRequest,
-    ApproveResponse,
-    AliasPredictionRequest,
-    AliasPredictionResponse,
-    RejectResponse, SplitToNewObjectResponse,
     CategoryAdminResponse, CategoryCreateRequest, CategoryUpdateRequest,
     ObjectAliasItem, ObjectAliasUpsertRequest, ObjectAliasUpdateRequest,
     ObjectListItem, ObjectDetailResponse, ObjectCreateRequest, ObjectUpdateRequest,
@@ -55,306 +46,6 @@ router = APIRouter(
 )
 admin_service = AdminService()
 OBJECT_UPLOAD_DIR = "uploads/objects"
-
-
-@router.get("/predictions", response_model=List[PredictionListItem])
-def list_predictions(
-    trang_thai: Optional[str] = Query(default="cho_duyet", description="cho_duyet | da_duyet | tu_choi"),
-    search: Optional[str] = Query(default=None),
-    limit: int = Query(default=50, ge=1),
-    offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_db),
-):
-    """Danh sách predictions của Gemini, lọc theo trạng thái kiểm duyệt."""
-    return admin_service.list_predictions(db, trang_thai=trang_thai, search=search, limit=limit, offset=offset)
-
-
-@router.get("/training-summary")
-def training_summary(
-    model_coverage: Optional[str] = Query(default=None, description="custom_yolo | coco_known | db_only | new_gemini"),
-    recommendation: Optional[str] = Query(default=None, description="high_priority | recommended | optional | not_needed"),
-    status: Optional[str] = Query(default=None, description="cho_duyet | da_duyet | tu_choi"),
-    source: Optional[str] = Query(default=None, description="yolo | gemini | admin"),
-    search: Optional[str] = Query(default=None),
-    db: Session = Depends(get_db),
-):
-    """Trả JSON tóm tắt dữ liệu training — dùng cho UI dashboard."""
-    return admin_service.training_summary(
-        db,
-        model_coverage=model_coverage,
-        recommendation=recommendation,
-        status=status,
-        source=source,
-        search=search,
-    )
-
-
-@router.get("/predictions/export-training")
-def export_training_data(db: Session = Depends(get_db)):
-    """Xuất dữ liệu training — predictions Gemini đã duyệt, định dạng JSONL."""
-    import json as _json
-    records = admin_service.export_training_data(db)
-    content = "\n".join(_json.dumps(r, ensure_ascii=False) for r in records)
-    return Response(
-        content=content,
-        media_type="application/x-ndjson",
-        headers={"Content-Disposition": "attachment; filename=yolo_training_data.jsonl"},
-    )
-
-
-@router.get("/predictions/export-training-grouped")
-def export_training_grouped(db: Session = Depends(get_db)):
-    """Xuất training data gom nhóm theo object — mỗi object có danh sách ảnh đa góc độ."""
-    import json as _json
-    records = admin_service.export_training_data_grouped(db)
-    content = "\n".join(_json.dumps(r, ensure_ascii=False) for r in records)
-    return Response(
-        content=content,
-        media_type="application/x-ndjson",
-        headers={"Content-Disposition": "attachment; filename=yolo_training_grouped.jsonl"},
-    )
-
-
-@router.patch("/training-images/{lich_su_quet_id}/approve")
-def approve_training_image(
-    lich_su_quet_id: int,
-    db: Session = Depends(get_db),
-    admin_id: int = Depends(require_admin_nguoi_dung_id),
-):
-    """Duyet anh training ma khong thay doi logic lich su quet."""
-    item = admin_service.approve_training_image_by_scan(db, lich_su_quet_id, admin_id=admin_id)
-    if not item:
-        raise HTTPException(404, "Khong tim thay anh training")
-    return {"message": "Da duyet anh training", "lich_su_quet_id": lich_su_quet_id, "training_image_id": item.id}
-
-
-@router.patch("/training-images/{lich_su_quet_id}/unlink")
-def unlink_training_image(
-    lich_su_quet_id: int,
-    db: Session = Depends(get_db),
-    admin_id: int = Depends(require_admin_nguoi_dung_id),
-):
-    """Từ chối ảnh training; lịch sử quét vẫn giữ đối tượng."""
-    item = admin_service.reject_training_image_by_scan(db, lich_su_quet_id, admin_id=admin_id)
-    if not item:
-        raise HTTPException(404, "Khong tim thay anh training")
-    return {"message": "Da tu choi anh training", "lich_su_quet_id": lich_su_quet_id, "training_image_id": item.id}
-
-
-@router.delete("/training-images/unlink-all")
-def unlink_all_training_images(
-    object_code: str = Query(..., description="Mã đối tượng cần xoá toàn bộ ảnh training"),
-    db: Session = Depends(get_db),
-    admin_id: int = Depends(require_admin_nguoi_dung_id),
-):
-    """Từ chối toàn bộ ảnh training của một nhãn; không sửa lịch sử quét."""
-    count = admin_service.reject_training_images_for_object(db, object_code, admin_id=admin_id)
-    return {"message": f"Da loai {count} anh khoi pool training cua '{object_code}'", "count": count}
-
-
-@router.post("/training-datasets")
-def create_training_dataset(
-    ma_phien_ban: str = Query(..., description="Ma phien ban dataset, vi du v1"),
-    ghi_chu: Optional[str] = Query(default=None),
-    db: Session = Depends(get_db),
-):
-    """Chot mot phien ban dataset gom toan bo anh training da duyet hien tai."""
-    try:
-        dataset = admin_service.create_dataset_version(db, ma_phien_ban=ma_phien_ban, ghi_chu=ghi_chu)
-    except ValueError as exc:
-        raise HTTPException(400, str(exc))
-    return {
-        "message": f"Da tao dataset {dataset.ma_phien_ban}",
-        "id": dataset.id,
-        "ma_phien_ban": dataset.ma_phien_ban,
-        "tong_anh": dataset.tong_anh,
-        "tong_nhan": dataset.tong_nhan,
-    }
-
-
-@router.delete("/predictions/cleanup-known-classes")
-def cleanup_known_class_predictions(db: Session = Depends(get_db)):
-    """Resolve pending predictions for known YOLO/COCO classes without leaving scan-history junk."""
-    from app.models.ai_feedback_report import AIPrediction, TrangThaiDuyet
-    from app.services.scan_service import YOLO_KNOWN_CLASSES
-    from app.repositories.object_repo import ObjectRepository, normalize_object_code
-
-    known_codes = {normalize_object_code(code) for code in YOLO_KNOWN_CLASSES}
-    predictions = db.query(AIPrediction).filter(
-        AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet,
-    ).all()
-
-    obj_repo = ObjectRepository()
-    matched = 0
-    resolved = 0
-    skipped_missing_object = []
-    linked_lich_su_quet_ids = []
-    deleted_prediction_ids = []
-
-    for p in predictions:
-        normalized_label = normalize_object_code(p.nhan_du_doan)
-        if normalized_label not in known_codes:
-            continue
-
-        matched += 1
-        obj = obj_repo.get_by_code(db, normalized_label)
-        if not obj:
-            skipped_missing_object.append({
-                "prediction_id": p.id,
-                "label": p.nhan_du_doan,
-            })
-            continue
-
-        if p.scan:
-            p.scan.doi_tuong_id = obj.id
-            admin_service.training_images.create_candidate(
-                db,
-                lich_su_quet_id=p.scan.id,
-                url_anh=p.scan.url_anh,
-                doi_tuong_id=obj.id,
-                nhan=obj.ma_doi_tuong,
-                nguon_du_lieu="gemini",
-                do_tin_cay=p.do_tin_cay,
-                ghi_chu="Resolved known YOLO/COCO class",
-            )
-            linked_lich_su_quet_ids.append(p.scan.id)
-
-        deleted_prediction_ids.append(p.id)
-        db.delete(p)
-        resolved += 1
-
-    db.commit()
-    return {
-        "message": "Da resolve pending predictions cua cac class YOLO/COCO da co object chinh thuc",
-        "matched": matched,
-        "resolved": resolved,
-        "linked_lich_su_quet_ids": linked_lich_su_quet_ids,
-        "deleted_prediction_ids": deleted_prediction_ids,
-        "skipped_missing_object": skipped_missing_object,
-    }
-
-
-@router.patch("/training-images/{lich_su_quet_id}/reassign")
-def reassign_training_image(
-    lich_su_quet_id: int,
-    target_object_code: str = Query(..., description="Mã đối tượng đích"),
-    db: Session = Depends(get_db),
-):
-    """Chuyển ảnh scan sang đối tượng khác trong pool training."""
-    item, target_obj = admin_service.reassign_training_image_by_scan(db, lich_su_quet_id, target_object_code)
-    if not target_obj:
-        scan_exists = db.query(ScanHistory.id).filter(ScanHistory.id == lich_su_quet_id).first()
-        if not scan_exists:
-            raise HTTPException(404, "Khong tim thay scan")
-        raise HTTPException(404, f"Khong tim thay doi tuong '{target_object_code}'")
-    return {
-        "message": f"Da chuyen anh sang '{target_object_code}'",
-        "lich_su_quet_id": lich_su_quet_id,
-        "training_image_id": item.id if item else None,
-        "new_object_id": target_obj.id,
-    }
-
-
-@router.get("/predictions/{prediction_id}", response_model=PredictionDetailResponse)
-def get_prediction(prediction_id: int, db: Session = Depends(get_db)):
-    """Chi tiết một prediction, bao gồm `vocab_payload` (word, IPA, loại từ, nghĩa TV, 3 ví dụ EN)."""
-    result = admin_service.get_prediction_detail(db, prediction_id)
-    if not result:
-        raise HTTPException(404, f"Không tìm thấy prediction #{prediction_id}")
-    return result
-
-
-@router.post("/predictions/{prediction_id}/approve", response_model=ApproveResponse)
-def approve_prediction(
-    prediction_id: int,
-    request: ApproveRequest,
-    db: Session = Depends(get_db),
-):
-    """
-    Duyệt prediction → insert vào bảng chính (DoiTuong + BanDich + ViDu).
-    Có thể override bất kỳ trường nào trước khi duyệt.
-    """
-    result = admin_service.approve_prediction(db, prediction_id, request)
-    if not result.success:
-        raise HTTPException(400, result.message)
-    return result
-
-
-@router.post("/predictions/{prediction_id}/alias", response_model=AliasPredictionResponse)
-def assign_prediction_alias(
-    prediction_id: int,
-    request: AliasPredictionRequest,
-    db: Session = Depends(get_db),
-):
-    """Gán prediction đang chờ duyệt thành bí danh của một đối tượng chính."""
-    result = admin_service.assign_prediction_alias(db, prediction_id, request)
-    if not result.success:
-        raise HTTPException(400, result.message)
-    return result
-
-
-@router.patch("/predictions/{prediction_id}/detach-image")
-def detach_review_image(prediction_id: int, db: Session = Depends(get_db)):
-    """Bỏ một ảnh bổ sung khỏi nhóm kiểm duyệt, không xóa ảnh khỏi lịch sử quét."""
-    result = admin_service.detach_review_image(db, prediction_id)
-    if not result.get("success"):
-        raise HTTPException(400, result.get("message", "Khong the bo anh"))
-    return result
-
-
-@router.patch("/predictions/{prediction_id}/reassign-image")
-def reassign_review_image(
-    prediction_id: int,
-    target_object_code: str = Query(..., description="Mã đối tượng đích đã có trong DB"),
-    db: Session = Depends(get_db),
-):
-    """Chuyển một ảnh bổ sung sang object chính khác đã có trong DB."""
-    result = admin_service.reassign_review_image(db, prediction_id, target_object_code)
-    if not result.get("success"):
-        raise HTTPException(400, result.get("message", "Khong the chuyen anh"))
-    return result
-
-
-@router.post("/predictions/{prediction_id}/reject", response_model=RejectResponse)
-def reject_prediction(prediction_id: int, db: Session = Depends(get_db)):
-    """Từ chối prediction — không insert gì vào bảng chính."""
-    result = admin_service.reject_prediction(db, prediction_id)
-    if not result.success:
-        raise HTTPException(400, result.message)
-    return result
-
-
-@router.patch("/predictions/{prediction_id}/split-to-new-object", response_model=SplitToNewObjectResponse)
-def split_to_new_object(
-    prediction_id: int,
-    new_object_code: str = Query(..., description="Mã đối tượng mới (vd: tofu, eraser)"),
-    db: Session = Depends(get_db),
-):
-    """
-    Tách ảnh ra khỏi nhóm kiểm duyệt hiện tại và tạo prediction mới với nhãn đúng.
-    Gemini sẽ tự sinh vocab cho object_code mới.
-    Prediction cũ bị đánh dấu tu_choi với audit trail.
-    """
-    result = admin_service.split_to_new_object(db, prediction_id, new_object_code)
-    if not result.success:
-        raise HTTPException(400, result.message)
-    return result
-
-
-@router.get("/stats")
-def moderation_stats(db: Session = Depends(get_db)):
-    """Thống kê số lượng predictions theo từng trạng thái."""
-    from app.models.ai_feedback_report import AIPrediction, TrangThaiDuyet, VaiTroDuDoan
-
-    counts = {
-        status.value: db.query(AIPrediction).filter(
-            AIPrediction.trang_thai == status,
-            AIPrediction.vai_tro == VaiTroDuDoan.chinh,
-        ).count()
-        for status in TrangThaiDuyet
-    }
-    counts["tong"] = sum(counts.values())
-    return counts
 
 
 @router.get("/objects/{object_code}/media")
@@ -553,8 +244,12 @@ def get_object(object_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/objects", response_model=ObjectDetailResponse)
-def create_object(req: ObjectCreateRequest, db: Session = Depends(get_db)):
-    return admin_service.create_object(db, req)
+def create_object(
+    req: ObjectCreateRequest,
+    db: Session = Depends(get_db),
+    admin_id: int = Depends(require_admin_nguoi_dung_id),
+):
+    return admin_service.create_object(db, req, admin_id=admin_id)
 
 
 @router.put("/objects/{object_id}", response_model=ObjectDetailResponse)
@@ -621,13 +316,22 @@ def list_translations(
 
 
 @router.post("/translations", response_model=TranslationAdminResponse)
-def create_translation(req: TranslationCreateRequest, db: Session = Depends(get_db)):
-    return admin_service.create_translation(db, req)
+def create_translation(
+    req: TranslationCreateRequest,
+    db: Session = Depends(get_db),
+    admin_id: int = Depends(require_admin_nguoi_dung_id),
+):
+    return admin_service.create_translation(db, req, admin_id=admin_id)
 
 
 @router.put("/translations/{translation_id}", response_model=TranslationAdminResponse)
-def update_translation(translation_id: int, req: TranslationUpdateRequest, db: Session = Depends(get_db)):
-    result = admin_service.update_translation(db, translation_id, req)
+def update_translation(
+    translation_id: int,
+    req: TranslationUpdateRequest,
+    db: Session = Depends(get_db),
+    admin_id: int = Depends(require_admin_nguoi_dung_id),
+):
+    result = admin_service.update_translation(db, translation_id, req, admin_id=admin_id)
     if not result:
         raise HTTPException(404, "Không tìm thấy bản dịch")
     return result

@@ -462,17 +462,34 @@
           <i class="bi bi-collection me-1"></i>Export grouped
         </button>
       </div>
-      <div id="td-summary-bar" class="d-flex gap-4 px-3 py-2 mb-3 rounded"
+      <div class="td-command-row">
+        <button type="button" class="td-command active" data-td-preset="all" onclick="setTrainingPreset('all', this)">
+          <i class="bi bi-grid-3x3-gap"></i><span>Tất cả</span>
+        </button>
+        <button type="button" class="td-command" data-td-preset="review" onclick="setTrainingPreset('review', this)">
+          <i class="bi bi-hourglass-split"></i><span>Cần duyệt</span>
+        </button>
+        <button type="button" class="td-command" data-td-preset="train" onclick="setTrainingPreset('train', this)">
+          <i class="bi bi-lightning-charge"></i><span>Nên train</span>
+        </button>
+        <button type="button" class="td-command" data-td-preset="ready" onclick="setTrainingPreset('ready', this)">
+          <i class="bi bi-box-arrow-up-right"></i><span>Sẵn sàng export</span>
+        </button>
+        <button type="button" class="td-command" data-td-preset="known" onclick="setTrainingPreset('known', this)">
+          <i class="bi bi-shield-check"></i><span>Đã có model</span>
+        </button>
+      </div>
+      <div id="td-summary-bar" class="td-kpi-grid d-flex gap-4 px-3 py-2 mb-3 rounded"
         style="background:#f0fdf4;border:1px solid #bbf7d0;font-size:.83rem;">
-        <span><i class="bi bi-boxes text-success me-1"></i>Objects: <strong id="td-total-objects">—</strong></span>
-        <span><i class="bi bi-images text-primary me-1"></i>Tổng ảnh: <strong id="td-total-images">—</strong></span>
+        <span><i class="bi bi-boxes text-success me-1"></i>Đối tượng: <strong id="td-total-objects">—</strong></span>
+        <span><i class="bi bi-images text-primary me-1"></i>Ảnh training: <strong id="td-total-images">—</strong></span>
         <span><i class="bi bi-hourglass-split text-warning me-1"></i>Chờ duyệt: <strong id="td-pending-images">—</strong></span>
         <span><i class="bi bi-check-circle text-success me-1"></i>Đã duyệt: <strong id="td-approved-images">—</strong></span>
         <span><i class="bi bi-x-circle text-danger me-1"></i>Từ chối: <strong id="td-rejected-images">—</strong></span>
-        <span><i class="bi bi-lightning-charge text-danger me-1"></i>Nên train: <strong id="td-train-priority">—</strong></span>
+        <span><i class="bi bi-lightning-charge text-danger me-1"></i>Cần train: <strong id="td-train-priority">—</strong></span>
       </div>
       <div class="td-filter-bar">
-        <input id="td-search" type="search" class="form-control form-control-sm" placeholder="Tìm nhãn, object, danh mục..."
+        <input id="td-search" type="search" class="form-control form-control-sm" placeholder="Tìm nhãn, đối tượng, danh mục..."
           oninput="debouncedLoadTrainingData()">
         <select id="td-recommendation-filter" class="form-select form-select-sm" onchange="loadTrainingData()">
           <option value="">Tất cả khuyến nghị</option>
@@ -483,7 +500,7 @@
         </select>
         <select id="td-coverage-filter" class="form-select form-select-sm" onchange="loadTrainingData()">
           <option value="">Tất cả model</option>
-          <option value="new_gemini">Object mới từ Gemini</option>
+          <option value="new_gemini">Đối tượng mới từ Gemini</option>
           <option value="db_only">Có DB, chưa có model</option>
           <option value="custom_yolo">Đã có YOLO custom</option>
           <option value="coco_known">Đã có COCO</option>
@@ -501,10 +518,10 @@
           <option value="admin">Admin</option>
         </select>
       </div>
-      <div id="td-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;"></div>
+      <div id="td-grid" class="td-grid"></div>
       <div id="td-empty" class="text-center text-muted py-5" style="display:none;">
         <i class="bi bi-inbox" style="font-size:2.5rem;opacity:.3;"></i>
-        <div class="mt-2">Chưa có object nào được duyệt</div>
+        <div class="mt-2">Chưa có đối tượng nào trong dữ liệu huấn luyện</div>
       </div>
     </div>
   </div>
