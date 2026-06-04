@@ -109,7 +109,7 @@ def backfill_review_logs(db: Session, stats: dict[str, int], backup: dict[str, l
             LearningProgress.so_lan_lap > 0,
             ReviewLog.id.is_(None),
         )
-        .order_by(LearningProgress.user_id, LearningProgress.lan_on_cuoi)
+        .order_by(LearningProgress.nguoi_dung_id, LearningProgress.lan_on_cuoi)
         .all()
     )
 
@@ -118,7 +118,7 @@ def backfill_review_logs(db: Session, stats: dict[str, int], backup: dict[str, l
         interval = int(progress.khoang_lap or 0)
         quality = estimate_quality(progress)
         log = ReviewLog(
-            user_id=progress.user_id,
+            nguoi_dung_id=progress.nguoi_dung_id,
             tien_do_hoc_id=progress.id,
             ban_dich_id=progress.ban_dich_id,
             chat_luong=quality,

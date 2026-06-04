@@ -8,39 +8,39 @@ from app.utils.timezone import now_vietnam
 
 
 class LearningProgressRepository:
-    def get_by_user_and_translation(self, db: Session, user_id: int, translation_id: int):
+    def get_by_user_and_translation(self, db: Session, nguoi_dung_id: int, translation_id: int):
         return db.query(LearningProgress).filter(
-            LearningProgress.user_id == user_id,
+            LearningProgress.nguoi_dung_id == nguoi_dung_id,
             LearningProgress.ban_dich_id == translation_id
         ).first()
 
-    def get_due_reviews(self, db: Session, user_id: int):
+    def get_due_reviews(self, db: Session, nguoi_dung_id: int):
         today = now_vietnam().date()
         return db.query(LearningProgress).filter(
-            LearningProgress.user_id == user_id,
+            LearningProgress.nguoi_dung_id == nguoi_dung_id,
             func.date(LearningProgress.ngay_on_tiep) <= today
         ).all()
 
     def get_by_id(self, db: Session, progress_id: int):
         return db.query(LearningProgress).filter(LearningProgress.id == progress_id).first()
 
-    def count_by_user(self, db: Session, user_id: int):
-        return db.query(LearningProgress).filter(LearningProgress.user_id == user_id).count()
+    def count_by_user(self, db: Session, nguoi_dung_id: int):
+        return db.query(LearningProgress).filter(LearningProgress.nguoi_dung_id == nguoi_dung_id).count()
 
-    def count_due_today(self, db: Session, user_id: int):
+    def count_due_today(self, db: Session, nguoi_dung_id: int):
         today = now_vietnam().date()
         return db.query(LearningProgress).filter(
-            LearningProgress.user_id == user_id,
+            LearningProgress.nguoi_dung_id == nguoi_dung_id,
             func.date(LearningProgress.ngay_on_tiep) <= today
         ).count()
 
-    def count_mastered(self, db: Session, user_id: int):
+    def count_mastered(self, db: Session, nguoi_dung_id: int):
         return db.query(LearningProgress).filter(
-            LearningProgress.user_id == user_id, 
+            LearningProgress.nguoi_dung_id == nguoi_dung_id, 
             LearningProgress.so_lan_lap >= SM2_MASTERED_MIN_REPETITIONS
         ).count()
 
-    def get_weekly_review_counts(self, db: Session, user_id: int) -> list:
+    def get_weekly_review_counts(self, db: Session, nguoi_dung_id: int) -> list:
         seven_days_ago = now_vietnam().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=6)
         results = (
             db.query(
@@ -48,7 +48,7 @@ class LearningProgressRepository:
                 func.count(ReviewLog.id).label("count")
             )
             .filter(
-                ReviewLog.user_id == user_id,
+                ReviewLog.nguoi_dung_id == nguoi_dung_id,
                 ReviewLog.thoi_diem_on >= seven_days_ago,
             )
             .group_by(func.date(ReviewLog.thoi_diem_on))
@@ -62,9 +62,9 @@ class LearningProgressRepository:
         db.flush()
         return log
 
-    def get_mastery_distribution(self, db: Session, user_id: int) -> dict:
+    def get_mastery_distribution(self, db: Session, nguoi_dung_id: int) -> dict:
         rows = db.query(LearningProgress.so_lan_lap).filter(
-            LearningProgress.user_id == user_id
+            LearningProgress.nguoi_dung_id == nguoi_dung_id
         ).all()
         new_count      = sum(1 for (r,) in rows if r == 0)
         learning_count = sum(1 for (r,) in rows if 0 < r < SM2_MASTERED_MIN_REPETITIONS)

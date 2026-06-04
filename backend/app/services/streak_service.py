@@ -12,17 +12,17 @@ from app.utils.timezone import now_vietnam
 class StreakService:
     """Build streak metrics from LichSuOnTap, the single source of review truth."""
 
-    def get_streak(self, db: Session, user_id: int) -> dict:
-        return self._build_streak(db, user_id)
+    def get_streak(self, db: Session, nguoi_dung_id: int) -> dict:
+        return self._build_streak(db, nguoi_dung_id)
 
-    def record_review(self, db: Session, user_id: int) -> dict:
+    def record_review(self, db: Session, nguoi_dung_id: int) -> dict:
         # Review submissions create LichSuOnTap rows; this is a compatibility read.
-        return self._build_streak(db, user_id)
+        return self._build_streak(db, nguoi_dung_id)
 
     def sync_from_client(
         self,
         db: Session,
-        user_id: int,
+        nguoi_dung_id: int,
         streak_hien_tai: int,
         streak_dai_nhat: int,
         tong_luot_on: int,
@@ -30,13 +30,13 @@ class StreakService:
         ngay_on_cuoi,
     ) -> dict:
         # Client summary counters are ignored because LichSuOnTap is authoritative.
-        return self._build_streak(db, user_id)
+        return self._build_streak(db, nguoi_dung_id)
 
-    def _build_streak(self, db: Session, user_id: int) -> dict:
+    def _build_streak(self, db: Session, nguoi_dung_id: int) -> dict:
         today = self._today()
-        review_dates = self._review_dates(db, user_id, today)
-        total_reviews = self._total_reviews(db, user_id)
-        reviews_today = self._reviews_on_date(db, user_id, today)
+        review_dates = self._review_dates(db, nguoi_dung_id, today)
+        total_reviews = self._total_reviews(db, nguoi_dung_id)
+        reviews_today = self._reviews_on_date(db, nguoi_dung_id, today)
         last_review = review_dates[-1] if review_dates else None
 
         return {
@@ -47,14 +47,14 @@ class StreakService:
             "ngay_on_cuoi": str(last_review) if last_review else None,
         }
 
-    def get_calendar(self, db: Session, user_id: int, days: int) -> list[dict]:
+    def get_calendar(self, db: Session, nguoi_dung_id: int, days: int) -> list[dict]:
         today = self._today()
         start = today - timedelta(days=days - 1)
         review_day = func.date(ReviewLog.thoi_diem_on)
         rows = (
             db.query(review_day, func.count(ReviewLog.id))
             .filter(
-                ReviewLog.user_id == user_id,
+                ReviewLog.nguoi_dung_id == nguoi_dung_id,
                 func.date(ReviewLog.thoi_diem_on) >= str(start),
             )
             .group_by(review_day)
@@ -71,11 +71,11 @@ class StreakService:
             result.append({"date": str(day), "count": count_map.get(str(day), 0)})
         return result
 
-    def _review_dates(self, db: Session, user_id: int, today: date) -> list[date]:
+    def _review_dates(self, db: Session, nguoi_dung_id: int, today: date) -> list[date]:
         review_day = func.date(ReviewLog.thoi_diem_on)
         rows = (
             db.query(review_day)
-            .filter(ReviewLog.user_id == user_id)
+            .filter(ReviewLog.nguoi_dung_id == nguoi_dung_id)
             .distinct()
             .order_by(review_day)
             .all()
@@ -87,14 +87,14 @@ class StreakService:
                 dates.append(review_date)
         return sorted(set(dates))
 
-    def _total_reviews(self, db: Session, user_id: int) -> int:
-        return db.query(func.count(ReviewLog.id)).filter(ReviewLog.user_id == user_id).scalar() or 0
+    def _total_reviews(self, db: Session, nguoi_dung_id: int) -> int:
+        return db.query(func.count(ReviewLog.id)).filter(ReviewLog.nguoi_dung_id == nguoi_dung_id).scalar() or 0
 
-    def _reviews_on_date(self, db: Session, user_id: int, review_date: date) -> int:
+    def _reviews_on_date(self, db: Session, nguoi_dung_id: int, review_date: date) -> int:
         return (
             db.query(func.count(ReviewLog.id))
             .filter(
-                ReviewLog.user_id == user_id,
+                ReviewLog.nguoi_dung_id == nguoi_dung_id,
                 func.date(ReviewLog.thoi_diem_on) == review_date,
             )
             .scalar()

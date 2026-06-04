@@ -9,7 +9,7 @@ class ReviewLog(Base):
     __tablename__ = "LichSuOnTap"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("NguoiDung.id", ondelete="CASCADE"), nullable=False)
+    nguoi_dung_id = Column(Integer, ForeignKey("NguoiDung.id", ondelete="CASCADE"), nullable=False)
     tien_do_hoc_id = Column(BigInteger, ForeignKey("TienDoHoc.id", ondelete="CASCADE"), nullable=False)
     ban_dich_id = Column(Integer, ForeignKey("BanDich.id", ondelete="CASCADE"), nullable=False)
     chat_luong = Column(Integer, nullable=False)

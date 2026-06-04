@@ -26,17 +26,17 @@ class UserRepository:
             User.thoi_gian_xoa.is_(None)
         ).first()
 
-    def get_by_id(self, db: Session, user_id: int):
+    def get_by_id(self, db: Session, nguoi_dung_id: int):
         return db.query(User).filter(
-            User.id == user_id,
+            User.id == nguoi_dung_id,
             User.thoi_gian_xoa.is_(None)
         ).first()
 
-    def get_profile(self, db: Session, user_id: int):
-        return db.query(Profile).filter(Profile.user_id == user_id).first()
+    def get_profile(self, db: Session, nguoi_dung_id: int):
+        return db.query(Profile).filter(Profile.nguoi_dung_id == nguoi_dung_id).first()
 
-    def get_settings(self, db: Session, user_id: int):
-        return db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+    def get_settings(self, db: Session, nguoi_dung_id: int):
+        return db.query(UserSettings).filter(UserSettings.nguoi_dung_id == nguoi_dung_id).first()
 
     def get_role_by_name(self, db: Session, name: str) -> VaiTro:
         return db.query(VaiTro).filter(VaiTro.ten_vai_tro == name).first()
@@ -47,8 +47,8 @@ class UserRepository:
     def create(self, db: Session, user: User, profile: Profile, settings: UserSettings):
         db.add(user)
         db.flush()
-        profile.user_id = user.id
-        settings.user_id = user.id
+        profile.nguoi_dung_id = user.id
+        settings.nguoi_dung_id = user.id
         db.add(profile)
         db.add(settings)
         db.commit()

@@ -32,7 +32,7 @@ class DictionaryService:
         text: str,
         from_lang: str = "en",
         to_lang: str = "vi",
-        user_id: Optional[int] = None,
+        nguoi_dung_id: Optional[int] = None,
     ) -> dict | None:
         normalized = text.strip()
         if not normalized:
@@ -41,7 +41,7 @@ class DictionaryService:
         cache_key = (normalized.lower(), from_lang.lower(), to_lang.lower())
         cached = self._get_cached(cache_key)
         if cached:
-            self._upsert_lookup(db, user_id, normalized, from_lang, to_lang, cached)
+            self._upsert_lookup(db, nguoi_dung_id, normalized, from_lang, to_lang, cached)
             db.commit()
             return cached
 
@@ -52,7 +52,7 @@ class DictionaryService:
             response = self._response_from_translation(
                 normalized, from_lang, to_lang, obj, matched_trans, target_trans
             )
-            self._upsert_lookup(db, user_id, normalized, from_lang, to_lang, response, obj.id)
+            self._upsert_lookup(db, nguoi_dung_id, normalized, from_lang, to_lang, response, obj.id)
             db.commit()
             self._set_cached(cache_key, response)
             return response
@@ -65,7 +65,7 @@ class DictionaryService:
                 response = self._response_from_translation(
                     normalized, from_lang, to_lang, obj, matched_trans, target_trans
                 )
-                self._upsert_lookup(db, user_id, normalized, from_lang, to_lang, response, obj.id)
+                self._upsert_lookup(db, nguoi_dung_id, normalized, from_lang, to_lang, response, obj.id)
                 db.commit()
                 self._set_cached(cache_key, response)
                 return response
@@ -80,7 +80,7 @@ class DictionaryService:
                         response = self._response_from_translation(
                             normalized, from_lang, to_lang, obj, matched_trans, target_trans
                         )
-                        self._upsert_lookup(db, user_id, normalized, from_lang, to_lang, response, obj.id)
+                        self._upsert_lookup(db, nguoi_dung_id, normalized, from_lang, to_lang, response, obj.id)
                         db.commit()
                         self._set_cached(cache_key, response)
                         return response
@@ -121,7 +121,7 @@ class DictionaryService:
         # Chỉ cache từ/cụm từ ngắn — đoạn văn dài thì dịch xong trả về, không lưu DB
         if len(normalized) <= 200:
             self._upsert_lookup(
-                db, user_id, normalized, from_lang, to_lang, response,
+                db, nguoi_dung_id, normalized, from_lang, to_lang, response,
                 translation_text=translation, phonetic=phonetic,
             )
             db.commit()
@@ -132,10 +132,10 @@ class DictionaryService:
     # History
     # ------------------------------------------------------------------
 
-    def delete_history_item(self, db: Session, user_id: int, item_id: int) -> bool:
+    def delete_history_item(self, db: Session, nguoi_dung_id: int, item_id: int) -> bool:
         item = (
             db.query(DictionaryLookup)
-            .filter(DictionaryLookup.id == item_id, DictionaryLookup.user_id == user_id)
+            .filter(DictionaryLookup.id == item_id, DictionaryLookup.nguoi_dung_id == nguoi_dung_id)
             .first()
         )
         if not item:
@@ -144,12 +144,12 @@ class DictionaryService:
         db.commit()
         return True
 
-    def get_history(self, db: Session, user_id: int, limit: int = 30) -> list[dict]:
+    def get_history(self, db: Session, nguoi_dung_id: int, limit: int = 30) -> list[dict]:
         from app.models.object_media import ObjectMedia
 
         rows = (
             db.query(DictionaryLookup)
-            .filter(DictionaryLookup.user_id == user_id)
+            .filter(DictionaryLookup.nguoi_dung_id == nguoi_dung_id)
             .order_by(DictionaryLookup.lan_tra_cuoi.desc())
             .limit(limit)
             .all()
@@ -393,7 +393,7 @@ class DictionaryService:
     def _upsert_lookup(
         self,
         db: Session,
-        user_id: Optional[int],
+        nguoi_dung_id: Optional[int],
         term: str,
         from_lang: str,
         to_lang: str,
@@ -402,7 +402,7 @@ class DictionaryService:
         translation_text: Optional[str] = None,
         phonetic: Optional[str] = None,
     ) -> None:
-        if not user_id:
+        if not nguoi_dung_id:
             return
 
         lang = db.query(Language).filter(Language.ma_ngon_ngu == from_lang).first()
@@ -410,7 +410,7 @@ class DictionaryService:
         existing = (
             db.query(DictionaryLookup)
             .filter(
-                DictionaryLookup.user_id == user_id,
+                DictionaryLookup.nguoi_dung_id == nguoi_dung_id,
                 func.lower(DictionaryLookup.tu_tra) == term.lower(),
             )
             .first()
@@ -436,7 +436,7 @@ class DictionaryService:
                 existing.phien_am = ipa[:100] if ipa else None
         else:
             db.add(DictionaryLookup(
-                user_id=user_id,
+                nguoi_dung_id=nguoi_dung_id,
                 tu_tra=term,
                 ngon_ngu_tra_id=lang.id if lang else None,
                 doi_tuong_id=obj_id,

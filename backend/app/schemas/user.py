@@ -71,7 +71,7 @@ class UserResponse(BaseModel):
 
 
 class ProfileResponse(BaseModel):
-    user_id: int
+    nguoi_dung_id: int
     username: Optional[str] = None
     full_name: Optional[str] = None
     avatar_url: Optional[str] = None
@@ -82,7 +82,7 @@ class ProfileResponse(BaseModel):
 
 
 class UserSettingsResponse(BaseModel):
-    user_id: int
+    nguoi_dung_id: int
     display_language: str = "vi"
     dark_mode: bool = False
 

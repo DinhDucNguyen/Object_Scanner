@@ -76,16 +76,16 @@ class DataService:
             })
         return result
 
-    def get_stats(self, db: Session, user_id: int):
-        streak = self.streak_service.get_streak(db, user_id)
+    def get_stats(self, db: Session, nguoi_dung_id: int):
+        streak = self.streak_service.get_streak(db, nguoi_dung_id)
         return StatsResponse(
             total_objects=self.obj_repo.count_all(db),
             total_translations=self.trans_repo.count_all(db),
             total_languages=self.lang_repo.count_active(db),
-            total_learned=self.learn_repo.count_by_user(db, user_id),
-            due_today=self.learn_repo.count_due_today(db, user_id),
-            mastered=self.learn_repo.count_mastered(db, user_id),
-            total_scans=self.hist_repo.count_by_user(db, user_id),
+            total_learned=self.learn_repo.count_by_user(db, nguoi_dung_id),
+            due_today=self.learn_repo.count_due_today(db, nguoi_dung_id),
+            mastered=self.learn_repo.count_mastered(db, nguoi_dung_id),
+            total_scans=self.hist_repo.count_by_user(db, nguoi_dung_id),
             current_streak=streak["streak_hien_tai"],
             longest_streak=streak["streak_dai_nhat"],
             total_reviews=streak["tong_luot_on"],

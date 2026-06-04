@@ -20,21 +20,21 @@ class LearningService:
         self.lang_repo = LanguageRepository()
         self.tts = TTSService()
 
-    def add_to_learning(self, db: Session, translation_id: int, user_id: int):
-        progress, created = self.ensure_in_learning(db, translation_id, user_id)
+    def add_to_learning(self, db: Session, translation_id: int, nguoi_dung_id: int):
+        progress, created = self.ensure_in_learning(db, translation_id, nguoi_dung_id)
         db.commit()
         if not created:
             return {"message": "Đã có trong danh sách học"}
         return {"message": "Đã thêm vào danh sách học", "id": progress.id}
 
-    def ensure_in_learning(self, db: Session, translation_id: int, user_id: int):
-        existing = self.repo.get_by_user_and_translation(db, user_id, translation_id)
+    def ensure_in_learning(self, db: Session, translation_id: int, nguoi_dung_id: int):
+        existing = self.repo.get_by_user_and_translation(db, nguoi_dung_id, translation_id)
         if existing:
             return existing, False
 
         now = now_vietnam()
         progress = LearningProgress(
-            user_id=user_id,
+            nguoi_dung_id=nguoi_dung_id,
             ban_dich_id=translation_id,
             ngay_on_tiep=now,
             lan_on_cuoi=now,
@@ -42,11 +42,11 @@ class LearningService:
         self.repo.create(db, progress)
         return progress, True
 
-    def get_due_count(self, db: Session, user_id: int) -> int:
-        return self.repo.count_due_today(db, user_id)
+    def get_due_count(self, db: Session, nguoi_dung_id: int) -> int:
+        return self.repo.count_due_today(db, nguoi_dung_id)
 
-    def get_due_reviews(self, db: Session, user_id: int):
-        due = self.repo.get_due_reviews(db, user_id)
+    def get_due_reviews(self, db: Session, nguoi_dung_id: int):
+        due = self.repo.get_due_reviews(db, nguoi_dung_id)
         results = []
         audio_url_updated = False
         for p in due:
@@ -92,7 +92,7 @@ class LearningService:
             db.commit()
         return results
 
-    def get_collection_review_cards(self, db: Session, collection_id: int, user_id: int, practice: bool = False):
+    def get_collection_review_cards(self, db: Session, collection_id: int, nguoi_dung_id: int, practice: bool = False):
         from app.models.user_collection import UserCollection
 
         collection = db.query(UserCollection).filter(
@@ -102,7 +102,7 @@ class LearningService:
 
         if not collection:
             raise HTTPException(404, "Collection not found")
-        if collection.user_id != user_id and not collection.cong_khai:
+        if collection.nguoi_dung_id != nguoi_dung_id and not collection.cong_khai:
             raise HTTPException(403, "Access denied")
 
         items = collection.items
@@ -123,7 +123,7 @@ class LearningService:
                 ef, interval, reps = 2.5, 0, 0
                 sort_order = 1
             else:
-                progress, created = self.ensure_in_learning(db, t.id, user_id)
+                progress, created = self.ensure_in_learning(db, t.id, nguoi_dung_id)
                 if created:
                     db.flush()
                 progress_id = progress.id
@@ -172,20 +172,20 @@ class LearningService:
         cards_with_sort.sort(key=lambda x: x[0])
         return [card for _, card in cards_with_sort]
 
-    def get_analytics(self, db: Session, user_id: int) -> dict:
-        weekly = self.repo.get_weekly_review_counts(db, user_id)
-        mastery = self.repo.get_mastery_distribution(db, user_id)
+    def get_analytics(self, db: Session, nguoi_dung_id: int) -> dict:
+        weekly = self.repo.get_weekly_review_counts(db, nguoi_dung_id)
+        mastery = self.repo.get_mastery_distribution(db, nguoi_dung_id)
         return {
             "weekly_reviews": [{"date": d, "count": c} for d, c in weekly],
             "mastery": mastery,
         }
 
-    def submit_review(self, db: Session, progress_id: int, request: ReviewRequest, user_id: int):
+    def submit_review(self, db: Session, progress_id: int, request: ReviewRequest, nguoi_dung_id: int):
         if progress_id == 0:
             return ReviewResult(success=True, new_interval=0, new_ef=2.5, next_review_date=now_vietnam().strftime("%Y-%m-%d"))
 
         progress = self.repo.get_by_id(db, progress_id)
-        if not progress or progress.user_id != user_id:
+        if not progress or progress.nguoi_dung_id != nguoi_dung_id:
             raise HTTPException(404, "Progress not found")
 
         reviewed_at = now_vietnam()
@@ -204,7 +204,7 @@ class LearningService:
             self.repo.create_review_log(
                 db,
                 ReviewLog(
-                    user_id=user_id,
+                    nguoi_dung_id=nguoi_dung_id,
                     tien_do_hoc_id=progress.id,
                     ban_dich_id=progress.ban_dich_id,
                     chat_luong=request.quality,
@@ -244,7 +244,7 @@ class LearningService:
         self.repo.create_review_log(
             db,
             ReviewLog(
-                user_id=user_id,
+                nguoi_dung_id=nguoi_dung_id,
                 tien_do_hoc_id=progress.id,
                 ban_dich_id=progress.ban_dich_id,
                 chat_luong=request.quality,

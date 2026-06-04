@@ -12,13 +12,13 @@ security_scheme = HTTPBearer()
 optional_security_scheme = HTTPBearer(auto_error=False)
 
 
-def get_current_user_id(
+def get_current_nguoi_dung_id(
     credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
     db: Session = Depends(get_db),
 ) -> int:
     """
     Parse JWT token từ header Authorization: Bearer <token>.
-    Trả về user_id nếu token hợp lệ, raise 401 nếu không.
+    Trả về nguoi_dung_id nếu token hợp lệ, raise 401 nếu không.
     """
     return _get_authenticated_user(db, credentials).id
 
@@ -31,9 +31,9 @@ def get_current_user(
 
 
 def _get_authenticated_user(db: Session, credentials: HTTPAuthorizationCredentials) -> User:
-    user_id = _extract_user_id(credentials)
+    nguoi_dung_id = _extract_nguoi_dung_id(credentials)
     user = db.query(User).filter(
-        User.id == user_id,
+        User.id == nguoi_dung_id,
         User.thoi_gian_xoa.is_(None),
     ).first()
     if not user:
@@ -49,7 +49,7 @@ def _get_authenticated_user(db: Session, credentials: HTTPAuthorizationCredentia
     return user
 
 
-def require_admin_user_id(user: User = Depends(get_current_user)) -> int:
+def require_admin_nguoi_dung_id(user: User = Depends(get_current_user)) -> int:
     role_name = (user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else "").strip().lower()
     admin_roles = {role.strip().lower() for role in settings.ADMIN_ROLE_NAMES}
     is_admin = role_name in admin_roles or user.id in settings.ADMIN_USER_IDS
@@ -58,12 +58,12 @@ def require_admin_user_id(user: User = Depends(get_current_user)) -> int:
     return user.id
 
 
-def get_optional_user_id(
+def get_optional_nguoi_dung_id(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security_scheme),
     db: Session = Depends(get_db),
 ) -> Optional[int]:
     """
-    Optional auth — trả về user_id nếu có token, None nếu không.
+    Optional auth — trả về nguoi_dung_id nếu có token, None nếu không.
     Dùng cho scan endpoints (cho phép anonymous nhưng track user nếu đăng nhập).
     """
     if credentials is None:
@@ -74,8 +74,8 @@ def get_optional_user_id(
         return None
 
 
-def _extract_user_id(credentials: HTTPAuthorizationCredentials) -> int:
-    """Extract và validate user_id từ JWT credentials."""
+def _extract_nguoi_dung_id(credentials: HTTPAuthorizationCredentials) -> int:
+    """Extract và validate nguoi_dung_id từ JWT credentials."""
     token = credentials.credentials
     payload = decode_token(token)
 
@@ -93,12 +93,12 @@ def _extract_user_id(credentials: HTTPAuthorizationCredentials) -> int:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user_id = payload.get("sub")
-    if user_id is None:
+    nguoi_dung_id = payload.get("sub")
+    if nguoi_dung_id is None:
         raise HTTPException(
             status_code=401,
-            detail="Token không chứa user_id",
+            detail="Token không chứa nguoi_dung_id",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return int(user_id)
+    return int(nguoi_dung_id)

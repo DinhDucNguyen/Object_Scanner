@@ -12,7 +12,7 @@ class ScanHistory(Base):
     __tablename__ = "LichSuQuet"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("NguoiDung.id", ondelete="CASCADE"), nullable=True)
+    nguoi_dung_id = Column(Integer, ForeignKey("NguoiDung.id", ondelete="CASCADE"), nullable=True)
     doi_tuong_id = Column(Integer, ForeignKey("DoiTuong.id", ondelete="SET NULL"), nullable=True)
     url_anh = Column(String(255), nullable=True)
     do_tin_cay = Column(Float, nullable=True)

@@ -8,7 +8,7 @@ from typing import List
 from app.db.session import get_db
 from app.services.data_service import DataService
 from app.schemas.common import StatsResponse, LanguageResponse, CategoryResponse
-from app.dependencies.get_current_user import get_current_user_id
+from app.dependencies.get_current_user import get_current_nguoi_dung_id
 
 router = APIRouter(prefix="/api", tags=["Data"])
 data_service = DataService()
@@ -32,6 +32,6 @@ def get_all_objects(category_id: int = None, db: Session = Depends(get_db)):
 @router.get("/stats", response_model=StatsResponse)
 def get_stats(
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id)
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id)
 ):
-    return data_service.get_stats(db, user_id)
+    return data_service.get_stats(db, nguoi_dung_id)

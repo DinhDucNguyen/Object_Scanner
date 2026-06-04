@@ -16,7 +16,7 @@ def upgrade():
     op.add_column("TraTuDien", sa.Column("ket_qua_dich", sa.String(500), nullable=True))
     op.add_column("TraTuDien", sa.Column("phien_am", sa.String(100), nullable=True))
     op.add_column("TraTuDien", sa.Column("den_ngon_ngu", sa.String(10), nullable=True))
-    op.create_index("ix_TraTuDien_user_lan_tra", "TraTuDien", ["user_id", "lan_tra_cuoi"])
+    op.create_index("ix_TraTuDien_user_lan_tra", "TraTuDien", ["nguoi_dung_id", "lan_tra_cuoi"])
 
 
 def downgrade():

@@ -32,8 +32,8 @@ class TokenManager(context: Context) {
         set(value) = prefs.edit().putString("username", value).apply()
 
     var userId: Int
-        get() = prefs.getInt("user_id", 0)
-        set(value) = prefs.edit().putInt("user_id", value).apply()
+        get() = prefs.getInt("nguoi_dung_id", 0)
+        set(value) = prefs.edit().putInt("nguoi_dung_id", value).apply()
 
     val isLoggedIn: Boolean get() = !accessToken.isNullOrEmpty()
 

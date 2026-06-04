@@ -14,7 +14,7 @@ from app.schemas.user import (
     ProfileUpdateRequest, AvatarUploadResponse,
     MessageResponse, GoogleLoginRequest,
 )
-from app.dependencies.get_current_user import get_current_user_id
+from app.dependencies.get_current_user import get_current_nguoi_dung_id
 from app.schemas.user import DeleteAccountRequest
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
@@ -52,47 +52,47 @@ def refresh_token(data: RefreshRequest, db: Session = Depends(get_db)):
 @router.get("/profile", response_model=ProfileResponse)
 def get_profile(
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id)
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id)
 ):
-    return user_service.get_profile(db, user_id)
+    return user_service.get_profile(db, nguoi_dung_id)
 
 
 @router.put("/profile", response_model=ProfileResponse)
 def update_profile(
     data: ProfileUpdateRequest,
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id),
 ):
-    return user_service.update_profile(db, user_id, data)
+    return user_service.update_profile(db, nguoi_dung_id, data)
 
 
 @router.post("/profile/avatar", response_model=AvatarUploadResponse)
 async def upload_avatar(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id),
 ):
     if file.content_type and not file.content_type.startswith("image/"):
         raise HTTPException(400, "File phải là ảnh")
     image_bytes = await read_upload_bytes(file)
-    return user_service.upload_avatar(db, user_id, image_bytes, file.filename or "avatar.jpg")
+    return user_service.upload_avatar(db, nguoi_dung_id, image_bytes, file.filename or "avatar.jpg")
 
 
 @router.get("/settings", response_model=UserSettingsResponse)
 def get_settings(
     db: Session = Depends(get_db), 
-    user_id: int = Depends(get_current_user_id)
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id)
 ):
-    return user_service.get_settings(db, user_id)
+    return user_service.get_settings(db, nguoi_dung_id)
 
 
 @router.put("/settings", response_model=UserSettingsResponse)
 def update_settings(
     data: UserSettingsUpdate,
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id)
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id)
 ):
-    return user_service.update_settings(db, user_id, data)
+    return user_service.update_settings(db, nguoi_dung_id, data)
 
 
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
@@ -120,10 +120,10 @@ def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
 def change_password(
     data: ChangePasswordRequest,
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id),
 ):
     """Đổi mật khẩu cho user đã đăng nhập (cần JWT)."""
-    return user_service.change_password(db, user_id, data)
+    return user_service.change_password(db, nguoi_dung_id, data)
 
 
 @router.post("/google", response_model=TokenResponse)
@@ -137,7 +137,7 @@ def google_login(request: Request, data: GoogleLoginRequest, db: Session = Depen
 def delete_account(
     data: DeleteAccountRequest,
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id),
 ):
     """Xóa tài khoản vĩnh viễn — yêu cầu xác nhận mật khẩu."""
-    return user_service.delete_account(db, user_id, data.password)
+    return user_service.delete_account(db, nguoi_dung_id, data.password)

@@ -128,29 +128,29 @@ class UserService:
             raise HTTPException(401, "Refresh token không hợp lệ hoặc đã hết hạn")
 
         try:
-            user_id = int(payload.get("sub"))
+            nguoi_dung_id = int(payload.get("sub"))
         except (TypeError, ValueError):
             raise HTTPException(401, "Refresh token không hợp lệ hoặc đã hết hạn")
 
-        user = self.repo.get_by_id(db, user_id)
+        user = self.repo.get_by_id(db, nguoi_dung_id)
         if not user:
             raise HTTPException(404, "User not found")
         self._ensure_user_can_authenticate(user)
 
         return self._generate_tokens(user)
 
-    def update_profile(self, db: Session, user_id: int, data) -> dict:
-        user = self.repo.get_by_id(db, user_id)
+    def update_profile(self, db: Session, nguoi_dung_id: int, data) -> dict:
+        user = self.repo.get_by_id(db, nguoi_dung_id)
         if not user:
             raise HTTPException(404, "Không tìm thấy người dùng")
 
         if data.username is not None:
             existing = self.repo.get_by_username(db, data.username)
-            if existing and existing.id != user_id:
+            if existing and existing.id != nguoi_dung_id:
                 raise HTTPException(400, "Tên đăng nhập đã được sử dụng")
             user.ten_dang_nhap = data.username
 
-        profile = self._get_or_create_profile(db, user_id)
+        profile = self._get_or_create_profile(db, nguoi_dung_id)
         if data.full_name is not None:
             profile.ho_ten = data.full_name
         if data.bio is not None:
@@ -159,17 +159,17 @@ class UserService:
         db.refresh(profile)
         db.refresh(user)
         return {
-            "user_id": profile.user_id,
+            "nguoi_dung_id": profile.nguoi_dung_id,
             "username": user.ten_dang_nhap,
             "full_name": profile.ho_ten,
             "avatar_url": profile.anh_dai_dien,
             "bio": profile.gioi_thieu,
         }
 
-    def upload_avatar(self, db: Session, user_id: int, image_bytes: bytes, filename: str) -> dict:
+    def upload_avatar(self, db: Session, nguoi_dung_id: int, image_bytes: bytes, filename: str) -> dict:
         import os, uuid
 
-        profile = self._get_or_create_profile(db, user_id)
+        profile = self._get_or_create_profile(db, nguoi_dung_id)
         if not image_bytes:
             raise HTTPException(400, "File ảnh không hợp lệ")
 
@@ -180,7 +180,7 @@ class UserService:
             ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "jpg"
             if ext not in {"jpg", "jpeg", "png", "webp"}:
                 ext = "jpg"
-            new_filename = f"{user_id}_{uuid.uuid4().hex[:8]}.{ext}"
+            new_filename = f"{nguoi_dung_id}_{uuid.uuid4().hex[:8]}.{ext}"
             filepath = os.path.join(uploads_dir, new_filename)
             with open(filepath, "wb") as f:
                 f.write(image_bytes)
@@ -190,49 +190,49 @@ class UserService:
         db.commit()
         return {"avatar_url": avatar_url}
 
-    def get_profile(self, db: Session, user_id: int):
-        profile = self._get_or_create_profile(db, user_id)
-        user = self.repo.get_by_id(db, user_id)
+    def get_profile(self, db: Session, nguoi_dung_id: int):
+        profile = self._get_or_create_profile(db, nguoi_dung_id)
+        user = self.repo.get_by_id(db, nguoi_dung_id)
         return {
-            "user_id": profile.user_id,
+            "nguoi_dung_id": profile.nguoi_dung_id,
             "username": user.ten_dang_nhap if user else None,
             "full_name": profile.ho_ten,
             "avatar_url": profile.anh_dai_dien,
             "bio": profile.gioi_thieu,
         }
 
-    def _get_or_create_profile(self, db: Session, user_id: int) -> Profile:
-        user = self.repo.get_by_id(db, user_id)
+    def _get_or_create_profile(self, db: Session, nguoi_dung_id: int) -> Profile:
+        user = self.repo.get_by_id(db, nguoi_dung_id)
         if not user:
             raise HTTPException(404, "Không tìm thấy người dùng")
 
-        profile = self.repo.get_profile(db, user_id)
+        profile = self.repo.get_profile(db, nguoi_dung_id)
         if profile:
             return profile
 
-        profile = Profile(user_id=user_id)
+        profile = Profile(nguoi_dung_id=nguoi_dung_id)
         db.add(profile)
         db.commit()
         db.refresh(profile)
         return profile
 
-    def get_settings(self, db: Session, user_id: int):
-        settings = self.repo.get_settings(db, user_id)
+    def get_settings(self, db: Session, nguoi_dung_id: int):
+        settings = self.repo.get_settings(db, nguoi_dung_id)
         if not settings:
-            settings = UserSettings(user_id=user_id)
+            settings = UserSettings(nguoi_dung_id=nguoi_dung_id)
             db.add(settings)
             db.commit()
             db.refresh(settings)
         return {
-            "user_id": settings.user_id,
+            "nguoi_dung_id": settings.nguoi_dung_id,
             "display_language": settings.ngon_ngu_giao_dien or "vi",
             "dark_mode": bool(settings.che_do_toi),
         }
 
-    def update_settings(self, db: Session, user_id: int, data: UserSettingsUpdate):
-        settings = self.repo.get_settings(db, user_id)
+    def update_settings(self, db: Session, nguoi_dung_id: int, data: UserSettingsUpdate):
+        settings = self.repo.get_settings(db, nguoi_dung_id)
         if not settings:
-            settings = UserSettings(user_id=user_id)
+            settings = UserSettings(nguoi_dung_id=nguoi_dung_id)
             db.add(settings)
 
         if data.display_language is not None:
@@ -242,13 +242,13 @@ class UserService:
 
         self.repo.update_settings(db, settings)
         return {
-            "user_id": settings.user_id,
+            "nguoi_dung_id": settings.nguoi_dung_id,
             "display_language": settings.ngon_ngu_giao_dien or "vi",
             "dark_mode": bool(settings.che_do_toi),
         }
 
-    def delete_account(self, db: Session, user_id: int, password: str) -> dict:
-        user = self.repo.get_by_id(db, user_id)
+    def delete_account(self, db: Session, nguoi_dung_id: int, password: str) -> dict:
+        user = self.repo.get_by_id(db, nguoi_dung_id)
         if not user:
             raise HTTPException(404, "Không tìm thấy người dùng")
         if not verify_password(password, user.mat_khau_ma_hoa):
@@ -334,8 +334,8 @@ class UserService:
 
         return {"message": "Đặt lại mật khẩu thành công"}
 
-    def change_password(self, db: Session, user_id: int, data: ChangePasswordRequest) -> dict:
-        user = self.repo.get_by_id(db, user_id)
+    def change_password(self, db: Session, nguoi_dung_id: int, data: ChangePasswordRequest) -> dict:
+        user = self.repo.get_by_id(db, nguoi_dung_id)
         if not user:
             raise HTTPException(404, "Không tìm thấy người dùng")
 

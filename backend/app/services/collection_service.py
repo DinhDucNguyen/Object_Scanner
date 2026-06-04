@@ -17,8 +17,8 @@ class CollectionService:
     def __init__(self):
         self.repo = CollectionRepository()
 
-    def get_collections(self, db: Session, user_id: int):
-        collections = self.repo.get_by_user(db, user_id)
+    def get_collections(self, db: Session, nguoi_dung_id: int):
+        collections = self.repo.get_by_user(db, nguoi_dung_id)
         return [
             CollectionResponse(
                 id=c.id, name=c.ten_bo_suu_tap, is_public=c.cong_khai,
@@ -27,8 +27,8 @@ class CollectionService:
             ) for c in collections
         ]
 
-    def create_collection(self, db: Session, user_id: int, data: CollectionCreate):
-        collection = UserCollection(user_id=user_id, ten_bo_suu_tap=data.name, cong_khai=data.is_public)
+    def create_collection(self, db: Session, nguoi_dung_id: int, data: CollectionCreate):
+        collection = UserCollection(nguoi_dung_id=nguoi_dung_id, ten_bo_suu_tap=data.name, cong_khai=data.is_public)
         result = self.repo.create_collection(db, collection)
         db.commit()
         return CollectionResponse(
@@ -40,11 +40,11 @@ class CollectionService:
         self,
         db: Session,
         collection_id: int,
-        user_id: int,
+        nguoi_dung_id: int,
         data: CollectionUpdate
     ):
         collection = self.repo.get_by_id(db, collection_id)
-        if not collection or collection.user_id != user_id:
+        if not collection or collection.nguoi_dung_id != nguoi_dung_id:
             raise HTTPException(status_code=404, detail="Collection not found")
 
         name = data.name.strip()
@@ -66,11 +66,11 @@ class CollectionService:
         self,
         db: Session,
         collection_id: int,
-        user_id: int,
+        nguoi_dung_id: int,
         data: CollectionPrivacyUpdate
     ):
         collection = self.repo.get_by_id(db, collection_id)
-        if not collection or collection.user_id != user_id:
+        if not collection or collection.nguoi_dung_id != nguoi_dung_id:
             raise HTTPException(status_code=404, detail="Collection not found")
 
         collection.cong_khai = data.is_public
@@ -84,9 +84,9 @@ class CollectionService:
             created_at=collection.ngay_tao
         )
 
-    def add_to_collection(self, db: Session, collection_id: int, data: CollectionItemAdd, user_id: int):
+    def add_to_collection(self, db: Session, collection_id: int, data: CollectionItemAdd, nguoi_dung_id: int):
         collection = self.repo.get_by_id(db, collection_id)
-        if not collection or collection.user_id != user_id:
+        if not collection or collection.nguoi_dung_id != nguoi_dung_id:
             raise HTTPException(status_code=404, detail="Collection not found")
 
         existing = self.repo.get_item(db, collection_id, data.translation_id)
@@ -96,8 +96,8 @@ class CollectionService:
         db.commit()
         return {"message": "Đã thêm vào bộ sưu tập"}
 
-    def get_public_collections(self, db: Session, user_id: int):
-        collections = self.repo.get_public(db, user_id)
+    def get_public_collections(self, db: Session, nguoi_dung_id: int):
+        collections = self.repo.get_public(db, nguoi_dung_id)
         return [
             CollectionResponse(
                 id=c.id, name=c.ten_bo_suu_tap, is_public=c.cong_khai,
@@ -111,9 +111,9 @@ class CollectionService:
             ) for c in collections
         ]
 
-    def get_collection_detail(self, db: Session, collection_id: int, user_id: int):
+    def get_collection_detail(self, db: Session, collection_id: int, nguoi_dung_id: int):
         collection = self.repo.get_by_id(db, collection_id)
-        if not collection or (collection.user_id != user_id and not collection.cong_khai):
+        if not collection or (collection.nguoi_dung_id != nguoi_dung_id and not collection.cong_khai):
             raise HTTPException(status_code=404, detail="Collection not found")
 
         item_responses = []
@@ -141,28 +141,28 @@ class CollectionService:
             id=collection.id,
             name=collection.ten_bo_suu_tap,
             is_public=collection.cong_khai,
-            can_edit=collection.user_id == user_id,
+            can_edit=collection.nguoi_dung_id == nguoi_dung_id,
             items=item_responses,
             created_at=collection.ngay_tao
         )
 
-    def delete_collection(self, db: Session, collection_id: int, user_id: int):
+    def delete_collection(self, db: Session, collection_id: int, nguoi_dung_id: int):
         collection = self.repo.get_by_id(db, collection_id)
-        if not collection or collection.user_id != user_id:
+        if not collection or collection.nguoi_dung_id != nguoi_dung_id:
             raise HTTPException(status_code=404, detail="Collection not found")
         self.repo.delete_collection(db, collection_id)
         db.commit()
 
-    def remove_from_collection(self, db: Session, collection_id: int, translation_id: int, user_id: int):
+    def remove_from_collection(self, db: Session, collection_id: int, translation_id: int, nguoi_dung_id: int):
         collection = self.repo.get_by_id(db, collection_id)
-        if not collection or collection.user_id != user_id:
+        if not collection or collection.nguoi_dung_id != nguoi_dung_id:
             raise HTTPException(status_code=404, detail="Collection not found")
         self.repo.remove_item(db, collection_id, translation_id)
         db.commit()
 
-    def get_collection_insights(self, db: Session, collection_id: int, user_id: int):
+    def get_collection_insights(self, db: Session, collection_id: int, nguoi_dung_id: int):
         collection = self.repo.get_by_id(db, collection_id)
-        if not collection or collection.user_id != user_id:
+        if not collection or collection.nguoi_dung_id != nguoi_dung_id:
             raise HTTPException(status_code=404, detail="Collection not found")
 
         items = db.query(CollectionItem).filter(CollectionItem.bo_suu_tap_id == collection_id).all()
@@ -178,7 +178,7 @@ class CollectionService:
             )
 
         progress_list = db.query(LearningProgress).filter(
-            LearningProgress.user_id == user_id,
+            LearningProgress.nguoi_dung_id == nguoi_dung_id,
             LearningProgress.ban_dich_id.in_(translation_ids)
         ).all()
 

@@ -12,7 +12,7 @@ class TrainingImageService:
         url_anh: str | None,
         nhan: str | None,
         nguon_du_lieu: NguonAnhHuanLuyen | str,
-        scan_id: int | None = None,
+        lich_su_quet_id: int | None = None,
         du_doan_id: int | None = None,
         doi_tuong_id: int | None = None,
         do_tin_cay: float | None = None,
@@ -23,11 +23,11 @@ class TrainingImageService:
 
         source = self._source(nguon_du_lieu)
         item = None
-        if scan_id is not None:
+        if lich_su_quet_id is not None:
             item = (
                 db.query(TrainingImage)
                 .filter(
-                    TrainingImage.scan_id == scan_id,
+                    TrainingImage.lich_su_quet_id == lich_su_quet_id,
                     TrainingImage.thoi_gian_xoa.is_(None),
                 )
                 .first()
@@ -35,7 +35,7 @@ class TrainingImageService:
 
         if item is None:
             item = TrainingImage(
-                scan_id=scan_id,
+                lich_su_quet_id=lich_su_quet_id,
                 du_doan_id=du_doan_id,
                 doi_tuong_id=doi_tuong_id,
                 url_anh=url_anh,
@@ -65,16 +65,16 @@ class TrainingImageService:
         self,
         db: Session,
         *,
-        scan_id: int | None,
+        lich_su_quet_id: int | None,
         doi_tuong_id: int,
         nhan: str | None = None,
     ) -> None:
-        if scan_id is None:
+        if lich_su_quet_id is None:
             return
         item = (
             db.query(TrainingImage)
             .filter(
-                TrainingImage.scan_id == scan_id,
+                TrainingImage.lich_su_quet_id == lich_su_quet_id,
                 TrainingImage.thoi_gian_xoa.is_(None),
             )
             .first()

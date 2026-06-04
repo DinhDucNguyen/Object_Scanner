@@ -54,21 +54,21 @@ def upgrade() -> None:
         sa.UniqueConstraint('ten_dang_nhap')
     )
     op.create_table('HoSo',
-        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('nguoi_dung_id', sa.Integer(), nullable=False),
         sa.Column('ho_ten', sa.String(length=100), nullable=True),
         sa.Column('anh_dai_dien', sa.String(length=255), nullable=True),
         sa.Column('gioi_thieu', sa.String(length=500), nullable=True),
-        sa.ForeignKeyConstraint(['user_id'], ['NguoiDung.id'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('user_id')
+        sa.ForeignKeyConstraint(['nguoi_dung_id'], ['NguoiDung.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('nguoi_dung_id')
     )
     op.create_table('CaiDatNguoiDung',
-        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('nguoi_dung_id', sa.Integer(), nullable=False),
         sa.Column('ngon_ngu_me', sa.Integer(), nullable=True),
         sa.Column('ngon_ngu_hoc', sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(['user_id'], ['NguoiDung.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['nguoi_dung_id'], ['NguoiDung.id'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['ngon_ngu_me'], ['NgonNgu.id'], name='fk_caidat_lang_native'),
         sa.ForeignKeyConstraint(['ngon_ngu_hoc'], ['NgonNgu.id'], name='fk_caidat_lang_target'),
-        sa.PrimaryKeyConstraint('user_id')
+        sa.PrimaryKeyConstraint('nguoi_dung_id')
     )
     op.create_table('DanhMuc',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -132,12 +132,12 @@ def upgrade() -> None:
     )
     op.create_table('BoSuuTap',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('nguoi_dung_id', sa.Integer(), nullable=False),
         sa.Column('ten_bo_suu_tap', sa.String(length=100), nullable=False),
         sa.Column('cong_khai', sa.Boolean(), nullable=True),
         sa.Column('ngay_tao', sa.TIMESTAMP(), nullable=True),
         sa.Column('thoi_gian_xoa', sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(['user_id'], ['NguoiDung.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['nguoi_dung_id'], ['NguoiDung.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
     )
     op.create_table('ChiTietBoSuuTap',
@@ -149,30 +149,30 @@ def upgrade() -> None:
     )
     op.create_table('LichSuQuet',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=True),
+        sa.Column('nguoi_dung_id', sa.Integer(), nullable=True),
         sa.Column('doi_tuong_id', sa.Integer(), nullable=True),
         sa.Column('url_anh', sa.String(length=255), nullable=True),
         sa.Column('do_tin_cay', sa.Float(), nullable=True),
         sa.Column('thoi_gian', sa.TIMESTAMP(), nullable=True),
         sa.ForeignKeyConstraint(['doi_tuong_id'], ['DoiTuong.id'], ondelete='SET NULL'),
-        sa.ForeignKeyConstraint(['user_id'], ['NguoiDung.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['nguoi_dung_id'], ['NguoiDung.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
     )
     op.create_table('DuDoanAI',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('scan_id', sa.Integer(), nullable=False),
+        sa.Column('lich_su_quet_id', sa.Integer(), nullable=False),
         sa.Column('nguon_ai', sa.Enum('yolo', 'gemini', name='nguonai'), nullable=False),
         sa.Column('nhan_du_doan', sa.String(length=255), nullable=True),
         sa.Column('do_tin_cay', sa.Float(), nullable=True),
         sa.Column('mo_ta', sa.Text(), nullable=True),
         sa.Column('ket_qua_dung', sa.Boolean(), nullable=True),
         sa.Column('thoi_gian', sa.TIMESTAMP(), nullable=True),
-        sa.ForeignKeyConstraint(['scan_id'], ['LichSuQuet.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['lich_su_quet_id'], ['LichSuQuet.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
     )
     op.create_table('TienDoHoc',
         sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('nguoi_dung_id', sa.Integer(), nullable=False),
         sa.Column('ban_dich_id', sa.Integer(), nullable=False),
         sa.Column('do_de_nho', sa.DECIMAL(precision=5, scale=2), nullable=True),
         sa.Column('khoang_lap', sa.Integer(), nullable=True),
@@ -180,13 +180,13 @@ def upgrade() -> None:
         sa.Column('ngay_on_tiep', sa.DateTime(), nullable=True),
         sa.Column('lan_on_cuoi', sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(['ban_dich_id'], ['BanDich.id'], ondelete='CASCADE'),
-        sa.ForeignKeyConstraint(['user_id'], ['NguoiDung.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['nguoi_dung_id'], ['NguoiDung.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('user_id', 'ban_dich_id', name='unique_user_translation')
+        sa.UniqueConstraint('nguoi_dung_id', 'ban_dich_id', name='unique_user_translation')
     )
     op.create_table('TraTuDien',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=True),
+        sa.Column('nguoi_dung_id', sa.Integer(), nullable=True),
         sa.Column('tu_tra', sa.String(length=255), nullable=False),
         sa.Column('ngon_ngu_tra_id', sa.Integer(), nullable=True),
         sa.Column('doi_tuong_id', sa.Integer(), nullable=True),
@@ -194,7 +194,7 @@ def upgrade() -> None:
         sa.Column('lan_tra_cuoi', sa.TIMESTAMP(), nullable=True),
         sa.ForeignKeyConstraint(['doi_tuong_id'], ['DoiTuong.id'], ondelete='SET NULL'),
         sa.ForeignKeyConstraint(['ngon_ngu_tra_id'], ['NgonNgu.id'], ondelete='CASCADE'),
-        sa.ForeignKeyConstraint(['user_id'], ['NguoiDung.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['nguoi_dung_id'], ['NguoiDung.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
     )
 

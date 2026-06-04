@@ -239,7 +239,7 @@ Không cần làm gì thêm — app tự load model khi khởi động.
 | `PUT` | `/api/auth/profile` | Cập nhật profile |
 | `POST` | `/api/scan` | Quét và nhận diện vật thể |
 | `GET` | `/api/history` | Lịch sử quét |
-| `DELETE` | `/api/history/{scan_id}` | Xóa một lịch sử quét |
+| `DELETE` | `/api/history/{lich_su_quet_id}` | Xóa một lịch sử quét |
 | `GET` | `/api/review/count` | Số từ cần ôn hôm nay |
 | `GET` | `/api/review` | Lấy danh sách thẻ ôn tập hôm nay |
 | `POST` | `/api/review/{progress_id}` | Nộp kết quả ôn tập |

@@ -28,7 +28,7 @@ class HistoryFeedbackService:
     def get_history(
         self,
         db: Session,
-        user_id: int,
+        nguoi_dung_id: int,
         limit: int = 50,
         offset: int = 0,
         keyword: str | None = None,
@@ -37,12 +37,12 @@ class HistoryFeedbackService:
         to_date: Date | None = None,
     ):
         scans = self.hist_repo.get_recent_scans(
-            db, user_id, limit, offset, keyword, period, from_date, to_date
+            db, nguoi_dung_id, limit, offset, keyword, period, from_date, to_date
         )
         return [self._scan_to_history_item(db, scan) for scan in scans]
 
-    def get_history_detail(self, db: Session, user_id: int, scan_id: int):
-        scan = self.hist_repo.get_by_id_for_user(db, scan_id, user_id)
+    def get_history_detail(self, db: Session, nguoi_dung_id: int, lich_su_quet_id: int):
+        scan = self.hist_repo.get_by_id_for_user(db, lich_su_quet_id, nguoi_dung_id)
         if not scan:
             return None
 
@@ -65,8 +65,8 @@ class HistoryFeedbackService:
         item["translations"] = translations
         return item
 
-    def delete_history(self, db: Session, user_id: int, scan_id: int) -> bool:
-        scan = self.hist_repo.get_by_id_for_user(db, scan_id, user_id)
+    def delete_history(self, db: Session, nguoi_dung_id: int, lich_su_quet_id: int) -> bool:
+        scan = self.hist_repo.get_by_id_for_user(db, lich_su_quet_id, nguoi_dung_id)
         if not scan:
             return False
         self.hist_repo.delete_scan(db, scan)
@@ -75,7 +75,7 @@ class HistoryFeedbackService:
 
     def create_prediction(self, db: Session, data: AIPredictionCreate):
         prediction = AIPrediction(
-            scan_id=data.scan_id,
+            lich_su_quet_id=data.lich_su_quet_id,
             nguon_ai=data.source_ai,
             nhan_du_doan=data.predicted_label,
             do_tin_cay=data.confidence,
@@ -85,15 +85,15 @@ class HistoryFeedbackService:
         db.commit()
         return result
 
-    def get_predictions(self, db: Session, scan_id: int, user_id: int | None = None):
-        if user_id is not None and not self.hist_repo.get_by_id_for_user(db, scan_id, user_id):
+    def get_predictions(self, db: Session, lich_su_quet_id: int, nguoi_dung_id: int | None = None):
+        if nguoi_dung_id is not None and not self.hist_repo.get_by_id_for_user(db, lich_su_quet_id, nguoi_dung_id):
             return None
 
-        predictions = self.hist_repo.get_predictions(db, scan_id)
+        predictions = self.hist_repo.get_predictions(db, lich_su_quet_id)
         return [
             {
                 "id": p.id,
-                "scan_id": p.scan_id,
+                "lich_su_quet_id": p.lich_su_quet_id,
                 "source_ai": p.nguon_ai.value if p.nguon_ai else None,
                 "predicted_label": p.nhan_du_doan,
                 "confidence": p.do_tin_cay,
@@ -107,7 +107,7 @@ class HistoryFeedbackService:
     def save_with_image(
         self,
         db: Session,
-        user_id: int,
+        nguoi_dung_id: int,
         object_code: str,
         confidence: float,
         image_bytes: bytes | None,
@@ -125,7 +125,7 @@ class HistoryFeedbackService:
             if review_translation:
                 translation_id = review_translation.id
                 _, learning_added = self.learning_service.ensure_in_learning(
-                    db, translation_id, user_id
+                    db, translation_id, nguoi_dung_id
                 )
                 learning_status = "added" if learning_added else "already_in_learning"
             else:
@@ -144,7 +144,7 @@ class HistoryFeedbackService:
                 image_url = f"{base_url}/uploads/scans/{filename}"
 
         scan = ScanHistory(
-            user_id=user_id,
+            nguoi_dung_id=nguoi_dung_id,
             doi_tuong_id=obj.id if obj else None,
             do_tin_cay=confidence,
             url_anh=image_url,
@@ -154,7 +154,7 @@ class HistoryFeedbackService:
         if image_url:
             self.training_images.create_candidate(
                 db,
-                scan_id=saved.id,
+                lich_su_quet_id=saved.id,
                 doi_tuong_id=obj.id if obj else None,
                 url_anh=image_url,
                 nhan=obj.ma_doi_tuong if obj else object_code,
@@ -242,10 +242,10 @@ class HistoryFeedbackService:
             "prediction_id": prediction.id if prediction else None,
         }
 
-    def _primary_prediction_for_scan(self, db: Session, scan_id: int) -> AIPrediction | None:
+    def _primary_prediction_for_scan(self, db: Session, lich_su_quet_id: int) -> AIPrediction | None:
         return (
             db.query(AIPrediction)
-            .filter(AIPrediction.scan_id == scan_id)
+            .filter(AIPrediction.lich_su_quet_id == lich_su_quet_id)
             .order_by(AIPrediction.thoi_gian.desc())
             .first()
         )

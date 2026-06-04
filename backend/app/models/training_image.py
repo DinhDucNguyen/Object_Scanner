@@ -34,7 +34,7 @@ class TrainingImage(Base):
     __tablename__ = "AnhHuanLuyen"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    scan_id = Column(Integer, ForeignKey("LichSuQuet.id", ondelete="SET NULL"), nullable=True, index=True)
+    lich_su_quet_id = Column(Integer, ForeignKey("LichSuQuet.id", ondelete="SET NULL"), nullable=True, index=True)
     du_doan_id = Column(Integer, ForeignKey("DuDoanAI.id", ondelete="SET NULL"), nullable=True, index=True)
     doi_tuong_id = Column(Integer, ForeignKey("DoiTuong.id", ondelete="SET NULL"), nullable=True, index=True)
     url_anh = Column(String(255), nullable=False)

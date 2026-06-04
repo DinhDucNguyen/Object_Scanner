@@ -4,8 +4,8 @@ from app.models.collection_item import CollectionItem
 
 
 class CollectionRepository:
-    def get_by_user(self, db: Session, user_id: int):
-        return db.query(UserCollection).filter(UserCollection.user_id == user_id).all()
+    def get_by_user(self, db: Session, nguoi_dung_id: int):
+        return db.query(UserCollection).filter(UserCollection.nguoi_dung_id == nguoi_dung_id).all()
 
     def get_by_id(self, db: Session, collection_id: int):
         return db.query(UserCollection).filter(UserCollection.id == collection_id).first()
@@ -34,10 +34,10 @@ class CollectionRepository:
         db.flush()
         return item
 
-    def get_public(self, db: Session, user_id: int):
+    def get_public(self, db: Session, nguoi_dung_id: int):
         return db.query(UserCollection).filter(
             UserCollection.cong_khai == True,
-            UserCollection.user_id != user_id,
+            UserCollection.nguoi_dung_id != nguoi_dung_id,
             UserCollection.thoi_gian_xoa.is_(None)
         ).all()
 

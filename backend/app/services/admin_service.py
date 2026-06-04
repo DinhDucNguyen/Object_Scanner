@@ -114,17 +114,17 @@ class AdminService:
                 AIPrediction.mo_ta.ilike(pattern),
             ))
         predictions = query.offset(offset).limit(limit).all()
-        scan_ids = [p.scan_id for p in predictions if p.scan_id]
+        lich_su_quet_ids = [p.lich_su_quet_id for p in predictions if p.lich_su_quet_id]
         scans = (
-            {s.id: s for s in db.query(ScanHistory).filter(ScanHistory.id.in_(scan_ids)).all()}
-            if scan_ids else {}
+            {s.id: s for s in db.query(ScanHistory).filter(ScanHistory.id.in_(lich_su_quet_ids)).all()}
+            if lich_su_quet_ids else {}
         )
         items = []
         for p in predictions:
-            scan = scans.get(p.scan_id)
+            scan = scans.get(p.lich_su_quet_id)
             item = PredictionListItem(
                 id=p.id,
-                scan_id=p.scan_id,
+                lich_su_quet_id=p.lich_su_quet_id,
                 nhan_du_doan=p.nhan_du_doan,
                 do_tin_cay=p.do_tin_cay,
                 trang_thai=p.trang_thai.value,
@@ -141,7 +141,7 @@ class AdminService:
         if not p:
             return None
 
-        scan = db.query(ScanHistory).filter(ScanHistory.id == p.scan_id).first()
+        scan = db.query(ScanHistory).filter(ScanHistory.id == p.lich_su_quet_id).first()
 
         vocab_payload = None
         if p.mo_ta:
@@ -152,7 +152,7 @@ class AdminService:
 
         return PredictionDetailResponse(
             id=p.id,
-            scan_id=p.scan_id,
+            lich_su_quet_id=p.lich_su_quet_id,
             nhan_du_doan=p.nhan_du_doan,
             do_tin_cay=p.do_tin_cay,
             trang_thai=p.trang_thai.value,
@@ -168,7 +168,7 @@ class AdminService:
         root_id = prediction.du_doan_goc_id or prediction.id
         related = (
             db.query(AIPrediction, ScanHistory)
-            .join(ScanHistory, AIPrediction.scan_id == ScanHistory.id)
+            .join(ScanHistory, AIPrediction.lich_su_quet_id == ScanHistory.id)
             .filter(
                 (AIPrediction.id == root_id) |
                 (AIPrediction.du_doan_goc_id == root_id)
@@ -179,8 +179,8 @@ class AdminService:
         return [
             {
                 "prediction_id": pred.id,
-                "scan_id": scan.id,
-                "user_id": scan.user_id,
+                "lich_su_quet_id": scan.id,
+                "nguoi_dung_id": scan.nguoi_dung_id,
                 "image_url": scan.url_anh,
                 "vai_tro": pred.vai_tro.value if pred.vai_tro else None,
                 "thoi_gian": scan.thoi_gian,
@@ -301,10 +301,10 @@ class AdminService:
     def approve_training_image_by_scan(
         self,
         db: Session,
-        scan_id: int,
+        lich_su_quet_id: int,
         admin_id: int | None = None,
     ) -> TrainingImage | None:
-        item = self._training_image_for_scan(db, scan_id)
+        item = self._training_image_for_scan(db, lich_su_quet_id)
         if not item:
             return None
 
@@ -323,11 +323,11 @@ class AdminService:
     def reject_training_image_by_scan(
         self,
         db: Session,
-        scan_id: int,
+        lich_su_quet_id: int,
         admin_id: int | None = None,
         note: str | None = None,
     ) -> TrainingImage | None:
-        item = self._training_image_for_scan(db, scan_id)
+        item = self._training_image_for_scan(db, lich_su_quet_id)
         if not item:
             return None
 
@@ -371,10 +371,10 @@ class AdminService:
     def reassign_training_image_by_scan(
         self,
         db: Session,
-        scan_id: int,
+        lich_su_quet_id: int,
         target_object_code: str,
     ) -> tuple[TrainingImage | None, Object | None]:
-        scan = db.query(ScanHistory).filter(ScanHistory.id == scan_id).first()
+        scan = db.query(ScanHistory).filter(ScanHistory.id == lich_su_quet_id).first()
         if not scan:
             return None, None
 
@@ -387,11 +387,11 @@ class AdminService:
             return None, None
 
         scan.doi_tuong_id = obj.id
-        item = self._training_image_for_scan(db, scan_id)
+        item = self._training_image_for_scan(db, lich_su_quet_id)
         if not item and scan.url_anh:
             item = self.training_images.create_candidate(
                 db,
-                scan_id=scan.id,
+                lich_su_quet_id=scan.id,
                 url_anh=scan.url_anh,
                 nhan=obj.ma_doi_tuong,
                 nguon_du_lieu="admin",
@@ -458,12 +458,12 @@ class AdminService:
             .all()
         )
 
-    def _training_image_for_scan(self, db: Session, scan_id: int) -> TrainingImage | None:
+    def _training_image_for_scan(self, db: Session, lich_su_quet_id: int) -> TrainingImage | None:
         return (
             db.query(TrainingImage)
             .options(joinedload(TrainingImage.scan), joinedload(TrainingImage.object))
             .filter(
-                TrainingImage.scan_id == scan_id,
+                TrainingImage.lich_su_quet_id == lich_su_quet_id,
                 TrainingImage.thoi_gian_xoa.is_(None),
             )
             .first()
@@ -537,7 +537,7 @@ class AdminService:
         recommendation = self._training_recommendation(coverage)
         return {
             "id": item.id,
-            "scan_id": item.scan_id,
+            "lich_su_quet_id": item.lich_su_quet_id,
             "prediction_id": item.du_doan_id,
             "object_code": code,
             "label": item.nhan,
@@ -565,7 +565,7 @@ class AdminService:
             "images": [
                 {
                     "id": img["id"],
-                    "scan_id": img["scan_id"],
+                    "lich_su_quet_id": img["lich_su_quet_id"],
                     "prediction_id": img["prediction_id"],
                     "url": img["url"],
                     "source": img["source"],
@@ -645,10 +645,10 @@ class AdminService:
                 if matched_cat:
                     obj.danh_muc_id = matched_cat.id
 
-        training_scan_ids: set[int] = set()
+        training_lich_su_quet_ids: set[int] = set()
         if p.scan:
             p.scan.doi_tuong_id = obj.id
-            training_scan_ids.add(p.scan.id)
+            training_lich_su_quet_ids.add(p.scan.id)
 
         total_examples_created = 0
         first_translation_id = None
@@ -741,10 +741,10 @@ class AdminService:
             total_examples_created += examples_created
 
         # Auto-enroll tất cả user đã quét object này (pending) vào learning
-        user_ids_to_enroll: set[int] = set()
+        nguoi_dung_ids_to_enroll: set[int] = set()
 
-        if p.scan and p.scan.user_id:
-            user_ids_to_enroll.add(p.scan.user_id)
+        if p.scan and p.scan.nguoi_dung_id:
+            nguoi_dung_ids_to_enroll.add(p.scan.nguoi_dung_id)
 
         # Tìm các prediction khác cùng object_code còn cho_duyet → auto-resolve luôn
         related_predictions = db.query(AIPrediction).filter(
@@ -759,15 +759,15 @@ class AdminService:
         for rel in related_predictions:
             if rel.scan:
                 rel.scan.doi_tuong_id = obj.id
-                training_scan_ids.add(rel.scan.id)
-                if rel.scan.user_id:
-                    user_ids_to_enroll.add(rel.scan.user_id)
+                training_lich_su_quet_ids.add(rel.scan.id)
+                if rel.scan.nguoi_dung_id:
+                    nguoi_dung_ids_to_enroll.add(rel.scan.nguoi_dung_id)
             rel.trang_thai = TrangThaiDuyet.da_duyet
 
         now = now_vietnam()
-        if training_scan_ids:
+        if training_lich_su_quet_ids:
             training_images = db.query(TrainingImage).filter(
-                TrainingImage.scan_id.in_(training_scan_ids),
+                TrainingImage.lich_su_quet_id.in_(training_lich_su_quet_ids),
                 TrainingImage.thoi_gian_xoa.is_(None),
             ).all()
             for image in training_images:
@@ -776,14 +776,14 @@ class AdminService:
                 image.trang_thai = TrangThaiAnhHuanLuyen.da_duyet
                 image.thoi_gian_duyet = now
 
-        for uid in user_ids_to_enroll:
+        for uid in nguoi_dung_ids_to_enroll:
             already = db.query(LearningProgress).filter(
-                LearningProgress.user_id == uid,
+                LearningProgress.nguoi_dung_id == uid,
                 LearningProgress.ban_dich_id == first_translation_id,
             ).first()
             if not already:
                 db.add(LearningProgress(
-                    user_id=uid,
+                    nguoi_dung_id=uid,
                     ban_dich_id=first_translation_id,
                     ngay_on_tiep=now,
                     lan_on_cuoi=now,
@@ -814,7 +814,7 @@ class AdminService:
             object_id=obj.id,
             translation_id=first_translation_id,
             examples_created=total_examples_created,
-            users_enrolled=len(user_ids_to_enroll),
+            users_enrolled=len(nguoi_dung_ids_to_enroll),
         )
 
     # ------------------------------------------------------------------
@@ -903,14 +903,14 @@ class AdminService:
         root_prediction = self._approved_root_prediction_for_object(db, obj)
 
         review_translation = self._pick_review_translation(db, obj.id)
-        user_ids_to_enroll: set[int] = set()
-        training_scan_ids: set[int] = set()
+        nguoi_dung_ids_to_enroll: set[int] = set()
+        training_lich_su_quet_ids: set[int] = set()
         for rel in related_predictions:
             if rel.scan:
                 rel.scan.doi_tuong_id = obj.id
-                training_scan_ids.add(rel.scan.id)
-                if rel.scan.user_id:
-                    user_ids_to_enroll.add(rel.scan.user_id)
+                training_lich_su_quet_ids.add(rel.scan.id)
+                if rel.scan.nguoi_dung_id:
+                    nguoi_dung_ids_to_enroll.add(rel.scan.nguoi_dung_id)
 
             payload = self._prediction_payload(rel)
             payload["ma_bi_danh"] = alias_code
@@ -925,9 +925,9 @@ class AdminService:
 
         users_enrolled = 0
         now = now_vietnam()
-        if training_scan_ids:
+        if training_lich_su_quet_ids:
             training_images = db.query(TrainingImage).filter(
-                TrainingImage.scan_id.in_(training_scan_ids),
+                TrainingImage.lich_su_quet_id.in_(training_lich_su_quet_ids),
                 TrainingImage.thoi_gian_xoa.is_(None),
             ).all()
             for image in training_images:
@@ -937,14 +937,14 @@ class AdminService:
                 image.thoi_gian_duyet = now
 
         if review_translation:
-            for uid in user_ids_to_enroll:
+            for uid in nguoi_dung_ids_to_enroll:
                 already = db.query(LearningProgress).filter(
-                    LearningProgress.user_id == uid,
+                    LearningProgress.nguoi_dung_id == uid,
                     LearningProgress.ban_dich_id == review_translation.id,
                 ).first()
                 if not already:
                     db.add(LearningProgress(
-                        user_id=uid,
+                        nguoi_dung_id=uid,
                         ban_dich_id=review_translation.id,
                         ngay_on_tiep=now,
                         lan_on_cuoi=now,
@@ -1025,15 +1025,15 @@ class AdminService:
 
         review_translation = self._pick_review_translation(db, obj.id)
         users_enrolled = 0
-        if review_translation and p.scan and p.scan.user_id:
+        if review_translation and p.scan and p.scan.nguoi_dung_id:
             already = db.query(LearningProgress).filter(
-                LearningProgress.user_id == p.scan.user_id,
+                LearningProgress.nguoi_dung_id == p.scan.nguoi_dung_id,
                 LearningProgress.ban_dich_id == review_translation.id,
             ).first()
             if not already:
                 now = now_vietnam()
                 db.add(LearningProgress(
-                    user_id=p.scan.user_id,
+                    nguoi_dung_id=p.scan.nguoi_dung_id,
                     ban_dich_id=review_translation.id,
                     ngay_on_tiep=now,
                     lan_on_cuoi=now,
@@ -1135,9 +1135,9 @@ class AdminService:
 
         object_code = (raw.get("object_code") or p.nhan_du_doan or "").lower()
         related_rejected = 0
-        rejected_scan_ids: set[int] = set()
-        if p.scan_id:
-            rejected_scan_ids.add(p.scan_id)
+        rejected_lich_su_quet_ids: set[int] = set()
+        if p.lich_su_quet_id:
+            rejected_lich_su_quet_ids.add(p.lich_su_quet_id)
         if object_code:
             related_predictions = db.query(AIPrediction).filter(
                 AIPrediction.id != prediction_id,
@@ -1150,15 +1150,15 @@ class AdminService:
             ).all()
             for rel in related_predictions:
                 rel.trang_thai = TrangThaiDuyet.tu_choi
-                if rel.scan_id:
-                    rejected_scan_ids.add(rel.scan_id)
+                if rel.lich_su_quet_id:
+                    rejected_lich_su_quet_ids.add(rel.lich_su_quet_id)
                 related_rejected += 1
 
         p.trang_thai = TrangThaiDuyet.tu_choi
-        if rejected_scan_ids:
+        if rejected_lich_su_quet_ids:
             now = now_vietnam()
             training_images = db.query(TrainingImage).filter(
-                TrainingImage.scan_id.in_(rejected_scan_ids),
+                TrainingImage.lich_su_quet_id.in_(rejected_lich_su_quet_ids),
                 TrainingImage.thoi_gian_xoa.is_(None),
             ).all()
             for image in training_images:
@@ -1230,7 +1230,7 @@ class AdminService:
 
         # Tạo prediction mới cho object đúng
         new_pred = AIPrediction(
-            scan_id=p.scan_id,
+            lich_su_quet_id=p.lich_su_quet_id,
             nguon_ai=NguonAI.gemini,
             nhan_du_doan=new_code,
             do_tin_cay=p.do_tin_cay,
@@ -1555,8 +1555,8 @@ class AdminService:
                 pred.du_doan_goc_id = root_prediction.id
 
             scan = pred.scan or (
-                db.query(ScanHistory).filter(ScanHistory.id == pred.scan_id).first()
-                if pred.scan_id else None
+                db.query(ScanHistory).filter(ScanHistory.id == pred.lich_su_quet_id).first()
+                if pred.lich_su_quet_id else None
             )
             if scan:
                 scan.doi_tuong_id = obj.id
@@ -1759,32 +1759,32 @@ class AdminService:
             ))
         return result
 
-    def update_user_role(self, db: Session, user_id: int, req: UserRoleUpdate) -> bool:
-        u = db.query(User).filter(User.id == user_id, User.thoi_gian_xoa.is_(None)).first()
+    def update_user_role(self, db: Session, nguoi_dung_id: int, req: UserRoleUpdate) -> bool:
+        u = db.query(User).filter(User.id == nguoi_dung_id, User.thoi_gian_xoa.is_(None)).first()
         if not u:
             return False
         u.vai_tro_id = req.vai_tro_id
         db.commit()
         return True
 
-    def update_user_status(self, db: Session, user_id: int, req: UserStatusUpdate) -> bool:
-        u = db.query(User).filter(User.id == user_id, User.thoi_gian_xoa.is_(None)).first()
+    def update_user_status(self, db: Session, nguoi_dung_id: int, req: UserStatusUpdate) -> bool:
+        u = db.query(User).filter(User.id == nguoi_dung_id, User.thoi_gian_xoa.is_(None)).first()
         if not u:
             return False
         u.trang_thai_id = req.trang_thai_id
         db.commit()
         return True
 
-    def delete_user(self, db: Session, user_id: int) -> bool:
-        u = db.query(User).filter(User.id == user_id, User.thoi_gian_xoa.is_(None)).first()
+    def delete_user(self, db: Session, nguoi_dung_id: int) -> bool:
+        u = db.query(User).filter(User.id == nguoi_dung_id, User.thoi_gian_xoa.is_(None)).first()
         if not u:
             return False
         u.thoi_gian_xoa = now_vietnam()
         db.commit()
         return True
 
-    def reset_user_password(self, db: Session, user_id: int, new_password: str) -> bool:
-        u = db.query(User).filter(User.id == user_id, User.thoi_gian_xoa.is_(None)).first()
+    def reset_user_password(self, db: Session, nguoi_dung_id: int, new_password: str) -> bool:
+        u = db.query(User).filter(User.id == nguoi_dung_id, User.thoi_gian_xoa.is_(None)).first()
         if not u:
             return False
         u.mat_khau_ma_hoa = hash_password(new_password)
@@ -1798,7 +1798,7 @@ class AdminService:
     def list_scan_history(
         self,
         db: Session,
-        user_id: Optional[int] = None,
+        nguoi_dung_id: Optional[int] = None,
         username: Optional[str] = None,
         object_code: Optional[str] = None,
         date_from: Optional[str] = None,
@@ -1809,12 +1809,12 @@ class AdminService:
         from datetime import datetime as dt
         query = (
             db.query(ScanHistory, User, Object)
-            .outerjoin(User, ScanHistory.user_id == User.id)
+            .outerjoin(User, ScanHistory.nguoi_dung_id == User.id)
             .outerjoin(Object, ScanHistory.doi_tuong_id == Object.id)
             .order_by(ScanHistory.thoi_gian.desc())
         )
-        if user_id:
-            query = query.filter(ScanHistory.user_id == user_id)
+        if nguoi_dung_id:
+            query = query.filter(ScanHistory.nguoi_dung_id == nguoi_dung_id)
         if username:
             query = query.filter(User.ten_dang_nhap.ilike(f"%{username}%"))
         if object_code:
@@ -1833,26 +1833,26 @@ class AdminService:
         if date_to:
             query = query.filter(ScanHistory.thoi_gian <= dt.fromisoformat(date_to + "T23:59:59"))
         rows = query.offset(offset).limit(limit).all()
-        scan_ids = [scan.id for scan, _, _ in rows]
-        pending_scan_ids = set(
-            r[0] for r in db.query(AIPrediction.scan_id)
+        lich_su_quet_ids = [scan.id for scan, _, _ in rows]
+        pending_lich_su_quet_ids = set(
+            r[0] for r in db.query(AIPrediction.lich_su_quet_id)
             .filter(
-                AIPrediction.scan_id.in_(scan_ids),
+                AIPrediction.lich_su_quet_id.in_(lich_su_quet_ids),
                 AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet,
             ).all()
-        ) if scan_ids else set()
+        ) if lich_su_quet_ids else set()
         result = []
         for scan, user, obj in rows:
             result.append(ScanHistoryAdminItem(
                 id=scan.id,
-                user_id=scan.user_id,
+                nguoi_dung_id=scan.nguoi_dung_id,
                 username=user.ten_dang_nhap if user else None,
                 doi_tuong_id=scan.doi_tuong_id,
                 object_code=obj.ma_doi_tuong if obj else None,
                 url_anh=scan.url_anh,
                 do_tin_cay=scan.do_tin_cay,
                 thoi_gian=scan.thoi_gian,
-                has_pending_prediction=scan.id in pending_scan_ids,
+                has_pending_prediction=scan.id in pending_lich_su_quet_ids,
             ))
         return result
 
@@ -1860,21 +1860,21 @@ class AdminService:
     # User Stats
     # ------------------------------------------------------------------
 
-    def get_user_stats(self, db: Session, user_id: int) -> Optional[UserStatsAdminResponse]:
+    def get_user_stats(self, db: Session, nguoi_dung_id: int) -> Optional[UserStatsAdminResponse]:
         from sqlalchemy import func
         from datetime import date, timedelta
 
-        user = db.query(User).filter(User.id == user_id, User.thoi_gian_xoa.is_(None)).first()
+        user = db.query(User).filter(User.id == nguoi_dung_id, User.thoi_gian_xoa.is_(None)).first()
         if not user:
             return None
 
-        total_scans = db.query(ScanHistory).filter(ScanHistory.user_id == user_id).count()
-        total_reviews = db.query(ReviewLog).filter(ReviewLog.user_id == user_id).count()
-        total_learned = db.query(LearningProgress).filter(LearningProgress.user_id == user_id).count()
+        total_scans = db.query(ScanHistory).filter(ScanHistory.nguoi_dung_id == nguoi_dung_id).count()
+        total_reviews = db.query(ReviewLog).filter(ReviewLog.nguoi_dung_id == nguoi_dung_id).count()
+        total_learned = db.query(LearningProgress).filter(LearningProgress.nguoi_dung_id == nguoi_dung_id).count()
 
         review_date_rows = (
             db.query(func.date(ReviewLog.thoi_diem_on))
-            .filter(ReviewLog.user_id == user_id)
+            .filter(ReviewLog.nguoi_dung_id == nguoi_dung_id)
             .distinct()
             .order_by(func.date(ReviewLog.thoi_diem_on).desc())
             .all()
@@ -1909,19 +1909,19 @@ class AdminService:
 
         last_scan = (
             db.query(ScanHistory.thoi_gian)
-            .filter(ScanHistory.user_id == user_id)
+            .filter(ScanHistory.nguoi_dung_id == nguoi_dung_id)
             .order_by(ScanHistory.thoi_gian.desc())
             .first()
         )
         last_review = (
             db.query(ReviewLog.thoi_diem_on)
-            .filter(ReviewLog.user_id == user_id)
+            .filter(ReviewLog.nguoi_dung_id == nguoi_dung_id)
             .order_by(ReviewLog.thoi_diem_on.desc())
             .first()
         )
 
         return UserStatsAdminResponse(
-            user_id=user_id,
+            nguoi_dung_id=nguoi_dung_id,
             total_scans=total_scans,
             total_reviews=total_reviews,
             total_learned=total_learned,

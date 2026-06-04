@@ -17,7 +17,7 @@ def upgrade():
     op.create_table(
         "LichSuOnTap",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
-        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("nguoi_dung_id", sa.Integer(), nullable=False),
         sa.Column("tien_do_hoc_id", sa.BigInteger(), nullable=False),
         sa.Column("ban_dich_id", sa.Integer(), nullable=False),
         sa.Column("chat_luong", sa.Integer(), nullable=False),
@@ -30,7 +30,7 @@ def upgrade():
         sa.Column("so_lan_lap_moi", sa.Integer(), nullable=True),
         sa.Column("ngay_on_tiep", sa.DateTime(), nullable=True),
         sa.Column("thoi_gian_tao", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(["user_id"], ["NguoiDung.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["nguoi_dung_id"], ["NguoiDung.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["tien_do_hoc_id"], ["TienDoHoc.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["ban_dich_id"], ["BanDich.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
@@ -38,7 +38,7 @@ def upgrade():
     op.create_index(
         "ix_LichSuOnTap_user_time",
         "LichSuOnTap",
-        ["user_id", "thoi_diem_on"],
+        ["nguoi_dung_id", "thoi_diem_on"],
         unique=False,
     )
     op.create_index(

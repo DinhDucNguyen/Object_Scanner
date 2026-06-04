@@ -73,12 +73,12 @@ class Settings(BaseSettings):
 
     @field_validator("ADMIN_USER_IDS", mode="before")
     @classmethod
-    def parse_admin_user_ids(cls, value):
+    def parse_admin_nguoi_dung_ids(cls, value):
         if isinstance(value, str):
             value = value.strip()
             if not value:
                 return []
-            return [int(user_id.strip()) for user_id in value.split(",") if user_id.strip()]
+            return [int(nguoi_dung_id.strip()) for nguoi_dung_id in value.split(",") if nguoi_dung_id.strip()]
         return value
     
     class Config:

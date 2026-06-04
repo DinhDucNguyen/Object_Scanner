@@ -34,7 +34,7 @@ def upgrade():
     op.create_table(
         "AnhHuanLuyen",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("scan_id", sa.Integer(), nullable=True),
+        sa.Column("lich_su_quet_id", sa.Integer(), nullable=True),
         sa.Column("du_doan_id", sa.Integer(), nullable=True),
         sa.Column("doi_tuong_id", sa.Integer(), nullable=True),
         sa.Column("url_anh", sa.String(length=255), nullable=False),
@@ -51,13 +51,13 @@ def upgrade():
         sa.ForeignKeyConstraint(["doi_tuong_id"], ["DoiTuong.id"], ondelete="SET NULL"),
         sa.ForeignKeyConstraint(["du_doan_id"], ["DuDoanAI.id"], ondelete="SET NULL"),
         sa.ForeignKeyConstraint(["nguoi_duyet_id"], ["NguoiDung.id"], ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(["scan_id"], ["LichSuQuet.id"], ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(["lich_su_quet_id"], ["LichSuQuet.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index("ix_AnhHuanLuyen_doi_tuong_id", "AnhHuanLuyen", ["doi_tuong_id"])
     op.create_index("ix_AnhHuanLuyen_du_doan_id", "AnhHuanLuyen", ["du_doan_id"])
     op.create_index("ix_AnhHuanLuyen_nhan", "AnhHuanLuyen", ["nhan"])
-    op.create_index("ix_AnhHuanLuyen_scan_id", "AnhHuanLuyen", ["scan_id"])
+    op.create_index("ix_AnhHuanLuyen_lich_su_quet_id", "AnhHuanLuyen", ["lich_su_quet_id"])
     op.create_index("ix_AnhHuanLuyen_trang_thai", "AnhHuanLuyen", ["trang_thai"])
 
     op.create_table(
@@ -77,7 +77,7 @@ def upgrade():
     op.execute(
         """
         INSERT INTO AnhHuanLuyen (
-            scan_id,
+            lich_su_quet_id,
             doi_tuong_id,
             url_anh,
             nhan,
@@ -110,7 +110,7 @@ def downgrade():
     op.drop_index("ix_AnhHuanLuyenDataset_anh_huan_luyen_id", table_name="AnhHuanLuyenDataset")
     op.drop_table("AnhHuanLuyenDataset")
     op.drop_index("ix_AnhHuanLuyen_trang_thai", table_name="AnhHuanLuyen")
-    op.drop_index("ix_AnhHuanLuyen_scan_id", table_name="AnhHuanLuyen")
+    op.drop_index("ix_AnhHuanLuyen_lich_su_quet_id", table_name="AnhHuanLuyen")
     op.drop_index("ix_AnhHuanLuyen_nhan", table_name="AnhHuanLuyen")
     op.drop_index("ix_AnhHuanLuyen_du_doan_id", table_name="AnhHuanLuyen")
     op.drop_index("ix_AnhHuanLuyen_doi_tuong_id", table_name="AnhHuanLuyen")

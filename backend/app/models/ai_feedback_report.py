@@ -30,7 +30,7 @@ class AIPrediction(Base):
     __tablename__ = "DuDoanAI"
 
     id          = Column(Integer, primary_key=True, autoincrement=True)
-    scan_id     = Column(Integer, ForeignKey("LichSuQuet.id", ondelete="CASCADE"), nullable=False)
+    lich_su_quet_id     = Column(Integer, ForeignKey("LichSuQuet.id", ondelete="CASCADE"), nullable=False)
     nguon_ai    = Column(Enum(NguonAI), nullable=False)
     nhan_du_doan = Column(String(255), nullable=True)
     do_tin_cay  = Column(Float, nullable=True)

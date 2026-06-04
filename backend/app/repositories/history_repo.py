@@ -14,7 +14,7 @@ class HistoryRepository:
     def get_recent_scans(
         self,
         db: Session,
-        user_id: int,
+        nguoi_dung_id: int,
         limit: int = 50,
         offset: int = 0,
         keyword: str | None = None,
@@ -23,7 +23,7 @@ class HistoryRepository:
         to_date: Date | None = None,
     ):
         query = db.query(ScanHistory).filter(
-            ScanHistory.user_id == user_id
+            ScanHistory.nguoi_dung_id == nguoi_dung_id
         )
 
         start_date, end_date = self._date_range(from_date, to_date)
@@ -40,7 +40,7 @@ class HistoryRepository:
                 query
                 .outerjoin(Object, ScanHistory.doi_tuong_id == Object.id)
                 .outerjoin(Translation, Translation.doi_tuong_id == Object.id)
-                .outerjoin(AIPrediction, AIPrediction.scan_id == ScanHistory.id)
+                .outerjoin(AIPrediction, AIPrediction.lich_su_quet_id == ScanHistory.id)
                 .filter(or_(
                     func.lower(Object.ma_doi_tuong).like(pattern),
                     func.lower(Translation.tu_vung).like(pattern),
@@ -59,14 +59,14 @@ class HistoryRepository:
             .all()
         )
 
-    def get_by_id_for_user(self, db: Session, scan_id: int, user_id: int):
+    def get_by_id_for_user(self, db: Session, lich_su_quet_id: int, nguoi_dung_id: int):
         return db.query(ScanHistory).filter(
-            ScanHistory.id == scan_id,
-            ScanHistory.user_id == user_id,
+            ScanHistory.id == lich_su_quet_id,
+            ScanHistory.nguoi_dung_id == nguoi_dung_id,
         ).first()
 
-    def count_by_user(self, db: Session, user_id: int):
-        return db.query(ScanHistory).filter(ScanHistory.user_id == user_id).count()
+    def count_by_user(self, db: Session, nguoi_dung_id: int):
+        return db.query(ScanHistory).filter(ScanHistory.nguoi_dung_id == nguoi_dung_id).count()
 
     def create_scan(self, db: Session, scan: ScanHistory):
         db.add(scan)
@@ -78,9 +78,9 @@ class HistoryRepository:
         db.flush()
         return prediction
 
-    def get_predictions(self, db: Session, scan_id: int):
+    def get_predictions(self, db: Session, lich_su_quet_id: int):
         return db.query(AIPrediction).filter(
-            AIPrediction.scan_id == scan_id
+            AIPrediction.lich_su_quet_id == lich_su_quet_id
         ).order_by(AIPrediction.thoi_gian.desc()).all()
 
     def delete_scan(self, db: Session, scan: ScanHistory):

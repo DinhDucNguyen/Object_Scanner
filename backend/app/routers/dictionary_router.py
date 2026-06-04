@@ -6,7 +6,7 @@ import logging
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.dependencies.get_current_user import get_current_user_id, get_optional_user_id
+from app.dependencies.get_current_user import get_current_nguoi_dung_id, get_optional_nguoi_dung_id
 from app.core.limiter import limiter
 from app.services.dictionary_service import DictionaryService
 
@@ -78,7 +78,7 @@ def translate(
     request: Request,
     req: TranslateRequest,
     db: Session = Depends(get_db),
-    user_id: Optional[int] = Depends(get_optional_user_id),
+    nguoi_dung_id: Optional[int] = Depends(get_optional_nguoi_dung_id),
 ):
     """DB-first dictionary lookup, then MyMemory fallback for plain translation."""
     if not req.text.strip():
@@ -89,7 +89,7 @@ def translate(
         req.text.strip(),
         req.from_lang,
         req.to_lang,
-        user_id,
+        nguoi_dung_id,
     )
     if result is None or result.get("_error") in ("quota_exceeded", "service_unavailable"):
         raise HTTPException(
@@ -103,9 +103,9 @@ def translate(
 def get_history(
     limit: int = Query(default=30, ge=1, le=100),
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id),
 ):
-    items = dictionary_service.get_history(db, user_id, limit)
+    items = dictionary_service.get_history(db, nguoi_dung_id, limit)
     return [DictionaryHistoryItem(**item) for item in items]
 
 
@@ -113,9 +113,9 @@ def get_history(
 def delete_history_item(
     item_id: int,
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id),
 ):
-    if not dictionary_service.delete_history_item(db, user_id, item_id):
+    if not dictionary_service.delete_history_item(db, nguoi_dung_id, item_id):
         raise HTTPException(status_code=404, detail="Item not found")
 
 

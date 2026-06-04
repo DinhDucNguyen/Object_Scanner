@@ -29,8 +29,8 @@ class VocabPayloadSchema(BaseModel):
 
 class RelatedPredictionImage(BaseModel):
     prediction_id: int
-    scan_id: Optional[int] = None
-    user_id: Optional[int] = None
+    lich_su_quet_id: Optional[int] = None
+    nguoi_dung_id: Optional[int] = None
     image_url: Optional[str] = None
     vai_tro: Optional[str] = None
     thoi_gian: Optional[datetime] = None
@@ -40,7 +40,7 @@ class RelatedPredictionImage(BaseModel):
 
 class PredictionListItem(BaseModel):
     id: int
-    scan_id: int
+    lich_su_quet_id: int
     nhan_du_doan: Optional[str] = None
     do_tin_cay: Optional[float] = None
     trang_thai: str
@@ -55,7 +55,7 @@ class PredictionListItem(BaseModel):
 
 class PredictionDetailResponse(BaseModel):
     id: int
-    scan_id: int
+    lich_su_quet_id: int
     nhan_du_doan: Optional[str] = None
     do_tin_cay: Optional[float] = None
     trang_thai: str
@@ -304,7 +304,7 @@ class UserPasswordReset(BaseModel):
 
 class ScanHistoryAdminItem(BaseModel):
     id: int
-    user_id: Optional[int] = None
+    nguoi_dung_id: Optional[int] = None
     username: Optional[str] = None
     doi_tuong_id: Optional[int] = None
     object_code: Optional[str] = None
@@ -319,7 +319,7 @@ class ScanHistoryAdminItem(BaseModel):
 # ---------------------------------------------------------------------------
 
 class UserStatsAdminResponse(BaseModel):
-    user_id: int
+    nguoi_dung_id: int
     total_scans: int = 0
     total_reviews: int = 0
     total_learned: int = 0

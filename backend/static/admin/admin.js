@@ -506,12 +506,12 @@
                    style="width:92px;height:92px;object-fit:cover;border-radius:8px;border:1px solid #dee2e6;cursor:zoom-in;"
                    alt="Ảnh liên quan"
                    onclick="zoomImage('${img.image_url}')"
-                   title="Scan #${img.scan_id || '—'}">
+                   title="Scan #${img.lich_su_quet_id || '—'}">
               <div class="mt-1" style="font-size:.72rem;line-height:1.2;">
                 <span class="badge ${img.vai_tro === 'chinh' ? 'badge-approved' : 'badge-neutral'}">
                   ${img.vai_tro === 'chinh' ? 'Chính' : 'Bổ sung'}
                 </span>
-                <div class="text-muted mt-1">Scan #${img.scan_id || '—'}</div>
+                <div class="text-muted mt-1">Scan #${img.lich_su_quet_id || '—'}</div>
                 ${canEditRelatedImages ? `
                   <div class="d-flex gap-1 mt-1 flex-wrap">
                     ${img.vai_tro !== 'chinh' ? `<button class="btn-act del" style="width:28px;height:26px;" onclick="detachReviewImage(${img.prediction_id}, ${rootPredictionId})" title="Bỏ khỏi nhóm duyệt"><i class="bi bi-trash3"></i></button>
@@ -1762,12 +1762,12 @@
                 ${trainingSourceLabel(img.source)}
               </div>
               <div class="td-thumb-actions">
-                ${img.scan_id && img.status !== 'da_duyet'
-                  ? `<button class="btn-act" onclick="approveTrainingImage(${img.scan_id},'${r.object_code}')" title="Duyệt ảnh"><i class="bi bi-check-lg"></i></button>` : ''}
-                ${img.scan_id && img.status !== 'tu_choi'
-                  ? `<button class="btn-act del" onclick="unlinkScan(${img.scan_id},'${r.object_code}')" title="Từ chối ảnh"><i class="bi bi-x-lg"></i></button>` : ''}
-                ${img.scan_id
-                  ? `<button class="btn-act" onclick="openReassign(${img.scan_id},'${r.object_code}')" title="Chuyển đối tượng"><i class="bi bi-arrow-left-right"></i></button>` : ''}
+                ${img.lich_su_quet_id && img.status !== 'da_duyet'
+                  ? `<button class="btn-act" onclick="approveTrainingImage(${img.lich_su_quet_id},'${r.object_code}')" title="Duyệt ảnh"><i class="bi bi-check-lg"></i></button>` : ''}
+                ${img.lich_su_quet_id && img.status !== 'tu_choi'
+                  ? `<button class="btn-act del" onclick="unlinkScan(${img.lich_su_quet_id},'${r.object_code}')" title="Từ chối ảnh"><i class="bi bi-x-lg"></i></button>` : ''}
+                ${img.lich_su_quet_id
+                  ? `<button class="btn-act" onclick="openReassign(${img.lich_su_quet_id},'${r.object_code}')" title="Chuyển đối tượng"><i class="bi bi-arrow-left-right"></i></button>` : ''}
               </div>
             </div>`
           ).join('');
@@ -2157,7 +2157,7 @@
               : '<span class="text-muted" style="font-size:.75rem;">N/A</span>'}</td>
             <td>
               <span class="fw-semibold" style="font-size:.82rem;">${s.username || '—'}</span>
-              ${s.user_id ? `<br><span class="text-muted" style="font-size:.72rem;">ID: ${s.user_id}</span>` : ''}
+              ${s.nguoi_dung_id ? `<br><span class="text-muted" style="font-size:.72rem;">ID: ${s.nguoi_dung_id}</span>` : ''}
             </td>
             <td>${s.object_code
               ? `<code class="cell-ellipsis code-cell" title="${escHtml(s.object_code)}">${escHtml(s.object_code)}</code>`

@@ -8,8 +8,8 @@ Endpoints:
   GET  /api/admin/predictions/export-training         — Xuất JSONL flat (1 dòng/prediction)
   GET  /api/admin/predictions/export-training-grouped — Xuất JSONL gom nhóm theo object + ảnh đa góc
   GET  /api/admin/predictions/{id}               — Chi tiết kèm vocab_payload
-  PATCH /api/admin/training-images/{scan_id}/unlink   — Bỏ ảnh khỏi pool training
-  PATCH /api/admin/training-images/{scan_id}/reassign — Chuyển ảnh sang đối tượng khác
+  PATCH /api/admin/training-images/{lich_su_quet_id}/unlink   — Bỏ ảnh khỏi pool training
+  PATCH /api/admin/training-images/{lich_su_quet_id}/reassign — Chuyển ảnh sang đối tượng khác
   POST /api/admin/predictions/{id}/approve       — Duyệt → insert DoiTuong/BanDich/ViDu
   POST /api/admin/predictions/{id}/reject        — Từ chối
   GET  /api/admin/stats                          — Thống kê nhanh
@@ -30,7 +30,7 @@ from app.services.object_media_service import set_primary_object_image
 from app.utils.timezone import now_vietnam
 from app.utils.cloudinary_helper import upload_image
 from app.utils.upload import read_upload_bytes
-from app.dependencies.get_current_user import require_admin_user_id
+from app.dependencies.get_current_user import require_admin_nguoi_dung_id
 from app.schemas.admin import (
     PredictionListItem,
     PredictionDetailResponse,
@@ -51,7 +51,7 @@ from app.schemas.admin import (
 router = APIRouter(
     prefix="/admin",
     tags=["Admin — Kiểm duyệt từ vựng"],
-    dependencies=[Depends(require_admin_user_id)],
+    dependencies=[Depends(require_admin_nguoi_dung_id)],
 )
 admin_service = AdminService()
 OBJECT_UPLOAD_DIR = "uploads/objects"
@@ -115,37 +115,37 @@ def export_training_grouped(db: Session = Depends(get_db)):
     )
 
 
-@router.patch("/training-images/{scan_id}/approve")
+@router.patch("/training-images/{lich_su_quet_id}/approve")
 def approve_training_image(
-    scan_id: int,
+    lich_su_quet_id: int,
     db: Session = Depends(get_db),
-    admin_id: int = Depends(require_admin_user_id),
+    admin_id: int = Depends(require_admin_nguoi_dung_id),
 ):
     """Duyet anh training ma khong thay doi logic lich su quet."""
-    item = admin_service.approve_training_image_by_scan(db, scan_id, admin_id=admin_id)
+    item = admin_service.approve_training_image_by_scan(db, lich_su_quet_id, admin_id=admin_id)
     if not item:
         raise HTTPException(404, "Khong tim thay anh training")
-    return {"message": "Da duyet anh training", "scan_id": scan_id, "training_image_id": item.id}
+    return {"message": "Da duyet anh training", "lich_su_quet_id": lich_su_quet_id, "training_image_id": item.id}
 
 
-@router.patch("/training-images/{scan_id}/unlink")
+@router.patch("/training-images/{lich_su_quet_id}/unlink")
 def unlink_training_image(
-    scan_id: int,
+    lich_su_quet_id: int,
     db: Session = Depends(get_db),
-    admin_id: int = Depends(require_admin_user_id),
+    admin_id: int = Depends(require_admin_nguoi_dung_id),
 ):
     """Từ chối ảnh training; lịch sử quét vẫn giữ đối tượng."""
-    item = admin_service.reject_training_image_by_scan(db, scan_id, admin_id=admin_id)
+    item = admin_service.reject_training_image_by_scan(db, lich_su_quet_id, admin_id=admin_id)
     if not item:
         raise HTTPException(404, "Khong tim thay anh training")
-    return {"message": "Da tu choi anh training", "scan_id": scan_id, "training_image_id": item.id}
+    return {"message": "Da tu choi anh training", "lich_su_quet_id": lich_su_quet_id, "training_image_id": item.id}
 
 
 @router.delete("/training-images/unlink-all")
 def unlink_all_training_images(
     object_code: str = Query(..., description="Mã đối tượng cần xoá toàn bộ ảnh training"),
     db: Session = Depends(get_db),
-    admin_id: int = Depends(require_admin_user_id),
+    admin_id: int = Depends(require_admin_nguoi_dung_id),
 ):
     """Từ chối toàn bộ ảnh training của một nhãn; không sửa lịch sử quét."""
     count = admin_service.reject_training_images_for_object(db, object_code, admin_id=admin_id)
@@ -188,7 +188,7 @@ def cleanup_known_class_predictions(db: Session = Depends(get_db)):
     matched = 0
     resolved = 0
     skipped_missing_object = []
-    linked_scan_ids = []
+    linked_lich_su_quet_ids = []
     deleted_prediction_ids = []
 
     for p in predictions:
@@ -209,7 +209,7 @@ def cleanup_known_class_predictions(db: Session = Depends(get_db)):
             p.scan.doi_tuong_id = obj.id
             admin_service.training_images.create_candidate(
                 db,
-                scan_id=p.scan.id,
+                lich_su_quet_id=p.scan.id,
                 url_anh=p.scan.url_anh,
                 doi_tuong_id=obj.id,
                 nhan=obj.ma_doi_tuong,
@@ -217,7 +217,7 @@ def cleanup_known_class_predictions(db: Session = Depends(get_db)):
                 do_tin_cay=p.do_tin_cay,
                 ghi_chu="Resolved known YOLO/COCO class",
             )
-            linked_scan_ids.append(p.scan.id)
+            linked_lich_su_quet_ids.append(p.scan.id)
 
         deleted_prediction_ids.append(p.id)
         db.delete(p)
@@ -228,28 +228,28 @@ def cleanup_known_class_predictions(db: Session = Depends(get_db)):
         "message": "Da resolve pending predictions cua cac class YOLO/COCO da co object chinh thuc",
         "matched": matched,
         "resolved": resolved,
-        "linked_scan_ids": linked_scan_ids,
+        "linked_lich_su_quet_ids": linked_lich_su_quet_ids,
         "deleted_prediction_ids": deleted_prediction_ids,
         "skipped_missing_object": skipped_missing_object,
     }
 
 
-@router.patch("/training-images/{scan_id}/reassign")
+@router.patch("/training-images/{lich_su_quet_id}/reassign")
 def reassign_training_image(
-    scan_id: int,
+    lich_su_quet_id: int,
     target_object_code: str = Query(..., description="Mã đối tượng đích"),
     db: Session = Depends(get_db),
 ):
     """Chuyển ảnh scan sang đối tượng khác trong pool training."""
-    item, target_obj = admin_service.reassign_training_image_by_scan(db, scan_id, target_object_code)
+    item, target_obj = admin_service.reassign_training_image_by_scan(db, lich_su_quet_id, target_object_code)
     if not target_obj:
-        scan_exists = db.query(ScanHistory.id).filter(ScanHistory.id == scan_id).first()
+        scan_exists = db.query(ScanHistory.id).filter(ScanHistory.id == lich_su_quet_id).first()
         if not scan_exists:
             raise HTTPException(404, "Khong tim thay scan")
         raise HTTPException(404, f"Khong tim thay doi tuong '{target_object_code}'")
     return {
         "message": f"Da chuyen anh sang '{target_object_code}'",
-        "scan_id": scan_id,
+        "lich_su_quet_id": lich_su_quet_id,
         "training_image_id": item.id if item else None,
         "new_object_id": target_obj.id,
     }
@@ -654,38 +654,38 @@ def list_users(
     return admin_service.list_users(db, limit=limit, offset=offset, search=search)
 
 
-@router.put("/users/{user_id}/role")
-def update_user_role(user_id: int, req: UserRoleUpdate, db: Session = Depends(get_db)):
-    if not admin_service.update_user_role(db, user_id, req):
+@router.put("/users/{nguoi_dung_id}/role")
+def update_user_role(nguoi_dung_id: int, req: UserRoleUpdate, db: Session = Depends(get_db)):
+    if not admin_service.update_user_role(db, nguoi_dung_id, req):
         raise HTTPException(404, "Không tìm thấy người dùng")
     return {"message": "Đã cập nhật vai trò"}
 
 
-@router.put("/users/{user_id}/status")
-def update_user_status(user_id: int, req: UserStatusUpdate, db: Session = Depends(get_db)):
-    if not admin_service.update_user_status(db, user_id, req):
+@router.put("/users/{nguoi_dung_id}/status")
+def update_user_status(nguoi_dung_id: int, req: UserStatusUpdate, db: Session = Depends(get_db)):
+    if not admin_service.update_user_status(db, nguoi_dung_id, req):
         raise HTTPException(404, "Không tìm thấy người dùng")
     return {"message": "Đã cập nhật trạng thái"}
 
 
-@router.delete("/users/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    if not admin_service.delete_user(db, user_id):
+@router.delete("/users/{nguoi_dung_id}")
+def delete_user(nguoi_dung_id: int, db: Session = Depends(get_db)):
+    if not admin_service.delete_user(db, nguoi_dung_id):
         raise HTTPException(404, "Không tìm thấy người dùng")
     return {"message": "Đã xoá người dùng"}
 
 
-@router.post("/users/{user_id}/reset-password")
-def reset_user_password(user_id: int, req: UserPasswordReset, db: Session = Depends(get_db)):
-    if not admin_service.reset_user_password(db, user_id, req.new_password):
+@router.post("/users/{nguoi_dung_id}/reset-password")
+def reset_user_password(nguoi_dung_id: int, req: UserPasswordReset, db: Session = Depends(get_db)):
+    if not admin_service.reset_user_password(db, nguoi_dung_id, req.new_password):
         raise HTTPException(404, "Không tìm thấy người dùng")
     return {"message": "Đã đặt lại mật khẩu"}
 
 
-@router.get("/users/{user_id}/stats", response_model=UserStatsAdminResponse)
-def get_user_stats(user_id: int, db: Session = Depends(get_db)):
+@router.get("/users/{nguoi_dung_id}/stats", response_model=UserStatsAdminResponse)
+def get_user_stats(nguoi_dung_id: int, db: Session = Depends(get_db)):
     """Stats của một user: tổng quét, tổng ôn, từ đã học, streak."""
-    result = admin_service.get_user_stats(db, user_id)
+    result = admin_service.get_user_stats(db, nguoi_dung_id)
     if not result:
         raise HTTPException(404, "Không tìm thấy người dùng")
     return result
@@ -697,7 +697,7 @@ def get_user_stats(user_id: int, db: Session = Depends(get_db)):
 
 @router.get("/scan-history", response_model=List[ScanHistoryAdminItem])
 def list_scan_history(
-    user_id: Optional[int] = Query(default=None),
+    nguoi_dung_id: Optional[int] = Query(default=None),
     username: Optional[str] = Query(default=None),
     object_code: Optional[str] = Query(default=None),
     date_from: Optional[str] = Query(default=None),
@@ -708,7 +708,7 @@ def list_scan_history(
 ):
     """Lịch sử quét toàn bộ hệ thống, có thể lọc theo user, mã đối tượng và khoảng ngày."""
     return admin_service.list_scan_history(
-        db, user_id=user_id, username=username, object_code=object_code,
+        db, nguoi_dung_id=nguoi_dung_id, username=username, object_code=object_code,
         date_from=date_from, date_to=date_to, limit=limit, offset=offset
     )
 
@@ -721,12 +721,12 @@ def bulk_delete_scan_history(ids: List[int] = Query(...), db: Session = Depends(
     return {"message": f"Da xoa {count} ban ghi", "count": count}
 
 
-@router.delete("/scan-history/{scan_id}")
-def delete_scan_history(scan_id: int, db: Session = Depends(get_db)):
+@router.delete("/scan-history/{lich_su_quet_id}")
+def delete_scan_history(lich_su_quet_id: int, db: Session = Depends(get_db)):
     """Xóa một bản ghi lịch sử quét."""
-    scan = db.query(ScanHistory).filter(ScanHistory.id == scan_id).first()
+    scan = db.query(ScanHistory).filter(ScanHistory.id == lich_su_quet_id).first()
     if not scan:
         raise HTTPException(404, "Không tìm thấy bản ghi")
     db.delete(scan)
     db.commit()
-    return {"message": "Đã xóa", "scan_id": scan_id}
+    return {"message": "Đã xóa", "lich_su_quet_id": lich_su_quet_id}

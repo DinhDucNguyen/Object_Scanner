@@ -89,7 +89,7 @@ class ScanService:
         self,
         db: Session,
         image_bytes: bytes,
-        user_id: int | None = None,
+        nguoi_dung_id: int | None = None,
         base_url: str | None = None,
     ) -> ScanResponse:
         # Bước 1: quick scan — model nhẹ, quota cao
@@ -148,7 +148,7 @@ class ScanService:
         if existing_pending:
             scan, prediction, source_payload = self._create_image_only_pending_scan(
                 db=db,
-                user_id=user_id,
+                nguoi_dung_id=nguoi_dung_id,
                 obj=obj,
                 object_code=object_code,
                 source_prediction=existing_pending,
@@ -166,14 +166,14 @@ class ScanService:
                     object_code=obj.ma_doi_tuong if obj else object_code,
                     object_id=obj.id if obj else 0,
                 ),
-                scan_id=scan.id,
+                lich_su_quet_id=scan.id,
                 prediction_id=prediction.id,
                 pending_review=True,
             )
 
         scan, prediction = self._create_pending_review(
             db=db,
-            user_id=user_id,
+            nguoi_dung_id=nguoi_dung_id,
             obj=obj,
             object_code=object_code,
             gemini_result=gemini_result,
@@ -191,7 +191,7 @@ class ScanService:
                 object_code=obj.ma_doi_tuong if obj else object_code,
                 object_id=obj.id if obj else 0,
             ),
-            scan_id=scan.id,
+            lich_su_quet_id=scan.id,
             prediction_id=prediction.id,
             pending_review=True,
         )
@@ -225,7 +225,7 @@ class ScanService:
     def _create_pending_review(
         self,
         db: Session,
-        user_id: int | None,
+        nguoi_dung_id: int | None,
         obj: Object | None,
         object_code: str,
         gemini_result: dict,
@@ -234,7 +234,7 @@ class ScanService:
     ) -> tuple[ScanHistory, AIPrediction]:
         image_url = self._save_scan_image(image_bytes, base_url)
         scan = ScanHistory(
-            user_id=user_id,
+            nguoi_dung_id=nguoi_dung_id,
             doi_tuong_id=obj.id if obj else None,
             do_tin_cay=1.0,
             url_anh=image_url,
@@ -250,7 +250,7 @@ class ScanService:
             payload["existing_object_id"] = obj.id
 
         prediction = AIPrediction(
-            scan_id=scan.id,
+            lich_su_quet_id=scan.id,
             nguon_ai=NguonAI.gemini,
             nhan_du_doan=object_code,
             do_tin_cay=1.0,
@@ -262,7 +262,7 @@ class ScanService:
         db.flush()
         self.training_images.create_candidate(
             db,
-            scan_id=scan.id,
+            lich_su_quet_id=scan.id,
             du_doan_id=prediction.id,
             doi_tuong_id=obj.id if obj else None,
             url_anh=image_url,
@@ -294,7 +294,7 @@ class ScanService:
     def _create_image_only_pending_scan(
         self,
         db: Session,
-        user_id: int | None,
+        nguoi_dung_id: int | None,
         obj: Object | None,
         object_code: str,
         source_prediction: AIPrediction,
@@ -304,7 +304,7 @@ class ScanService:
         image_url = self._save_scan_image(image_bytes, base_url)
         source_payload = self._prediction_payload(source_prediction)
         scan = ScanHistory(
-            user_id=user_id,
+            nguoi_dung_id=nguoi_dung_id,
             doi_tuong_id=obj.id if obj else None,
             do_tin_cay=1.0,
             url_anh=image_url,
@@ -325,7 +325,7 @@ class ScanService:
             payload["existing_object_id"] = obj.id
 
         prediction = AIPrediction(
-            scan_id=scan.id,
+            lich_su_quet_id=scan.id,
             nguon_ai=NguonAI.gemini,
             nhan_du_doan=object_code,
             do_tin_cay=1.0,
@@ -338,7 +338,7 @@ class ScanService:
         db.flush()
         self.training_images.create_candidate(
             db,
-            scan_id=scan.id,
+            lich_su_quet_id=scan.id,
             du_doan_id=prediction.id,
             doi_tuong_id=obj.id if obj else None,
             url_anh=image_url,

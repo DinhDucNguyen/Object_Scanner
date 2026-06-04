@@ -14,7 +14,7 @@ from app.services.scan_service import ScanService
 from app.services.gemini_service import GeminiService
 from app.services.tts_service import TTSService
 from app.schemas.common import ScanRequest, ScanResponse, TranslationResponse
-from app.dependencies.get_current_user import get_optional_user_id
+from app.dependencies.get_current_user import get_optional_nguoi_dung_id
 from app.utils.image import compress_image
 from app.core.constants import MAX_IMAGE_UPLOAD_BYTES
 from app.core.limiter import limiter
@@ -31,11 +31,11 @@ tts_service = TTSService()
 def scan_object(
     request: ScanRequest, 
     db: Session = Depends(get_db),
-    user_id: Optional[int] = Depends(get_optional_user_id)
+    nguoi_dung_id: Optional[int] = Depends(get_optional_nguoi_dung_id)
 ):
     """Scan bằng object_code (từ ML Kit/YOLOv10 on-device)."""
     logger.info("Scan request: object_code=%s, confidence=%s", request.object_code, request.confidence)
-    request.user_id = user_id
+    request.nguoi_dung_id = nguoi_dung_id
     result = scan_service.process_scan(db, request)
     logger.info("Scan response: source=%s, translations=%d", result.source, len(result.translations))
     return result
@@ -47,7 +47,7 @@ async def scan_image(
     request: Request,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    user_id: Optional[int] = Depends(get_optional_user_id),
+    nguoi_dung_id: Optional[int] = Depends(get_optional_nguoi_dung_id),
 ):
     """Scan bằng ảnh — gọi Gemini Vision API để nhận diện."""
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -63,7 +63,7 @@ async def scan_image(
         scan_service.process_scan_image,
         db,
         compressed_bytes,
-        user_id,
+        nguoi_dung_id,
         str(request.base_url).rstrip("/"),
     )
 

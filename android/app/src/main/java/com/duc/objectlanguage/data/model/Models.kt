@@ -55,7 +55,7 @@ data class UserResponse(
 // ====== SETTINGS ======
 
 data class UserSettingsResponse(
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("nguoi_dung_id") val userId: Int,
     @SerializedName("display_language") val displayLanguage: String = "vi",
     @SerializedName("dark_mode") val darkMode: Boolean = false
 )
@@ -78,7 +78,7 @@ data class ScanResponse(
     @SerializedName("object_code") val objectCode: String,
     @SerializedName("category_name") val categoryName: String?,
     val translations: List<TranslationResponse>,
-    @SerializedName("scan_id") val scanId: Int? = null,
+    @SerializedName("lich_su_quet_id") val scanId: Int? = null,
     @SerializedName("prediction_id") val predictionId: Int? = null,
     @SerializedName("pending_review") val pendingReview: Boolean = false,
     val aliases: List<String> = emptyList()
@@ -283,7 +283,7 @@ data class ObjectData(
 // ====== PROFILE ======
 
 data class ProfileData(
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("nguoi_dung_id") val userId: Int,
     val username: String?,
     @SerializedName("full_name") val fullName: String?,
     @SerializedName("avatar_url") val avatarUrl: String?,

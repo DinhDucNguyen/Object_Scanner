@@ -48,7 +48,7 @@ class TranslationResponse(BaseModel):
 class ScanRequest(BaseModel):
     object_code: str
     confidence: float = 0.0
-    user_id: int = 1
+    nguoi_dung_id: int = 1
     image_url: Optional[str] = None
 
 
@@ -58,7 +58,7 @@ class ScanResponse(BaseModel):
     object_code: str
     category_name: Optional[str] = None
     translations: List[TranslationResponse]
-    scan_id: Optional[int] = None
+    lich_su_quet_id: Optional[int] = None
     prediction_id: Optional[int] = None
     pending_review: bool = False
     aliases: List[str] = []
@@ -164,7 +164,7 @@ class CollectionInsightsResponse(BaseModel):
 # ====== AI Prediction ======
 
 class AIPredictionCreate(BaseModel):
-    scan_id: int
+    lich_su_quet_id: int
     source_ai: str  # 'yolo' or 'gemini'
     predicted_label: Optional[str] = None
     confidence: Optional[float] = None
@@ -172,7 +172,7 @@ class AIPredictionCreate(BaseModel):
 
 class AIPredictionResponse(BaseModel):
     id: int
-    scan_id: int
+    lich_su_quet_id: int
     source_ai: str
     predicted_label: Optional[str] = None
     confidence: Optional[float] = None
