@@ -13,3 +13,4 @@ backend/backups/
 # AI tool directories
 .agent/
 .claude/
+.vscode/
