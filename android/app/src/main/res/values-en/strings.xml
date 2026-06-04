@@ -378,6 +378,7 @@
     <string name="test_no_cards_matching">No cards available for matching yet.</string>
     <string name="test_no_image_cards_matching">Your reviewed words do not have standard images yet.</string>
     <string name="test_no_cards_pronunciation">No words available for pronunciation practice yet.</string>
+    <string name="test_empty_back">Back</string>
     <string name="test_load_quiz_error">Could not load quiz: %s</string>
     <string name="test_load_game_error">Could not load game: %s</string>
     <string name="test_load_practice_error">Could not load practice: %s</string>
@@ -474,6 +475,9 @@
     <string name="streak_stats_title">Review statistics</string>
     <string name="streak_today_done">Completed today!</string>
     <string name="streak_today_pending">No review yet today</string>
+    <string name="streak_load_error">Could not load your streak. Showing the latest local data.</string>
+    <string name="streak_calendar_load_error">Could not load recent learning calendar.</string>
+    <string name="streak_sync_error">Could not sync your streak to the server.</string>
     <string name="streak_milestone_label">Next milestone: %d days</string>
     <string name="streak_days_to_go">%d days to go</string>
     <string name="streak_days_count">%d days</string>
@@ -606,6 +610,7 @@
     <string name="ci_mastered_label">Mastered</string>
     <string name="ci_reviewing_label">Learning</string>
     <string name="ci_not_started_label">Not started</string>
+    <string name="ci_no_data_label">No data yet</string>
 
     <!-- Analytics -->
     <string name="analytics_overview_title">Learning overview</string>
@@ -812,4 +817,9 @@
     <string name="weekday_thu_short">Thu</string>
     <string name="weekday_fri_short">Fri</string>
     <string name="weekday_sat_short">Sat</string>
+    <string name="dashboard_load_error">Could not load dashboard data</string>
+    <plurals name="history_result_count">
+        <item quantity="one">%d result</item>
+        <item quantity="other">%d results</item>
+    </plurals>
 </resources>

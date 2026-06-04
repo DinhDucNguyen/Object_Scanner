@@ -44,6 +44,9 @@ class ListeningTestViewModel(application: Application) : AndroidViewModel(applic
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
+    private val _emptyMessage = MutableLiveData<String?>()
+    val emptyMessage: LiveData<String?> = _emptyMessage
+
     private val _finished = MutableLiveData(false)
     val finished: LiveData<Boolean> = _finished
 
@@ -54,6 +57,7 @@ class ListeningTestViewModel(application: Application) : AndroidViewModel(applic
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
+            _emptyMessage.value = null
             _finished.value = false
             _currentIndex.value = 0
             _score.value = 0
@@ -62,8 +66,7 @@ class ListeningTestViewModel(application: Application) : AndroidViewModel(applic
             result.fold(
                 onSuccess = { cards ->
                     if (cards.isEmpty()) {
-                        _error.value = localizedString(R.string.test_no_cards_listening)
-                        _finished.value = true
+                        _emptyMessage.value = localizedString(R.string.test_no_cards_listening)
                         _isLoading.value = false
                         return@fold
                     }
@@ -86,7 +89,6 @@ class ListeningTestViewModel(application: Application) : AndroidViewModel(applic
                 },
                 onFailure = { throwable ->
                     _error.value = localizedString(R.string.test_load_practice_error, throwable.message.orEmpty())
-                    _finished.value = true
                 }
             )
             _isLoading.value = false

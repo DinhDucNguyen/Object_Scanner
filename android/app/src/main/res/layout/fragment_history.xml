@@ -40,13 +40,18 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/btnBack"
+            android:layout_toStartOf="@id/historyToolbarActions"
             android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="@string/title_history"
             android:textColor="@color/text_primary"
             android:textSize="22sp"
             android:textStyle="bold" />
 
         <LinearLayout
+            android:id="@+id/historyToolbarActions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
@@ -241,6 +246,16 @@
             android:visibility="gone"
             app:tint="@color/text_secondary" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvResultCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="2dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp"
+        android:visibility="gone" />
 
     <FrameLayout
         android:layout_width="match_parent"

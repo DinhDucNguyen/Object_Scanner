@@ -131,11 +131,11 @@ class CollectionInsightsFragment : Fragment() {
         
         val entries = if (insights.totalItems > 0) {
             listOf(
-                PieEntry(reviewed.toFloat(), "Đã ôn"),
-                PieEntry(unreviewed.toFloat(), "Chưa ôn")
+                PieEntry(reviewed.toFloat(), getString(R.string.ci_reviewed)),
+                PieEntry(unreviewed.toFloat(), getString(R.string.ci_not_started_label))
             )
         } else {
-            listOf(PieEntry(1f, "Chưa có dữ liệu"))
+            listOf(PieEntry(1f, getString(R.string.ci_no_data_label)))
         }
         
         val textColor = ContextCompat.getColor(requireContext(), R.color.text_primary)

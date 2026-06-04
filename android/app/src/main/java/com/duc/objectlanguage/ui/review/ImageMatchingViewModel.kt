@@ -45,6 +45,9 @@ class ImageMatchingViewModel(application: Application) : AndroidViewModel(applic
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
+    private val _emptyMessage = MutableLiveData<String?>()
+    val emptyMessage: LiveData<String?> = _emptyMessage
+
     private val _finished = MutableLiveData(false)
     val finished: LiveData<Boolean> = _finished
 
@@ -65,6 +68,7 @@ class ImageMatchingViewModel(application: Application) : AndroidViewModel(applic
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
+            _emptyMessage.value = null
             _finished.value = false
             _score.value = 0
             currentRoundIndex = 0
@@ -73,16 +77,14 @@ class ImageMatchingViewModel(application: Application) : AndroidViewModel(applic
             result.fold(
                 onSuccess = { cards ->
                     if (cards.isEmpty()) {
-                        _error.value = localizedString(R.string.test_no_cards_matching)
-                        _finished.value = true
+                        _emptyMessage.value = localizedString(R.string.test_no_cards_matching)
                         _isLoading.value = false
                         return@fold
                     }
 
                     allReviewCards = cards.filter { !it.imageUrl.isNullOrBlank() }
                     if (allReviewCards.isEmpty()) {
-                        _error.value = localizedString(R.string.test_no_image_cards_matching)
-                        _finished.value = true
+                        _emptyMessage.value = localizedString(R.string.test_no_image_cards_matching)
                         _isLoading.value = false
                         return@fold
                     }
@@ -95,7 +97,6 @@ class ImageMatchingViewModel(application: Application) : AndroidViewModel(applic
                 },
                 onFailure = { throwable ->
                     _error.value = localizedString(R.string.test_load_game_error, throwable.message.orEmpty())
-                    _finished.value = true
                 }
             )
             _isLoading.value = false

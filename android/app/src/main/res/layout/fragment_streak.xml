@@ -37,7 +37,11 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toEndOf="@id/btnBack"
+                android:layout_toStartOf="@id/milestoneInfoButton"
                 android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="@string/dashboard_streak_title"
                 android:textColor="@color/text_primary"
                 android:textSize="22sp"
@@ -475,10 +479,15 @@
                 android:layout_marginBottom="12dp">
 
                 <TextView
+                    android:id="@+id/tvAchievementsTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@id/tvViewAllAchievements"
                     android:layout_centerVertical="true"
+                    android:layout_marginEnd="8dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
                     android:text="@string/streak_section_achievements"
                     android:textColor="@color/text_muted"
                     android:textSize="12sp"

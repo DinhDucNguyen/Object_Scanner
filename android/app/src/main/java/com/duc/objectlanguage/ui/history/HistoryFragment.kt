@@ -86,6 +86,7 @@ class HistoryFragment : Fragment() {
         val layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
+        binding.recyclerView.itemAnimator = androidx.recyclerview.widget.DefaultItemAnimator()
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
@@ -185,6 +186,16 @@ class HistoryFragment : Fragment() {
             val empty = items.isEmpty() && viewModel.isLoading.value != true
             binding.tvEmpty.visibility = if (empty) View.VISIBLE else View.GONE
             binding.recyclerView.visibility = if (empty) View.GONE else View.VISIBLE
+            if (items.isNotEmpty()) {
+                binding.tvResultCount.text = resources.getQuantityString(
+                    R.plurals.history_result_count,
+                    items.size,
+                    items.size,
+                )
+                binding.tvResultCount.visibility = View.VISIBLE
+            } else {
+                binding.tvResultCount.visibility = View.GONE
+            }
         }
 
         viewModel.message.observe(viewLifecycleOwner) { message ->
@@ -302,14 +313,23 @@ class HistoryFragment : Fragment() {
     }
 
     private fun confirmDelete(item: HistoryItem) {
-        AlertDialog.Builder(requireContext())
-            .setTitle(getString(R.string.history_delete_title))
-            .setMessage(getString(R.string.history_delete_message))
-            .setNegativeButton(R.string.btn_cancel, null)
-            .setPositiveButton(R.string.btn_delete) { _, _ ->
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_confirm, null)
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialogView.findViewById<android.widget.TextView>(R.id.tvDeleteTitle)
+            .text = getString(R.string.history_delete_title)
+        dialogView.findViewById<android.widget.TextView>(R.id.tvDeleteMessage)
+            .text = getString(R.string.history_delete_message)
+        dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDelete)
+            .setOnClickListener {
                 viewModel.deleteHistory(item)
+                dialog.dismiss()
             }
-            .show()
+        dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelDelete)
+            .setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     override fun onResume() {

@@ -69,10 +69,12 @@ class ReviewFragment : Fragment() {
         }
         viewModel.sessionSummary.observe(viewLifecycleOwner) { summary ->
             updateSessionSummary(summary)
+            if (summary.total > 0) refreshReviewBadge()
         }
 
         viewModel.finished.observe(viewLifecycleOwner) { done ->
             if (done) {
+                refreshReviewBadge()
                 binding.cardContent.visibility = View.GONE
                 binding.buttonRow.visibility = View.GONE
                 binding.layoutFinished.visibility = View.VISIBLE
@@ -191,6 +193,10 @@ class ReviewFragment : Fragment() {
         binding.tvReviewRemembered.text = getString(R.string.review_summary_remembered_value, summary.remembered)
         binding.tvReviewNeedsReview.text = getString(R.string.review_summary_needs_review_value, summary.needsReview)
         binding.tvReviewRate.text = getString(R.string.format_percent_int, summary.rememberedPercent)
+    }
+
+    private fun refreshReviewBadge() {
+        (activity as? com.duc.objectlanguage.ui.MainActivity)?.updateReviewBadge()
     }
 
     private fun vibrateReview(quality: Int) {

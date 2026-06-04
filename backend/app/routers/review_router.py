@@ -23,6 +23,14 @@ def add_to_learning(
     return learning_service.add_to_learning(db, translation_id, user_id)
 
 
+@router.get("/review/count")
+def get_due_count(
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id)
+):
+    return {"count": learning_service.get_due_count(db, user_id)}
+
+
 @router.get("/review", response_model=List[ReviewCardResponse])
 def get_due_reviews(
     db: Session = Depends(get_db),

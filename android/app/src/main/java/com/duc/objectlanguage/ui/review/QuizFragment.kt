@@ -71,11 +71,16 @@ class QuizFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
-            binding.quizContainer.visibility = if (loading) View.GONE else View.VISIBLE
+            if (loading) {
+                binding.quizContainer.visibility = View.GONE
+                binding.emptyStateLayout.visibility = View.GONE
+            }
         }
 
         viewModel.currentQuestion.observe(viewLifecycleOwner) { question ->
             question?.let {
+                binding.emptyStateLayout.visibility = View.GONE
+                binding.quizContainer.visibility = View.VISIBLE
                 displayQuestion(it)
                 startTimer()
             }
@@ -106,16 +111,22 @@ class QuizFragment : Fragment() {
         }
 
         viewModel.finished.observe(viewLifecycleOwner) { finished ->
-            if (finished) {
+            if (finished && viewModel.getTotalQuestions() > 0) {
                 timer?.cancel()
+                refreshReviewBadge()
                 showResultDialog()
             }
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
             error?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+                showError(it)
+                viewModel.clearError()
             }
+        }
+
+        viewModel.emptyMessage.observe(viewLifecycleOwner) { message ->
+            if (message != null) showEmptyState(message)
         }
     }
 
@@ -220,6 +231,28 @@ class QuizFragment : Fragment() {
             rb.buttonTintList = null
             rb.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
         }
+    }
+
+    private fun showEmptyState(message: String) {
+        timer?.cancel()
+        binding.quizContainer.visibility = View.GONE
+        binding.emptyStateLayout.visibility = View.VISIBLE
+        binding.tvEmptyMessage.text = message
+        binding.btnEmptyBack.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    private fun showError(message: String) {
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.test_error_title))
+            .setMessage(message)
+            .setPositiveButton(getString(R.string.test_ok), null)
+            .show()
+    }
+
+    private fun refreshReviewBadge() {
+        (activity as? com.duc.objectlanguage.ui.MainActivity)?.updateReviewBadge()
     }
 
     private fun showResultDialog() {

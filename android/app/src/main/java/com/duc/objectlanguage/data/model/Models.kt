@@ -355,3 +355,5 @@ data class LichSuQuetResponse(
     @SerializedName("learning_status") val learningStatus: String? = null,
     @SerializedName("translation_id") val translationId: Int? = null
 )
+
+data class DueCountResponse(val count: Int)

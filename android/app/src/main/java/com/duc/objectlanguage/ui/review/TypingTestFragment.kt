@@ -92,7 +92,10 @@ class TypingTestFragment : Fragment() {
         }
 
         viewModel.finished.observe(viewLifecycleOwner) { finished ->
-            if (finished) showResultDialog()
+            if (finished && viewModel.getTotalQuestions() > 0) {
+                refreshReviewBadge()
+                showResultDialog()
+            }
         }
     }
 
@@ -170,6 +173,10 @@ class TypingTestFragment : Fragment() {
             .setMessage(message)
             .setPositiveButton(getString(R.string.test_ok), null)
             .show()
+    }
+
+    private fun refreshReviewBadge() {
+        (activity as? com.duc.objectlanguage.ui.MainActivity)?.updateReviewBadge()
     }
 
     private fun showResultDialog() {

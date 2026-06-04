@@ -12,6 +12,7 @@ import com.duc.objectlanguage.data.local.NotificationPreferences
 import com.duc.objectlanguage.data.local.StreakDataStore
 import com.duc.objectlanguage.data.model.StreakResponse
 import com.duc.objectlanguage.data.model.StreakSyncRequest
+import com.duc.objectlanguage.ui.common.localizedString
 import com.duc.objectlanguage.utils.AppNotificationHelper
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -44,8 +45,15 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
     private val _celebrateMilestone = MutableLiveData<Int?>()
     val celebrateMilestone: LiveData<Int?> = _celebrateMilestone
 
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> = _error
+
     fun clearCelebration() {
         _celebrateMilestone.value = null
+    }
+
+    fun clearError() {
+        _error.value = null
     }
 
     fun recordReview() {
@@ -76,23 +84,30 @@ class StreakViewModel(application: Application) : AndroidViewModel(application) 
 
             repository.syncStreak(StreakSyncRequest(current, longest, total, today, lastDate))
                 .onSuccess { remote -> applyServerStreak(remote) }
+                .onFailure {
+                    _error.value = localizedString(R.string.streak_sync_error)
+                }
         }
     }
 
     fun loadFromServer() {
         viewModelScope.launch {
-            repository.getStreak().onSuccess { remote ->
-                applyServerStreak(remote)
-            }
+            repository.getStreak()
+                .onSuccess { remote -> applyServerStreak(remote) }
+                .onFailure {
+                    _error.value = localizedString(R.string.streak_load_error)
+                }
         }
         loadCalendar()
     }
 
     fun loadCalendar() {
         viewModelScope.launch {
-            repository.getStreakCalendar(30).onSuccess { response ->
-                _calendarDays.postValue(response.days)
-            }
+            repository.getStreakCalendar(30)
+                .onSuccess { response -> _calendarDays.postValue(response.days) }
+                .onFailure {
+                    _error.value = localizedString(R.string.streak_calendar_load_error)
+                }
         }
     }
 

@@ -51,6 +51,7 @@ class ImageMatchingFragment : Fragment() {
 
     private fun setupObservers() {
         viewModel.cards.observe(viewLifecycleOwner) { cards ->
+            if (cards.isNotEmpty()) showGameContent(true)
             adapter.submitList(cards)
         }
 
@@ -68,6 +69,7 @@ class ImageMatchingFragment : Fragment() {
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            if (loading) binding.emptyStateLayout.visibility = View.GONE
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
@@ -78,8 +80,9 @@ class ImageMatchingFragment : Fragment() {
         }
 
         viewModel.finished.observe(viewLifecycleOwner) { finished ->
-            if (finished) {
+            if (finished && viewModel.getTotalRounds() > 0) {
                 stopTimer()
+                refreshReviewBadge()
                 showResultDialog()
             }
         }
@@ -90,6 +93,10 @@ class ImageMatchingFragment : Fragment() {
                     if (_binding != null) viewModel.startNextRound()
                 }, 1000)
             }
+        }
+
+        viewModel.emptyMessage.observe(viewLifecycleOwner) { message ->
+            if (message != null) showEmptyState(message)
         }
     }
 
@@ -130,6 +137,25 @@ class ImageMatchingFragment : Fragment() {
             .setMessage(message)
             .setPositiveButton(getString(R.string.test_ok), null)
             .show()
+    }
+
+    private fun showEmptyState(message: String) {
+        stopTimer()
+        showGameContent(false)
+        binding.emptyStateLayout.visibility = View.VISIBLE
+        binding.tvEmptyMessage.text = message
+        binding.btnEmptyBack.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    private fun showGameContent(show: Boolean) {
+        binding.gameContentGroup.visibility = if (show) View.VISIBLE else View.GONE
+        if (show) binding.emptyStateLayout.visibility = View.GONE
+    }
+
+    private fun refreshReviewBadge() {
+        (activity as? com.duc.objectlanguage.ui.MainActivity)?.updateReviewBadge()
     }
 
     private fun showResultDialog() {

@@ -154,12 +154,20 @@ class PronunciationFragment : Fragment() {
 
         viewModel.currentIndex.observe(viewLifecycleOwner) { index ->
             val total = viewModel.getTotalWords()
-            binding.tvProgress.text = getString(R.string.test_pronunciation_word_counter, index + 1, total)
+            binding.tvProgress.text = if (total > 0) {
+                getString(R.string.test_pronunciation_word_counter, index + 1, total)
+            } else {
+                ""
+            }
         }
 
         viewModel.score.observe(viewLifecycleOwner) { score ->
             val total = viewModel.getTotalWords()
-            binding.tvScore.text = getString(R.string.test_score, score, total)
+            binding.tvScore.text = if (total > 0) {
+                getString(R.string.test_score, score, total)
+            } else {
+                ""
+            }
         }
 
         viewModel.pronunciationResult.observe(viewLifecycleOwner) { result ->
@@ -180,7 +188,10 @@ class PronunciationFragment : Fragment() {
         }
 
         viewModel.finished.observe(viewLifecycleOwner) { finished ->
-            if (finished) showResultDialog()
+            if (finished && viewModel.getTotalWords() > 0) {
+                refreshReviewBadge()
+                showResultDialog()
+            }
         }
     }
 
@@ -255,6 +266,10 @@ class PronunciationFragment : Fragment() {
             .setMessage(message)
             .setPositiveButton(getString(R.string.test_ok), null)
             .show()
+    }
+
+    private fun refreshReviewBadge() {
+        (activity as? com.duc.objectlanguage.ui.MainActivity)?.updateReviewBadge()
     }
 
     private fun showResultDialog() {

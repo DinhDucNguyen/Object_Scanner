@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
+import com.duc.objectlanguage.ui.collection.SaveToCollectionBottomSheet
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.TranslationResponse
 import com.duc.objectlanguage.databinding.FragmentHistoryDetailBinding
@@ -71,7 +72,8 @@ class HistoryDetailFragment : Fragment() {
                 if (targetCollectionId > 0 && !targetCollectionName.isNullOrBlank()) {
                     viewModel.addToCollectionDirect(translationId, targetCollectionId, targetCollectionName!!)
                 } else {
-                    viewModel.showAddToCollectionDialog(translationId, requireContext())
+                    SaveToCollectionBottomSheet.newInstance(translationId)
+                        .show(childFragmentManager, "save_to_collection")
                 }
             }
         }

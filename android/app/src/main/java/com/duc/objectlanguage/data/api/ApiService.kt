@@ -80,6 +80,9 @@ interface ApiService {
     suspend fun addToLearning(@Query("translation_id") id: Int): Response<ResponseBody>
 
     // ====== REVIEW ======
+    @GET("api/review/count")
+    suspend fun getDueCount(): Response<DueCountResponse>
+
     @GET("api/review")
     suspend fun getDueReviews(): Response<List<ReviewCardResponse>>
 

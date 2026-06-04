@@ -42,6 +42,9 @@ class LearningService:
         self.repo.create(db, progress)
         return progress, True
 
+    def get_due_count(self, db: Session, user_id: int) -> int:
+        return self.repo.count_due_today(db, user_id)
+
     def get_due_reviews(self, db: Session, user_id: int):
         due = self.repo.get_due_reviews(db, user_id)
         results = []

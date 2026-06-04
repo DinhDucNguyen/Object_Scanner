@@ -12,6 +12,7 @@ import android.graphics.ColorMatrixColorFilter
 import android.graphics.PorterDuff
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -69,6 +70,12 @@ class StreakFragment : Fragment() {
         viewModel.calendarDays.observe(viewLifecycleOwner) { days ->
             bindCalendar(days)
         }
+        viewModel.error.observe(viewLifecycleOwner) { error ->
+            if (!error.isNullOrBlank()) {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
+                viewModel.clearError()
+            }
+        }
     }
 
     private fun updateUI(data: StreakData) {
@@ -122,13 +129,13 @@ class StreakFragment : Fragment() {
 
             // Trạng thái hôm nay
             if (data.reviewsToday > 0) {
-                todayStatusIcon.text = "✓"
+                todayStatusIcon.text = getString(R.string.symbol_check)
                 todayStatusText.text = getString(R.string.streak_today_done).uppercase()
                 todayStatusContainer.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.success_light))
                 todayStatusIcon.setTextColor(ContextCompat.getColor(requireContext(), R.color.success))
                 todayStatusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.success))
             } else {
-                todayStatusIcon.text = "✕"
+                todayStatusIcon.text = getString(R.string.symbol_close)
                 todayStatusText.text = getString(R.string.streak_today_pending).uppercase()
                 todayStatusContainer.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.warning_light))
                 todayStatusIcon.setTextColor(ContextCompat.getColor(requireContext(), R.color.warning))

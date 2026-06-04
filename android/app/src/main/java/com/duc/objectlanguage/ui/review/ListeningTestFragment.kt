@@ -60,6 +60,7 @@ class ListeningTestFragment : Fragment() {
     private fun setupObservers() {
         viewModel.currentQuestion.observe(viewLifecycleOwner) { question ->
             question?.let {
+                showPracticeContent(true)
                 binding.etAnswer.text?.clear()
                 binding.etAnswer.isEnabled = true
                 binding.btnSubmit.isEnabled = true
@@ -95,6 +96,7 @@ class ListeningTestFragment : Fragment() {
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            if (loading) binding.emptyStateLayout.visibility = View.GONE
             binding.etAnswer.isEnabled = !loading
             binding.btnSubmit.isEnabled = !loading
             binding.btnSkip.isEnabled = !loading
@@ -112,7 +114,14 @@ class ListeningTestFragment : Fragment() {
         }
 
         viewModel.finished.observe(viewLifecycleOwner) { finished ->
-            if (finished) showResultDialog()
+            if (finished && viewModel.getTotalQuestions() > 0) {
+                refreshReviewBadge()
+                showResultDialog()
+            }
+        }
+
+        viewModel.emptyMessage.observe(viewLifecycleOwner) { message ->
+            if (message != null) showEmptyState(message)
         }
     }
 
@@ -213,6 +222,25 @@ class ListeningTestFragment : Fragment() {
             .setMessage(message)
             .setPositiveButton(getString(R.string.test_ok), null)
             .show()
+    }
+
+    private fun showEmptyState(message: String) {
+        tts?.stop()
+        showPracticeContent(false)
+        binding.emptyStateLayout.visibility = View.VISIBLE
+        binding.tvEmptyMessage.text = message
+        binding.btnEmptyBack.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    private fun showPracticeContent(show: Boolean) {
+        binding.practiceContentGroup.visibility = if (show) View.VISIBLE else View.GONE
+        if (show) binding.emptyStateLayout.visibility = View.GONE
+    }
+
+    private fun refreshReviewBadge() {
+        (activity as? com.duc.objectlanguage.ui.MainActivity)?.updateReviewBadge()
     }
 
     private fun showResultDialog() {

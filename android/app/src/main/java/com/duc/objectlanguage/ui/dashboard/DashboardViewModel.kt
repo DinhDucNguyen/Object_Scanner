@@ -58,7 +58,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             val result = repo.getStats()
             result.fold(
                 onSuccess = { _stats.value = it },
-                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message }
+                onFailure = {
+                    if (it is CancellationException) return@launch
+                    _error.value = it.message ?: app.getString(R.string.dashboard_load_error)
+                }
             )
             _isLoading.value = false
         }

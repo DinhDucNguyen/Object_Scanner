@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private data class NavTab(
-        val tabView: LinearLayout,
+        val tabView: View,
         val icon: ImageView,
         val label: TextView,
         val destinationId: Int,
@@ -183,6 +183,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         syncAccountLanguage()
+        updateReviewBadge()
+    }
+
+    fun updateReviewBadge() {
+        val app = application as ObjectLanguageApp
+        if (!app.tokenManager.isLoggedIn) {
+            binding.tvReviewBadge.visibility = View.GONE
+            return
+        }
+        lifecycleScope.launch {
+            app.repository.getDueCount().onSuccess { count ->
+                if (count > 0) {
+                    binding.tvReviewBadge.text = if (count > 99) "99+" else count.toString()
+                    binding.tvReviewBadge.visibility = View.VISIBLE
+                } else {
+                    binding.tvReviewBadge.visibility = View.GONE
+                }
+            }
+        }
     }
 
     private fun bottomNavItemForDestination(destinationId: Int): Int? {
@@ -347,6 +366,7 @@ class MainActivity : AppCompatActivity() {
             }
         } ?: false
         binding.offlineBanner.visibility = if (isOnline) View.GONE else View.VISIBLE
+        updateReviewBadge()
     }
 
     override fun onPause() {

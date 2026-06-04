@@ -35,6 +35,7 @@ import kotlinx.coroutines.withContext
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.DialogScanPreviewBinding
 import com.duc.objectlanguage.databinding.FragmentScanBinding
+import com.duc.objectlanguage.ui.collection.SaveToCollectionBottomSheet
 import com.duc.objectlanguage.ui.common.GuestUpsellDialog
 import com.duc.objectlanguage.ui.common.addPulseFeedback
 import com.duc.objectlanguage.ui.common.addScaleFeedback
@@ -268,7 +269,8 @@ class ScanFragment : Fragment() {
                             binding.btnAddToCollection.visibility = View.VISIBLE
                             binding.btnAddToCollection.setOnClickListener {
                                 binding.btnAddToCollection.playSuccessBounce()
-                                viewModel.showAddToCollectionDialog(enTrans.id, requireContext())
+                                SaveToCollectionBottomSheet.newInstance(enTrans.id)
+                                    .show(childFragmentManager, "save_to_collection")
                             }
                         }
                     } else {

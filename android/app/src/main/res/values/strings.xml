@@ -370,6 +370,7 @@
     <string name="test_no_cards_matching">Chưa có thẻ để chơi ghép hình.</string>
     <string name="test_no_image_cards_matching">Các từ đã ôn chưa có ảnh chuẩn để ghép hình.</string>
     <string name="test_no_cards_pronunciation">Chưa có từ để luyện phát âm.</string>
+    <string name="test_empty_back">Quay lại</string>
     <string name="test_load_quiz_error">Không tải được quiz: %s</string>
     <string name="test_load_game_error">Không tải được trò chơi: %s</string>
     <string name="test_load_practice_error">Không tải được bài luyện: %s</string>
@@ -470,6 +471,9 @@
     <string name="streak_stats_title">Thống kê ôn tập</string>
     <string name="streak_today_done">Đã ôn tập hôm nay!</string>
     <string name="streak_today_pending">Chưa ôn tập hôm nay</string>
+    <string name="streak_load_error">Không tải được chuỗi học. Đang hiển thị dữ liệu gần nhất.</string>
+    <string name="streak_calendar_load_error">Không tải được lịch học gần đây.</string>
+    <string name="streak_sync_error">Không đồng bộ được chuỗi học lên máy chủ.</string>
     <string name="streak_milestone_label">Mốc tiếp theo: %d ngày</string>
     <string name="streak_days_to_go">Còn %d ngày nữa</string>
     <string name="streak_days_count">%d ngày</string>
@@ -599,6 +603,7 @@
     <string name="ci_mastered_label">Thành thạo</string>
     <string name="ci_reviewing_label">Đang học</string>
     <string name="ci_not_started_label">Chưa ôn</string>
+    <string name="ci_no_data_label">Chưa có dữ liệu</string>
 
     <!-- Analytics -->
     <string name="analytics_overview_title">Tổng quan học tập</string>
@@ -816,4 +821,8 @@
     <string name="weekday_thu_short">T5</string>
     <string name="weekday_fri_short">T6</string>
     <string name="weekday_sat_short">T7</string>
+    <string name="dashboard_load_error">Không tải được dữ liệu tổng quan</string>
+    <plurals name="history_result_count">
+        <item quantity="other">%d kết quả</item>
+    </plurals>
 </resources>

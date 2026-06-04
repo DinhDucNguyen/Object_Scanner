@@ -423,6 +423,16 @@ class AppRepository(private val tokenManager: TokenManager) {
 
 
 
+    suspend fun getDueCount(): Result<Int> {
+        return try {
+            val response = api.getDueCount()
+            if (response.isSuccessful) Result.success(response.body()?.count ?: 0)
+            else Result.success(0)
+        } catch (e: Exception) {
+            Result.success(0)
+        }
+    }
+
     suspend fun getDueReviews(): Result<List<ReviewCardResponse>> {
 
         return try {

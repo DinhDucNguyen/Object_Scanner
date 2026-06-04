@@ -83,4 +83,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <LinearLayout
+        android:id="@+id/emptyStateLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/tvEmptyMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp"
+            tools:text="@string/test_no_cards_matching" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEmptyBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="@string/test_empty_back" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/gameContentGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="tvProgress,tvTimer,tvScore,tvInstruction,rvCards" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
