@@ -2,7 +2,23 @@
 
 Ứng dụng Android học tiếng Anh qua nhận diện vật thể — chụp ảnh bất kỳ đồ vật nào, AI nhận diện và hiển thị từ vựng (tên, phiên âm IPA, định nghĩa, câu ví dụ, phát âm), lưu vào bộ sưu tập cá nhân và ôn tập bằng flashcard spaced repetition.
 
-> Đồ án tốt nghiệp — Khoa Công nghệ Số, 2026.
+> Đồ án tốt nghiệp — Khoa Công nghệ Số, năm 2026.
+
+---
+
+## Giao diện
+
+<div align="center">
+
+| Dashboard | Tùy chọn nhận diện | Tra từ điển |
+|:---------:|:------------------:|:-----------:|
+| <img src="screenshots/01_dashboard.jpg" width="200"/> | <img src="screenshots/02_scan.jpg" width="200"/> | <img src="screenshots/03_dictionary.jpg" width="200"/> |
+
+| Ôn tập flashcard | Chuỗi ngày học | Cá nhân |
+|:----------------:|:--------------:|:-------:|
+| <img src="screenshots/04_flashcard.jpg" width="200"/> | <img src="screenshots/05_streak.jpg" width="200"/> | <img src="screenshots/06_profile.jpg" width="200"/> |
+
+</div>
 
 ---
 
@@ -10,7 +26,7 @@
 
 | Tính năng | Mô tả |
 |-----------|-------|
-| **Quét vật thể** | Camera nhận diện qua YOLOv8 on-device → ML Kit ImageLabeling → Gemini API fallback |
+| **Quét vật thể** | Camera nhận diện qua YOLOv8 on-device → ML Kit → Gemini API fallback |
 | **Từ vựng chi tiết** | Tên tiếng Anh, phiên âm IPA, định nghĩa, câu ví dụ, phát âm TTS |
 | **Bộ sưu tập** | Tạo và quản lý bộ từ vựng cá nhân theo chủ đề |
 | **Ôn tập flashcard** | Spaced repetition SM-2, badge đếm từ cần ôn hôm nay |
@@ -91,7 +107,7 @@ Object_Scanner/
 ### Yêu cầu hệ thống
 
 - Python 3.11+
-- Android Studio Hedgehog (2023.1.1) trở lên
+- Android Studio Hedgehog (2023.1.1) trở lên — hoặc version mới hơn
 - JDK 17+
 - Android device hoặc emulator API 24+ (Android 7.0+)
 
@@ -128,7 +144,7 @@ Swagger API docs: `http://localhost:8000/docs`
 
 | Biến | Bắt buộc | Mô tả |
 |------|----------|-------|
-| `DATABASE_URL` | ✅ | SQLite: `sqlite:///./objectscanner.db` hoặc MySQL |
+| `DATABASE_URL` | ✅ | SQLite: `sqlite:///./objectscanner.db` — hoặc MySQL: `mysql+pymysql://user:pass@host/dbname` |
 | `SECRET_KEY` | ✅ | Key JWT — sinh bằng `python -c "import secrets; print(secrets.token_hex(32))"` |
 | `GEMINI_API_KEY` | ✅ | Lấy tại [Google AI Studio](https://aistudio.google.com/app/apikey) |
 | `CLOUDINARY_CLOUD_NAME` | ✅ | Lấy tại [Cloudinary Console](https://cloudinary.com/console) |
@@ -199,7 +215,8 @@ Version hiện tại: `0016_user_email_verified`
 ### Model YOLO
 Model YOLOv8 nhận diện vật thể đã được train sẵn trên Google Colab và đặt tại:
 ```
-android/app/src/main/assets/best.tflite
+android/app/src/main/assets/yolov8n_int8.tflite          # model nhẹ, chạy nhanh
+android/app/src/main/assets/yolov8_custom_float32.tflite  # model custom độ chính xác cao hơn
 ```
 Không cần làm gì thêm — app tự load model khi khởi động.
 
@@ -217,14 +234,25 @@ Không cần làm gì thêm — app tự load model khi khởi động.
 |--------|----------|-------|
 | `POST` | `/api/auth/register` | Đăng ký tài khoản |
 | `POST` | `/api/auth/login` | Đăng nhập, trả về JWT |
+| `POST` | `/api/auth/refresh` | Làm mới access token |
+| `GET` | `/api/auth/profile` | Lấy thông tin profile |
+| `PUT` | `/api/auth/profile` | Cập nhật profile |
 | `POST` | `/api/scan` | Quét và nhận diện vật thể |
 | `GET` | `/api/history` | Lịch sử quét |
+| `DELETE` | `/api/history/{scan_id}` | Xóa một lịch sử quét |
+| `GET` | `/api/review/count` | Số từ cần ôn hôm nay |
 | `GET` | `/api/review` | Lấy danh sách thẻ ôn tập hôm nay |
 | `POST` | `/api/review/{progress_id}` | Nộp kết quả ôn tập |
-| `GET` | `/api/review/count` | Số từ cần ôn hôm nay |
+| `GET` | `/api/analytics` | Thống kê học tập |
 | `GET` | `/api/collections` | Danh sách bộ sưu tập |
+| `POST` | `/api/collections` | Tạo bộ sưu tập mới |
+| `POST` | `/api/collections/{collection_id}/items` | Thêm từ vào bộ sưu tập |
+| `DELETE` | `/api/collections/{collection_id}/items/{translation_id}` | Xóa từ khỏi bộ sưu tập |
 | `GET` | `/api/streak` | Thông tin chuỗi ngày học |
-| `GET` | `/api/dictionary` | Tra từ điển |
+| `GET` | `/api/streak/calendar` | Lịch học 30 ngày gần nhất |
+| `POST` | `/api/streak/sync` | Đồng bộ streak lên server |
+| `POST` | `/api/dictionary/translate` | Dịch văn bản |
+| `GET` | `/api/dictionary/history` | Lịch sử tra từ |
 
 Xem đầy đủ tại `http://localhost:8000/docs` khi server đang chạy.
 
@@ -232,4 +260,4 @@ Xem đầy đủ tại `http://localhost:8000/docs` khi server đang chạy.
 
 ## Tác giả
 
-**Đinh Đức Nguyên** — Đồ án tốt nghiệp 2026
+**Nguyễn Đình Đức - 22SK1** — Đồ án tốt nghiệp 2026
