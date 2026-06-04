@@ -2,7 +2,7 @@
 
 Ứng dụng Android học tiếng Anh qua nhận diện vật thể — chụp ảnh bất kỳ đồ vật nào, AI nhận diện và hiển thị từ vựng (tên, phiên âm IPA, định nghĩa, câu ví dụ, phát âm), lưu vào bộ sưu tập cá nhân và ôn tập bằng flashcard spaced repetition.
 
-> Đồ án tốt nghiệp — Khoa Công nghệ Thông tin, 2025.
+> Đồ án tốt nghiệp — Khoa Công nghệ Số, 2026.
 
 ---
 
@@ -214,4 +214,4 @@ Xem đầy đủ tại `http://localhost:8000/docs` khi server đang chạy.
 
 ## Tác giả
 
-**Đinh Đức Nguyên** — Đồ án tốt nghiệp 2025
+**Đinh Đức Nguyên** — Đồ án tốt nghiệp 2026
