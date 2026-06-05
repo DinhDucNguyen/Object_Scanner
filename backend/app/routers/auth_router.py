@@ -34,7 +34,8 @@ def resend_registration_otp(request: Request, data: ForgotPasswordRequest, db: S
 
 
 @router.post("/register/verify-otp", response_model=MessageResponse)
-def verify_registration_otp(data: VerifyOtpRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def verify_registration_otp(request: Request, data: VerifyOtpRequest, db: Session = Depends(get_db)):
     return user_service.verify_registration_otp(db, data)
 
 
@@ -105,13 +106,15 @@ def forgot_password(request: Request, data: ForgotPasswordRequest, db: Session =
 
 
 @router.post("/verify-otp", response_model=MessageResponse)
-def verify_otp(data: VerifyOtpRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def verify_otp(request: Request, data: VerifyOtpRequest, db: Session = Depends(get_db)):
     """Kiểm tra OTP có hợp lệ không (chưa dùng, chưa hết hạn)."""
     return user_service.verify_otp(db, data)
 
 
 @router.post("/reset-password", response_model=MessageResponse)
-def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def reset_password(request: Request, data: ResetPasswordRequest, db: Session = Depends(get_db)):
     """Đặt lại mật khẩu mới bằng OTP đã xác thực."""
     return user_service.reset_password(db, data)
 

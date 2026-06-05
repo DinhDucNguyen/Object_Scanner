@@ -40,6 +40,7 @@ import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentProfileBinding
 import com.duc.objectlanguage.ui.MainActivity
+import com.duc.objectlanguage.ui.review.ReviewSessionStore
 import com.duc.objectlanguage.utils.LocaleHelper
 import com.duc.objectlanguage.utils.PasswordValidator
 import com.duc.objectlanguage.utils.resolveMediaUrl
@@ -193,6 +194,7 @@ class ProfileFragment : Fragment() {
                     dialog.dismiss()
                     val app = requireActivity().application as ObjectLanguageApp
                     app.repository.logout()
+                    ReviewSessionStore.clearAll()
                     (requireActivity() as? MainActivity)?.updateReviewBadge()
                     resetGraphToGuestScan()
                 }
@@ -224,6 +226,7 @@ class ProfileFragment : Fragment() {
                             dialog.dismiss()
                             Toast.makeText(requireContext(), getString(R.string.profile_delete_account_success), Toast.LENGTH_SHORT).show()
                             app.repository.logout()
+                            ReviewSessionStore.clearAll()
                             (requireActivity() as? MainActivity)?.updateReviewBadge()
                             resetGraphToGuestScan()
                         },

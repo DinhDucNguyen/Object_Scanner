@@ -34,4 +34,8 @@ object ReviewSessionStore {
     fun clear(collectionId: Int, practice: Boolean) {
         sessions.remove(collectionId to practice)
     }
+
+    fun clearAll() {
+        sessions.clear()
+    }
 }

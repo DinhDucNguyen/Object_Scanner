@@ -396,6 +396,9 @@ class UserService:
         )
         if not user:
             user = self.repo.get_by_email(db, email)
+            # Không link Google ID vào tài khoản email chưa xác thực — tránh account takeover
+            if user and not bool(user.email_da_xac_thuc):
+                user = None
         if user:
             user.email_da_xac_thuc = True
             if not getattr(user, "ma_dinh_danh_google", None):
