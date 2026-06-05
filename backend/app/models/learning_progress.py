@@ -1,7 +1,7 @@
 # pyrefly: ignore [missing-import]
 from sqlalchemy import (
     Column, Integer, BigInteger, ForeignKey, DECIMAL, DateTime,
-    UniqueConstraint
+    Index, UniqueConstraint
 )
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import relationship
@@ -23,6 +23,7 @@ class LearningProgress(Base):
 
     __table_args__ = (
         UniqueConstraint("nguoi_dung_id", "ban_dich_id", name="unique_user_translation"),
+        Index("ix_TienDoHoc_nguoi_dung_ngay_on_tiep", "nguoi_dung_id", "ngay_on_tiep"),
     )
 
     user = relationship("User", back_populates="learning_progress")

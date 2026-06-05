@@ -8,6 +8,9 @@ from app.utils.timezone import now_vietnam
 
 
 class LearningProgressRepository:
+    def _due_cutoff(self):
+        return now_vietnam().replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+
     def get_by_user_and_translation(self, db: Session, nguoi_dung_id: int, translation_id: int):
         return db.query(LearningProgress).filter(
             LearningProgress.nguoi_dung_id == nguoi_dung_id,
@@ -15,10 +18,10 @@ class LearningProgressRepository:
         ).first()
 
     def get_due_reviews(self, db: Session, nguoi_dung_id: int):
-        today = now_vietnam().date()
+        due_cutoff = self._due_cutoff()
         return db.query(LearningProgress).filter(
             LearningProgress.nguoi_dung_id == nguoi_dung_id,
-            func.date(LearningProgress.ngay_on_tiep) <= today
+            LearningProgress.ngay_on_tiep < due_cutoff
         ).all()
 
     def get_by_id(self, db: Session, progress_id: int):
@@ -28,10 +31,10 @@ class LearningProgressRepository:
         return db.query(LearningProgress).filter(LearningProgress.nguoi_dung_id == nguoi_dung_id).count()
 
     def count_due_today(self, db: Session, nguoi_dung_id: int):
-        today = now_vietnam().date()
+        due_cutoff = self._due_cutoff()
         return db.query(LearningProgress).filter(
             LearningProgress.nguoi_dung_id == nguoi_dung_id,
-            func.date(LearningProgress.ngay_on_tiep) <= today
+            LearningProgress.ngay_on_tiep < due_cutoff
         ).count()
 
     def count_mastered(self, db: Session, nguoi_dung_id: int):
