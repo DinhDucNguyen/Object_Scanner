@@ -287,7 +287,7 @@ class ScanService:
                 AIPrediction.vai_tro == VaiTroDuDoan.chinh,
             )
             .order_by(AIPrediction.thoi_gian.asc())
-            .all()
+            .yield_per(100)
         )
         for prediction in predictions:
             payload = self._prediction_payload(prediction)
