@@ -93,7 +93,7 @@
       const status = document.getElementById('pred-filter')?.value || 'cho_duyet';
       try {
         const search = document.getElementById('pred-search')?.value.trim() || '';
-        let predUrl = `/predictions?trang_thai=${status}&limit=9999`;
+        let predUrl = `/predictions?trang_thai=${status}&limit=1000`;
         if (search) predUrl += `&search=${encodeURIComponent(search)}`;
         const data = await apiJSON(predUrl);
         const pageData = getPagedRows('predictions', data);
@@ -336,7 +336,7 @@
       const p = await apiJSON(`/predictions/${id}`).catch(() => null);
       const aliasCode = (p?.vocab_payload?.object_code || p?.nhan_du_doan || '').trim();
       let objects = [];
-      try { objects = await apiJSON('/objects?limit=9999'); }
+      try { objects = await apiJSON('/objects?limit=1000'); }
       catch (e) { toast('Lá»—i táº£i danh sÃ¡ch Ä‘á»‘i tÆ°á»£ng: ' + e.message, 'danger'); return; }
 
       const options = objects.map(o => {

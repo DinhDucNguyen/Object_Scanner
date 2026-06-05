@@ -46,6 +46,7 @@ router = APIRouter(
 )
 admin_service = AdminService()
 MAX_BULK_SCAN_HISTORY_DELETE = 500
+MAX_ADMIN_PAGE_LIMIT = 1000
 OBJECT_UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploads" / "objects"
 
 
@@ -228,7 +229,7 @@ def list_objects(
     search: Optional[str] = Query(default=None),
     category_id: Optional[int] = Query(default=None),
     no_image: Optional[bool] = Query(default=None, description="true = chỉ hiện đối tượng chưa có ảnh"),
-    limit: int = Query(default=50, ge=1),
+    limit: int = Query(default=50, ge=1, le=MAX_ADMIN_PAGE_LIMIT),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
@@ -306,7 +307,7 @@ def list_translations(
     search: Optional[str] = Query(default=None),
     lang_code: Optional[str] = Query(default=None),
     approved: Optional[bool] = Query(default=None),
-    limit: int = Query(default=50, ge=1),
+    limit: int = Query(default=50, ge=1, le=MAX_ADMIN_PAGE_LIMIT),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
@@ -351,7 +352,7 @@ def delete_translation(translation_id: int, db: Session = Depends(get_db)):
 @router.get("/users", response_model=List[UserAdminResponse])
 def list_users(
     search: Optional[str] = Query(default=None),
-    limit: int = Query(default=50, ge=1),
+    limit: int = Query(default=50, ge=1, le=MAX_ADMIN_PAGE_LIMIT),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
@@ -406,7 +407,7 @@ def list_scan_history(
     object_code: Optional[str] = Query(default=None),
     date_from: Optional[str] = Query(default=None),
     date_to: Optional[str] = Query(default=None),
-    limit: int = Query(default=50, ge=1),
+    limit: int = Query(default=50, ge=1, le=MAX_ADMIN_PAGE_LIMIT),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):

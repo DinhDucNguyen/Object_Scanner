@@ -14,10 +14,7 @@ import com.duc.objectlanguage.databinding.DialogDictionaryHistoryDetailBinding
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.gson.Gson
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -30,7 +27,6 @@ class DictionaryHistoryDetailBottomSheet : BottomSheetDialogFragment() {
 
     private var onDeleted: ((Int) -> Unit)? = null
     private lateinit var audioPlayer: AudioPlayerManager
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     fun setOnDeletedListener(listener: (Int) -> Unit) {
         onDeleted = listener
@@ -122,7 +118,7 @@ class DictionaryHistoryDetailBottomSheet : BottomSheetDialogFragment() {
         btn: com.google.android.material.button.MaterialButton,
     ) {
         btn.isEnabled = false
-        scope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             val bytes = repo.getTtsAudio(word, lang)
             if (_binding == null) return@launch
             btn.isEnabled = true
@@ -165,7 +161,6 @@ class DictionaryHistoryDetailBottomSheet : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         audioPlayer.release()
-        scope.cancel()
         _binding = null
     }
 

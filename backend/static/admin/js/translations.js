@@ -8,7 +8,7 @@
       const tbody = document.getElementById('trans-body');
       if (tbody) tbody.innerHTML = loadingRow(7);
       try {
-        let url = `/translations?limit=9999`;
+        let url = `/translations?limit=1000`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
         if (lang) url += `&lang_code=${lang}`;
         if (approved !== '') url += `&approved=${approved}`;

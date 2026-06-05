@@ -13,6 +13,7 @@ import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.*
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 
 import kotlinx.coroutines.withContext
 
@@ -350,6 +351,7 @@ class AppRepository(private val tokenManager: TokenManager) {
             if (response.isSuccessful) withContext(Dispatchers.IO) { response.body()?.bytes() } else null
 
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
 
             null
 
@@ -368,6 +370,7 @@ class AppRepository(private val tokenManager: TokenManager) {
             if (response.isSuccessful) withContext(Dispatchers.IO) { response.body()?.bytes() } else null
 
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
 
             null
 
@@ -388,6 +391,7 @@ class AppRepository(private val tokenManager: TokenManager) {
             else emptyList()
 
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
 
             emptyList()
 
@@ -433,6 +437,7 @@ class AppRepository(private val tokenManager: TokenManager) {
             if (response.isSuccessful) Result.success(response.body()?.count ?: 0)
             else Result.success(0)
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             Result.success(0)
         }
     }
@@ -710,6 +715,7 @@ class AppRepository(private val tokenManager: TokenManager) {
             }
 
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
 
             Result.failure(Exception("Không thể kết nối tới server"))
 

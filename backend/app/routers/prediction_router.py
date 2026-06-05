@@ -45,13 +45,15 @@ router = APIRouter(
 )
 prediction_service = PredictionService()
 training_service = TrainingService()
+MAX_ADMIN_PAGE_LIMIT = 1000
+MAX_KNOWN_CLASS_CLEANUP = 500
 
 
 @router.get("/predictions", response_model=List[PredictionListItem])
 def list_predictions(
     trang_thai: Optional[str] = Query(default="cho_duyet", description="cho_duyet | da_duyet | tu_choi"),
     search: Optional[str] = Query(default=None),
-    limit: int = Query(default=50, ge=1),
+    limit: int = Query(default=50, ge=1, le=MAX_ADMIN_PAGE_LIMIT),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
@@ -84,7 +86,10 @@ def export_training_grouped(db: Session = Depends(get_db)):
 
 
 @router.delete("/predictions/cleanup-known-classes")
-def cleanup_known_class_predictions(db: Session = Depends(get_db)):
+def cleanup_known_class_predictions(
+    limit: int = Query(default=MAX_KNOWN_CLASS_CLEANUP, ge=1, le=MAX_KNOWN_CLASS_CLEANUP),
+    db: Session = Depends(get_db),
+):
     """Resolve pending predictions for known YOLO/COCO classes without leaving scan-history junk."""
     from app.models.ai_feedback_report import AIPrediction, TrangThaiDuyet
     from app.services.scan_service import YOLO_KNOWN_CLASSES
@@ -93,7 +98,7 @@ def cleanup_known_class_predictions(db: Session = Depends(get_db)):
     known_codes = {normalize_object_code(code) for code in YOLO_KNOWN_CLASSES}
     predictions = db.query(AIPrediction).filter(
         AIPrediction.trang_thai == TrangThaiDuyet.cho_duyet,
-    ).all()
+    ).order_by(AIPrediction.id.asc()).limit(limit).all()
 
     obj_repo = ObjectRepository()
     matched = 0
@@ -137,6 +142,7 @@ def cleanup_known_class_predictions(db: Session = Depends(get_db)):
     db.commit()
     return {
         "message": "Da resolve pending predictions cua cac class YOLO/COCO da co object chinh thuc",
+        "processed_limit": limit,
         "matched": matched,
         "resolved": resolved,
         "linked_lich_su_quet_ids": linked_lich_su_quet_ids,

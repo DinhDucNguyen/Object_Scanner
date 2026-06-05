@@ -7,7 +7,7 @@
       const tbody = document.getElementById('user-body');
       if (tbody) tbody.innerHTML = loadingRow(6);
       try {
-        let data = await apiJSON(`/users?limit=9999${search ? '&search=' + encodeURIComponent(search) : ''}`);
+        let data = await apiJSON(`/users?limit=1000${search ? '&search=' + encodeURIComponent(search) : ''}`);
         if (roleFilter) data = data.filter(u => (u.vai_tro || '').toLowerCase().includes(roleFilter));
         if (statusFilter === 'active') data = data.filter(u => (u.trang_thai || '').toLowerCase().includes('hoat') || u.trang_thai === 'active');
         if (statusFilter === 'locked') data = data.filter(u => !((u.trang_thai || '').toLowerCase().includes('hoat') || u.trang_thai === 'active'));

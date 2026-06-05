@@ -548,7 +548,7 @@
       document.getElementById('rm-current-code').textContent = currentCode;
       document.getElementById('rm-search').value = '';
       if (_cachedObjects.length === 0) {
-        try { _cachedObjects = await apiJSON('/objects?limit=9999'); } catch (_) { _cachedObjects = []; }
+        try { _cachedObjects = await apiJSON('/objects?limit=1000'); } catch (_) { _cachedObjects = []; }
       }
       _fillReassignSelect('');
       bootstrap.Modal.getOrCreateInstance(document.getElementById('reassign-modal')).show();
@@ -563,7 +563,7 @@
       document.getElementById('rm-current-code').textContent = currentCode;
       document.getElementById('rm-search').value = '';
       if (_cachedObjects.length === 0) {
-        try { _cachedObjects = await apiJSON('/objects?limit=9999'); } catch (_) { _cachedObjects = []; }
+        try { _cachedObjects = await apiJSON('/objects?limit=1000'); } catch (_) { _cachedObjects = []; }
       }
       _fillReassignSelect('');
       bootstrap.Modal.getOrCreateInstance(document.getElementById('reassign-modal')).show();

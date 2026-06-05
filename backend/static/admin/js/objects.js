@@ -7,7 +7,7 @@
       const tbody = document.getElementById('obj-body');
       if (tbody) tbody.innerHTML = loadingRow(7);
       try {
-        let url = `/objects?limit=9999&offset=0`;
+        let url = `/objects?limit=1000&offset=0`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
         if (catId) url += `&category_id=${catId}`;
         const rawData = await apiJSON(url);

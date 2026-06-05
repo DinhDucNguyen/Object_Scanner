@@ -3,6 +3,7 @@ package com.duc.objectlanguage.workers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.NotificationPreferences
 import com.duc.objectlanguage.data.local.StreakDataStore
@@ -33,13 +34,15 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
         if (!settings.dailyReminderEnabled) return
         if (!AppNotificationHelper.canPostNotifications(appContext)) return
 
-        val tokenManager = TokenManager(appContext)
+        val app = appContext as? ObjectLanguageApp
+        val tokenManager = app?.tokenManager ?: TokenManager(appContext)
         if (!tokenManager.isLoggedIn) return
 
         val streakStore = StreakDataStore(appContext)
         val hasReviewedToday = streakStore.hasReviewedToday()
+        val repository = app?.repository ?: AppRepository(tokenManager)
         val stats = runCatching {
-            AppRepository(tokenManager).getStats().getOrNull()
+            repository.getStats().getOrNull()
         }.getOrNull()
 
         val dueToday = stats?.dueToday ?: 0

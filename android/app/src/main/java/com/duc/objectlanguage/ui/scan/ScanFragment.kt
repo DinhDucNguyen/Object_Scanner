@@ -30,6 +30,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.duc.objectlanguage.R
@@ -109,6 +110,7 @@ class ScanFragment : Fragment() {
                 }
                 showPreviewDialog(imageBytes, bitmap)
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 Toast.makeText(requireContext(), getString(R.string.scan_error_read_image_detail, e.message), Toast.LENGTH_LONG).show()
                 Log.e("ScanFragment", "Gallery read error", e)
                 restartCameraIfPermitted()

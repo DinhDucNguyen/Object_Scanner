@@ -9,7 +9,7 @@
       const tbody = document.getElementById('sh-body');
       if (tbody) tbody.innerHTML = loadingRow(9);
       try {
-        let url = `/scan-history?limit=9999`;
+        let url = `/scan-history?limit=1000`;
         if (objCode) url += `&object_code=${encodeURIComponent(objCode)}`;
         if (username) url += `&username=${encodeURIComponent(username)}`;
         if (dateFrom) url += `&date_from=${dateFrom}`;
