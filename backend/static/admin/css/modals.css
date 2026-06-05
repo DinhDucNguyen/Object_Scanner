@@ -1,0 +1,35 @@
+    /* Stacked modals: confirm/split/reassign ná»•i lÃªn trÃªn modal Ä‘ang má»Ÿ */
+    #confirm-modal  { z-index: 1075; }
+    #split-modal    { z-index: 1075; }
+    #reassign-modal { z-index: 1075; }
+
+    .modal-header {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+      background: #fafbfc;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .modal-title {
+      font-weight: 700;
+      font-size: .92rem;
+      color: var(--text);
+    }
+
+    .modal-body { padding: 1.25rem; }
+
+    .modal-footer {
+      border-top: 1px solid var(--border);
+      padding: .875rem 1.25rem;
+      background: #fafbfc;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    .vocab-lang-block {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .875rem;
+      margin-top: .6rem;
+      background: #f8fafc;
+    }
+
