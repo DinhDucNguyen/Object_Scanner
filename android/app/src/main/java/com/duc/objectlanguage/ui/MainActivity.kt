@@ -29,7 +29,6 @@ import com.duc.objectlanguage.databinding.ActivityMainBinding
 import com.duc.objectlanguage.ui.common.GuestUpsellDialog
 import com.duc.objectlanguage.ui.review.ReviewSessionStore
 import com.duc.objectlanguage.utils.LocaleHelper
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.widget.Toast
 import kotlinx.coroutines.launch
 
@@ -379,7 +378,6 @@ class MainActivity : AppCompatActivity() {
             text = getString(R.string.review_leave_collection_confirm)
             setOnClickListener {
                 dialog.dismiss()
-                ReviewSessionStore.clear(collectionId, practice)
                 if (collectionId > 0) {
                     if (!navController.popBackStack()) {
                         navController.navigate(R.id.collectionListFragment)

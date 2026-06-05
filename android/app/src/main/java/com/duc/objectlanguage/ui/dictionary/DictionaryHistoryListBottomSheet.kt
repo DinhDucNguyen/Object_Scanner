@@ -13,6 +13,7 @@ import com.duc.objectlanguage.databinding.DialogDictionaryHistoryListBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -66,10 +67,7 @@ class DictionaryHistoryListBottomSheet : BottomSheetDialogFragment() {
                 }.show(childFragmentManager, "dict_history_detail")
             },
             onSwipeDelete = { item ->
-                adapter?.slideOutOpenedItem {
-                    onItemDeleted?.invoke(item.id)
-                    removeItem(item.id)
-                }
+                confirmDelete(item)
             }
         ).also {
             it.submitList(items.toList())
@@ -77,6 +75,22 @@ class DictionaryHistoryListBottomSheet : BottomSheetDialogFragment() {
         }
 
         setupSearch()
+    }
+
+    private fun confirmDelete(item: DictionaryHistoryItem) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dictionary_history_delete_confirm_title)
+            .setMessage(getString(R.string.dictionary_history_delete_confirm_message, item.tuTra))
+            .setNegativeButton(R.string.btn_cancel) { _, _ ->
+                adapter?.closeOpenedItem()
+            }
+            .setPositiveButton(R.string.btn_delete) { _, _ ->
+                adapter?.slideOutOpenedItem {
+                    onItemDeleted?.invoke(item.id)
+                    removeItem(item.id)
+                }
+            }
+            .show()
     }
 
     private fun setupSearch() {

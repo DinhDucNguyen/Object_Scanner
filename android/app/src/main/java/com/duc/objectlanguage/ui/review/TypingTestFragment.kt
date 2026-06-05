@@ -21,6 +21,7 @@ class TypingTestFragment : Fragment() {
 
     private var hintFirstLetterUsed = false
     private var hintWordLengthUsed = false
+    private var advanceRunnable: Runnable? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -159,12 +160,15 @@ class TypingTestFragment : Fragment() {
             binding.tvHint.visibility = View.VISIBLE
         }
 
-        binding.root.postDelayed({
-            if (_binding == null) return@postDelayed
-            binding.etAnswer.setTextColor(resources.getColor(android.R.color.black, null))
-            binding.tvHint.setTextColor(resources.getColor(android.R.color.darker_gray, null))
-            viewModel.moveToNext()
-        }, 2000)
+        advanceRunnable?.let { binding.root.removeCallbacks(it) }
+        advanceRunnable = Runnable {
+            if (_binding != null) {
+                binding.etAnswer.setTextColor(resources.getColor(android.R.color.black, null))
+                binding.tvHint.setTextColor(resources.getColor(android.R.color.darker_gray, null))
+                viewModel.moveToNext()
+            }
+        }
+        advanceRunnable?.let { binding.root.postDelayed(it, 2000) }
     }
 
     private fun showError(message: String) {
@@ -203,6 +207,8 @@ class TypingTestFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        advanceRunnable?.let { binding.root.removeCallbacks(it) }
+        advanceRunnable = null
         _binding = null
     }
 }

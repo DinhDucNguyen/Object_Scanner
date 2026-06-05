@@ -83,10 +83,11 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
         }
 
         translateJob?.cancel()
+        val requestKey = "${from}:${to}:${normalized.lowercase()}"
+        val hasCachedResult = requestKey == lastRequestKey && _result.value != null
+        lastRequestKey = requestKey
         translateJob = viewModelScope.launch(Dispatchers.IO) {
-            val requestKey = "${from}:${to}:${normalized.lowercase()}"
-            if (requestKey == lastRequestKey && _result.value != null) return@launch
-            lastRequestKey = requestKey
+            if (hasCachedResult) return@launch
             _isLoading.postValue(true)
             _error.postValue(null)
             val response = repo.translate(normalized, from, to)

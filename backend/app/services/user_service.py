@@ -2,8 +2,10 @@ import logging
 # pyrefly: ignore [missing-import]
 from fastapi import HTTPException
 # pyrefly: ignore [missing-import]
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from datetime import timedelta
+import os
 import random
 
 logger = logging.getLogger(__name__)
@@ -25,6 +27,9 @@ from app.utils.cloudinary_helper import upload_image
 from app.utils.timezone import now_vietnam
 
 OTP_EXPIRE_MINUTES = 5
+FORGOT_PASSWORD_GENERIC_MESSAGE = (
+    "Nếu email đã đăng ký và đủ điều kiện đặt lại mật khẩu, mã OTP sẽ được gửi trong ít phút."
+)
 
 # email -> {"otp": str, "expires_at": datetime}
 _otp_store: dict[str, dict] = {}
@@ -247,30 +252,37 @@ class UserService:
             "dark_mode": bool(settings.che_do_toi),
         }
 
-    def delete_account(self, db: Session, nguoi_dung_id: int, password: str) -> dict:
+    def delete_account(self, db: Session, nguoi_dung_id: int, password: str | None) -> dict:
         user = self.repo.get_by_id(db, nguoi_dung_id)
         if not user:
             raise HTTPException(404, "Không tìm thấy người dùng")
-        if not verify_password(password, user.mat_khau_ma_hoa):
+        password = (password or "").strip()
+        is_google_account = bool(getattr(user, "ma_dinh_danh_google", None))
+        if not is_google_account and not password:
+            raise HTTPException(400, "Vui lòng nhập mật khẩu để xóa tài khoản")
+        if password and not verify_password(password, user.mat_khau_ma_hoa):
             raise HTTPException(400, "Mật khẩu không đúng")
         db.delete(user)
         db.commit()
         return {"message": "Tài khoản đã được xóa vĩnh viễn"}
 
     def forgot_password(self, db: Session, data: ForgotPasswordRequest) -> dict:
+        email = data.email.lower()
         user = self.repo.get_by_email(db, data.email)
-        if not user:
-            logger.debug("forgot_password: email not found: %s", data.email)
-            raise ValueError("Email không tồn tại")
-
-        if not bool(user.email_da_xac_thuc):
-            raise HTTPException(400, "Email chưa được xác thực. Vui lòng xác thực email trước.")
+        if not user or not bool(user.email_da_xac_thuc):
+            logger.debug("forgot_password: email unavailable for reset: %s", data.email)
+            return {
+                "message": FORGOT_PASSWORD_GENERIC_MESSAGE,
+                "email": email,
+                "masked_email": self._mask_email(email),
+            }
 
         email = user.email.lower()
         otp_code = str(random.randint(100000, 999999))
         _otp_store[email] = {
             "otp": otp_code,
             "expires_at": now_vietnam() + timedelta(minutes=OTP_EXPIRE_MINUTES),
+            "verified": False,
         }
 
         ok = EmailService().send_otp(email, otp_code, purpose="reset")
@@ -279,7 +291,7 @@ class UserService:
             _otp_store.pop(email, None)
             raise HTTPException(500, "Không thể gửi email. Vui lòng kiểm tra lại địa chỉ email.")
         masked = self._mask_email(email)
-        return {"message": "Mã OTP đã được gửi", "email": email, "masked_email": masked}
+        return {"message": FORGOT_PASSWORD_GENERIC_MESSAGE, "email": email, "masked_email": masked}
 
     @staticmethod
     def _mask_email(email: str) -> str:
@@ -294,6 +306,9 @@ class UserService:
         entry = _otp_store.get(data.email)
         if not entry or entry["otp"] != data.otp_code or entry["expires_at"] < now_vietnam():
             raise HTTPException(400, "OTP không hợp lệ hoặc đã hết hạn")
+        if entry.get("verified"):
+            raise HTTPException(400, "OTP đã được xác thực. Vui lòng tiếp tục đặt lại mật khẩu.")
+        entry["verified"] = True
         return {"message": "OTP hợp lệ", "valid": True}
 
     def resend_registration_otp(self, db: Session, data: ForgotPasswordRequest) -> dict:
@@ -323,6 +338,8 @@ class UserService:
         entry = _otp_store.get(data.email)
         if not entry or entry["otp"] != data.otp_code or entry["expires_at"] < now_vietnam():
             raise HTTPException(400, "OTP không hợp lệ hoặc đã hết hạn")
+        if not entry.get("verified"):
+            raise HTTPException(400, "Vui lòng xác thực OTP trước khi đặt lại mật khẩu")
 
         user = self.repo.get_by_email(db, data.email)
         if not user:
@@ -361,17 +378,28 @@ class UserService:
             raise HTTPException(401, "Google token không hợp lệ")
 
         email = idinfo.get("email", "").lower().strip()
+        ma_dinh_danh_google = (idinfo.get("sub") or "").strip()
         email_verified = bool(idinfo.get("email_verified"))
         full_name = idinfo.get("name", "")
         if not email:
             raise HTTPException(400, "Không lấy được email từ Google")
+        if not ma_dinh_danh_google:
+            raise HTTPException(400, "Không lấy được mã định danh Google")
 
         if not email_verified:
             raise HTTPException(401, "Email Google chưa được xác thực")
 
-        user = self.repo.get_by_email(db, email)
+        user = (
+            db.query(User)
+            .filter(User.ma_dinh_danh_google == ma_dinh_danh_google, User.thoi_gian_xoa.is_(None))
+            .first()
+        )
+        if not user:
+            user = self.repo.get_by_email(db, email)
         if user:
             user.email_da_xac_thuc = True
+            if not getattr(user, "ma_dinh_danh_google", None):
+                user.ma_dinh_danh_google = ma_dinh_danh_google
             status_name = user.trang_thai_obj.ten_trang_thai if user.trang_thai_obj else ""
             if status_name != "hoat_dong":
                 raise HTTPException(403, "Tài khoản đã bị khóa")
@@ -392,15 +420,22 @@ class UserService:
                 ten_dang_nhap=username,
                 email=email,
                 email_da_xac_thuc=True,
-                mat_khau_ma_hoa=hash_password(__import__('os').urandom(32).hex()),
+                ma_dinh_danh_google=ma_dinh_danh_google,
+                mat_khau_ma_hoa=hash_password(os.urandom(32).hex()),
                 vai_tro_id=role.id,
                 trang_thai_id=status.id,
             )
             profile = Profile(ho_ten=full_name)
             settings = UserSettings()
-            self.repo.create(db, user, profile, settings)
+            user.profile = profile
+            user.settings = settings
+            db.add(user)
 
         user.lan_dang_nhap_cuoi = now_vietnam()
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(409, "Tài khoản Google đang được xử lý. Vui lòng thử lại.")
 
         return self._generate_tokens(user)

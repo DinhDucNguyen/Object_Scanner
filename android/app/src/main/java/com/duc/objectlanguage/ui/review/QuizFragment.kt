@@ -23,6 +23,7 @@ class QuizFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: QuizViewModel by viewModels()
     private var timer: CountDownTimer? = null
+    private var advanceRunnable: Runnable? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -194,12 +195,14 @@ class QuizFragment : Fragment() {
             shakeView(wrongView)
         }
 
-        binding.root.postDelayed({
+        advanceRunnable?.let { binding.root.removeCallbacks(it) }
+        advanceRunnable = Runnable {
             if (_binding != null) {
                 viewModel.moveToNext()
                 resetOptionColors()
             }
-        }, 1800)
+        }
+        advanceRunnable?.let { binding.root.postDelayed(it, 1800) }
     }
 
     private fun tintOption(view: RadioButton, bgColorRes: Int, textColorRes: Int) {
@@ -280,6 +283,8 @@ class QuizFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         timer?.cancel()
+        advanceRunnable?.let { binding.root.removeCallbacks(it) }
+        advanceRunnable = null
         _binding = null
     }
 }

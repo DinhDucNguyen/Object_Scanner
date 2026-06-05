@@ -1,8 +1,6 @@
 package com.duc.objectlanguage.ui.scan
 
 import android.app.Application
-import android.app.AlertDialog
-import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -13,7 +11,6 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.model.ScanResponse
 import com.duc.objectlanguage.data.model.TranslationResponse
-import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.ui.common.localizedString
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import com.google.mlkit.vision.common.InputImage
@@ -29,7 +26,6 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
 
     private val app = application as ObjectLanguageApp
     private val repo = app.repository
-    private val collectionRepo = CollectionRepository(app.tokenManager)
     private val guestSessionManager = app.guestSessionManager
 
     val isGuest: Boolean get() = !app.tokenManager.isLoggedIn
@@ -309,33 +305,6 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
     fun clearAddedMsg() { _addedMsg.value = null }
 
     fun clearError() { _error.value = null }
-
-    fun showAddToCollectionDialog(translationId: Int, context: Context) {
-        viewModelScope.launch {
-            val result = collectionRepo.getCollections()
-            val collections = result.getOrNull()
-            if (collections.isNullOrEmpty()) {
-                _addedMsg.value = localizedString(R.string.scan_add_collection_empty)
-                return@launch
-            }
-            val labels = collections.map { it.name }.toTypedArray()
-            AlertDialog.Builder(context)
-                .setTitle(localizedString(R.string.scan_add_to_collection_title))
-                .setItems(labels) { _, which ->
-                    val collectionId = collections[which].id
-                    viewModelScope.launch {
-                        val r = collectionRepo.addToCollection(collectionId, translationId)
-                        _addedMsg.value = if (r.isSuccess) {
-                            localizedString(R.string.collection_added_to, collections[which].name)
-                        } else {
-                            localizedString(R.string.scan_add_to_collection_error, r.exceptionOrNull()?.message.orEmpty())
-                        }
-                    }
-                }
-                .setNegativeButton(localizedString(R.string.btn_cancel), null)
-                .show()
-        }
-    }
 
     override fun onCleared() {
         super.onCleared()

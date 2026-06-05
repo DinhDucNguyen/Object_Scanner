@@ -22,6 +22,7 @@ class ImageMatchingFragment : Fragment() {
     private lateinit var adapter: MatchingCardAdapter
     private var timer: CountDownTimer? = null
     private val timeLimit = 120
+    private var nextRoundRunnable: Runnable? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -89,9 +90,11 @@ class ImageMatchingFragment : Fragment() {
 
         viewModel.roundComplete.observe(viewLifecycleOwner) { complete ->
             if (complete) {
-                binding.root.postDelayed({
+                nextRoundRunnable?.let { binding.root.removeCallbacks(it) }
+                nextRoundRunnable = Runnable {
                     if (_binding != null) viewModel.startNextRound()
-                }, 1000)
+                }
+                nextRoundRunnable?.let { binding.root.postDelayed(it, 1000) }
             }
         }
 
@@ -182,6 +185,8 @@ class ImageMatchingFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         stopTimer()
+        nextRoundRunnable?.let { binding.root.removeCallbacks(it) }
+        nextRoundRunnable = null
         _binding = null
     }
 }

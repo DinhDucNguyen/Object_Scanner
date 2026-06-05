@@ -213,10 +213,6 @@ class ProfileFragment : Fragment() {
         dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDelete)
             .setOnClickListener {
                 val password = etPassword.text.toString()
-                if (password.isEmpty()) {
-                    etPassword.error = getString(R.string.profile_delete_account_password_hint)
-                    return@setOnClickListener
-                }
                 val app = requireActivity().application as ObjectLanguageApp
                 val btn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDelete)
                 btn.isEnabled = false

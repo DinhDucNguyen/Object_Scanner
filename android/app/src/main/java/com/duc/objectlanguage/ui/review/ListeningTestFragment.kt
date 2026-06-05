@@ -26,6 +26,7 @@ class ListeningTestFragment : Fragment() {
     private var hintFirstLetterUsed = false
     private var hintWordLengthUsed = false
     private var repeatCount = 0
+    private var advanceRunnable: Runnable? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -208,12 +209,15 @@ class ListeningTestFragment : Fragment() {
             tts?.speak(result.correctAnswer, TextToSpeech.QUEUE_FLUSH, null, null)
         }
 
-        binding.root.postDelayed({
-            if (_binding == null) return@postDelayed
-            binding.etAnswer.setTextColor(resources.getColor(android.R.color.black, null))
-            binding.tvHint.setTextColor(resources.getColor(android.R.color.darker_gray, null))
-            viewModel.moveToNext()
-        }, 3000)
+        advanceRunnable?.let { binding.root.removeCallbacks(it) }
+        advanceRunnable = Runnable {
+            if (_binding != null) {
+                binding.etAnswer.setTextColor(resources.getColor(android.R.color.black, null))
+                binding.tvHint.setTextColor(resources.getColor(android.R.color.darker_gray, null))
+                viewModel.moveToNext()
+            }
+        }
+        advanceRunnable?.let { binding.root.postDelayed(it, 3000) }
     }
 
     private fun showError(message: String) {
@@ -270,6 +274,8 @@ class ListeningTestFragment : Fragment() {
         tts?.stop()
         tts?.shutdown()
         tts = null
+        advanceRunnable?.let { binding.root.removeCallbacks(it) }
+        advanceRunnable = null
         _binding = null
     }
 }

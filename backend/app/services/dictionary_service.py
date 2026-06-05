@@ -255,21 +255,20 @@ class DictionaryService:
     ) -> tuple[Object, Translation, Translation] | None:
         """Tìm object bằng phần tên tiếng Việt trong dinh_nghia (trước dấu ':')."""
         text_lower = vi_text.strip().lower()
-        rows = (
+        row = (
             db.query(Object, Translation)
             .join(Translation, Translation.doi_tuong_id == Object.id)
             .filter(Object.thoi_gian_xoa.is_(None))
             .filter(Translation.thoi_gian_xoa.is_(None))
             .filter(Translation.dinh_nghia.isnot(None))
-            .all()
+            .filter(func.lower(func.trim(func.substring_index(Translation.dinh_nghia, ":", 1))) == text_lower)
+            .first()
         )
-        for obj, trans in rows:
-            dinh_nghia = (trans.dinh_nghia or "").strip()
-            vi_name = dinh_nghia.split(":")[0].strip().lower() if ":" in dinh_nghia else dinh_nghia.lower()
-            if vi_name == text_lower:
-                target_trans = self._find_target_translation(db, obj.id, to_lang) or trans
-                return obj, trans, target_trans
-        return None
+        if not row:
+            return None
+        obj, trans = row
+        target_trans = self._find_target_translation(db, obj.id, to_lang) or trans
+        return obj, trans, target_trans
 
     def _find_target_translation(
         self, db: Session, object_id: int, to_lang: str
@@ -456,7 +455,7 @@ class DictionaryService:
         if not cached:
             return None
         created_at, value = cached
-        if datetime.utcnow() - created_at > self._cache_ttl:
+        if now_vietnam() - created_at > self._cache_ttl:
             self._cache.pop(key, None)
             return None
         return deepcopy(value)
@@ -464,4 +463,4 @@ class DictionaryService:
     def _set_cached(self, key: tuple[str, str, str], value: dict) -> None:
         if len(self._cache) > 200:
             self._cache.clear()
-        self._cache[key] = (datetime.utcnow(), deepcopy(value))
+        self._cache[key] = (now_vietnam(), deepcopy(value))

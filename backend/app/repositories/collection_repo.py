@@ -5,10 +5,16 @@ from app.models.collection_item import CollectionItem
 
 class CollectionRepository:
     def get_by_user(self, db: Session, nguoi_dung_id: int):
-        return db.query(UserCollection).filter(UserCollection.nguoi_dung_id == nguoi_dung_id).all()
+        return db.query(UserCollection).filter(
+            UserCollection.nguoi_dung_id == nguoi_dung_id,
+            UserCollection.thoi_gian_xoa.is_(None),
+        ).all()
 
     def get_by_id(self, db: Session, collection_id: int):
-        return db.query(UserCollection).filter(UserCollection.id == collection_id).first()
+        return db.query(UserCollection).filter(
+            UserCollection.id == collection_id,
+            UserCollection.thoi_gian_xoa.is_(None),
+        ).first()
 
     def count_items(self, db: Session, collection_id: int):
         return db.query(CollectionItem).filter(CollectionItem.bo_suu_tap_id == collection_id).count()

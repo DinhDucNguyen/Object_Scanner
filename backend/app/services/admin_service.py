@@ -364,6 +364,32 @@ class AdminService:
     # Translation CRUD
     # ------------------------------------------------------------------
 
+    def _translation_admin_response(self, t: Translation) -> TranslationAdminResponse:
+        obj_code = t.object.ma_doi_tuong if t.object else None
+        lang_code = t.language.ma_ngon_ngu if t.language else None
+        examples = t.examples or []
+        return TranslationAdminResponse(
+            id=t.id,
+            doi_tuong_id=t.doi_tuong_id,
+            object_code=obj_code,
+            lang_code=lang_code,
+            tu_vung=t.tu_vung,
+            phien_am=t.phien_am,
+            loai_tu=t.loai_tu,
+            dinh_nghia=t.dinh_nghia,
+            am_thanh_url=t.am_thanh_url,
+            da_xac_nhan=bool(t.da_xac_nhan),
+            example_count=len(examples),
+            examples=[
+                ExampleItem(id=ex.id, cau_vi_du=ex.cau_vi_du, dich_nghia=ex.dich_nghia)
+                for ex in examples
+            ],
+            du_doan_ai_id=t.du_doan_ai_id,
+            nguoi_tao_id=t.nguoi_tao_id,
+            nguoi_duyet_id=t.nguoi_duyet_id,
+            thoi_gian_duyet=t.thoi_gian_duyet,
+        )
+
     def list_translations(
         self,
         db: Session,
@@ -387,30 +413,7 @@ class AdminService:
         trans = query.order_by(Translation.id.desc()).offset(offset).limit(limit).all()
         result = []
         for t in trans:
-            obj_code = t.object.ma_doi_tuong if t.object else None
-            lang_code = t.language.ma_ngon_ngu if t.language else None
-            ex_count = len(t.examples) if t.examples else 0
-            result.append(TranslationAdminResponse(
-                id=t.id,
-                doi_tuong_id=t.doi_tuong_id,
-                object_code=obj_code,
-                lang_code=lang_code,
-                tu_vung=t.tu_vung,
-                phien_am=t.phien_am,
-                loai_tu=t.loai_tu,
-                dinh_nghia=t.dinh_nghia,
-                am_thanh_url=t.am_thanh_url,
-                da_xac_nhan=bool(t.da_xac_nhan),
-                example_count=ex_count,
-                examples=[
-                    ExampleItem(id=ex.id, cau_vi_du=ex.cau_vi_du, dich_nghia=ex.dich_nghia)
-                    for ex in (t.examples or [])
-                ],
-                du_doan_ai_id=t.du_doan_ai_id,
-                nguoi_tao_id=t.nguoi_tao_id,
-                nguoi_duyet_id=t.nguoi_duyet_id,
-                thoi_gian_duyet=t.thoi_gian_duyet,
-            ))
+            result.append(self._translation_admin_response(t))
         return result
 
     def create_translation(self, db: Session, req: TranslationCreateRequest, admin_id: int | None = None) -> TranslationAdminResponse:
@@ -443,7 +446,7 @@ class AdminService:
             PredictionService._add_example(db, t.id, sentence)
         db.commit()
         db.refresh(t)
-        return self.list_translations(db, object_id=t.doi_tuong_id, limit=1, offset=0)[0]
+        return self._translation_admin_response(t)
 
     def update_translation(
         self,
@@ -480,8 +483,7 @@ class AdminService:
                 PredictionService._add_example(db, t.id, sentence)
         db.commit()
         db.refresh(t)
-        trans_list = self.list_translations(db, object_id=t.doi_tuong_id, limit=200, offset=0)
-        return next((x for x in trans_list if x.id == t.id), None)
+        return self._translation_admin_response(t)
 
     def delete_translation(self, db: Session, translation_id: int) -> bool:
         t = db.query(Translation).filter(Translation.id == translation_id, Translation.thoi_gian_xoa.is_(None)).first()
@@ -622,7 +624,7 @@ class AdminService:
 
     def get_user_stats(self, db: Session, nguoi_dung_id: int) -> Optional[UserStatsAdminResponse]:
         from sqlalchemy import func
-        from datetime import date, timedelta
+        from datetime import timedelta
 
         user = db.query(User).filter(User.id == nguoi_dung_id, User.thoi_gian_xoa.is_(None)).first()
         if not user:
@@ -644,7 +646,7 @@ class AdminService:
         streak_hien_tai = 0
         streak_dai_nhat = 0
         if dates:
-            today = date.today()
+            today = now_vietnam().date()
             cur = 0
             if dates[0] == today or dates[0] == today - timedelta(days=1):
                 check = dates[0]

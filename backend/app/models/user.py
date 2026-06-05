@@ -11,6 +11,7 @@ class User(Base):
     ten_dang_nhap = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     email_da_xac_thuc = Column(Boolean, nullable=False, default=False, server_default="0")
+    ma_dinh_danh_google = Column(String(128), unique=True, nullable=True)
     mat_khau_ma_hoa = Column(String(255), nullable=False)
     vai_tro_id = Column(Integer, ForeignKey("VaiTro.id"), nullable=False)
     trang_thai_id = Column(Integer, ForeignKey("TrangThaiNguoiDung.id"), nullable=False)

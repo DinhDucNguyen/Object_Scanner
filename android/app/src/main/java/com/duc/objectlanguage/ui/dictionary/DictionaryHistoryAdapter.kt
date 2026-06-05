@@ -161,7 +161,10 @@ class DictionaryHistoryAdapter(
                 binding.cardForeground.translationX, -binding.root.width.toFloat()
             ).apply {
                 duration = 200
-                doOnEnd { onDone() }
+                doOnEnd {
+                    if (openedHolder == this@HistoryViewHolder) openedHolder = null
+                    onDone()
+                }
                 start()
             }
         }
@@ -176,6 +179,12 @@ class DictionaryHistoryAdapter(
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         holder.bind(getItem(position))
+    }
+
+    override fun onViewRecycled(holder: HistoryViewHolder) {
+        if (openedHolder == holder) openedHolder = null
+        holder.resetSwipe(animate = false)
+        super.onViewRecycled(holder)
     }
 
     fun closeOpenedItem() {
