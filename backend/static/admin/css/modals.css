@@ -32,4 +32,12 @@
       margin-top: .6rem;
       background: #f8fafc;
     }
+    /* Modal body content fade-in after data loads */
+    .modal-body-content {
+      animation: modalContentFade .16s ease both;
+    }
 
+    @keyframes modalContentFade {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }

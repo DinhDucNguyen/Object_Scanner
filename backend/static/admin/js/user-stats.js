@@ -8,7 +8,7 @@
       new bootstrap.Modal(document.getElementById('form-modal')).show();
       try {
         const s = await apiJSON(`/users/${userId}/stats`);
-        document.getElementById('fm-body').innerHTML = `
+        setModalBody('fm-body', `
       <div class="row g-2 mb-3">
         <div class="col-6">
           <div class="p-3 rounded text-center" style="background:#e7f1ff;">
@@ -48,9 +48,9 @@
           <span class="text-muted">Ã”n táº­p gáº§n nháº¥t:</span>
           <span>${fmtDate(s.last_review_at)}</span>
         </div>
-      </div>`;
+      </div>`);
       } catch (e) {
-        document.getElementById('fm-body').innerHTML = `<div class="alert alert-danger">Lá»—i: ${e.message}</div>`;
+        setModalBody('fm-body', `<div class="alert alert-danger">Lá»—i: ${e.message}</div>`);
       }
     }
 

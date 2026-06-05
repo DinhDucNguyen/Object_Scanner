@@ -181,6 +181,11 @@
       flex: 1;
       color: var(--text);
       letter-spacing: -.02em;
+      transition: opacity .12s ease;
+    }
+
+    #page-title.switching {
+      opacity: 0;
     }
 
     .tb-user {
@@ -220,15 +225,17 @@
     .section {
       display: none;
       padding: 1.5rem;
-      animation: fadeIn .18s ease;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
+    .section.active {
+      display: block;
+      animation: sectionFadeIn .2s cubic-bezier(.2, .8, .2, 1) both;
     }
 
-    .section.active { display: block; }
+    @keyframes sectionFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
     /* â”€â”€â”€ Stat cards â”€â”€â”€ */
     .stat-row {

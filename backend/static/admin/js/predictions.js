@@ -225,7 +225,7 @@
         </div>`;
           });
         }
-        document.getElementById('pm-body').innerHTML = html;
+        setModalBody('pm-body', html);
         if (p.trang_thai === 'cho_duyet') {
           document.getElementById('pm-footer').innerHTML = `
         <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">ÄÃ³ng</button>

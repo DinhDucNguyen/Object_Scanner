@@ -109,7 +109,12 @@
       document.querySelectorAll('.section').forEach(s =>
         s.classList.toggle('active', s.id === 'section-' + section)
       );
-      document.getElementById('page-title').textContent = SECTION_LABELS[section] || section;
+      const titleEl = document.getElementById('page-title');
+      titleEl.classList.add('switching');
+      requestAnimationFrame(() => {
+        titleEl.textContent = SECTION_LABELS[section] || section;
+        titleEl.classList.remove('switching');
+      });
       const loaders = {
         dashboard: loadDashboard, predictions: loadPredictions,
         objects: loadObjects, translations: loadTranslations,
@@ -135,6 +140,12 @@
       const res = await api(path, opts);
       if (!res.ok) { const t = await res.text(); throw new Error(t); }
       return res.json();
+    }
+
+    function setModalBody(elId, html) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.innerHTML = '<div class="modal-body-content">' + html + '</div>';
     }
 
     function escHtml(s) {
