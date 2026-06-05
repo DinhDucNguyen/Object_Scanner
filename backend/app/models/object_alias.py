@@ -14,7 +14,8 @@ class ObjectAlias(Base):
     doi_tuong_id = Column(Integer, ForeignKey("DoiTuong.id", ondelete="CASCADE"), nullable=False, index=True)
     ma_bi_danh = Column(String(100), unique=True, nullable=False, index=True)
     ten_hien_thi = Column(String(255), nullable=True)
-    ngon_ngu = Column(String(10), nullable=True)
+    ngon_ngu_id = Column(Integer, ForeignKey("NgonNgu.id", ondelete="SET NULL"), nullable=True, index=True)
     thoi_gian_tao = Column(TIMESTAMP, default=now_vietnam)
 
     object = relationship("Object", back_populates="aliases")
+    language = relationship("Language", foreign_keys=[ngon_ngu_id])

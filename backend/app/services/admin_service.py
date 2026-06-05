@@ -54,6 +54,12 @@ class AdminService:
         self.tts = TTSService()
         self.streak_service = StreakService()
 
+    def _resolve_lang_id(self, db: Session, ma_ngon_ngu: str | None) -> int | None:
+        if not ma_ngon_ngu:
+            return None
+        lang = db.query(Language).filter(Language.ma_ngon_ngu == ma_ngon_ngu.strip().lower()).first()
+        return lang.id if lang else None
+
     def _object_translation_counts(self, db: Session, object_id: int) -> tuple[int, int]:
         base = db.query(Translation).filter(
             Translation.doi_tuong_id == object_id,
@@ -311,13 +317,13 @@ class AdminService:
             if req.ten_hien_thi is not None:
                 alias.ten_hien_thi = req.ten_hien_thi.strip() or None
             if req.ngon_ngu is not None:
-                alias.ngon_ngu = req.ngon_ngu.strip() or None
+                alias.ngon_ngu_id = self._resolve_lang_id(db, req.ngon_ngu)
         else:
             alias = ObjectAlias(
                 doi_tuong_id=obj.id,
                 ma_bi_danh=alias_code,
                 ten_hien_thi=(req.ten_hien_thi or "").strip() or None,
-                ngon_ngu=(req.ngon_ngu or "").strip() or None,
+                ngon_ngu_id=self._resolve_lang_id(db, req.ngon_ngu),
             )
             db.add(alias)
 
@@ -350,7 +356,7 @@ class AdminService:
         alias.ma_bi_danh = new_code
         alias.ten_hien_thi = (ten_hien_thi or "").strip() or None
         if ngon_ngu is not None:
-            alias.ngon_ngu = ngon_ngu.strip() or None
+            alias.ngon_ngu_id = self._resolve_lang_id(db, ngon_ngu)
         db.commit()
         db.refresh(alias)
         return ObjectAliasItem.model_validate(alias)

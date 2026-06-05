@@ -44,6 +44,12 @@ class PredictionService:
         self.gemini = GeminiService()
         self.training_images = TrainingImageService()
 
+    def _resolve_lang_id(self, db: Session, ma_ngon_ngu: str | None) -> int | None:
+        if not ma_ngon_ngu:
+            return None
+        lang = db.query(Language).filter(Language.ma_ngon_ngu == ma_ngon_ngu.strip().lower()).first()
+        return lang.id if lang else None
+
     def _prediction_payload(self, prediction: AIPrediction) -> dict:
         return load_prediction_payload(prediction.mo_ta, prediction.nhan_du_doan)
 
@@ -483,7 +489,7 @@ class PredictionService:
                 doi_tuong_id=obj.id,
                 ma_bi_danh=alias_code,
                 ten_hien_thi=(request.ten_hien_thi or "").strip() or None,
-                ngon_ngu=(request.ngon_ngu or "").strip() or None,
+                ngon_ngu_id=self._resolve_lang_id(db, request.ngon_ngu),
             )
             db.add(alias)
             db.flush()
@@ -491,7 +497,7 @@ class PredictionService:
             if request.ten_hien_thi is not None:
                 alias.ten_hien_thi = request.ten_hien_thi.strip() or alias.ten_hien_thi
             if request.ngon_ngu is not None:
-                alias.ngon_ngu = request.ngon_ngu.strip() or alias.ngon_ngu
+                alias.ngon_ngu_id = self._resolve_lang_id(db, request.ngon_ngu)
 
         root_id = p.du_doan_goc_id or p.id
         related_predictions = db.query(AIPrediction).filter(
