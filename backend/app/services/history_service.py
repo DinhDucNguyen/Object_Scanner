@@ -1,7 +1,6 @@
-import os
-import json
 import uuid
 from datetime import date as Date
+from pathlib import Path
 from sqlalchemy.orm import Session
 from app.repositories.history_repo import HistoryRepository
 from app.repositories.object_repo import ObjectRepository
@@ -11,12 +10,13 @@ from app.models.ai_feedback_report import AIPrediction
 from app.models.translation import Translation
 from app.schemas.common import AIPredictionCreate, LichSuQuetResponse
 from app.services.learning_service import LearningService
+from app.services.prediction_payload import load_prediction_payload
 from app.services.training_image_service import TrainingImageService
 from app.utils.cloudinary_helper import upload_image
 from app.utils.image import check_image_quality
 from app.utils.timezone import now_vietnam
 
-UPLOAD_DIR = "uploads/scans"
+UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploads" / "scans"
 
 
 class HistoryFeedbackService:
@@ -139,11 +139,10 @@ class HistoryFeedbackService:
             image_url = upload_image(image_bytes)
             if image_url is None:
                 # Fallback: lưu local nếu Cloudinary chưa cấu hình
-                os.makedirs(UPLOAD_DIR, exist_ok=True)
+                UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
                 filename = f"{uuid.uuid4().hex}.jpg"
-                filepath = os.path.join(UPLOAD_DIR, filename)
-                with open(filepath, "wb") as f:
-                    f.write(image_bytes)
+                filepath = UPLOAD_DIR / filename
+                filepath.write_bytes(image_bytes)
                 image_url = f"{base_url}/uploads/scans/{filename}"
 
         scan = ScanHistory(
@@ -257,10 +256,7 @@ class HistoryFeedbackService:
         )
 
     def _prediction_payload(self, prediction: AIPrediction) -> dict:
-        try:
-            return json.loads(prediction.mo_ta or "{}")
-        except Exception:
-            return {}
+        return load_prediction_payload(prediction.mo_ta, prediction.nhan_du_doan)
 
     def _pending_translations_to_dicts(self, translations_raw: list, object_code: str) -> list[dict]:
         translations = []

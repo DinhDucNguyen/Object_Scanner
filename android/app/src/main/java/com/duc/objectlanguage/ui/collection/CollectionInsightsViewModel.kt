@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.duc.objectlanguage.data.local.TokenManager
+import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.data.model.CollectionInsights
 import com.duc.objectlanguage.data.repository.CollectionRepository
@@ -18,8 +18,7 @@ import java.util.Locale
  */
 class CollectionInsightsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val tokenManager = TokenManager(application)
-    private val repo = CollectionRepository(tokenManager)
+    private val repo = CollectionRepository((application as ObjectLanguageApp).tokenManager)
 
     private val _collections = MutableLiveData<List<Collection>>()
     val collections: LiveData<List<Collection>> = _collections

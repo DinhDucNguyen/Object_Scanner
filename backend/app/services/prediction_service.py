@@ -3,7 +3,6 @@ Prediction Service
 ==================
 Xử lý quy trình kiểm duyệt AI predictions (approve, reject, alias, split, v.v.)
 """
-import json
 from typing import Optional
 
 from sqlalchemy import or_
@@ -26,6 +25,7 @@ from app.models.example import ViDu
 from app.models.language import Language
 from app.services.tts_service import TTSService
 from app.services.gemini_service import GeminiService
+from app.services.prediction_payload import dump_prediction_payload, load_prediction_payload
 from app.services.training_image_service import TrainingImageService
 from app.repositories.object_repo import normalize_object_code
 from app.utils.timezone import now_vietnam
@@ -45,10 +45,7 @@ class PredictionService:
         self.training_images = TrainingImageService()
 
     def _prediction_payload(self, prediction: AIPrediction) -> dict:
-        try:
-            return json.loads(prediction.mo_ta or "{}")
-        except Exception:
-            return {}
+        return load_prediction_payload(prediction.mo_ta, prediction.nhan_du_doan)
 
     def _is_image_only_prediction(self, prediction: AIPrediction) -> bool:
         return prediction.vai_tro == VaiTroDuDoan.anh_bo_sung
@@ -118,7 +115,7 @@ class PredictionService:
         vocab_payload = None
         if p.mo_ta:
             try:
-                vocab_payload = VocabPayloadSchema.model_validate(json.loads(p.mo_ta))
+                vocab_payload = VocabPayloadSchema.model_validate(self._prediction_payload(p))
             except Exception:
                 pass
 
@@ -193,9 +190,8 @@ class PredictionService:
         if not p.mo_ta:
             return ApproveResponse(success=False, message="Không có dữ liệu từ vựng (mo_ta trống)", prediction_id=prediction_id)
 
-        try:
-            raw = json.loads(p.mo_ta)
-        except Exception:
+        raw = self._prediction_payload(p)
+        if raw.get("_payload_error"):
             return ApproveResponse(success=False, message="mo_ta không phải JSON hợp lệ", prediction_id=prediction_id)
 
         object_code = normalize_object_code(raw.get("object_code", p.nhan_du_doan or "unknown"))
@@ -523,7 +519,7 @@ class PredictionService:
             payload["ma_bi_danh"] = alias_code
             payload["ma_doi_tuong_chinh"] = obj.ma_doi_tuong
             payload["doi_tuong_chinh_id"] = obj.id
-            rel.mo_ta = json.dumps(payload, ensure_ascii=False)
+            rel.mo_ta = dump_prediction_payload(payload, rel.nhan_du_doan)
             rel.nhan_du_doan = obj.ma_doi_tuong
             if root_prediction and rel.id != root_prediction.id:
                 rel.vai_tro = VaiTroDuDoan.anh_bo_sung
@@ -588,7 +584,7 @@ class PredictionService:
         payload = self._prediction_payload(p)
         payload["review_kind"] = "detached_image"
         payload["detached_from_prediction_id"] = root_id
-        p.mo_ta = json.dumps(payload, ensure_ascii=False)
+        p.mo_ta = dump_prediction_payload(payload, p.nhan_du_doan)
         p.du_doan_goc_id = None
         p.trang_thai = TrangThaiDuyet.tu_choi
         db.commit()
@@ -626,7 +622,7 @@ class PredictionService:
         payload["reassigned_from_prediction_id"] = root_id
         payload["ma_doi_tuong_chinh"] = obj.ma_doi_tuong
         payload["doi_tuong_chinh_id"] = obj.id
-        p.mo_ta = json.dumps(payload, ensure_ascii=False)
+        p.mo_ta = dump_prediction_payload(payload, p.nhan_du_doan)
         p.nhan_du_doan = obj.ma_doi_tuong
         p.du_doan_goc_id = target_root.id if target_root and target_root.id != p.id else None
         p.trang_thai = TrangThaiDuyet.da_duyet
@@ -713,7 +709,7 @@ class PredictionService:
             payload["ma_bi_danh"] = alias_code
             payload["ma_doi_tuong_chinh"] = obj.ma_doi_tuong
             payload["doi_tuong_chinh_id"] = obj.id
-            pred.mo_ta = json.dumps(payload, ensure_ascii=False)
+            pred.mo_ta = dump_prediction_payload(payload, pred.nhan_du_doan)
             pred.nhan_du_doan = obj.ma_doi_tuong
             if root_prediction and pred.id != root_prediction.id:
                 pred.vai_tro = VaiTroDuDoan.anh_bo_sung
@@ -744,15 +740,10 @@ class PredictionService:
                 prediction_id=prediction_id,
             )
 
-        raw = {}
+        raw = self._prediction_payload(p)
         deleted_translations = 0
         deleted_object = False
-        if p.mo_ta:
-            try:
-                raw = json.loads(p.mo_ta)
-            except Exception:
-                raw = {}
-
+        if p.mo_ta and not raw.get("_payload_error"):
             for translation_id in raw.get("temp_translation_ids") or []:
                 translation = db.query(Translation).filter(Translation.id == translation_id).first()
                 if translation and not translation.da_xac_nhan:
@@ -862,16 +853,16 @@ class PredictionService:
 
         if vocab_generated:
             vocab_result["object_code"] = new_code
-            new_mo_ta = json.dumps(vocab_result, ensure_ascii=False)
+            new_mo_ta = dump_prediction_payload(vocab_result, new_code)
         else:
             # Tạo payload tối thiểu để admin có thể approve sau
-            new_mo_ta = json.dumps({
+            new_mo_ta = dump_prediction_payload({
                 "object_code": new_code,
                 "category": None,
                 "translations": [],
                 "_admin_split": True,
                 "_vocab_error": vocab_result.get("_message", "unknown"),
-            }, ensure_ascii=False)
+            }, new_code)
 
         # Tạo prediction mới cho object đúng
         new_pred = AIPrediction(
@@ -905,7 +896,7 @@ class PredictionService:
         old_payload["original_object_code"] = p.nhan_du_doan
         old_payload["split_to_new_prediction_id"] = new_pred.id
         old_payload["corrected_by_admin"] = True
-        p.mo_ta = json.dumps(old_payload, ensure_ascii=False)
+        p.mo_ta = dump_prediction_payload(old_payload, p.nhan_du_doan)
         p.trang_thai = TrangThaiDuyet.tu_choi
         p.du_doan_goc_id = None
 

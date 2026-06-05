@@ -63,6 +63,7 @@ class ScanFragment : Fragment() {
     private var cameraProvider: ProcessCameraProvider? = null
     private lateinit var cameraExecutor: ExecutorService
     private var detectorHelper: ObjectDetectorHelper? = null
+    private val detectorLock = Any()
     private var latestDetection: DetectionResult? = null
     private var selectedModelName = ObjectDetectorHelper.COCO_MODEL
     private var lastScannedBitmap: Bitmap? = null
@@ -122,9 +123,7 @@ class ScanFragment : Fragment() {
         if (result.resultCode == Activity.RESULT_OK && data != null) {
             val croppedUri = UCrop.getOutput(data) ?: return@registerForActivityResult
             try {
-                val stream = requireContext().contentResolver.openInputStream(croppedUri)
-                val croppedBytes = stream?.readBytes()
-                stream?.close()
+                val croppedBytes = requireContext().contentResolver.openInputStream(croppedUri)?.use { it.readBytes() }
                 if (croppedBytes != null) {
                     val croppedBitmap = BitmapFactory.decodeByteArray(croppedBytes, 0, croppedBytes.size)
                     showPreviewDialog(croppedBytes, croppedBitmap)
@@ -419,13 +418,15 @@ class ScanFragment : Fragment() {
     }
 
     private fun initDetector(modelName: String) {
-        detectorHelper?.close()
-        detectorHelper = ObjectDetectorHelper(
-            context = requireContext(),
-            modelName = modelName,
-        ) { event ->
-            if (event is DetectionEvent.Failure) {
-                Log.e("ObjectDetector", "YOLO load failed: ${event.message}")
+        synchronized(detectorLock) {
+            detectorHelper?.close()
+            detectorHelper = ObjectDetectorHelper(
+                context = requireContext(),
+                modelName = modelName,
+            ) { event ->
+                if (event is DetectionEvent.Failure) {
+                    Log.e("ObjectDetector", "YOLO load failed: ${event.message}")
+                }
             }
         }
     }
@@ -630,7 +631,9 @@ class ScanFragment : Fragment() {
             lifecycleScope.launch {
                 val yoloResult = withContext(Dispatchers.Default) {
                     val bmp = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                    detectorHelper?.detectBitmap(bmp)
+                    synchronized(detectorLock) {
+                        detectorHelper?.detectBitmap(bmp)
+                    }
                 }
                 viewModel.scanWithDetection(yoloResult, imageBytes)
             }
@@ -898,7 +901,10 @@ class ScanFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        detectorHelper?.close()
+        synchronized(detectorLock) {
+            detectorHelper?.close()
+            detectorHelper = null
+        }
         cameraExecutor.shutdown()
         _binding = null
     }

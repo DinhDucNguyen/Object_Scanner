@@ -1,7 +1,6 @@
-import json
 import logging
-import os
 import uuid
+from pathlib import Path
 
 from sqlalchemy.orm import Session
 
@@ -16,6 +15,7 @@ from app.repositories.object_repo import ObjectRepository, normalize_object_code
 from app.repositories.translation_repo import TranslationRepository
 from app.schemas.common import ScanRequest, ScanResponse, TranslationResponse, ViDuResponse
 from app.services.gemini_service import GeminiService
+from app.services.prediction_payload import dump_prediction_payload, load_prediction_payload
 from app.services.training_image_service import TrainingImageService
 from app.services.tts_service import TTSService
 from app.utils.cloudinary_helper import upload_image
@@ -23,7 +23,7 @@ from app.utils.image import check_image_quality
 from app.utils.timezone import now_vietnam
 
 
-UPLOAD_DIR = "uploads/scans"
+UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploads" / "scans"
 logger = logging.getLogger(__name__)
 
 # Các class YOLO custom đã train — không cần thêm training data
@@ -75,7 +75,7 @@ class ScanService:
                 object_id=obj.id,
                 object_code=obj.ma_doi_tuong,
                 category_name=obj.category.ten_danh_muc if obj.category else None,
-                translations=[self._to_dto(db, t) for t in translations],
+                translations=self._to_dtos(db, translations),
                 aliases=self._get_aliases(db, obj.id),
             )
 
@@ -131,7 +131,7 @@ class ScanService:
                     object_id=obj.id,
                     object_code=obj.ma_doi_tuong,
                     category_name=obj.category.ten_danh_muc if obj.category else None,
-                    translations=[self._to_dto(db, t) for t in existing_translations],
+                    translations=self._to_dtos(db, existing_translations),
                     aliases=self._get_aliases(db, obj.id),
                 )
 
@@ -202,7 +202,7 @@ class ScanService:
         if not obj:
             return None
         translations = self._approved_translations(db, obj.id)
-        return [self._to_dto(db, t) for t in translations]
+        return self._to_dtos(db, translations)
 
     def _approved_translations(self, db: Session, object_id: int) -> list[Translation]:
         return [
@@ -256,7 +256,7 @@ class ScanService:
             nguon_ai=NguonAI.gemini,
             nhan_du_doan=object_code,
             do_tin_cay=1.0,
-            mo_ta=json.dumps(payload, ensure_ascii=False),
+            mo_ta=dump_prediction_payload(payload, object_code),
             trang_thai=TrangThaiDuyet.cho_duyet,
             vai_tro=VaiTroDuDoan.chinh,
         )
@@ -334,7 +334,7 @@ class ScanService:
             nguon_ai=NguonAI.gemini,
             nhan_du_doan=object_code,
             do_tin_cay=1.0,
-            mo_ta=json.dumps(payload, ensure_ascii=False),
+            mo_ta=dump_prediction_payload(payload, object_code),
             trang_thai=TrangThaiDuyet.cho_duyet,
             vai_tro=VaiTroDuDoan.anh_bo_sung,
             du_doan_goc_id=source_prediction.id,
@@ -357,21 +357,17 @@ class ScanService:
         return scan, prediction, source_payload
 
     def _prediction_payload(self, prediction: AIPrediction) -> dict:
-        try:
-            return json.loads(prediction.mo_ta or "{}")
-        except Exception:
-            return {}
+        return load_prediction_payload(prediction.mo_ta, prediction.nhan_du_doan)
 
     def _save_scan_image(self, image_bytes: bytes, base_url: str | None) -> str | None:
         image_url = upload_image(image_bytes)
         if image_url or not base_url:
             return image_url
 
-        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
         filename = f"{uuid.uuid4().hex}.jpg"
-        filepath = os.path.join(UPLOAD_DIR, filename)
-        with open(filepath, "wb") as f:
-            f.write(image_bytes)
+        filepath = UPLOAD_DIR / filename
+        filepath.write_bytes(image_bytes)
         return f"{base_url}/uploads/scans/{filename}"
 
     def _pending_translation_dtos(
@@ -424,16 +420,27 @@ class ScanService:
         names = {"en": "English", "vi": "Vietnamese", "ja": "Japanese", "ko": "Korean"}
         return names.get((lang_code or "").lower(), (lang_code or "en").upper())
 
-    def _to_dto(self, db: Session, t: Translation) -> TranslationResponse:
+    def _to_dtos(self, db: Session, translations: list[Translation]) -> list[TranslationResponse]:
+        responses: list[TranslationResponse] = []
+        audio_updated = False
+        for translation in translations:
+            response, updated = self._to_dto(db, translation)
+            responses.append(response)
+            audio_updated = audio_updated or updated
+        if audio_updated:
+            db.commit()
+        return responses
+
+    def _to_dto(self, db: Session, t: Translation) -> tuple[TranslationResponse, bool]:
         lang = self.lang_repo.get_by_id(db, t.ngon_ngu_id)
         lang_code = lang.ma_ngon_ngu if lang else "en"
         audio_url = t.am_thanh_url
+        audio_updated = False
         if not audio_url:
             audio_url = self.tts.get_audio_url(t.tu_vung, lang_code)
             if audio_url:
                 t.am_thanh_url = audio_url
-                db.commit()
-                db.refresh(t)
+                audio_updated = True
         examples = [
             ViDuResponse(id=e.id, cau_vi_du=e.cau_vi_du, dich_nghia=e.dich_nghia, nguon_du_lieu=e.nguon_du_lieu)
             for e in sorted((t.examples or []), key=lambda item: item.id or 0)[:3]
@@ -451,4 +458,4 @@ class ScanService:
             examples=examples,
             audio_url=audio_url,
             data_source=t.nguon_du_lieu.value if isinstance(t.nguon_du_lieu, NguonDuLieu) else (str(t.nguon_du_lieu) if t.nguon_du_lieu else None),
-        )
+        ), audio_updated

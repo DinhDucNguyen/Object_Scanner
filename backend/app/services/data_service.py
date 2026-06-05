@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from typing import Optional
 
 from app.repositories.object_repo import ObjectRepository
 from app.repositories.translation_repo import TranslationRepository
@@ -54,7 +55,7 @@ class DataService:
             for cat in categories
         ]
 
-    def get_all_objects(self, db: Session, category_id: int = None):
+    def get_all_objects(self, db: Session, category_id: Optional[int] = None):
         objects = self.obj_repo.get_all(db, category_id)
         result = []
         for obj in objects:

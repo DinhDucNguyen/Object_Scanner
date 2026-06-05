@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 # pyrefly: ignore [missing-import]
-from typing import List
+from typing import List, Optional
 
 from app.db.session import get_db
 from app.services.data_service import DataService
@@ -25,7 +25,7 @@ def get_categories(db: Session = Depends(get_db)):
 
 
 @router.get("/objects")
-def get_all_objects(category_id: int = None, db: Session = Depends(get_db)):
+def get_all_objects(category_id: Optional[int] = None, db: Session = Depends(get_db)):
     return data_service.get_all_objects(db, category_id)
 
 

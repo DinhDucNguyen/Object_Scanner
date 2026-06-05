@@ -8,11 +8,12 @@ from urllib.parse import quote
 from gtts import gTTS
 
 logger = logging.getLogger("uvicorn.error")
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
 class TTSService:
-    def __init__(self, cache_dir: str = "uploads/tts", max_cache_files: int = 1000):
-        self.cache_dir = Path(cache_dir)
+    def __init__(self, cache_dir: str | Path | None = None, max_cache_files: int = 1000):
+        self.cache_dir = Path(cache_dir) if cache_dir else BACKEND_ROOT / "uploads" / "tts"
         self.max_cache_files = max_cache_files
 
     def get_audio_url(self, text: str, lang_code: str = "en") -> str | None:

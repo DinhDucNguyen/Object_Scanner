@@ -7,8 +7,10 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 import os
 import random
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+UPLOADS_DIR = Path(__file__).resolve().parents[2] / "uploads"
 
 # pyrefly: ignore [missing-import]
 from app.models.user import User
@@ -172,7 +174,7 @@ class UserService:
         }
 
     def upload_avatar(self, db: Session, nguoi_dung_id: int, image_bytes: bytes, filename: str) -> dict:
-        import os, uuid
+        import uuid
 
         profile = self._get_or_create_profile(db, nguoi_dung_id)
         if not image_bytes:
@@ -180,15 +182,14 @@ class UserService:
 
         avatar_url = upload_image(image_bytes, folder="object_scanner/avatars")
         if avatar_url is None:
-            uploads_dir = "uploads/avatars"
-            os.makedirs(uploads_dir, exist_ok=True)
+            uploads_dir = UPLOADS_DIR / "avatars"
+            uploads_dir.mkdir(parents=True, exist_ok=True)
             ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "jpg"
             if ext not in {"jpg", "jpeg", "png", "webp"}:
                 ext = "jpg"
             new_filename = f"{nguoi_dung_id}_{uuid.uuid4().hex[:8]}.{ext}"
-            filepath = os.path.join(uploads_dir, new_filename)
-            with open(filepath, "wb") as f:
-                f.write(image_bytes)
+            filepath = uploads_dir / new_filename
+            filepath.write_bytes(image_bytes)
             avatar_url = f"/uploads/avatars/{new_filename}"
 
         profile.anh_dai_dien = avatar_url

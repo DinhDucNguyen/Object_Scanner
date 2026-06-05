@@ -1,5 +1,5 @@
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Path, Query, Request
 # pyrefly: ignore [missing-import]
 from fastapi.responses import StreamingResponse, Response
 # pyrefly: ignore [missing-import]
@@ -80,8 +80,8 @@ def get_translations(object_code: str, db: Session = Depends(get_db)):
 @limiter.limit("20/minute")
 def get_example_sentences(
     request: Request,
-    object_code: str,
-    lang: str = Query(default="en", description="Language code"),
+    object_code: str = Path(..., min_length=1, max_length=64, pattern=r"^[A-Za-z0-9_-]+$"),
+    lang: str = Query(default="en", min_length=2, max_length=5, pattern=r"^[a-z]{2}(-[A-Z]{2})?$", description="Language code"),
     count: int = Query(default=3, ge=1, le=3),
 ):
     """Sinh câu ví dụ cho từ vựng bằng Gemini."""

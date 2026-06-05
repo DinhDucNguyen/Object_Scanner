@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
-import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.ReviewCardResponse
 import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.ui.common.localizedString
@@ -39,8 +38,9 @@ data class ReviewSessionSummary(
 
 class ReviewViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = (application as ObjectLanguageApp).repository
-    private val collectionRepo = CollectionRepository(TokenManager(application))
+    private val app = application as ObjectLanguageApp
+    private val repo = app.repository
+    private val collectionRepo = CollectionRepository(app.tokenManager)
 
     private val _cards = MutableLiveData<List<ReviewCardResponse>>()
     val cards: LiveData<List<ReviewCardResponse>> = _cards

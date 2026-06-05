@@ -13,6 +13,7 @@ Flow:
       ↓ admin reject
   DuDoanAI.trang_thai = tu_choi
 """
+from datetime import datetime as dt
 from typing import Optional, List
 
 from sqlalchemy import func, case, or_
@@ -32,6 +33,7 @@ from app.models.review_log import ReviewLog
 from app.models.learning_progress import LearningProgress
 from app.services.tts_service import TTSService
 from app.services.prediction_service import PredictionService
+from app.services.streak_service import StreakService
 from app.repositories.object_repo import normalize_object_code
 from app.utils.timezone import now_vietnam
 from app.utils.security import hash_password
@@ -50,6 +52,7 @@ from app.schemas.admin import (
 class AdminService:
     def __init__(self):
         self.tts = TTSService()
+        self.streak_service = StreakService()
 
     def _object_translation_counts(self, db: Session, object_id: int) -> tuple[int, int]:
         base = db.query(Translation).filter(
@@ -568,7 +571,6 @@ class AdminService:
         limit: int = 50,
         offset: int = 0,
     ) -> List[ScanHistoryAdminItem]:
-        from datetime import datetime as dt
         query = (
             db.query(ScanHistory, User, Object)
             .outerjoin(User, ScanHistory.nguoi_dung_id == User.id)
@@ -590,10 +592,14 @@ class AdminService:
                 Object.ma_doi_tuong.ilike(pattern),
                 alias_match,
             ))
-        if date_from:
-            query = query.filter(ScanHistory.thoi_gian >= dt.fromisoformat(date_from))
-        if date_to:
-            query = query.filter(ScanHistory.thoi_gian <= dt.fromisoformat(date_to + "T23:59:59"))
+        try:
+            if date_from:
+                query = query.filter(ScanHistory.thoi_gian >= dt.fromisoformat(date_from))
+            if date_to:
+                end_value = date_to if "T" in date_to else f"{date_to}T23:59:59"
+                query = query.filter(ScanHistory.thoi_gian <= dt.fromisoformat(end_value))
+        except ValueError as exc:
+            raise ValueError("date_from/date_to phai dung dinh dang ISO: YYYY-MM-DD hoac YYYY-MM-DDTHH:MM:SS") from exc
         rows = query.offset(offset).limit(limit).all()
         lich_su_quet_ids = [scan.id for scan, _, _ in rows]
         pending_lich_su_quet_ids = set(
@@ -623,51 +629,14 @@ class AdminService:
     # ------------------------------------------------------------------
 
     def get_user_stats(self, db: Session, nguoi_dung_id: int) -> Optional[UserStatsAdminResponse]:
-        from sqlalchemy import func
-        from datetime import timedelta
-
         user = db.query(User).filter(User.id == nguoi_dung_id, User.thoi_gian_xoa.is_(None)).first()
         if not user:
             return None
 
         total_scans = db.query(ScanHistory).filter(ScanHistory.nguoi_dung_id == nguoi_dung_id).count()
-        total_reviews = db.query(ReviewLog).filter(ReviewLog.nguoi_dung_id == nguoi_dung_id).count()
+        streak = self.streak_service.get_streak(db, nguoi_dung_id)
+        total_reviews = streak["tong_luot_on"]
         total_learned = db.query(LearningProgress).filter(LearningProgress.nguoi_dung_id == nguoi_dung_id).count()
-
-        review_date_rows = (
-            db.query(func.date(ReviewLog.thoi_diem_on))
-            .filter(ReviewLog.nguoi_dung_id == nguoi_dung_id)
-            .distinct()
-            .order_by(func.date(ReviewLog.thoi_diem_on).desc())
-            .all()
-        )
-        dates = [r[0] for r in review_date_rows]
-
-        streak_hien_tai = 0
-        streak_dai_nhat = 0
-        if dates:
-            today = now_vietnam().date()
-            cur = 0
-            if dates[0] == today or dates[0] == today - timedelta(days=1):
-                check = dates[0]
-                for d in dates:
-                    if d == check:
-                        cur += 1
-                        check -= timedelta(days=1)
-                    else:
-                        break
-            streak_hien_tai = cur
-
-            longest = 1
-            run = 1
-            for i in range(1, len(dates)):
-                if (dates[i - 1] - dates[i]).days == 1:
-                    run += 1
-                    if run > longest:
-                        longest = run
-                else:
-                    run = 1
-            streak_dai_nhat = longest
 
         last_scan = (
             db.query(ScanHistory.thoi_gian)
@@ -687,8 +656,8 @@ class AdminService:
             total_scans=total_scans,
             total_reviews=total_reviews,
             total_learned=total_learned,
-            streak_hien_tai=streak_hien_tai,
-            streak_dai_nhat=streak_dai_nhat,
+            streak_hien_tai=streak["streak_hien_tai"],
+            streak_dai_nhat=streak["streak_dai_nhat"],
             last_scan_at=last_scan[0] if last_scan else None,
             last_review_at=last_review[0] if last_review else None,
         )

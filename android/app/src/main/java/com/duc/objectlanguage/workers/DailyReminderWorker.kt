@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import com.duc.objectlanguage.data.local.NotificationPreferences
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -34,15 +33,20 @@ object DailyReminderWorker {
         alarmManager.cancel(buildPendingIntent(context))
     }
 
-    fun syncWithPreferences(context: Context) {
+    fun syncWithPreferences(context: Context, scope: CoroutineScope) {
         val appContext = context.applicationContext
-        CoroutineScope(Dispatchers.IO).launch {
-            val settings = NotificationPreferences(appContext).currentSettings()
-            if (settings.dailyReminderEnabled) {
-                scheduleDailyReminder(appContext, settings.reminderHour, settings.reminderMinute)
-            } else {
-                cancelDailyReminder(appContext)
-            }
+        scope.launch {
+            syncWithPreferencesNow(appContext)
+        }
+    }
+
+    suspend fun syncWithPreferencesNow(context: Context) {
+        val appContext = context.applicationContext
+        val settings = NotificationPreferences(appContext).currentSettings()
+        if (settings.dailyReminderEnabled) {
+            scheduleDailyReminder(appContext, settings.reminderHour, settings.reminderMinute)
+        } else {
+            cancelDailyReminder(appContext)
         }
     }
 

@@ -1,7 +1,6 @@
 package com.duc.objectlanguage.ui.auth
 
 import android.app.Activity
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,11 +9,9 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.databinding.FragmentLoginBinding
 import com.duc.objectlanguage.ui.MainActivity
@@ -23,12 +20,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: LoginViewModel by viewModels()
 
     private lateinit var googleSignInClient: GoogleSignInClient
 
@@ -66,10 +63,8 @@ class LoginFragment : Fragment() {
             .build()
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
-        val app = requireActivity().application as ObjectLanguageApp
-        val repo = app.repository
-
         binding.btnLogin.addRaisedButtonFeedback()
+        observeViewModel()
 
         binding.btnLogin.setOnClickListener {
             val user = binding.etUsername.text.toString().trim()
@@ -80,26 +75,7 @@ class LoginFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            binding.btnLogin.isEnabled = false
-            binding.progressBar.visibility = View.VISIBLE
-
-            lifecycleScope.launch {
-                val result = repo.login(user, pass)
-                if (_binding == null) return@launch
-
-                binding.progressBar.visibility = View.GONE
-                binding.btnLogin.isEnabled = true
-
-                result.fold(
-                    onSuccess = {
-                        applyAccountDarkMode()
-                        resetGraphToDashboard()
-                    },
-                    onFailure = {
-                        Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
-                    }
-                )
-            }
+            viewModel.login(user, pass)
         }
 
         binding.btnGoogleLogin.setOnClickListener {
@@ -118,26 +94,23 @@ class LoginFragment : Fragment() {
     }
 
     private fun sendGoogleTokenToBackend(idToken: String) {
-        val app = requireActivity().application as ObjectLanguageApp
-        binding.btnGoogleLogin.isEnabled = false
-        binding.progressBar.visibility = View.VISIBLE
+        viewModel.googleLogin(idToken)
+    }
 
-        lifecycleScope.launch {
-            val result = app.repository.googleLogin(idToken)
-            if (_binding == null) return@launch
+    private fun observeViewModel() {
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+            binding.btnLogin.isEnabled = !state.isLoading
+            binding.btnGoogleLogin.isEnabled = !state.isLoading
+        }
 
-            binding.progressBar.visibility = View.GONE
-            binding.btnGoogleLogin.isEnabled = true
-
-            result.fold(
-                onSuccess = {
-                    applyAccountDarkMode()
-                    resetGraphToDashboard()
-                },
-                onFailure = {
-                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
-                }
-            )
+        viewModel.event.observe(viewLifecycleOwner) { event ->
+            when (event) {
+                is LoginEvent.Success -> resetGraphToDashboard()
+                is LoginEvent.Error -> Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
+                null -> Unit
+            }
+            if (event != null) viewModel.consumeEvent()
         }
     }
 
@@ -158,20 +131,6 @@ class LoginFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun applyAccountDarkMode() {
-        val app = requireActivity().application as ObjectLanguageApp
-        val prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        lifecycleScope.launch {
-            app.repository.getUserSettings().onSuccess { settings ->
-                val isDark = settings.darkMode
-                prefs.edit().putBoolean("dark_mode", isDark).apply()
-                AppCompatDelegate.setDefaultNightMode(
-                    if (isDark) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-                )
-            }
-        }
     }
 
     private fun resetGraphToDashboard() {

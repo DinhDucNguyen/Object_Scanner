@@ -118,6 +118,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 Log.e("ScanViewModel", "ML Kit failed: ${e.message}", e)
             }
 

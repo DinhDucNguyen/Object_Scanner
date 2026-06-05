@@ -12,8 +12,8 @@ Endpoints:
   CRUD /api/admin/users
   CRUD /api/admin/scan-history
 """
-import os
 import uuid
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session
@@ -45,7 +45,8 @@ router = APIRouter(
     dependencies=[Depends(require_admin_nguoi_dung_id)],
 )
 admin_service = AdminService()
-OBJECT_UPLOAD_DIR = "uploads/objects"
+MAX_BULK_SCAN_HISTORY_DELETE = 500
+OBJECT_UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploads" / "objects"
 
 
 @router.get("/objects/{object_code}/media")
@@ -88,12 +89,11 @@ async def add_object_media(
         image_bytes = await read_upload_bytes(image)
         final_url = upload_image(image_bytes, folder="object_scanner/objects")
         if final_url is None:
-            os.makedirs(OBJECT_UPLOAD_DIR, exist_ok=True)
+            OBJECT_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
             extension = _extension_from_content_type(image.content_type)
             filename = f"{uuid.uuid4().hex}{extension}"
-            filepath = os.path.join(OBJECT_UPLOAD_DIR, filename)
-            with open(filepath, "wb") as f:
-                f.write(image_bytes)
+            filepath = OBJECT_UPLOAD_DIR / filename
+            filepath.write_bytes(image_bytes)
             final_url = f"{str(request.base_url).rstrip('/')}/uploads/objects/{filename}"
 
     if not final_url:
@@ -411,16 +411,22 @@ def list_scan_history(
     db: Session = Depends(get_db),
 ):
     """Lịch sử quét toàn bộ hệ thống, có thể lọc theo user, mã đối tượng và khoảng ngày."""
-    return admin_service.list_scan_history(
-        db, nguoi_dung_id=nguoi_dung_id, username=username, object_code=object_code,
-        date_from=date_from, date_to=date_to, limit=limit, offset=offset
-    )
+    try:
+        return admin_service.list_scan_history(
+            db, nguoi_dung_id=nguoi_dung_id, username=username, object_code=object_code,
+            date_from=date_from, date_to=date_to, limit=limit, offset=offset
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 @router.delete("/scan-history/bulk")
 def bulk_delete_scan_history(ids: List[int] = Query(...), db: Session = Depends(get_db)):
     """Xóa nhiều bản ghi lịch sử quét cùng lúc."""
-    count = db.query(ScanHistory).filter(ScanHistory.id.in_(ids)).delete(synchronize_session=False)
+    unique_ids = list(dict.fromkeys(ids))
+    if len(unique_ids) > MAX_BULK_SCAN_HISTORY_DELETE:
+        raise HTTPException(400, f"Chi duoc xoa toi da {MAX_BULK_SCAN_HISTORY_DELETE} ban ghi moi lan")
+    count = db.query(ScanHistory).filter(ScanHistory.id.in_(unique_ids)).delete(synchronize_session=False)
     db.commit()
     return {"message": f"Da xoa {count} ban ghi", "count": count}
 

@@ -42,6 +42,6 @@ class ObjectLanguageApp : Application() {
 
         // Schedule background workers for streaks and notifications
         StreakResetWorker.scheduleStreakCheck(this)
-        DailyReminderWorker.syncWithPreferences(this)
+        DailyReminderWorker.syncWithPreferences(this, applicationScope)
     }
 }

@@ -13,31 +13,50 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
+    private val lock = Any()
+
+    @Volatile
     private var tokenManager: TokenManager? = null
+
+    @Volatile
     private var _api: ApiService? = null
+
+    @Volatile
     private var _collectionApi: CollectionApiService? = null
 
     fun init(tm: TokenManager) {
-        tokenManager = tm
-        rebuild()
+        synchronized(lock) {
+            tokenManager = tm
+            rebuildLocked()
+        }
     }
 
     fun rebuild() {
+        synchronized(lock) {
+            rebuildLocked()
+        }
+    }
+
+    private fun rebuildLocked() {
         _api = null
         _collectionApi = null
     }
 
     val api: ApiService
         get() {
-            return _api ?: buildRetrofit().create(ApiService::class.java).also {
-                _api = it
+            return _api ?: synchronized(lock) {
+                _api ?: buildRetrofit().create(ApiService::class.java).also {
+                    _api = it
+                }
             }
         }
 
     val collectionApi: CollectionApiService
         get() {
-            return _collectionApi ?: buildRetrofit().create(CollectionApiService::class.java).also {
-                _collectionApi = it
+            return _collectionApi ?: synchronized(lock) {
+                _collectionApi ?: buildRetrofit().create(CollectionApiService::class.java).also {
+                    _collectionApi = it
+                }
             }
         }
 

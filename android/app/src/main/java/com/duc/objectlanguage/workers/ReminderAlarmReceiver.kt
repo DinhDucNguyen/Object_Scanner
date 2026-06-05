@@ -18,35 +18,42 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val appContext = context.applicationContext
+        val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
-            val settings = NotificationPreferences(appContext).currentSettings()
-            if (!settings.dailyReminderEnabled) return@launch
-            if (!AppNotificationHelper.canPostNotifications(appContext)) return@launch
-
-            val tokenManager = TokenManager(appContext)
-            if (!tokenManager.isLoggedIn) return@launch
-
-            val streakStore = StreakDataStore(appContext)
-            val hasReviewedToday = streakStore.hasReviewedToday()
-            val stats = runCatching {
-                AppRepository(tokenManager).getStats().getOrNull()
-            }.getOrNull()
-
-            val dueToday = stats?.dueToday ?: 0
-
-            // Nếu đã ôn rồi thì không nhắc streak nữa
-            val showStreak = settings.streakAlertEnabled && !hasReviewedToday
-            val currentStreak = streakStore.currentStreak.first()
-            val (title, message) = buildNotificationContent(
-                appContext, currentStreak, if (dueToday > 0) dueToday else null, showStreak
-            )
-            AppNotificationHelper.showDailyReminder(appContext, title, message)
-
-            // Lên lịch lại cho ngày hôm sau
-            DailyReminderWorker.scheduleDailyReminder(
-                appContext, settings.reminderHour, settings.reminderMinute
-            )
+            try {
+                handleReminder(appContext)
+            } finally {
+                pendingResult.finish()
+            }
         }
+    }
+
+    private suspend fun handleReminder(appContext: Context) {
+        val settings = NotificationPreferences(appContext).currentSettings()
+        if (!settings.dailyReminderEnabled) return
+        if (!AppNotificationHelper.canPostNotifications(appContext)) return
+
+        val tokenManager = TokenManager(appContext)
+        if (!tokenManager.isLoggedIn) return
+
+        val streakStore = StreakDataStore(appContext)
+        val hasReviewedToday = streakStore.hasReviewedToday()
+        val stats = runCatching {
+            AppRepository(tokenManager).getStats().getOrNull()
+        }.getOrNull()
+
+        val dueToday = stats?.dueToday ?: 0
+
+        val showStreak = settings.streakAlertEnabled && !hasReviewedToday
+        val currentStreak = streakStore.currentStreak.first()
+        val (title, message) = buildNotificationContent(
+            appContext, currentStreak, if (dueToday > 0) dueToday else null, showStreak
+        )
+        AppNotificationHelper.showDailyReminder(appContext, title, message)
+
+        DailyReminderWorker.scheduleDailyReminder(
+            appContext, settings.reminderHour, settings.reminderMinute
+        )
     }
 
     private fun buildNotificationContent(

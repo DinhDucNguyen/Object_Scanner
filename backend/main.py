@@ -1,5 +1,6 @@
 import os
 import logging
+from pathlib import Path
 from fastapi import FastAPI, Request
 
 logging.basicConfig(
@@ -73,13 +74,17 @@ app.include_router(prediction_router.router, prefix="/api")
 app.include_router(training_router.router, prefix="/api")
 app.include_router(streak_router.router)
 
-os.makedirs("uploads/scans", exist_ok=True)
-os.makedirs("uploads/objects", exist_ok=True)
-os.makedirs("uploads/avatars", exist_ok=True)
-os.makedirs("uploads/tts", exist_ok=True)
-os.makedirs("static/admin", exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-app.mount("/admin-panel", StaticFiles(directory="static/admin", html=True), name="admin-panel")
+BASE_DIR = Path(__file__).resolve().parent
+UPLOADS_DIR = BASE_DIR / "uploads"
+STATIC_ADMIN_DIR = BASE_DIR / "static" / "admin"
+
+os.makedirs(UPLOADS_DIR / "scans", exist_ok=True)
+os.makedirs(UPLOADS_DIR / "objects", exist_ok=True)
+os.makedirs(UPLOADS_DIR / "avatars", exist_ok=True)
+os.makedirs(UPLOADS_DIR / "tts", exist_ok=True)
+os.makedirs(STATIC_ADMIN_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
+app.mount("/admin-panel", StaticFiles(directory=str(STATIC_ADMIN_DIR), html=True), name="admin-panel")
 
 @app.get("/")
 def read_root():

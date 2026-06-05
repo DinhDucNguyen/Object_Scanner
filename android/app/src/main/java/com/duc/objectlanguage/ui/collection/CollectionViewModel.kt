@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
-import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.data.model.CollectionDetail
 import com.duc.objectlanguage.data.repository.CollectionRepository
@@ -21,9 +20,9 @@ import kotlinx.coroutines.launch
  */
 class CollectionViewModel(application: Application) : AndroidViewModel(application) {
     
-    private val tokenManager = TokenManager(application)
-    private val repo = CollectionRepository(tokenManager)
-    private val appRepository = (application as ObjectLanguageApp).repository
+    private val app = application as ObjectLanguageApp
+    private val repo = CollectionRepository(app.tokenManager)
+    private val appRepository = app.repository
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
     
     // Collections list

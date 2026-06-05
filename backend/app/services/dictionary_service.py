@@ -21,6 +21,8 @@ class DictionaryService:
         self._cache: dict[tuple[str, str, str], tuple[datetime, dict]] = {}
         self._cache_ttl = timedelta(minutes=10)
         self._gemini = GeminiService()
+        self._history_retention = timedelta(days=180)
+        self._max_history_per_user = 500
 
     # ------------------------------------------------------------------
     # Public
@@ -445,6 +447,27 @@ class DictionaryService:
                 ket_qua_dich=(trans_text[:500] if trans_text and not obj_id else None),
                 phien_am=(ipa[:100] if ipa and not obj_id else None),
             ))
+        self._trim_user_history(db, nguoi_dung_id)
+
+    def _trim_user_history(self, db: Session, nguoi_dung_id: int) -> None:
+        cutoff = now_vietnam() - self._history_retention
+        db.query(DictionaryLookup).filter(
+            DictionaryLookup.nguoi_dung_id == nguoi_dung_id,
+            DictionaryLookup.lan_tra_cuoi < cutoff,
+        ).delete(synchronize_session=False)
+
+        stale_ids = [
+            row[0]
+            for row in (
+                db.query(DictionaryLookup.id)
+                .filter(DictionaryLookup.nguoi_dung_id == nguoi_dung_id)
+                .order_by(DictionaryLookup.lan_tra_cuoi.desc(), DictionaryLookup.id.desc())
+                .offset(self._max_history_per_user)
+                .all()
+            )
+        ]
+        if stale_ids:
+            db.query(DictionaryLookup).filter(DictionaryLookup.id.in_(stale_ids)).delete(synchronize_session=False)
 
     # ------------------------------------------------------------------
     # Cache
