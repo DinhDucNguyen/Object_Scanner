@@ -58,17 +58,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    columns = _columns()
-    if NEW_COLUMN in columns:
-        _drop_unique_if_exists(NEW_CONSTRAINT)
-        op.alter_column(
-            "NguoiDung",
-            NEW_COLUMN,
-            new_column_name=OLD_COLUMN,
-            existing_type=sa.String(length=128),
-            existing_nullable=True,
-        )
-    elif OLD_COLUMN not in columns:
-        op.add_column("NguoiDung", sa.Column(OLD_COLUMN, sa.String(length=128), nullable=True))
-
-    _create_unique_if_missing(OLD_CONSTRAINT, OLD_COLUMN)
+    # Revision 0028 now defines the Vietnamese column name. Downgrading from
+    # 0029 to 0028 should therefore keep the schema unchanged.
+    if NEW_COLUMN in _columns():
+        _create_unique_if_missing(NEW_CONSTRAINT, NEW_COLUMN)
