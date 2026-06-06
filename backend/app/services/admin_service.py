@@ -218,7 +218,7 @@ class AdminService:
                 translation_count=approved_count,
                 pending_translation_count=pending_count,
                 has_image=obj.id in has_img_ids,
-                aliases=[ObjectAliasItem.model_validate(alias) for alias in (obj.aliases or [])],
+                aliases=[ObjectAliasItem.from_alias(alias) for alias in (obj.aliases or [])],
                 nguon_tao=obj.nguon_tao.value if hasattr(obj.nguon_tao, "value") else obj.nguon_tao,
                 nguoi_tao_id=obj.nguoi_tao_id,
                 du_doan_ai_id=obj.du_doan_ai_id,
@@ -251,7 +251,7 @@ class AdminService:
             translation_count=approved_count,
             pending_translation_count=pending_count,
             has_image=bool(has_img),
-            aliases=[ObjectAliasItem.model_validate(alias) for alias in (obj.aliases or [])],
+            aliases=[ObjectAliasItem.from_alias(alias) for alias in (obj.aliases or [])],
             nguon_tao=obj.nguon_tao.value if hasattr(obj.nguon_tao, "value") else obj.nguon_tao,
             nguoi_tao_id=obj.nguoi_tao_id,
             du_doan_ai_id=obj.du_doan_ai_id,
@@ -331,7 +331,7 @@ class AdminService:
         prediction_svc._rewire_alias_predictions(db, alias_code, obj)
         db.commit()
         db.refresh(alias)
-        return ObjectAliasItem.model_validate(alias)
+        return ObjectAliasItem.from_alias(alias)
 
     def update_object_alias(self, db: Session, alias_id: int, ma_bi_danh: str, ten_hien_thi: str | None, ngon_ngu: str | None) -> ObjectAliasItem | None:
         alias = db.query(ObjectAlias).filter(ObjectAlias.id == alias_id).first()
@@ -359,7 +359,7 @@ class AdminService:
             alias.ngon_ngu_id = self._resolve_lang_id(db, ngon_ngu)
         db.commit()
         db.refresh(alias)
-        return ObjectAliasItem.model_validate(alias)
+        return ObjectAliasItem.from_alias(alias)
 
     def delete_object_alias(self, db: Session, alias_id: int) -> bool:
         alias = db.query(ObjectAlias).filter(ObjectAlias.id == alias_id).first()

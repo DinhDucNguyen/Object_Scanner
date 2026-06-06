@@ -163,15 +163,14 @@ class ObjectAliasItem(BaseModel):
     ngon_ngu: Optional[str] = None
 
     @classmethod
-    def model_validate(cls, obj, **kwargs):
-        data = {
-            "id": obj.id,
-            "doi_tuong_id": obj.doi_tuong_id,
-            "ma_bi_danh": obj.ma_bi_danh,
-            "ten_hien_thi": obj.ten_hien_thi,
-            "ngon_ngu": obj.language.ma_ngon_ngu if obj.language else None,
-        }
-        return cls(**data)
+    def from_alias(cls, alias):
+        return cls(**{
+            "id": alias.id,
+            "doi_tuong_id": alias.doi_tuong_id,
+            "ma_bi_danh": alias.ma_bi_danh,
+            "ten_hien_thi": alias.ten_hien_thi,
+            "ngon_ngu": alias.language.ma_ngon_ngu if alias.language else None,
+        })
 
     class Config:
         from_attributes = True
