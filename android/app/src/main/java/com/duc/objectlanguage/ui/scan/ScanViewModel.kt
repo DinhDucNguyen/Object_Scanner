@@ -92,7 +92,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
 
-            // 2. ML Kit — chỉ chạy khi YOLO không detect được
+            // 2. ML Kit — chạy khi YOLO không detect được, hoặc YOLO 80-89% nhưng DB miss
             try {
                 val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
                     ?: throw IllegalArgumentException("Invalid image")
