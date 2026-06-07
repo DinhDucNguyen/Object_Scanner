@@ -397,4 +397,3 @@
       objectOnlyNoImage = false;
       reloadPagedTable('objects');
     }
-

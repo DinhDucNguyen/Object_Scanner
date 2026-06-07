@@ -186,6 +186,7 @@ else YOLO >= 90% tin cay nhung DB miss
     Gemini --> Scan: ma_doi_tuong, do_tin_cay
     Scan -> Gemini: identify_object(image_bytes)
     Gemini --> Scan: thong_tin_tu_vung_day_du
+    Scan -> DB: tao_lich_su_quet_cho_xu_ly()
     Scan -> DB: tao_du_doan_ai_cho_xet_duyet()
     Scan -> DB: tao_anh_huan_luyen_ung_vien()
     Scan --> ScanRouter: ScanResponse(source=gemini_pending_review)
@@ -218,6 +219,7 @@ else YOLO khong tim thay trong DB va confidence < 90%, hoac YOLO khong detect du
         Gemini --> Scan: ma_doi_tuong, do_tin_cay
         Scan -> Gemini: identify_object(image_bytes)
         Gemini --> Scan: thong_tin_tu_vung_day_du
+        Scan -> DB: tao_lich_su_quet_cho_xu_ly()
         Scan -> DB: tao_du_doan_ai_cho_xet_duyet()
         Scan -> DB: tao_anh_huan_luyen_ung_vien()
         Scan --> ScanRouter: ScanResponse(source=gemini_pending_review)
