@@ -31,7 +31,7 @@
       const err = document.getElementById('login-err');
       const btn = document.getElementById('login-label');
       err.style.display = 'none';
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Äang Ä‘Äƒng nháº­p...';
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang đăng nhập...';
       try {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
@@ -39,9 +39,9 @@
           body: JSON.stringify({ username: user, password: pass }),
         });
         if (!res.ok) {
-          err.textContent = 'Sai tÃ i khoáº£n hoáº·c máº­t kháº©u';
+          err.textContent = 'Sai tài khoản hoặc mật khẩu';
           err.style.display = '';
-          btn.textContent = 'ÄÄƒng nháº­p';
+          btn.textContent = 'Đăng nhập';
           return;
         }
         const data = await res.json();
@@ -51,9 +51,9 @@
         setUserDisplay(user);
         initApp();
       } catch (e) {
-        err.textContent = 'KhÃ´ng káº¿t ná»‘i Ä‘Æ°á»£c server';
+        err.textContent = 'Không kết nối được server';
         err.style.display = '';
-        btn.textContent = 'ÄÄƒng nháº­p';
+        btn.textContent = 'Đăng nhập';
       }
     }
 
@@ -71,13 +71,13 @@
       });
       const err = document.getElementById('login-err');
       if (expired) {
-        err.textContent = 'PhiÃªn lÃ m viá»‡c Ä‘Ã£ háº¿t háº¡n, vui lÃ²ng Ä‘Äƒng nháº­p láº¡i.';
+        err.textContent = 'Phiên làm việc đã hết hạn, vui lòng đăng nhập lại.';
         err.style.display = '';
       } else {
         err.style.display = 'none';
       }
       document.getElementById('login-screen').style.display = '';
-      document.getElementById('login-label').textContent = 'ÄÄƒng nháº­p';
+      document.getElementById('login-label').textContent = 'Đăng nhập';
     }
 
     // ============================================================
@@ -96,9 +96,9 @@
     }
 
     const SECTION_LABELS = {
-      dashboard: 'Dashboard', predictions: 'Kiá»ƒm duyá»‡t',
-      objects: 'Äá»‘i tÆ°á»£ng', translations: 'Báº£n dá»‹ch',
-      'scan-history': 'Lá»‹ch sá»­ quÃ©t', categories: 'Danh má»¥c', users: 'NgÆ°á»i dÃ¹ng',
+      dashboard: 'Dashboard', predictions: 'Kiểm duyệt',
+      objects: 'Đối tượng', translations: 'Bản dịch',
+      'scan-history': 'Lịch sử quét', categories: 'Danh mục', users: 'Người dùng',
       'training-data': 'Training Data',
     };
 
@@ -132,7 +132,7 @@
         ...opts,
         headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json', ...(opts.headers || {}) },
       });
-      if (res.status === 401) { doLogout(true); throw new Error('PhiÃªn háº¿t háº¡n'); }
+      if (res.status === 401) { doLogout(true); throw new Error('Phiên hết hạn'); }
       return res;
     }
 
@@ -166,9 +166,9 @@
     }
 
     // ============================================================
-    // Confirm modal (thay tháº¿ browser confirm)
+    // Confirm modal (thay thế browser confirm)
     // ============================================================
-    function confirmAction(message, onConfirm, title = 'XÃ¡c nháº­n') {
+    function confirmAction(message, onConfirm, title = 'Xác nhận') {
       document.getElementById('cm-title').textContent = title;
       document.getElementById('cm-body').textContent = message;
       const btn = document.getElementById('cm-confirm');
@@ -189,7 +189,7 @@
     // Helpers
     // ============================================================
     function confBar(v) {
-      if (!v) return '<span class="text-muted">â€”</span>';
+      if (!v) return '<span class="text-muted">—</span>';
       const pct = Math.round(v * 100);
       const color = pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444';
       return `<div class="conf-bar"><div class="conf-track"><div class="conf-fill" style="width:${pct}%;background:${color};"></div></div><small style="color:${color};font-weight:700;">${pct}%</small></div>`;
@@ -208,12 +208,12 @@
     }
 
     function fmtDate(s) {
-      if (!s) return 'â€”';
+      if (!s) return '—';
       return new Date(s).toLocaleString('vi', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
 
     function fmtDateShort(s) {
-      if (!s) return 'â€”';
+      if (!s) return '—';
       return new Date(s).toLocaleDateString('vi', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
@@ -222,7 +222,7 @@
     }
 
     function loadingRow(cols) {
-      return `<tr><td colspan="${cols}" class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Äang táº£i...</td></tr>`;
+      return `<tr><td colspan="${cols}" class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải...</td></tr>`;
     }
 
     const PAGINATION_TARGETS = {
@@ -283,9 +283,9 @@
           : `<button type="button" class="page-btn ${p === pageData.page ? 'active' : ''}" onclick="setTablePage('${key}', ${p})">${p}</button>`
       )).join('');
       el.innerHTML = `
-        <div class="page-info">Hiá»ƒn thá»‹ ${pageData.start + 1}-${pageData.end} / ${pageData.total}</div>
+        <div class="page-info">Hiển thị ${pageData.start + 1}-${pageData.end} / ${pageData.total}</div>
         <div class="page-controls">
-          <button type="button" class="page-btn icon" onclick="setTablePage('${key}', ${pageData.page - 1})" ${pageData.page <= 1 ? 'disabled' : ''} title="Trang trÆ°á»›c">
+          <button type="button" class="page-btn icon" onclick="setTablePage('${key}', ${pageData.page - 1})" ${pageData.page <= 1 ? 'disabled' : ''} title="Trang trước">
             <i class="bi bi-chevron-left"></i>
           </button>
           ${pages}

@@ -18,22 +18,22 @@
         const countEl = document.querySelector('#section-objects .result-count');
         if (countEl) {
           if (objectOnlyNoImage) {
-            countEl.innerHTML = `Lá»c: ${data.length} chÆ°a cÃ³ áº£nh â€” <a href="#" onclick="clearNoImageFilter();return false;" style="font-weight:600;">Xem táº¥t cáº£</a>`;
+            countEl.innerHTML = `Lọc: ${data.length} chưa có ảnh — <a href="#" onclick="clearNoImageFilter();return false;" style="font-weight:600;">Xem tất cả</a>`;
           } else {
-            countEl.textContent = data.length ? `${data.length} Ä‘á»‘i tÆ°á»£ng` : '';
+            countEl.textContent = data.length ? `${data.length} đối tượng` : '';
           }
         }
         const warnEl = document.getElementById('obj-image-warning');
         const warnText = document.getElementById('obj-image-warning-text');
         if (noImageObjs.length > 0) {
-          warnText.textContent = `${noImageObjs.length} Ä‘á»‘i tÆ°á»£ng Ä‘ang thiáº¿u áº£nh Ä‘áº¡i diá»‡n`;
+          warnText.textContent = `${noImageObjs.length} đối tượng đang thiếu ảnh đại diện`;
           warnEl.style.display = '';
         } else {
           warnEl.style.display = 'none';
         }
         document.getElementById('obj-body').innerHTML = data.length
           ? pageData.rows.map((o, idx) => {
-            const objectCode = escHtml(o.ma_doi_tuong || 'â€”');
+            const objectCode = escHtml(o.ma_doi_tuong || '—');
             const objectCodeRaw = o.ma_doi_tuong || '';
             const objectCodeArg = escHtml(JSON.stringify(objectCodeRaw));
             const aliases = (o.aliases || []).slice(0, 4);
@@ -55,73 +55,73 @@
                 ${aliasHtml}
               </div>
             </td>
-            <td>${o.category_name ? `<span class="badge badge-neutral">${escHtml(o.category_name)}</span>` : '<span class="text-muted">â€”</span>'}</td>
+            <td>${o.category_name ? `<span class="badge badge-neutral">${escHtml(o.category_name)}</span>` : '<span class="text-muted">—</span>'}</td>
             <td><div class="object-trans-stack">${translationBadge(o.translation_count, o.pending_translation_count)}</div></td>
             <td class="text-end">
               <div class="btn-actions object-actions">
-                <button class="btn-act" style="position:relative;" onclick="openObjMediaModal(${objectCodeArg})" title="${!o.has_image ? 'ThÃªm áº£nh Ä‘áº¡i diá»‡n' : 'Quáº£n lÃ½ áº£nh'}"><i class="bi bi-image"></i>${!o.has_image ? '<span style="position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:#f59e0b;display:block;"></span>' : ''}</button>
-                <button class="btn-act" onclick='openEditObjModal(${JSON.stringify(o)})' title="Sá»­a"><i class="bi bi-pencil"></i></button>
+                <button class="btn-act" style="position:relative;" onclick="openObjMediaModal(${objectCodeArg})" title="${!o.has_image ? 'Thêm ảnh đại diện' : 'Quản lý ảnh'}"><i class="bi bi-image"></i>${!o.has_image ? '<span style="position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:#f59e0b;display:block;"></span>' : ''}</button>
+                <button class="btn-act" onclick='openEditObjModal(${JSON.stringify(o)})' title="Sửa"><i class="bi bi-pencil"></i></button>
                 <div class="dropdown action-menu">
-                  <button class="btn-act dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tÃ¡c khÃ¡c">
+                  <button class="btn-act dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác">
                     <i class="bi bi-three-dots"></i>
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end">
-                    <li><button type="button" class="dropdown-item" onclick='openObjectAliasModal(${JSON.stringify(o)})'><i class="bi bi-link-45deg"></i>TÃªn gá»i khÃ¡c</button></li>
+                    <li><button type="button" class="dropdown-item" onclick='openObjectAliasModal(${JSON.stringify(o)})'><i class="bi bi-link-45deg"></i>Tên gọi khác</button></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><button type="button" class="dropdown-item text-danger" onclick="deleteObj(${o.id})"><i class="bi bi-trash3"></i>XoÃ¡ Ä‘á»‘i tÆ°á»£ng</button></li>
+                    <li><button type="button" class="dropdown-item text-danger" onclick="deleteObj(${o.id})"><i class="bi bi-trash3"></i>Xoá đối tượng</button></li>
                   </ul>
                 </div>
               </div>
             </td>
           </tr>`;
           }).join('')
-          : emptyRow(5, 'bi-box-seam', 'KhÃ´ng cÃ³ Ä‘á»‘i tÆ°á»£ng nÃ o');
-      } catch (e) { toast('Lá»—i táº£i Ä‘á»‘i tÆ°á»£ng: ' + e.message, 'danger'); }
+          : emptyRow(5, 'bi-box-seam', 'Không có đối tượng nào');
+      } catch (e) { toast('Lỗi tải đối tượng: ' + e.message, 'danger'); }
     }
 
     function openCreateObjectModal() {
       document.getElementById('fm-submit').style.display = '';
-      document.getElementById('fm-title').textContent = 'ThÃªm Ä‘á»‘i tÆ°á»£ng má»›i';
+      document.getElementById('fm-title').textContent = 'Thêm đối tượng mới';
       document.getElementById('fm-body').innerHTML = `
     <div class="approve-card">
-      <p class="approve-card-title">ThÃ´ng tin Ä‘á»‘i tÆ°á»£ng</p>
+      <p class="approve-card-title">Thông tin đối tượng</p>
       <div class="mb-3">
-        <label class="form-label mb-1">MÃ£ Ä‘á»‘i tÆ°á»£ng <span class="text-danger">*</span></label>
+        <label class="form-label mb-1">Mã đối tượng <span class="text-danger">*</span></label>
         <input id="obj-code" class="form-control form-control-sm" placeholder="vd: apple, dog, car..." />
       </div>
       <div>
-        <label class="form-label mb-1">Danh má»¥c</label>
+        <label class="form-label mb-1">Danh mục</label>
         <select id="obj-cat" class="form-select form-select-sm">${catOptions(null)}</select>
       </div>
     </div>`;
       document.getElementById('fm-submit').onclick = async () => {
         const body = { ma_doi_tuong: document.getElementById('obj-code').value.trim(), danh_muc_id: document.getElementById('obj-cat').value || null };
-        if (!body.ma_doi_tuong) { toast('Nháº­p mÃ£ Ä‘á»‘i tÆ°á»£ng', 'warning'); return; }
-        try { await apiJSON('/objects', { method: 'POST', body: JSON.stringify(body) }); toast('ÄÃ£ thÃªm Ä‘á»‘i tÆ°á»£ng'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadObjects(); }
-        catch (e) { toast('Lá»—i: ' + e.message, 'danger'); }
+        if (!body.ma_doi_tuong) { toast('Nhập mã đối tượng', 'warning'); return; }
+        try { await apiJSON('/objects', { method: 'POST', body: JSON.stringify(body) }); toast('Đã thêm đối tượng'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadObjects(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
       };
       new bootstrap.Modal(document.getElementById('form-modal')).show();
     }
 
     function openEditObjModal(o) {
       document.getElementById('fm-submit').style.display = '';
-      document.getElementById('fm-title').textContent = 'Sá»­a Ä‘á»‘i tÆ°á»£ng: ' + o.ma_doi_tuong;
+      document.getElementById('fm-title').textContent = 'Sửa đối tượng: ' + o.ma_doi_tuong;
       document.getElementById('fm-body').innerHTML = `
     <div class="approve-note">
       <i class="bi bi-pencil-square"></i>
-      <span>Chá»‰nh sá»­a Ä‘á»‘i tÆ°á»£ng <code>${escHtml(o.ma_doi_tuong || '')}</code></span>
+      <span>Chỉnh sửa đối tượng <code>${escHtml(o.ma_doi_tuong || '')}</code></span>
     </div>
     <div class="approve-card">
-      <p class="approve-card-title">ThÃ´ng tin Ä‘á»‘i tÆ°á»£ng</p>
+      <p class="approve-card-title">Thông tin đối tượng</p>
       <div>
-        <label class="form-label mb-1">Danh má»¥c</label>
+        <label class="form-label mb-1">Danh mục</label>
         <select id="obj-cat" class="form-select form-select-sm">${catOptions(o.danh_muc_id)}</select>
       </div>
     </div>`;
       document.getElementById('fm-submit').onclick = async () => {
         const body = { danh_muc_id: document.getElementById('obj-cat').value || null };
-        try { await apiJSON(`/objects/${o.id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('ÄÃ£ cáº­p nháº­t'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadObjects(); }
-        catch (e) { toast('Lá»—i: ' + e.message, 'danger'); }
+        try { await apiJSON(`/objects/${o.id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Đã cập nhật'); bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide(); loadObjects(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
       };
       new bootstrap.Modal(document.getElementById('form-modal')).show();
     }
@@ -163,7 +163,7 @@
 
     function openObjectAliasModal(o) {
       document.getElementById('fm-submit').style.display = 'none';
-      document.getElementById('fm-title').textContent = 'TÃªn gá»i khÃ¡c: ' + o.ma_doi_tuong;
+      document.getElementById('fm-title').textContent = 'Tên gọi khác: ' + o.ma_doi_tuong;
       const aliases = o.aliases || [];
       const objectCode = escHtml(o.ma_doi_tuong || '');
       const suggestion = getAliasSuggestion(o.ma_doi_tuong);
@@ -174,18 +174,18 @@
     <div class="alias-help">
       <i class="bi bi-info-circle"></i>
       <div>
-        <strong>Alias lÃ  nhÃ£n phá»¥ Ä‘Æ°á»£c gom vá» object chÃ­nh.</strong>
-        Náº¿u há»‡ thá»‘ng nháº­n ra má»™t tÃªn khÃ¡c nhÆ°ng thá»±c ra váº«n lÃ  <code>${objectCode}</code>,
-        nháº­p tÃªn Ä‘Ã³ á»Ÿ Ä‘Ã¢y thay vÃ¬ táº¡o object má»›i.
-        <div class="mt-1">VÃ­ dá»¥ cÃ³ thá»ƒ gáº¯n: ${examplesText}</div>
+        <strong>Alias là nhãn phụ được gom về object chính.</strong>
+        Nếu hệ thống nhận ra một tên khác nhưng thực ra vẫn là <code>${objectCode}</code>,
+        nhập tên đó ở đây thay vì tạo object mới.
+        <div class="mt-1">Ví dụ có thể gắn: ${examplesText}</div>
         <div class="alias-flow">
           <div class="alias-flow-cell">
-            <strong>NhÃ£n há»‡ thá»‘ng tráº£ vá»</strong>
+            <strong>Nhãn hệ thống trả về</strong>
             <code>${aliasExample}</code>
           </div>
           <div class="alias-flow-arrow"><i class="bi bi-arrow-right"></i></div>
           <div class="alias-flow-cell">
-            <strong>Object chÃ­nh trong DB</strong>
+            <strong>Object chính trong DB</strong>
             <code>${objectCode}</code>
           </div>
         </div>
@@ -194,7 +194,7 @@
 
     <div>
       <div class="d-flex align-items-center justify-content-between mb-2">
-        <label class="form-label fw-semibold mb-0">TÃªn gá»i khÃ¡c hiá»‡n cÃ³</label>
+        <label class="form-label fw-semibold mb-0">Tên gọi khác hiện có</label>
         <span class="badge badge-neutral">${aliases.length} alias</span>
       </div>
       <div id="obj-alias-list" class="alias-list">
@@ -202,13 +202,13 @@
           <div class="alias-item" id="alias-row-${a.id}">
             <div style="min-width:0;flex:1;">
               <code class="cell-ellipsis" style="max-width:220px;" title="${escHtml(a.ma_bi_danh || '')}">${escHtml(a.ma_bi_danh || '')}</code>
-              ${a.ten_hien_thi ? `<div class="text-muted mt-1" style="font-size:.78rem;">Hiá»ƒn thá»‹: ${escHtml(a.ten_hien_thi)}</div>` : ''}
+              ${a.ten_hien_thi ? `<div class="text-muted mt-1" style="font-size:.78rem;">Hiển thị: ${escHtml(a.ten_hien_thi)}</div>` : ''}
             </div>
             <div class="d-flex gap-1">
-              <button class="btn-act" onclick="toggleEditAlias(${a.id},'${escHtml(a.ma_bi_danh || '')}','${escHtml(a.ten_hien_thi || '')}','${escHtml(a.ngon_ngu || 'en')}')" title="Sá»­a tÃªn gá»i nÃ y">
+              <button class="btn-act" onclick="toggleEditAlias(${a.id},'${escHtml(a.ma_bi_danh || '')}','${escHtml(a.ten_hien_thi || '')}','${escHtml(a.ngon_ngu || 'en')}')" title="Sửa tên gọi này">
                 <i class="bi bi-pencil"></i>
               </button>
-              <button class="btn-act del" onclick="deleteObjectAlias(${a.id})" title="XoÃ¡ tÃªn gá»i nÃ y">
+              <button class="btn-act del" onclick="deleteObjectAlias(${a.id})" title="Xoá tên gọi này">
                 <i class="bi bi-trash3"></i>
               </button>
             </div>
@@ -216,48 +216,48 @@
           <div id="alias-edit-${a.id}" style="display:none;" class="alias-edit-form">
             <div class="alias-form-grid">
               <div>
-                <label class="form-label" style="font-size:.78rem;">NhÃ£n phá»¥ / alias <span class="text-danger">*</span></label>
+                <label class="form-label" style="font-size:.78rem;">Nhãn phụ / alias <span class="text-danger">*</span></label>
                 <input id="alias-edit-code-${a.id}" class="form-control form-control-sm" value="${escHtml(a.ma_bi_danh || '')}">
               </div>
               <div>
-                <label class="form-label" style="font-size:.78rem;">TÃªn hiá»ƒn thá»‹</label>
+                <label class="form-label" style="font-size:.78rem;">Tên hiển thị</label>
                 <input id="alias-edit-display-${a.id}" class="form-control form-control-sm" value="${escHtml(a.ten_hien_thi || '')}">
               </div>
               <div>
-                <label class="form-label" style="font-size:.78rem;">NgÃ´n ngá»¯</label>
+                <label class="form-label" style="font-size:.78rem;">Ngôn ngữ</label>
                 <input id="alias-edit-lang-${a.id}" class="form-control form-control-sm" value="${escHtml(a.ngon_ngu || 'en')}">
               </div>
             </div>
             <div class="d-flex gap-2 justify-content-end mt-2">
-              <button class="btn btn-sm btn-outline-secondary" onclick="toggleEditAlias(${a.id})">Huá»·</button>
-              <button class="btn btn-sm btn-primary" onclick="saveEditAlias(${a.id})"><i class="bi bi-check-lg me-1"></i>LÆ°u</button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="toggleEditAlias(${a.id})">Huỷ</button>
+              <button class="btn btn-sm btn-primary" onclick="saveEditAlias(${a.id})"><i class="bi bi-check-lg me-1"></i>Lưu</button>
             </div>
-          </div>`).join('') : '<div class="alias-empty"><i class="bi bi-link-45deg me-1"></i>ChÆ°a cÃ³ tÃªn gá»i khÃ¡c cho object nÃ y.</div>'}
+          </div>`).join('') : '<div class="alias-empty"><i class="bi bi-link-45deg me-1"></i>Chưa có tên gọi khác cho object này.</div>'}
       </div>
     </div>
 
     <div class="border rounded p-3" style="background:#fafbfc;">
-      <div class="fw-semibold mb-2" style="font-size:.84rem;">Gáº¯n nhÃ£n phá»¥ vÃ o object nÃ y</div>
+      <div class="fw-semibold mb-2" style="font-size:.84rem;">Gắn nhãn phụ vào object này</div>
       <div class="alias-form-grid">
         <div>
-          <label class="form-label">NhÃ£n phá»¥ / alias <span class="text-danger">*</span></label>
+          <label class="form-label">Nhãn phụ / alias <span class="text-danger">*</span></label>
           <input id="obj-alias-code" class="form-control form-control-sm" placeholder="vd: ${aliasExample}">
         </div>
         <div>
-          <label class="form-label">TÃªn hiá»ƒn thá»‹ cho ngÆ°á»i há»c</label>
+          <label class="form-label">Tên hiển thị cho người học</label>
           <input id="obj-alias-display" class="form-control form-control-sm" placeholder="vd: ${displayExample}">
         </div>
         <div>
-          <label class="form-label">NgÃ´n ngá»¯</label>
+          <label class="form-label">Ngôn ngữ</label>
           <input id="obj-alias-lang" class="form-control form-control-sm" value="en">
         </div>
       </div>
       <div class="form-text mt-2" style="font-size:.76rem;">
-        Sau khi lÆ°u, alias nÃ y sáº½ trá» vá» <code>${objectCode}</code>. KhÃ´ng táº¡o object má»›i.
+        Sau khi lưu, alias này sẽ trỏ về <code>${objectCode}</code>. Không tạo object mới.
       </div>
       <div class="d-flex justify-content-end mt-3">
         <button class="btn btn-sm btn-primary" onclick="saveObjectAlias(${o.id})">
-          <i class="bi bi-link-45deg me-1"></i>Gáº¯n vÃ o ${objectCode}
+          <i class="bi bi-link-45deg me-1"></i>Gắn vào ${objectCode}
         </button>
       </div>
     </div>`;
@@ -268,7 +268,7 @@
       const code = document.getElementById('obj-alias-code')?.value.trim();
       const display = document.getElementById('obj-alias-display')?.value.trim();
       const lang = document.getElementById('obj-alias-lang')?.value.trim() || 'en';
-      if (!code) { toast('Nháº­p nhÃ£n phá»¥ / alias', 'warning'); return; }
+      if (!code) { toast('Nhập nhãn phụ / alias', 'warning'); return; }
       const btn = document.getElementById('fm-submit');
       if (btn) btn.disabled = true;
       try {
@@ -281,22 +281,22 @@
             ngon_ngu: lang,
           }),
         });
-        toast('ÄÃ£ lÆ°u tÃªn gá»i khÃ¡c');
+        toast('Đã lưu tên gọi khác');
         bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide();
         loadObjects();
-      } catch (e) { toast('Lá»—i: ' + e.message, 'danger'); }
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
       finally { if (btn) btn.disabled = false; }
     }
 
     async function deleteObjectAlias(aliasId) {
-      confirmAction('XÃ³a bÃ­ danh nÃ y?', async () => {
+      confirmAction('Xóa bí danh này?', async () => {
         try {
           await apiJSON(`/object-aliases/${aliasId}`, { method: 'DELETE' });
-          toast('ÄÃ£ xÃ³a bÃ­ danh', 'warning');
+          toast('Đã xóa bí danh', 'warning');
           bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide();
           loadObjects();
-        } catch (e) { toast('Lá»—i: ' + e.message, 'danger'); }
-      }, 'XÃ³a bÃ­ danh');
+        } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      }, 'Xóa bí danh');
     }
 
     function toggleEditAlias(aliasId, code, display, lang) {
@@ -323,7 +323,7 @@
       const code = document.getElementById(`alias-edit-code-${aliasId}`)?.value.trim();
       const display = document.getElementById(`alias-edit-display-${aliasId}`)?.value.trim();
       const lang = document.getElementById(`alias-edit-lang-${aliasId}`)?.value.trim() || 'en';
-      if (!code) { toast('Nháº­p nhÃ£n phá»¥ / alias', 'warning'); return; }
+      if (!code) { toast('Nhập nhãn phụ / alias', 'warning'); return; }
       const triggerEl = document.querySelector(`[onclick*="saveEditAlias(${aliasId})"]`);
       if (triggerEl) triggerEl.disabled = true;
       try {
@@ -331,18 +331,18 @@
           method: 'PUT',
           body: JSON.stringify({ ma_bi_danh: code, ten_hien_thi: display || null, ngon_ngu: lang }),
         });
-        toast('ÄÃ£ cáº­p nháº­t bÃ­ danh');
+        toast('Đã cập nhật bí danh');
         bootstrap.Modal.getInstance(document.getElementById('form-modal'))?.hide();
         loadObjects();
-      } catch (e) { toast('Lá»—i: ' + e.message, 'danger'); }
+      } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
       finally { if (triggerEl) triggerEl.disabled = false; }
     }
 
     async function deleteObj(id) {
-      confirmAction('XoÃ¡ Ä‘á»‘i tÆ°á»£ng nÃ y? Táº¥t cáº£ báº£n dá»‹ch liÃªn quan sáº½ bá»‹ xoÃ¡.', async () => {
-        try { await apiJSON(`/objects/${id}`, { method: 'DELETE' }); toast('ÄÃ£ xoÃ¡ Ä‘á»‘i tÆ°á»£ng', 'warning'); loadObjects(); }
-        catch (e) { toast('Lá»—i: ' + e.message, 'danger'); }
-      }, 'XoÃ¡ Ä‘á»‘i tÆ°á»£ng');
+      confirmAction('Xoá đối tượng này? Tất cả bản dịch liên quan sẽ bị xoá.', async () => {
+        try { await apiJSON(`/objects/${id}`, { method: 'DELETE' }); toast('Đã xoá đối tượng', 'warning'); loadObjects(); }
+        catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      }, 'Xoá đối tượng');
     }
 
     function zoomImage(url) {
@@ -376,16 +376,16 @@
     async function batchApproveTrans() {
       const ids = Array.from(document.querySelectorAll('.trans-check:checked')).map(el => parseInt(el.dataset.id));
       if (!ids.length) return;
-      confirmAction(`XÃ¡c nháº­n ${ids.length} báº£n dá»‹ch Ä‘Ã£ chá»n?`, async () => {
+      confirmAction(`Xác nhận ${ids.length} bản dịch đã chọn?`, async () => {
         let ok = 0, fail = 0;
         for (const id of ids) {
           try { await apiJSON(`/translations/${id}`, { method: 'PUT', body: JSON.stringify({ da_xac_nhan: true }) }); ok++; }
           catch { fail++; }
         }
-        if (fail > 0) toast(`XÃ¡c nháº­n ${ok}/${ids.length} â€” ${fail} lá»—i`, 'warning');
-        else toast(`ÄÃ£ xÃ¡c nháº­n ${ok}/${ids.length} báº£n dá»‹ch`);
+        if (fail > 0) toast(`Xác nhận ${ok}/${ids.length} — ${fail} lỗi`, 'warning');
+        else toast(`Đã xác nhận ${ok}/${ids.length} bản dịch`);
         loadTranslations();
-      }, 'XÃ¡c nháº­n báº£n dá»‹ch');
+      }, 'Xác nhận bản dịch');
     }
 
     function filterNoImage() {

@@ -10,7 +10,9 @@ backend/backups/
 # Claude Code worktrees (temporary agent workspaces)
 .claude/worktrees/
 
-# AI tool directories
+# AI tool directories (any subdirectory)
+**/.agent/
+**/.claude/
 .agent/
 .claude/
 .vscode/

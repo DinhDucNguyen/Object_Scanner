@@ -18,7 +18,7 @@
         const pageData = getPagedRows('scanHistory', data);
         renderTablePagination('scanHistory', pageData);
         const countEl = document.querySelector('#section-scan-history .result-count');
-        if (countEl) countEl.textContent = data.length ? `${data.length} lÆ°á»£t quÃ©t` : '';
+        if (countEl) countEl.textContent = data.length ? `${data.length} lượt quét` : '';
         const checkAll = document.getElementById('sh-check-all');
         if (checkAll) checkAll.checked = false;
         updateScanHistoryBulkBtn();
@@ -29,36 +29,36 @@
             <td class="stt-cell">${pageData.start + idx + 1}</td>
             <td class="text-muted">${s.id}</td>
             <td>${s.url_anh
-              ? `<img src="${s.url_anh}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;cursor:zoom-in;" onclick="zoomImage('${s.url_anh}')" title="Nháº¥n Ä‘á»ƒ xem to" />`
+              ? `<img src="${s.url_anh}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;cursor:zoom-in;" onclick="zoomImage('${s.url_anh}')" title="Nhấn để xem to" />`
               : '<span class="text-muted" style="font-size:.75rem;">N/A</span>'}</td>
             <td>
-              <span class="fw-semibold" style="font-size:.82rem;">${s.username || 'â€”'}</span>
+              <span class="fw-semibold" style="font-size:.82rem;">${s.username || '—'}</span>
               ${s.nguoi_dung_id ? `<br><span class="text-muted" style="font-size:.72rem;">ID: ${s.nguoi_dung_id}</span>` : ''}
             </td>
             <td>${s.object_code
               ? `<code class="cell-ellipsis code-cell" title="${escHtml(s.object_code)}">${escHtml(s.object_code)}</code>`
               : s.has_pending_prediction
-                ? '<span class="badge badge-pending">Chá» duyá»‡t</span>'
-                : '<span class="text-muted">â€”</span>'}</td>
+                ? '<span class="badge badge-pending">Chờ duyệt</span>'
+                : '<span class="text-muted">—</span>'}</td>
             <td>${confBar(s.do_tin_cay)}</td>
             <td class="text-muted" style="font-size:.82rem;">${fmtDate(s.thoi_gian)}</td>
-            <td><button class="btn btn-sm btn-outline-danger" style="padding:2px 7px;font-size:.75rem;" onclick="deleteScanHistory(${s.id})" title="XÃ³a"><i class="bi bi-trash"></i></button></td>
+            <td><button class="btn btn-sm btn-outline-danger" style="padding:2px 7px;font-size:.75rem;" onclick="deleteScanHistory(${s.id})" title="Xóa"><i class="bi bi-trash"></i></button></td>
           </tr>`).join('')
-          : '<tr><td colspan="9"><div class="empty-state"><i class="bi bi-camera"></i><p>ChÆ°a cÃ³ lá»‹ch sá»­ quÃ©t</p></div></td></tr>';
-      } catch (e) { toast('Lá»—i táº£i lá»‹ch sá»­ quÃ©t: ' + e.message, 'danger'); }
+          : '<tr><td colspan="9"><div class="empty-state"><i class="bi bi-camera"></i><p>Chưa có lịch sử quét</p></div></td></tr>';
+      } catch (e) { toast('Lỗi tải lịch sử quét: ' + e.message, 'danger'); }
     }
 
     async function deleteScanHistory(scanId) {
       confirmAction(
-        `XÃ³a lá»‹ch sá»­ quÃ©t #${scanId}?`,
+        `Xóa lịch sử quét #${scanId}?`,
         async () => {
           try {
             await apiJSON(`/scan-history/${scanId}`, { method: 'DELETE' });
-            toast('ÄÃ£ xÃ³a lá»‹ch sá»­ quÃ©t', 'success');
+            toast('Đã xóa lịch sử quét', 'success');
             loadScanHistory();
-          } catch (e) { toast('Lá»—i xÃ³a: ' + e.message, 'danger'); }
+          } catch (e) { toast('Lỗi xóa: ' + e.message, 'danger'); }
         },
-        'XÃ³a lá»‹ch sá»­'
+        'Xóa lịch sử'
       );
     }
 
@@ -87,13 +87,13 @@
     async function bulkDeleteScanHistory() {
       const ids = getSelectedScanIds();
       if (!ids.length) return;
-      confirmAction(`XÃ³a ${ids.length} lá»‹ch sá»­ quÃ©t Ä‘Ã£ chá»n?`, async () => {
+      confirmAction(`Xóa ${ids.length} lịch sử quét đã chọn?`, async () => {
         try {
           const params = ids.map(id => `ids=${id}`).join('&');
           await apiJSON(`/scan-history/bulk?${params}`, { method: 'DELETE' });
-          toast(`ÄÃ£ xÃ³a ${ids.length} lá»‹ch sá»­ quÃ©t`, 'warning');
+          toast(`Đã xóa ${ids.length} lịch sử quét`, 'warning');
           loadScanHistory();
-        } catch (e) { toast('Lá»—i: ' + e.message, 'danger'); }
-      }, 'XÃ³a hÃ ng loáº¡t');
+        } catch (e) { toast('Lỗi: ' + e.message, 'danger'); }
+      }, 'Xóa hàng loạt');
     }
 

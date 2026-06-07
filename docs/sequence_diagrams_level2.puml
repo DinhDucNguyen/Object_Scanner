@@ -1,0 +1,405 @@
+' ================================================================
+' Object Scanner - So do tuan tu muc 2
+' Cac message chinh trong file nay co the dung de bo sung Method
+' cho so do Class muc 2.
+' ================================================================
+
+@startuml
+title 1. Dang ky tai khoan va xac thuc OTP
+
+actor "Nguoi dung" as User
+boundary "AndroidApp" as App
+control "AuthRouter" as Router
+control "UserService" as Service
+database "Database" as DB
+control "EmailService" as Email
+
+User -> App: nhap_thong_tin_dang_ky()
+App -> Router: register(du_lieu)
+Router -> Service: register(du_lieu)
+Service -> DB: kiem_tra_email_va_ten_dang_nhap_da_ton_tai()
+
+alt Email da ton tai nhung chua xac thuc
+    Service -> Service: tao_ma_otp_dang_ky()
+    Service -> Service: luu_otp_vao_bo_nho_tam(email, ma_otp)
+    Service -> Email: gui_lai_otp(email, ma_otp)
+    Email --> Service: gui_thanh_cong
+    Service --> Router: thong_bao_da_gui_lai_otp
+    Router --> App: yeu_cau_xac_thuc_otp
+    App --> User: hien_thi_man_hinh_nhap_otp()
+else Thong tin hop le (email moi)
+    Service -> Service: tao_ma_otp_dang_ky()
+    Service -> Service: luu_otp_vao_bo_nho_tam(email, ma_otp)
+    Service -> Email: gui_otp(email, ma_otp)
+    Email --> Service: gui_thanh_cong
+
+    alt Gui email thanh cong
+        Service -> DB: tao_nguoi_dung_voi_trang_thai_chua_xac_thuc()
+        Service --> Router: ket_qua_dang_ky
+        Router --> App: yeu_cau_xac_thuc_otp
+        App --> User: hien_thi_man_hinh_nhap_otp()
+
+        User -> App: nhap_otp()
+        App -> Router: verify_registration_otp(du_lieu)
+        Router -> Service: verify_registration_otp(du_lieu)
+        Service -> Service: kiem_tra_otp_trong_bo_nho_tam()
+        Service -> DB: kich_hoat_tai_khoan(email_da_xac_thuc = true)
+        Service --> Router: boolean
+        Router --> App: ket_qua_xac_thuc
+        App --> User: thong_bao_dang_ky_thanh_cong()
+    else Gui email that bai
+        Service -> Service: xoa_otp_khoi_bo_nho_tam(email)
+        Service --> Router: loi_gui_email
+        Router --> App: thong_bao_loi
+        App --> User: hien_thi_loi()
+    end
+else Email hoac ten dang nhap da ton tai
+    Service --> Router: loi_dang_ky
+    Router --> App: thong_bao_loi
+    App --> User: hien_thi_loi()
+end
+@enduml
+
+@startuml
+title 2. Dang nhap tai khoan
+
+actor "Nguoi dung" as User
+boundary "AndroidApp" as App
+control "AuthRouter" as Router
+control "UserService" as Service
+database "Database" as DB
+
+User -> App: nhap_thong_tin_dang_nhap()
+App -> Router: login(du_lieu)
+Router -> Service: login(du_lieu)
+Service -> DB: tim_nguoi_dung()
+
+alt Tai khoan hop le
+    DB --> Service: thong_tin_nguoi_dung
+    Service -> Service: kiem_tra_mat_khau()
+    Service -> DB: cap_nhat_lan_dang_nhap_cuoi()
+    Service --> Router: TokenResponse
+    Router --> App: TokenResponse
+    App -> App: luu_access_token_va_refresh_token()
+    App --> User: hien_thi_man_hinh_chinh()
+else Sai thong tin dang nhap
+    Service --> Router: loi_dang_nhap
+    Router --> App: thong_bao_loi
+    App --> User: hien_thi_loi_dang_nhap()
+end
+@enduml
+
+@startuml
+title 3. Quen mat khau va dat lai mat khau
+
+actor "Nguoi dung" as User
+boundary "AndroidApp" as App
+control "AuthRouter" as Router
+control "UserService" as Service
+database "Database" as DB
+control "EmailService" as Email
+
+User -> App: nhap_email_quen_mat_khau()
+App -> Router: forgot_password(du_lieu)
+Router -> Service: forgot_password(du_lieu)
+Service -> DB: tim_nguoi_dung_theo_email()
+
+alt Email ton tai va da xac thuc
+    Service -> Service: tao_ma_otp_dat_lai_mat_khau()
+    Service -> Service: luu_otp_vao_bo_nho_tam(email, ma_otp)
+    Service -> Email: gui_otp(email, ma_otp)
+    Email --> Service: gui_thanh_cong
+    Service --> Router: boolean
+    Router --> App: yeu_cau_nhap_otp
+
+    User -> App: nhap_otp_va_mat_khau_moi()
+    App -> Router: verify_otp(du_lieu)
+    Router -> Service: verify_otp(du_lieu)
+    Service -> Service: kiem_tra_otp_trong_bo_nho_tam()
+    Service --> Router: boolean
+    Router --> App: otp_hop_le
+
+    App -> Router: reset_password(du_lieu)
+    Router -> Service: reset_password(du_lieu)
+    Service -> DB: cap_nhat_mat_khau_moi()
+    Service -> Service: xoa_otp_khoi_bo_nho_tam(email)
+    Service --> Router: boolean
+    Router --> App: ket_qua_dat_lai_mat_khau
+    App --> User: thong_bao_thanh_cong()
+else Email khong ton tai hoac chua xac thuc
+    note right of Service
+        Tra ve thong bao chung chung (generic message)
+        de tranh lo thong tin email co ton tai hay khong
+    end note
+    Service --> Router: thong_bao_chung_chung
+    Router --> App: thong_bao_chung_chung
+    App --> User: hien_thi_thong_bao_da_gui_neu_co()
+end
+@enduml
+
+@startuml
+title 4. Quet anh nhan dien vat the
+
+actor "Nguoi dung" as User
+boundary "AndroidApp" as App
+control "ScanRouter" as ScanRouter
+control "HistoryRouter" as HistoryRouter
+control "ScanService" as Scan
+control "HistoryFeedbackService" as History
+control "GeminiService" as Gemini
+database "Database" as DB
+
+User -> App: chup_anh()
+App -> App: chay_yolo_on_device()
+
+alt YOLO >= 80% tin cay va tim thay trong DB
+    App -> ScanRouter: process_scan(yeu_cau)
+    ScanRouter -> Scan: process_scan(yeu_cau)
+    Scan -> DB: tim_doi_tuong_theo_ma()
+    Scan -> DB: lay_danh_sach_ban_dich_da_duyet()
+    Scan --> ScanRouter: ScanResponse(source=internal_db)
+    ScanRouter --> App: ScanResponse
+    App --> User: hien_thi_ket_qua_quet()
+
+    == Goi rieng de luu lich su quet va anh huan luyen ==
+    App -> HistoryRouter: save_lich_su_quet(object_code, image_bytes, nguoi_dung_id)
+    HistoryRouter -> History: save_with_image(object_code, image_bytes, nguoi_dung_id, base_url)
+    History -> DB: tim_doi_tuong_theo_ma()
+    History -> DB: tim_ban_dich_de_on_tap()
+    History -> History: kiem_tra_chat_luong_anh()
+    History -> History: tai_anh_len_luu_tru()
+    History -> DB: luu_lich_su_quet()
+    History -> DB: tao_anh_huan_luyen_ung_vien()
+    History -> DB: them_vao_tien_do_hoc_neu_can()
+    History --> HistoryRouter: LichSuQuetResponse
+    HistoryRouter --> App: LichSuQuetResponse
+    App --> User: cap_nhat_trang_thai_da_luu()
+
+else YOLO >= 90% tin cay nhung DB miss
+    note right of App
+        Confidence cao => bo qua ML Kit,
+        goi Gemini truc tiep
+    end note
+    App -> ScanRouter: process_scan_image(image_bytes, nguoi_dung_id)
+    ScanRouter -> Scan: process_scan_image(image_bytes, nguoi_dung_id)
+    Scan -> Gemini: identify_object_quick(image_bytes)
+    Gemini --> Scan: ma_doi_tuong, do_tin_cay
+    Scan -> Gemini: identify_object(image_bytes)
+    Gemini --> Scan: thong_tin_tu_vung_day_du
+    Scan -> DB: tao_du_doan_ai_cho_xet_duyet()
+    Scan -> DB: tao_anh_huan_luyen_ung_vien()
+    Scan --> ScanRouter: ScanResponse(source=gemini_pending_review)
+    ScanRouter --> App: ScanResponse
+    App --> User: hien_thi_ket_qua_cho_xet_duyet()
+
+else YOLO < 80% hoac khong detect duoc
+    note right of App
+        Fallback: thu ML Kit ImageLabeling
+    end note
+    App -> App: chay_ml_kit_image_labeling()
+
+    alt ML Kit >= 80% va tim thay trong DB
+        App -> ScanRouter: process_scan(yeu_cau)
+        ScanRouter -> Scan: process_scan(yeu_cau)
+        Scan -> DB: tim_doi_tuong_theo_ma()
+        Scan -> DB: lay_danh_sach_ban_dich_da_duyet()
+        Scan --> ScanRouter: ScanResponse(source=internal_db)
+        ScanRouter --> App: ScanResponse
+        App --> User: hien_thi_ket_qua_quet()
+        App -> HistoryRouter: save_lich_su_quet(object_code, confidence, image_bytes)
+        HistoryRouter --> App: LichSuQuetResponse
+        App --> User: cap_nhat_trang_thai_da_luu()
+
+    else ML Kit miss hoac confidence thap
+        App -> ScanRouter: process_scan_image(image_bytes, nguoi_dung_id)
+        ScanRouter -> Scan: process_scan_image(image_bytes, nguoi_dung_id)
+        Scan -> Gemini: identify_object_quick(image_bytes)
+        Gemini --> Scan: ma_doi_tuong, do_tin_cay
+        Scan -> Gemini: identify_object(image_bytes)
+        Gemini --> Scan: thong_tin_tu_vung_day_du
+        Scan -> DB: tao_du_doan_ai_cho_xet_duyet()
+        Scan -> DB: tao_anh_huan_luyen_ung_vien()
+        Scan --> ScanRouter: ScanResponse(source=gemini_pending_review)
+        ScanRouter --> App: ScanResponse
+        App --> User: hien_thi_ket_qua_cho_xet_duyet()
+    end
+end
+@enduml
+
+@startuml
+title 5. Tra tu dien va luu lich su tra cuu
+
+actor "Nguoi dung" as User
+boundary "AndroidApp" as App
+control "DictionaryRouter" as Router
+control "DictionaryService" as Service
+control "GeminiService" as Gemini
+database "Database" as DB
+
+User -> App: nhap_tu_can_tra()
+App -> Router: translate_or_lookup(text, from_lang, to_lang, nguoi_dung_id)
+Router -> Service: translate_or_lookup(text, from_lang, to_lang, nguoi_dung_id)
+Service -> Service: kiem_tra_cache_trong_bo_nho()
+
+alt Co trong cache
+    Service -> DB: luu_hoac_cap_nhat_lich_su_tra_cuu()
+    Service --> Router: ket_qua_tra_tu
+else Khong co trong cache
+    Service -> DB: tim_trong_ban_dich_va_bi_danh()
+
+    alt Tim thay trong CSDL
+        DB --> Service: doi_tuong_va_ban_dich
+        Service -> Service: luu_vao_cache()
+        Service -> DB: luu_hoac_cap_nhat_lich_su_tra_cuu()
+        Service --> Router: ket_qua_tra_tu
+    else Khong tim thay trong CSDL
+        Service -> Gemini: dich_tu_vung(text, from_lang, to_lang)
+        Gemini --> Service: ket_qua_dich
+        Service -> Service: luu_vao_cache()
+        Service -> DB: luu_hoac_cap_nhat_lich_su_tra_cuu()
+        Service --> Router: ket_qua_tra_tu
+    end
+end
+
+Router --> App: ket_qua_tra_tu
+App --> User: hien_thi_ket_qua_tra_tu()
+@enduml
+
+@startuml
+title 6. Tao bo suu tap va them ban dich vao bo suu tap
+
+actor "Nguoi dung" as User
+boundary "AndroidApp" as App
+control "CollectionRouter" as Router
+control "CollectionService" as Service
+database "Database" as DB
+
+User -> App: nhap_ten_bo_suu_tap()
+App -> Router: create_collection(nguoi_dung_id, du_lieu)
+Router -> Service: create_collection(nguoi_dung_id, du_lieu)
+Service -> DB: tao_bo_suu_tap()
+DB --> Service: BoSuuTap
+Service --> Router: BoSuuTap
+Router --> App: BoSuuTap
+App --> User: hien_thi_bo_suu_tap_moi()
+
+User -> App: chon_ban_dich_de_luu()
+App -> Router: add_to_collection(bo_suu_tap_id, ban_dich_id, nguoi_dung_id)
+Router -> Service: add_to_collection(bo_suu_tap_id, ban_dich_id, nguoi_dung_id)
+Service -> DB: kiem_tra_quyen_so_huu_bo_suu_tap()
+Service -> DB: kiem_tra_ban_dich_da_ton_tai()
+
+alt Chua co trong bo suu tap
+    Service -> DB: them_chi_tiet_bo_suu_tap()
+    Service --> Router: boolean
+else Da co trong bo suu tap
+    Service --> Router: boolean
+end
+
+Router --> App: ket_qua_luu
+App --> User: thong_bao_da_luu()
+@enduml
+
+@startuml
+title 7. On tap tu vung theo thuat toan SM-2
+
+actor "Nguoi dung" as User
+boundary "AndroidApp" as App
+control "ReviewRouter" as ReviewRouter
+control "LearningService" as Learning
+database "Database" as DB
+
+User -> App: mo_man_hinh_on_tap()
+App -> ReviewRouter: get_due_reviews(nguoi_dung_id)
+ReviewRouter -> Learning: get_due_reviews(nguoi_dung_id)
+Learning -> DB: lay_tien_do_hoc_den_han()
+DB --> Learning: List<ReviewCard>
+Learning --> ReviewRouter: List<ReviewCard>
+ReviewRouter --> App: List<ReviewCard>
+App --> User: hien_thi_the_on_tap()
+
+User -> App: chon_muc_do_nho()
+App -> ReviewRouter: submit_review(tien_do_hoc_id, yeu_cau, nguoi_dung_id)
+ReviewRouter -> Learning: submit_review(tien_do_hoc_id, yeu_cau, nguoi_dung_id)
+Learning -> DB: lay_tien_do_hoc()
+Learning -> Learning: tinh_sm2()
+Learning -> DB: cap_nhat_tien_do_hoc()
+Learning -> DB: ghi_lich_su_on_tap()
+Learning --> ReviewRouter: ReviewResult
+ReviewRouter --> App: ReviewResult
+App --> User: hien_thi_ket_qua_on_tap()
+@enduml
+
+@startuml
+title 8. Xem thong ke chuoi on tap (Streak)
+
+actor "Nguoi dung" as User
+boundary "AndroidApp" as App
+control "StreakRouter" as Router
+control "StreakService" as Streak
+database "Database" as DB
+
+User -> App: mo_man_hinh_streak()
+App -> Router: get_streak(nguoi_dung_id)
+Router -> Streak: get_streak(nguoi_dung_id)
+Streak -> DB: tinh_chuoi_on_tap_tu_lich_su()
+DB --> Streak: thong_ke_streak
+Streak --> Router: dict
+Router --> App: dict
+App --> User: hien_thi_chuoi_on_tap()
+
+App -> Router: get_calendar(nguoi_dung_id, days)
+Router -> Streak: get_calendar(nguoi_dung_id, days)
+Streak -> DB: lay_lich_on_tap_theo_ngay()
+DB --> Streak: List<NgayOnTap>
+Streak --> Router: List<NgayOnTap>
+Router --> App: List<NgayOnTap>
+App --> User: hien_thi_lich_streak()
+
+note over App, Router
+    Endpoint record_review ton tai de tuong thich/dong bo,
+    nhung man hinh Streak hien tai khong co nut diem danh
+    va khong goi record_review truc tiep.
+end note
+@enduml
+
+@startuml
+title 9. Admin duyet ket qua AI
+
+actor "Quan tri vien" as Admin
+boundary "AdminWeb" as Web
+control "PredictionRouter" as Router
+control "PredictionService" as Prediction
+control "TTSService" as TTS
+database "Database" as DB
+
+Admin -> Web: mo_danh_sach_du_doan_cho_duyet()
+Web -> Router: list_predictions(trang_thai, limit, offset, search)
+Router -> Prediction: list_predictions(trang_thai, limit, offset, search)
+Prediction -> DB: lay_du_doan_cho_duyet()
+DB --> Prediction: List<DuDoanAI>
+Prediction --> Router: List<DuDoanAI>
+Router --> Web: List<DuDoanAI>
+Web --> Admin: hien_thi_danh_sach_du_doan()
+
+Admin -> Web: chon_duyet_du_doan()
+Web -> Router: approve_prediction(du_doan_ai_id, yeu_cau, admin_id)
+Router -> Prediction: approve_prediction(du_doan_ai_id, yeu_cau, admin_id)
+Prediction -> DB: lay_du_doan_ai()
+Prediction -> DB: tao_hoac_cap_nhat_doi_tuong()
+
+loop Voi moi ban dich trong du doan
+    Prediction -> TTS: get_audio_url(word_name, lang_code)
+    TTS --> Prediction: audio_url
+    Prediction -> DB: tao_hoac_cap_nhat_ngon_ngu_neu_can()
+    Prediction -> DB: tao_hoac_cap_nhat_ban_dich(audio_url)
+    Prediction -> DB: luu_vi_du()
+end
+
+Prediction -> DB: gan_nguoi_dung_vao_tien_do_hoc_neu_can()
+Prediction -> DB: cap_nhat_trang_thai_du_doan()
+Prediction -> DB: cap_nhat_anh_huan_luyen_lien_quan()
+Prediction --> Router: boolean
+Router --> Web: ket_qua_duyet
+Web --> Admin: thong_bao_duyet_thanh_cong()
+@enduml
