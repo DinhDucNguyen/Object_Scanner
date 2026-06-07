@@ -192,9 +192,10 @@ else YOLO >= 90% tin cay nhung DB miss
     ScanRouter --> App: ScanResponse
     App --> User: hien_thi_ket_qua_cho_xet_duyet()
 
-else YOLO < 80% hoac khong detect duoc
+else YOLO khong tim thay trong DB va confidence < 90%, hoac YOLO khong detect duoc
     note right of App
-        Fallback: thu ML Kit ImageLabeling
+        YOLO 80-89% DB miss, hoac YOLO < 80%:
+        Fallback sang ML Kit ImageLabeling
     end note
     App -> App: chay_ml_kit_image_labeling()
 
