@@ -20,6 +20,7 @@ from app.utils.timezone import now_vietnam
 
 class NguonAnhHuanLuyen(str, enum.Enum):
     yolo = "yolo"
+    mlkit = "mlkit"
     gemini = "gemini"
     admin = "admin"
 

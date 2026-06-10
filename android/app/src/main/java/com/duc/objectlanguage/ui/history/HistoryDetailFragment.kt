@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,10 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.duc.objectlanguage.ui.collection.SaveToCollectionBottomSheet
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.TranslationResponse
@@ -133,14 +138,64 @@ class HistoryDetailFragment : Fragment() {
             }
         }
         if (!isAdded || context == null) return
+        binding.scannedImageFrame.layoutParams = binding.scannedImageFrame.layoutParams.apply {
+            height = dp(260)
+        }
         Glide.with(requireContext())
             .load(imageUrl)
             .placeholder(R.drawable.ic_image_placeholder)
             .error(R.drawable.ic_image_placeholder)
+            .into(binding.ivScannedImageBackdrop)
+        Glide.with(requireContext())
+            .load(imageUrl)
+            .placeholder(R.drawable.ic_image_placeholder)
+            .error(R.drawable.ic_image_placeholder)
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable,
+                    model: Any,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    adjustPreviewHeight(resource)
+                    return false
+                }
+            })
             .into(binding.ivScannedImage)
         binding.ivScannedImage.setOnClickListener {
             if (!imageUrl.isNullOrBlank()) showImageFullscreen(imageUrl)
         }
+    }
+
+    private fun adjustPreviewHeight(drawable: Drawable) {
+        val width = drawable.intrinsicWidth
+        val height = drawable.intrinsicHeight
+        if (width <= 0 || height <= 0) return
+
+        val ratio = height.toFloat() / width.toFloat()
+        val targetHeight = when {
+            ratio >= 1.45f -> dp(380)
+            ratio >= 1.1f -> dp(330)
+            ratio <= 0.7f -> dp(220)
+            else -> dp(280)
+        }
+        binding.scannedImageFrame.layoutParams = binding.scannedImageFrame.layoutParams.apply {
+            this.height = targetHeight
+        }
+    }
+
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
     }
 
     private fun bindReviewStatus(view: TextView, status: String?) {

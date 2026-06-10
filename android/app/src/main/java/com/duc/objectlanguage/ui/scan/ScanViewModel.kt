@@ -79,7 +79,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                     _detectionSource.value = "$modelLabel · ${(yoloResult.confidence * 100).toInt()}%"
                     _scanResult.value = dbResult
                     loadExamples(dbResult)
-                    onScanSuccess(objectCode, yoloResult.confidence, imageBytes)
+                    onScanSuccess(objectCode, yoloResult.confidence, imageBytes, "yolo")
                     _isLoading.value = false
                     return@launch
                 }
@@ -112,7 +112,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                         _detectionSource.value = "ML Kit · ${(topLabel.confidence * 100).toInt()}%"
                         _scanResult.value = dbResult
                         loadExamples(dbResult)
-                        onScanSuccess(objectCode, topLabel.confidence, imageBytes)
+                        onScanSuccess(objectCode, topLabel.confidence, imageBytes, "mlkit")
                         _isLoading.value = false
                         return@launch
                     }
@@ -127,11 +127,16 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun onScanSuccess(objectCode: String, confidence: Float, imageBytes: ByteArray) {
+    private fun onScanSuccess(
+        objectCode: String,
+        confidence: Float,
+        imageBytes: ByteArray,
+        trainingSource: String,
+    ) {
         if (isGuest) {
             recordGuestScanIfNeeded()
         } else {
-            saveScanAndQueueReview(objectCode, confidence, imageBytes)
+            saveScanAndQueueReview(objectCode, confidence, imageBytes, trainingSource)
         }
     }
 
@@ -157,7 +162,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
                             recordGuestScanIfNeeded()
                             _addedMsg.value = getApplication<Application>().getString(R.string.scan_pending)
                         } else {
-                            onScanSuccess(it.objectCode, 1.0f, imageBytes)
+                            onScanSuccess(it.objectCode, 1.0f, imageBytes, "gemini")
                         }
                     }
                 }
@@ -167,9 +172,14 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         _isLoading.value = false
     }
 
-    private fun saveScanAndQueueReview(objectCode: String, confidence: Float, imageBytes: ByteArray) {
+    private fun saveScanAndQueueReview(
+        objectCode: String,
+        confidence: Float,
+        imageBytes: ByteArray,
+        trainingSource: String,
+    ) {
         viewModelScope.launch {
-            val result = repo.saveLichSuQue(objectCode, confidence, imageBytes)
+            val result = repo.saveLichSuQue(objectCode, confidence, imageBytes, trainingSource)
             result.fold(
                 onSuccess = { response ->
                     if (response.learningAdded) {

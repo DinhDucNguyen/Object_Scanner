@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.duc.objectlanguage.ui.MainActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.duc.objectlanguage.R
@@ -176,7 +177,7 @@ class DashboardFragment : Fragment() {
     }
 
     private fun selectBottomTab(itemId: Int) {
-        findNavController().navigate(itemId)
+        (requireActivity() as? MainActivity)?.navigateToTab(itemId)
     }
 
     private fun bindTopCollections(collections: List<CollectionHighlight>) {

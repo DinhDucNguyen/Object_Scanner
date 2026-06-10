@@ -704,10 +704,11 @@
     <string name="profile_btn_delete_account">Xóa tài khoản</string>
     <string name="profile_delete_account_title">Xóa tài khoản</string>
     <string name="profile_delete_account_msg">Toàn bộ dữ liệu của bạn (lịch sử, bộ sưu tập, tiến trình học) sẽ bị xóa vĩnh viễn và không thể khôi phục.</string>
-    <string name="profile_delete_account_password_hint">Nhập mật khẩu, tài khoản Google có thể để trống</string>
+    <string name="profile_delete_account_password_hint">Nhập mật khẩu</string>
     <string name="profile_delete_account_confirm">Xóa vĩnh viễn</string>
     <string name="profile_delete_account_success">Tài khoản đã được xóa</string>
     <string name="profile_delete_account_wrong_password">Mật khẩu không đúng</string>
+    <string name="profile_delete_google_confirm_message">Toàn bộ dữ liệu của bạn sẽ bị xóa vĩnh viễn. Bạn sẽ được yêu cầu xác nhận lại tài khoản Google để tiếp tục.</string>
     <string name="profile_bio_placeholder">Nhấn để thêm giới thiệu…</string>
     <string name="profile_bio_dialog_title">Giới thiệu bản thân</string>
     <string name="profile_bio_hint">Viết vài dòng về bạn…</string>

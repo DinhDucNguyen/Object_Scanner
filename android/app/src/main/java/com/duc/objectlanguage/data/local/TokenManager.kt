@@ -35,6 +35,16 @@ class TokenManager(context: Context) {
         get() = prefs.getInt("nguoi_dung_id", 0)
         set(value) = prefs.edit().putInt("nguoi_dung_id", value).apply()
 
+    var role: String?
+        get() = prefs.getString("role", null)
+        set(value) = prefs.edit().putString("role", value).apply()
+
+    val isAdmin: Boolean get() = role?.lowercase() in setOf("admin", "quan_tri", "quan_tri_vien")
+
+    var isGoogleAccount: Boolean
+        get() = prefs.getBoolean("is_google_account", false)
+        set(value) = prefs.edit().putBoolean("is_google_account", value).apply()
+
     val isLoggedIn: Boolean get() = !accessToken.isNullOrEmpty()
 
     fun clear() {

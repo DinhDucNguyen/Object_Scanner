@@ -13,9 +13,9 @@ from app.schemas.user import (
     ResetPasswordRequest, ChangePasswordRequest,
     ProfileUpdateRequest, AvatarUploadResponse,
     MessageResponse, GoogleLoginRequest,
+    DeleteAccountRequest, GoogleDeleteAccountRequest,
 )
 from app.dependencies.get_current_user import get_current_nguoi_dung_id
-from app.schemas.user import DeleteAccountRequest
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 user_service = UserService()
@@ -144,3 +144,13 @@ def delete_account(
 ):
     """Xóa tài khoản vĩnh viễn — yêu cầu xác nhận mật khẩu."""
     return user_service.delete_account(db, nguoi_dung_id, data.password)
+
+
+@router.delete("/account/google", response_model=MessageResponse)
+def delete_account_google(
+    data: GoogleDeleteAccountRequest,
+    db: Session = Depends(get_db),
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id),
+):
+    """Xóa tài khoản Google — yêu cầu xác thực lại bằng Google idToken."""
+    return user_service.delete_account_google(db, nguoi_dung_id, data.id_token)

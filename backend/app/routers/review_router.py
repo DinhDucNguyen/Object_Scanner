@@ -39,6 +39,14 @@ def get_due_reviews(
     return learning_service.get_due_reviews(db, nguoi_dung_id)
 
 
+@router.get("/review/mastered", response_model=List[ReviewCardResponse])
+def get_mastered_words(
+    db: Session = Depends(get_db),
+    nguoi_dung_id: int = Depends(get_current_nguoi_dung_id)
+):
+    return learning_service.get_mastered_words(db, nguoi_dung_id)
+
+
 @router.get("/analytics")
 def get_analytics(
     db: Session = Depends(get_db),

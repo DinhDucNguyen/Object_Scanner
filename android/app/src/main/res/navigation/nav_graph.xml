@@ -364,6 +364,7 @@
         android:label="@string/notification_settings_title" />
 
 
+
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.duc.objectlanguage.ui.profile.ProfileFragment"

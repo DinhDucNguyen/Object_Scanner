@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var isApplyingAccountLanguage = false
+
     private var currentTabId = R.id.scanFragment
     private var previousTabId: Int? = null
     private var backPressedTime = 0L
@@ -188,6 +189,18 @@ class MainActivity : AppCompatActivity() {
         updateReviewBadge()
     }
 
+    fun navigateToTab(itemId: Int) {
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val tabs = listOf(
+            NavTab(binding.navTabHome, binding.navIconHome, binding.navLabelHome, R.id.dashboardFragment),
+            NavTab(binding.navTabDictionary, binding.navIconDictionary, binding.navLabelDictionary, R.id.dictionaryFragment),
+            NavTab(binding.navTabScan, binding.navIconScan, binding.navLabelScan, R.id.scanFragment, isScan = true),
+            NavTab(binding.navTabReview, binding.navIconReview, binding.navLabelReview, R.id.reviewFragment),
+            NavTab(binding.navTabProfile, binding.navIconProfile, binding.navLabelProfile, R.id.profileFragment),
+        )
+        navigateToBottomDestination(itemId, navHostFragment.navController, tabs)
+    }
+
     fun updateReviewBadge() {
         val app = application as ObjectLanguageApp
         if (!app.tokenManager.isLoggedIn) {
@@ -285,16 +298,18 @@ class MainActivity : AppCompatActivity() {
         if (navController.currentDestination?.id == itemId) return true
 
         val fromTabId = bottomNavItemForDestination(navController.currentDestination?.id ?: -1) ?: -1
+        val fromIndex = tabs.indexOfFirst { it.destinationId == fromTabId }
+        val toIndex = tabs.indexOfFirst { it.destinationId == itemId }
+        val goingRight = toIndex > fromIndex
 
         return try {
             val options = NavOptions.Builder()
                 .setLaunchSingleTop(true)
-                // Pop hết về start destination để giữ back stack gọn — chỉ 1 bước back giữa tabs
                 .setPopUpTo(navController.graph.startDestinationId, false)
-                .setEnterAnim(R.anim.nav_tab_fade_in)
-                .setExitAnim(R.anim.nav_tab_fade_out)
-                .setPopEnterAnim(R.anim.nav_tab_fade_in)
-                .setPopExitAnim(R.anim.nav_tab_fade_out)
+                .setEnterAnim(if (goingRight) R.anim.nav_slide_in_right else R.anim.nav_slide_in_left)
+                .setExitAnim(if (goingRight) R.anim.nav_slide_out_left else R.anim.nav_slide_out_right)
+                .setPopEnterAnim(if (goingRight) R.anim.nav_slide_in_left else R.anim.nav_slide_in_right)
+                .setPopExitAnim(if (goingRight) R.anim.nav_slide_out_right else R.anim.nav_slide_out_left)
                 .build()
             if (!isBackNavigation) previousTabId = fromTabId.takeIf { it != -1 }
             navController.navigate(itemId, null, options)

@@ -92,6 +92,35 @@ class LearningService:
             db.commit()
         return results
 
+    def get_mastered_words(self, db: Session, nguoi_dung_id: int):
+        mastered = self.repo.get_mastered(db, nguoi_dung_id)
+        results = []
+        for p in mastered:
+            t = p.translation
+            if not t:
+                continue
+            lang = self.lang_repo.get_by_id(db, t.ngon_ngu_id)
+            results.append(
+                ReviewCardResponse(
+                    progress_id=p.id,
+                    translation_id=p.ban_dich_id,
+                    object_code=t.object.ma_doi_tuong if t.object else "",
+                    word_name=t.tu_vung,
+                    phonetic=t.phien_am,
+                    definition=t.dinh_nghia,
+                    examples=[],
+                    language_code=lang.ma_ngon_ngu if lang else "",
+                    language_name=lang.ten_ngon_ngu if lang else "",
+                    easiness_factor=float(p.do_de_nho),
+                    interval=p.khoang_lap,
+                    repetitions=p.so_lan_lap,
+                    image_url=pick_primary_object_image(t.object),
+                    audio_url=t.am_thanh_url,
+                    last_reviewed_at=p.lan_on_cuoi.isoformat() if p.lan_on_cuoi else None,
+                )
+            )
+        return results
+
     def get_collection_review_cards(self, db: Session, collection_id: int, nguoi_dung_id: int, practice: bool = False):
         from app.models.user_collection import UserCollection
 

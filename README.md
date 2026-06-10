@@ -210,7 +210,7 @@ alembic heads           # Kiểm tra head hiện tại
 alembic current         # Kiểm tra version đang chạy
 ```
 
-Version hiện tại: `0016_user_email_verified`
+Version hiện tại: `0032_add_mlkit_training_source`
 
 ### Model YOLO
 Model YOLOv8 nhận diện vật thể đã được train sẵn trên Google Colab và đặt tại:

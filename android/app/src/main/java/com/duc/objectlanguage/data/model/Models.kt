@@ -35,6 +35,10 @@ data class DeleteAccountRequest(
     @SerializedName("password") val password: String
 )
 
+data class GoogleDeleteAccountRequest(
+    @SerializedName("id_token") val idToken: String
+)
+
 data class MessageResponse(val message: String)
 
 data class TokenResponse(
@@ -130,7 +134,8 @@ data class ReviewCardResponse(
     val interval: Int,
     val repetitions: Int,
     @SerializedName("image_url") val imageUrl: String? = null,
-    @SerializedName("audio_url") val audioUrl: String? = null
+    @SerializedName("audio_url") val audioUrl: String? = null,
+    @SerializedName("last_reviewed_at") val lastReviewedAt: String? = null
 )
 
 data class ReviewResult(

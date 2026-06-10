@@ -131,7 +131,7 @@ class TrainingService:
                     "translations": self._training_group_translations(item.object),
                     "images": [],
                     "status_counts": {"cho_duyet": 0, "da_duyet": 0, "tu_choi": 0},
-                    "source_counts": {"yolo": 0, "gemini": 0, "admin": 0},
+                    "source_counts": {"yolo": 0, "mlkit": 0, "gemini": 0, "admin": 0},
                     "dataset_versions": set(),
                     "latest_image_at": None,
                     "confidence_sum": 0.0,

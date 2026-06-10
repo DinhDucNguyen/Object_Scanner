@@ -47,6 +47,9 @@ interface ApiService {
     @HTTP(method = "DELETE", path = "api/auth/account", hasBody = true)
     suspend fun deleteAccount(@Body req: DeleteAccountRequest): Response<MessageResponse>
 
+    @HTTP(method = "DELETE", path = "api/auth/account/google", hasBody = true)
+    suspend fun deleteAccountGoogle(@Body req: GoogleDeleteAccountRequest): Response<MessageResponse>
+
     // ====== SCAN ======
     @POST("api/scan")
     suspend fun scanByCode(@Body req: ScanRequest): Response<ScanResponse>
@@ -91,6 +94,9 @@ interface ApiService {
         @Path("progressId") id: Int,
         @Body req: ReviewRequest
     ): Response<ReviewResult>
+
+    @GET("api/review/mastered")
+    suspend fun getMasteredWords(): Response<List<ReviewCardResponse>>
 
     // ====== STATS ======
     @GET("api/stats")

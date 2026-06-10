@@ -711,10 +711,11 @@
     <string name="profile_btn_delete_account">Delete account</string>
     <string name="profile_delete_account_title">Delete account</string>
     <string name="profile_delete_account_msg">All your data (history, collections, learning progress) will be permanently deleted and cannot be recovered.</string>
-    <string name="profile_delete_account_password_hint">Enter password, or leave blank for Google accounts</string>
+    <string name="profile_delete_account_password_hint">Enter password</string>
     <string name="profile_delete_account_confirm">Delete permanently</string>
     <string name="profile_delete_account_success">Account has been deleted</string>
     <string name="profile_delete_account_wrong_password">Incorrect password</string>
+    <string name="profile_delete_google_confirm_message">All your data will be permanently deleted. You will be asked to re-authenticate with Google to proceed.</string>
     <string name="profile_bio_placeholder">Tap to add a bio…</string>
     <string name="profile_bio_dialog_title">About you</string>
     <string name="profile_bio_hint">Write a few lines about yourself…</string>

@@ -197,3 +197,7 @@ class GoogleLoginRequest(BaseModel):
 
 class DeleteAccountRequest(BaseModel):
     password: Optional[str] = None
+
+
+class GoogleDeleteAccountRequest(BaseModel):
+    id_token: str

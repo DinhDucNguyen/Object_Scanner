@@ -41,11 +41,17 @@ class CollectionRepository:
         return item
 
     def get_public(self, db: Session, nguoi_dung_id: int):
-        return db.query(UserCollection).filter(
-            UserCollection.cong_khai == True,
-            UserCollection.nguoi_dung_id != nguoi_dung_id,
-            UserCollection.thoi_gian_xoa.is_(None)
-        ).all()
+        return (
+            db.query(UserCollection)
+            .join(CollectionItem, CollectionItem.bo_suu_tap_id == UserCollection.id)
+            .filter(
+                UserCollection.cong_khai == True,
+                UserCollection.nguoi_dung_id != nguoi_dung_id,
+                UserCollection.thoi_gian_xoa.is_(None),
+            )
+            .distinct()
+            .all()
+        )
 
     def remove_item(self, db: Session, collection_id: int, translation_id: int):
         db.query(CollectionItem).filter(

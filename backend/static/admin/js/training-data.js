@@ -38,7 +38,7 @@
 
     function trainingSourceLabel(source) {
 
-      return { yolo: 'YOLO', gemini: 'Gemini', admin: 'Admin' }[source] || source || '—';
+      return { yolo: 'YOLO', mlkit: 'ML Kit', gemini: 'Gemini', admin: 'Admin' }[source] || source || '—';
 
     }
 

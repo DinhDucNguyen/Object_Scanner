@@ -119,6 +119,8 @@ class CollectionService:
         collection = self.repo.get_by_id(db, collection_id)
         if not collection or (collection.nguoi_dung_id != nguoi_dung_id and not collection.cong_khai):
             raise HTTPException(status_code=404, detail="Collection not found")
+        if collection.nguoi_dung_id != nguoi_dung_id and not collection.items:
+            raise HTTPException(status_code=404, detail="Collection not found")
 
         item_responses = []
         for item in collection.items:

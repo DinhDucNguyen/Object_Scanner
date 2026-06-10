@@ -49,6 +49,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.yalantis.ucrop.UCrop
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -61,6 +65,27 @@ class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ProfileViewModel by viewModels()
+
+    private var googleSignInClient: GoogleSignInClient? = null
+
+    private val googleReAuthLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account?.idToken
+                if (idToken != null) {
+                    proceedDeleteGoogleAccount(idToken)
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.auth_google_token_error), Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: ApiException) {
+                Toast.makeText(requireContext(), getString(R.string.auth_google_signin_failed, e.statusCode), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri ?: return@registerForActivityResult
@@ -98,6 +123,12 @@ class ProfileFragment : Fragment() {
             resetGraphToGuestScan()
             return
         }
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.google_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
         val initialUsername = app.tokenManager.username ?: getString(R.string.dashboard_default_user)
         binding.tvUsername.text = initialUsername
@@ -205,6 +236,22 @@ class ProfileFragment : Fragment() {
     }
 
     private fun showDeleteAccountDialog() {
+        val app = requireActivity().application as ObjectLanguageApp
+        if (app.tokenManager.isGoogleAccount) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.profile_delete_account_title))
+                .setMessage(getString(R.string.profile_delete_google_confirm_message))
+                .setPositiveButton(getString(R.string.profile_delete_account_confirm)) { _, _ ->
+                    val client = googleSignInClient ?: return@setPositiveButton
+                    client.signOut().addOnCompleteListener {
+                        googleReAuthLauncher.launch(client.signInIntent)
+                    }
+                }
+                .setNegativeButton(getString(R.string.btn_cancel), null)
+                .show()
+            return
+        }
+
         val dialogView = layoutInflater.inflate(R.layout.dialog_delete_account, null)
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(dialogView)
@@ -215,7 +262,6 @@ class ProfileFragment : Fragment() {
         dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDelete)
             .setOnClickListener {
                 val password = etPassword.text.toString()
-                val app = requireActivity().application as ObjectLanguageApp
                 val btn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDelete)
                 btn.isEnabled = false
                 lifecycleScope.launch {
@@ -242,6 +288,26 @@ class ProfileFragment : Fragment() {
             .setOnClickListener { dialog.dismiss() }
 
         dialog.show()
+    }
+
+    private fun proceedDeleteGoogleAccount(idToken: String) {
+        val app = requireActivity().application as ObjectLanguageApp
+        lifecycleScope.launch {
+            val result = app.repository.deleteAccountGoogle(idToken)
+            if (_binding == null) return@launch
+            result.fold(
+                onSuccess = {
+                    Toast.makeText(requireContext(), getString(R.string.profile_delete_account_success), Toast.LENGTH_SHORT).show()
+                    app.repository.logout()
+                    ReviewSessionStore.clearAll()
+                    (requireActivity() as? MainActivity)?.updateReviewBadge()
+                    resetGraphToGuestScan()
+                },
+                onFailure = {
+                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                }
+            )
+        }
     }
 
     private fun showAvatarOptions() {
@@ -569,10 +635,13 @@ class ProfileFragment : Fragment() {
     }
 
     private fun showOverflowMenu() {
+        val app = requireActivity().application as ObjectLanguageApp
         val popup = PopupMenu(requireContext(), binding.btnMenu)
         popup.menu.add(0, 1, 0, getString(R.string.profile_menu_change_password))
         popup.menu.add(0, 2, 1, getString(R.string.profile_menu_notifications))
-        popup.menu.add(0, 3, 2, getString(R.string.profile_menu_delete_account))
+        if (!app.tokenManager.isAdmin) {
+            popup.menu.add(0, 3, 2, getString(R.string.profile_menu_delete_account))
+        }
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> { showChangePasswordDialog(); true }
@@ -584,13 +653,16 @@ class ProfileFragment : Fragment() {
         popup.show()
     }
 
+    private var isDarkModeChanging = false
+
     private fun setupDarkModeSwitch() {
         val prefs = requireContext().getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
         val isDark = prefs.getBoolean("dark_mode", false)
-        // Tắt listener trước khi set checked để tránh trigger giả
         binding.switchDarkMode.setOnCheckedChangeListener(null)
         binding.switchDarkMode.isChecked = isDark
         binding.switchDarkMode.setOnCheckedChangeListener { _, checked ->
+            if (isDarkModeChanging) return@setOnCheckedChangeListener
+            isDarkModeChanging = true
             saveScrollPositionForRecreate()
             prefs.edit().putBoolean("dark_mode", checked).apply()
             val app = requireActivity().application as ObjectLanguageApp

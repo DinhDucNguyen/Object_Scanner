@@ -74,6 +74,12 @@ class LearningProgressRepository:
         mastered_count = sum(1 for (r,) in rows if r >= SM2_MASTERED_MIN_REPETITIONS)
         return {"new": new_count, "learning": learning_count, "mastered": mastered_count}
 
+    def get_mastered(self, db: Session, nguoi_dung_id: int) -> list:
+        return db.query(LearningProgress).filter(
+            LearningProgress.nguoi_dung_id == nguoi_dung_id,
+            LearningProgress.so_lan_lap >= SM2_MASTERED_MIN_REPETITIONS
+        ).all()
+
     def create(self, db: Session, progress: LearningProgress):
         db.add(progress)
         db.flush()

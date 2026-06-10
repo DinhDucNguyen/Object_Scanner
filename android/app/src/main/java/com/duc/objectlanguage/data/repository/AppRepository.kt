@@ -57,6 +57,9 @@ class AppRepository(private val tokenManager: TokenManager) {
 
                 tokenManager.userId = body.user.id
 
+                tokenManager.role = body.user.role
+                tokenManager.isGoogleAccount = false
+
                 Result.success(body)
 
             } else {
@@ -92,6 +95,9 @@ class AppRepository(private val tokenManager: TokenManager) {
                 tokenManager.username = body.user.username
 
                 tokenManager.userId = body.user.id
+
+                tokenManager.role = body.user.role
+                tokenManager.isGoogleAccount = true
 
                 Result.success(body)
 
@@ -255,6 +261,20 @@ class AppRepository(private val tokenManager: TokenManager) {
     suspend fun deleteAccount(password: String): Result<String> {
         return try {
             val response = api.deleteAccount(DeleteAccountRequest(password))
+            if (response.isSuccessful) {
+                tokenManager.clear()
+                Result.success(response.body()?.message ?: "Tài khoản đã được xóa")
+            } else {
+                Result.failure(Exception(apiError(response, "Xóa tài khoản thất bại")))
+            }
+        } catch (e: Exception) {
+            Result.failure(userFacingException(e, "Không thể kết nối máy chủ"))
+        }
+    }
+
+    suspend fun deleteAccountGoogle(idToken: String): Result<String> {
+        return try {
+            val response = api.deleteAccountGoogle(GoogleDeleteAccountRequest(idToken))
             if (response.isSuccessful) {
                 tokenManager.clear()
                 Result.success(response.body()?.message ?: "Tài khoản đã được xóa")
@@ -479,6 +499,15 @@ class AppRepository(private val tokenManager: TokenManager) {
     }
 
 
+
+    suspend fun getMasteredWords(): Result<List<ReviewCardResponse>> {
+        return try {
+            val response = api.getMasteredWords()
+            bodyResult(response, "Không tải được danh sách từ thành thạo")
+        } catch (e: Exception) {
+            Result.failure(userFacingException(e, "Không tải được danh sách từ thành thạo"))
+        }
+    }
 
     // ====== STATS ======
 

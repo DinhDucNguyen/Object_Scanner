@@ -83,6 +83,7 @@ class ReviewCardResponse(BaseModel):
     repetitions: int
     image_url: Optional[str] = None
     audio_url: Optional[str] = None
+    last_reviewed_at: Optional[str] = None
 
 class ReviewResult(BaseModel):
     success: bool

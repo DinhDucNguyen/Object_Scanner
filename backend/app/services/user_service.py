@@ -257,6 +257,10 @@ class UserService:
         user = self.repo.get_by_id(db, nguoi_dung_id)
         if not user:
             raise HTTPException(404, "Không tìm thấy người dùng")
+        role_name = (user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else "").strip().lower()
+        admin_roles = {r.strip().lower() for r in _settings.ADMIN_ROLE_NAMES}
+        if role_name in admin_roles or user.id in _settings.ADMIN_USER_IDS:
+            raise HTTPException(403, "Tài khoản quản trị viên không thể tự xóa")
         password = (password or "").strip()
         is_google_account = bool(getattr(user, "ma_dinh_danh_google", None))
         if not is_google_account and not password:
@@ -364,6 +368,36 @@ class UserService:
         db.commit()
 
         return {"message": "Đổi mật khẩu thành công"}
+
+    def delete_account_google(self, db: Session, nguoi_dung_id: int, id_token: str) -> dict:
+        try:
+            from google.oauth2 import id_token as google_id_token
+            from google.auth.transport import requests as google_requests
+            idinfo = google_id_token.verify_oauth2_token(
+                id_token,
+                google_requests.Request(),
+                GOOGLE_CLIENT_ID,
+            )
+        except Exception as e:
+            logger.warning("delete_account_google: invalid token: %s", e)
+            raise HTTPException(401, "Google token không hợp lệ")
+
+        user = self.repo.get_by_id(db, nguoi_dung_id)
+        if not user:
+            raise HTTPException(404, "Không tìm thấy người dùng")
+
+        role_name = (user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else "").strip().lower()
+        admin_roles = {r.strip().lower() for r in _settings.ADMIN_ROLE_NAMES}
+        if role_name in admin_roles or user.id in _settings.ADMIN_USER_IDS:
+            raise HTTPException(403, "Tài khoản quản trị viên không thể tự xóa")
+
+        google_sub = (idinfo.get("sub") or "").strip()
+        if not google_sub or getattr(user, "ma_dinh_danh_google", None) != google_sub:
+            raise HTTPException(403, "Google token không khớp với tài khoản này")
+
+        db.delete(user)
+        db.commit()
+        return {"message": "Tài khoản đã được xóa vĩnh viễn"}
 
     def google_login(self, db: Session, id_token: str) -> dict:
         try:
