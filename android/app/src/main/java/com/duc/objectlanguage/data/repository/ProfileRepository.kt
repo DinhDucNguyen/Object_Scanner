@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.data.repository
 
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.api.RetrofitClient
 import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.*
@@ -13,9 +14,9 @@ class ProfileRepository(private val tokenManager: TokenManager) {
     suspend fun getProfile(): Result<ProfileData> {
         return try {
             val response = api.getProfile()
-            ApiErrorParser.bodyResult(response, "Không tải được hồ sơ")
+            ApiErrorParser.bodyResult(response, R.string.repo_profile_load_error)
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được hồ sơ"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_profile_load_error))
         }
     }
 
@@ -26,9 +27,9 @@ class ProfileRepository(private val tokenManager: TokenManager) {
             if (response.isSuccessful && profile != null) {
                 profile.username?.takeIf { it.isNotBlank() }?.let { tokenManager.username = it }
                 Result.success(profile)
-            } else Result.failure(Exception(ApiErrorParser.fromResponse(response, "Cập nhật profile thất bại")))
+            } else Result.failure(Exception(ApiErrorParser.fromResponse(response, R.string.repo_profile_update_failed)))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không cập nhật được hồ sơ"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_profile_update_error))
         }
     }
 
@@ -39,36 +40,36 @@ class ProfileRepository(private val tokenManager: TokenManager) {
             val response = api.uploadAvatar(part)
             val avatar = response.body()?.avatarUrl
             if (response.isSuccessful && avatar != null) Result.success(avatar)
-            else Result.failure(Exception(ApiErrorParser.fromResponse(response, "Không tải được ảnh đại diện")))
+            else Result.failure(Exception(ApiErrorParser.fromResponse(response, R.string.repo_profile_avatar_load_error)))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được ảnh đại diện"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_profile_avatar_load_error))
         }
     }
 
     suspend fun getUserSettings(): Result<UserSettingsResponse> {
         return try {
             val response = api.getSettings()
-            ApiErrorParser.bodyResult(response, "Không tải được cài đặt")
+            ApiErrorParser.bodyResult(response, R.string.repo_profile_settings_load_error)
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được cài đặt"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_profile_settings_load_error))
         }
     }
 
     suspend fun updateUserSettings(displayLanguage: String): Result<UserSettingsResponse> {
         return try {
             val response = api.updateSettings(UserSettingsUpdate(displayLanguage = displayLanguage))
-            ApiErrorParser.bodyResult(response, "Không cập nhật được cài đặt")
+            ApiErrorParser.bodyResult(response, R.string.repo_profile_settings_update_error)
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không cập nhật được cài đặt"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_profile_settings_update_error))
         }
     }
 
     suspend fun updateDarkMode(darkMode: Boolean): Result<UserSettingsResponse> {
         return try {
             val response = api.updateSettings(UserSettingsUpdate(darkMode = darkMode))
-            ApiErrorParser.bodyResult(response, "Không cập nhật được cài đặt")
+            ApiErrorParser.bodyResult(response, R.string.repo_profile_settings_update_error)
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không cập nhật được cài đặt"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_profile_settings_update_error))
         }
     }
 }

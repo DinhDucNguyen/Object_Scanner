@@ -1,20 +1,34 @@
 package com.duc.objectlanguage.data.repository
 
+import androidx.annotation.StringRes
 import com.google.gson.JsonParser
 import kotlinx.coroutines.CancellationException
 import retrofit2.Response
 
 internal object ApiErrorParser {
 
+    fun fromResponse(response: Response<*>, @StringRes fallbackRes: Int, vararg args: Any): String {
+        return fromResponse(response, RepositoryText.get(fallbackRes, *args))
+    }
+
     fun fromResponse(response: Response<*>, fallback: String): String {
         val raw = response.errorBody()?.string()
         val detail = parseDetail(raw)
-        return if (detail.isNullOrBlank()) "$fallback (${response.code()})" else detail
+        if (detail.isNullOrBlank()) return "$fallback (${response.code()})"
+        return if (RepositoryText.language() == "vi") detail else "$fallback (${response.code()})"
+    }
+
+    fun userFacing(e: Exception, @StringRes fallbackRes: Int, vararg args: Any): Exception {
+        return userFacing(e, RepositoryText.get(fallbackRes, *args))
     }
 
     fun userFacing(e: Exception, fallback: String): Exception {
         if (e is CancellationException) throw e
         return Exception(fallback)
+    }
+
+    fun <T> bodyResult(response: Response<T>, @StringRes fallbackRes: Int, vararg args: Any): Result<T> {
+        return bodyResult(response, RepositoryText.get(fallbackRes, *args))
     }
 
     fun <T> bodyResult(response: Response<T>, fallback: String): Result<T> {

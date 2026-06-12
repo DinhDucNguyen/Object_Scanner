@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.RectF
 import androidx.camera.core.ImageProxy
+import com.duc.objectlanguage.R
+import com.duc.objectlanguage.utils.LocaleHelper
 import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
 import java.nio.ByteBuffer
@@ -53,7 +55,7 @@ class ObjectDetectorHelper(
             )
             interpreter = Interpreter(model, Interpreter.Options().apply { setNumThreads(4) })
         }.onFailure {
-            onResult(DetectionEvent.Failure("Không load được model: ${it.message}"))
+            onResult(DetectionEvent.Failure(localizedString(R.string.scan_model_load_error_format, it.message.orEmpty())))
         }
     }
 
@@ -93,7 +95,7 @@ class ObjectDetectorHelper(
         runCatching {
             interp.run(inputBuffer, outputBuffer)
         }.onFailure {
-            onResult(DetectionEvent.Failure("Lỗi nhận diện: ${it.message}"))
+            onResult(DetectionEvent.Failure(localizedString(R.string.scan_detection_error_format, it.message.orEmpty())))
             return
         }
 
@@ -205,5 +207,10 @@ class ObjectDetectorHelper(
 
         fun displayNameForModel(modelName: String): String =
             if (modelName == COCO_MODEL) "COCO YOLOv8n" else "YOLOv8 Custom"
+    }
+
+    private fun localizedString(resId: Int, vararg args: Any): String {
+        val localizedContext = LocaleHelper.applyLocale(context)
+        return localizedContext.getString(resId, *args)
     }
 }

@@ -9,7 +9,7 @@ import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.data.model.CollectionDetail
-import com.duc.objectlanguage.data.repository.CollectionRepository
+import com.duc.objectlanguage.ui.common.localizedString
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -21,8 +21,8 @@ import kotlinx.coroutines.launch
 class CollectionViewModel(application: Application) : AndroidViewModel(application) {
     
     private val app = application as ObjectLanguageApp
-    private val repo = CollectionRepository(app.tokenManager)
     private val appRepository = app.repository
+    private val repo = appRepository.collection
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
     
     // Collections list
@@ -96,7 +96,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
                     _error.value = null
                 },
                 onFailure = { e ->
-                    _error.value = "Lỗi tải chi tiết: ${e.message}"
+                    _error.value = localizedString(R.string.collection_detail_load_error_format, e.message.orEmpty())
                 }
             )
             
@@ -109,7 +109,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
      */
     fun createCollection(name: String, isPublic: Boolean) {
         if (name.isBlank()) {
-            _error.value = getApplication<Application>().getString(R.string.collection_name_empty)
+            _error.value = localizedString(R.string.collection_name_empty)
             return
         }
         
@@ -119,11 +119,11 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
             
             result.fold(
                 onSuccess = {
-                    _successMessage.value = getApplication<Application>().getString(R.string.collection_created, name)
+                    _successMessage.value = localizedString(R.string.collection_created, name)
                     loadCollections()
                 },
                 onFailure = { e ->
-                    _error.value = "Lỗi tạo bộ sưu tập: ${e.message}"
+                    _error.value = localizedString(R.string.collection_create_error_format, e.message.orEmpty())
                 }
             )
             
@@ -137,7 +137,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
     fun updateCollectionName(collectionId: Int, name: String) {
         val trimmedName = name.trim()
         if (trimmedName.isBlank()) {
-            _error.value = getApplication<Application>().getString(R.string.collection_name_empty)
+            _error.value = localizedString(R.string.collection_name_empty)
             return
         }
 
@@ -147,7 +147,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
 
             result.fold(
                 onSuccess = {
-                    _successMessage.value = getApplication<Application>().getString(
+                    _successMessage.value = localizedString(
                         R.string.collection_name_updated,
                         trimmedName
                     )
@@ -155,7 +155,7 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
                     loadPublicCollections()
                 },
                 onFailure = { e ->
-                    _error.value = getApplication<Application>().getString(
+                    _error.value = localizedString(
                         R.string.collection_name_update_error,
                         e.message ?: ""
                     )
@@ -176,12 +176,12 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
 
             result.fold(
                 onSuccess = {
-                    _successMessage.value = getApplication<Application>().getString(R.string.collection_privacy_updated)
+                    _successMessage.value = localizedString(R.string.collection_privacy_updated)
                     loadCollections()
                     loadPublicCollections()
                 },
                 onFailure = { e ->
-                    _error.value = getApplication<Application>().getString(
+                    _error.value = localizedString(
                         R.string.collection_privacy_update_error,
                         e.message ?: ""
                     )
@@ -202,11 +202,11 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
             
             result.fold(
                 onSuccess = {
-                    _successMessage.value = getApplication<Application>().getString(R.string.collection_deleted, collectionName)
+                    _successMessage.value = localizedString(R.string.collection_deleted, collectionName)
                     loadCollections()
                 },
                 onFailure = { e ->
-                    _error.value = "Lỗi xoá bộ sưu tập: ${e.message}"
+                    _error.value = localizedString(R.string.collection_delete_error_format, e.message.orEmpty())
                 }
             )
             
@@ -224,11 +224,11 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
             
             result.fold(
                 onSuccess = {
-                    _successMessage.value = getApplication<Application>().getString(R.string.collection_added)
+                    _successMessage.value = localizedString(R.string.collection_added)
                     loadCollectionDetail(collectionId)
                 },
                 onFailure = { e ->
-                    _error.value = "Lỗi thêm từ: ${e.message}"
+                    _error.value = localizedString(R.string.collection_add_word_error_format, e.message.orEmpty())
                 }
             )
             
@@ -246,11 +246,11 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
             
             result.fold(
                 onSuccess = {
-                    _successMessage.value = getApplication<Application>().getString(R.string.collection_removed)
+                    _successMessage.value = localizedString(R.string.collection_removed)
                     loadCollectionDetail(collectionId)
                 },
                 onFailure = { e ->
-                    _error.value = "Lỗi xoá từ: ${e.message}"
+                    _error.value = localizedString(R.string.collection_remove_word_error_format, e.message.orEmpty())
                 }
             )
             
@@ -314,10 +314,10 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
                 ?: appRepository.getTtsAudio(word, lang)
             if (bytes != null) {
                 audioPlayer.playMp3(bytes) {
-                    _error.value = getApplication<Application>().getString(R.string.collection_audio_play_error)
+                    _error.value = localizedString(R.string.collection_audio_play_error)
                 }
             } else {
-                _error.value = getApplication<Application>().getString(R.string.collection_audio_load_error)
+                _error.value = localizedString(R.string.collection_audio_load_error)
             }
         }
     }

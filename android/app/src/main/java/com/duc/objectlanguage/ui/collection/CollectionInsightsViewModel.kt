@@ -6,9 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.Collection
 import com.duc.objectlanguage.data.model.CollectionInsights
-import com.duc.objectlanguage.data.repository.CollectionRepository
+import com.duc.objectlanguage.ui.common.localizedString
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -18,7 +19,7 @@ import java.util.Locale
  */
 class CollectionInsightsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = CollectionRepository((application as ObjectLanguageApp).tokenManager)
+    private val repo = (application as ObjectLanguageApp).repository.collection
 
     private val _collections = MutableLiveData<List<Collection>>()
     val collections: LiveData<List<Collection>> = _collections
@@ -70,7 +71,7 @@ class CollectionInsightsViewModel(application: Application) : AndroidViewModel(a
                     _error.value = null
                 },
                 onFailure = { e ->
-                    _error.value = "Không tải được bộ sưu tập: ${e.message}"
+                    _error.value = localizedString(R.string.ci_collections_load_error_format, e.message.orEmpty())
                 }
             )
 
@@ -95,7 +96,7 @@ class CollectionInsightsViewModel(application: Application) : AndroidViewModel(a
                     _error.value = null
                 },
                 onFailure = { e ->
-                    _error.value = "Không tải được thống kê: ${e.message}"
+                    _error.value = localizedString(R.string.ci_insights_load_error_format, e.message.orEmpty())
                 }
             )
 
@@ -120,54 +121,54 @@ class CollectionInsightsViewModel(application: Application) : AndroidViewModel(a
 
         when {
             insights.reviewedItems == 0 ->
-                suggestions.add("Hãy bắt đầu ôn tập để xây dựng vốn từ vựng của bạn.")
+                suggestions.add(localizedString(R.string.ci_suggestion_start_review))
             progressPercent < 50 ->
-                suggestions.add("Bạn đã ôn ${progressPercent}% từ trong bộ sưu tập. Tiếp tục giữ nhịp nhé.")
+                suggestions.add(localizedString(R.string.ci_suggestion_progress_low, progressPercent))
             progressPercent < 100 ->
-                suggestions.add("Tiến độ tốt. Còn ${100 - progressPercent}% nữa là hoàn tất vòng ôn đầu.")
+                suggestions.add(localizedString(R.string.ci_suggestion_progress_mid, 100 - progressPercent))
             else ->
-                suggestions.add("Đã ôn hết tất cả từ. Hãy duy trì để không quên.")
+                suggestions.add(localizedString(R.string.ci_suggestion_progress_done))
         }
 
         when {
             masteryPercent == 0 && insights.reviewedItems > 0 ->
-                suggestions.add("Tập trung cải thiện điểm chất lượng để đưa các từ vào mức thành thạo.")
+                suggestions.add(localizedString(R.string.ci_suggestion_mastery_start))
             masteryPercent < 30 ->
-                suggestions.add("${masteryPercent}% từ đã thành thạo. Nên ôn lại các từ khó thường xuyên hơn.")
+                suggestions.add(localizedString(R.string.ci_suggestion_mastery_low, masteryPercent))
             masteryPercent < 70 ->
-                suggestions.add("${masteryPercent}% từ đã thành thạo. Bạn đang tiến bộ rất ổn.")
+                suggestions.add(localizedString(R.string.ci_suggestion_mastery_mid, masteryPercent))
             masteryPercent >= 70 ->
-                suggestions.add("Xuất sắc. ${masteryPercent}% từ trong bộ sưu tập đã thành thạo.")
+                suggestions.add(localizedString(R.string.ci_suggestion_mastery_high, masteryPercent))
         }
 
         when {
             insights.successRate < 0.5 ->
-                suggestions.add("Thử dùng các chế độ ôn khác nhau như Quiz hoặc Gõ từ để nhớ lâu hơn.")
+                suggestions.add(localizedString(R.string.ci_suggestion_success_low))
             insights.successRate < 0.75 ->
-                suggestions.add("Tỉ lệ đúng ${(insights.successRate * 100).toInt()}%. Luyện phát âm có thể giúp ghi nhớ tốt hơn.")
+                suggestions.add(localizedString(R.string.ci_suggestion_success_mid, (insights.successRate * 100).toInt()))
             insights.successRate >= 0.75 ->
-                suggestions.add("Tỉ lệ đúng ${(insights.successRate * 100).toInt()}%. Đây là mức rất tốt.")
+                suggestions.add(localizedString(R.string.ci_suggestion_success_high, (insights.successRate * 100).toInt()))
         }
 
         if (insights.lastReviewDate != null) {
             val daysSinceReview = calculateDaysSince(insights.lastReviewDate)
             when {
                 daysSinceReview == 0 ->
-                    suggestions.add("Bạn đã ôn hôm nay. Duy trì thói quen này là đẹp.")
+                    suggestions.add(localizedString(R.string.ci_suggestion_review_today))
                 daysSinceReview == 1 ->
-                    suggestions.add("Lần ôn gần nhất là hôm qua. Ôn lại hôm nay để giữ tiến độ.")
+                    suggestions.add(localizedString(R.string.ci_suggestion_review_yesterday))
                 daysSinceReview in 2..7 ->
-                    suggestions.add("${daysSinceReview} ngày chưa ôn. Đã đến lúc quay lại bộ sưu tập này.")
+                    suggestions.add(localizedString(R.string.ci_suggestion_review_days, daysSinceReview))
                 daysSinceReview > 7 ->
-                    suggestions.add("Đã ${daysSinceReview} ngày chưa ôn. Một số từ có thể cần học lại từ đầu.")
+                    suggestions.add(localizedString(R.string.ci_suggestion_review_many_days, daysSinceReview))
             }
         }
 
         when {
             insights.totalItems < 10 ->
-                suggestions.add("Bộ sưu tập còn nhỏ. Thêm vài từ liên quan sẽ giúp buổi ôn đầy đủ hơn.")
+                suggestions.add(localizedString(R.string.ci_suggestion_small_collection))
             insights.totalItems > 50 ->
-                suggestions.add("Bộ sưu tập khá lớn. Có thể chia thành nhóm chủ đề nhỏ để dễ quản lý.")
+                suggestions.add(localizedString(R.string.ci_suggestion_large_collection))
         }
 
         _suggestions.value = suggestions

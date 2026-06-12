@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.Collection
-import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.databinding.DialogSaveToCollectionBinding
 import com.duc.objectlanguage.databinding.ItemCollectionPickerBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -23,7 +22,7 @@ class SaveToCollectionBottomSheet : BottomSheetDialogFragment() {
     private val binding get() = _binding!!
 
     private val translationId: Int by lazy { requireArguments().getInt(ARG_TRANSLATION_ID) }
-    private lateinit var repo: CollectionRepository
+    private val repo get() = (requireActivity().application as ObjectLanguageApp).repository.collection
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = DialogSaveToCollectionBinding.inflate(inflater, container, false)
@@ -32,7 +31,6 @@ class SaveToCollectionBottomSheet : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        repo = CollectionRepository((requireActivity().application as ObjectLanguageApp).tokenManager)
         loadCollections()
     }
 

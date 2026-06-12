@@ -8,6 +8,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
+import com.duc.objectlanguage.ui.common.localizedString
 import kotlinx.coroutines.launch
 
 data class LoginUiState(
@@ -44,7 +46,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     _event.value = LoginEvent.Success
                 },
                 onFailure = {
-                    _event.value = LoginEvent.Error(it.message ?: "Dang nhap that bai")
+                    _event.value = LoginEvent.Error(it.message ?: localizedString(R.string.login_error_failed))
                 }
             )
             _state.value = LoginUiState()
@@ -62,7 +64,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     _event.value = LoginEvent.Success
                 },
                 onFailure = {
-                    _event.value = LoginEvent.Error(it.message ?: "Dang nhap Google that bai")
+                    _event.value = LoginEvent.Error(it.message ?: localizedString(R.string.login_error_google_failed))
                 }
             )
             _state.value = LoginUiState()

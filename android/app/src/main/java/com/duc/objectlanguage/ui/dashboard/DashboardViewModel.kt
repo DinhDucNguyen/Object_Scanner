@@ -10,7 +10,6 @@ import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.StreakDataStore
 import com.duc.objectlanguage.data.model.StatsResponse
-import com.duc.objectlanguage.data.repository.CollectionRepository
 import java.util.Calendar
 import kotlin.random.Random
 import kotlinx.coroutines.CancellationException
@@ -21,7 +20,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val app = application as ObjectLanguageApp
     private val repo = app.repository
-    private val collectionRepo = CollectionRepository(app.tokenManager)
+    private val collectionRepo = repo.collection
     private val streakStore = StreakDataStore(application)
 
     private val _stats = MutableLiveData<StatsResponse?>()

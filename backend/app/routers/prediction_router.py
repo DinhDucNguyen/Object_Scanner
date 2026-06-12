@@ -141,7 +141,7 @@ def cleanup_known_class_predictions(
 
     db.commit()
     return {
-        "message": "Da resolve pending predictions cua cac class YOLO/COCO da co object chinh thuc",
+        "message": "Đã xử lý các prediction YOLO/COCO đã có object chính thức",
         "processed_limit": limit,
         "matched": matched,
         "resolved": resolved,
@@ -196,7 +196,7 @@ def detach_review_image(prediction_id: int, db: Session = Depends(get_db)):
     """Bỏ một ảnh bổ sung khỏi nhóm kiểm duyệt, không xóa ảnh khỏi lịch sử quét."""
     result = prediction_service.detach_review_image(db, prediction_id)
     if not result.get("success"):
-        raise HTTPException(400, result.get("message", "Khong the bo anh"))
+        raise HTTPException(400, result.get("message", "Không thể bỏ ảnh"))
     return result
 
 
@@ -209,7 +209,7 @@ def reassign_review_image(
     """Chuyển một ảnh bổ sung sang object chính khác đã có trong DB."""
     result = prediction_service.reassign_review_image(db, prediction_id, target_object_code)
     if not result.get("success"):
-        raise HTTPException(400, result.get("message", "Khong the chuyen anh"))
+        raise HTTPException(400, result.get("message", "Không thể chuyển ảnh"))
     return result
 
 

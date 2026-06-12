@@ -128,10 +128,10 @@ def set_media_primary(media_id: int, db: Session = Depends(get_db)):
         ObjectMedia.thoi_gian_xoa.is_(None),
     ).first()
     if not media:
-        raise HTTPException(404, "Khong tim thay anh doi tuong")
+        raise HTTPException(404, "Không tìm thấy ảnh đối tượng")
     set_primary_object_image(db, media.object, media)
     db.commit()
-    return {"message": "Da dat anh chinh", "media_id": media.id}
+    return {"message": "Đã đặt ảnh chính", "media_id": media.id}
 
 
 @router.post("/objects/media/{media_id}/unset-primary")
@@ -141,10 +141,10 @@ def unset_media_primary(media_id: int, db: Session = Depends(get_db)):
         ObjectMedia.thoi_gian_xoa.is_(None),
     ).first()
     if not media:
-        raise HTTPException(404, "Khong tim thay anh doi tuong")
+        raise HTTPException(404, "Không tìm thấy ảnh đối tượng")
     media.doi_tuong_chinh = False
     db.commit()
-    return {"message": "Da bo anh chinh", "media_id": media.id}
+    return {"message": "Đã bỏ ảnh chính", "media_id": media.id}
 
 
 @router.delete("/objects/media/{media_id}")
@@ -154,10 +154,10 @@ def delete_object_media(media_id: int, db: Session = Depends(get_db)):
         ObjectMedia.thoi_gian_xoa.is_(None),
     ).first()
     if not media:
-        raise HTTPException(404, "Khong tim thay anh doi tuong")
+        raise HTTPException(404, "Không tìm thấy ảnh đối tượng")
     media.thoi_gian_xoa = now_vietnam()
     db.commit()
-    return {"message": "Da xoa anh doi tuong", "media_id": media.id}
+    return {"message": "Đã xóa ảnh đối tượng", "media_id": media.id}
 
 
 def _get_object_or_404(db: Session, object_code: str) -> Object:
@@ -166,7 +166,7 @@ def _get_object_or_404(db: Session, object_code: str) -> Object:
         Object.thoi_gian_xoa.is_(None),
     ).first()
     if not obj:
-        raise HTTPException(404, "Khong tim thay doi tuong")
+        raise HTTPException(404, "Không tìm thấy đối tượng")
     return obj
 
 
@@ -275,7 +275,7 @@ def upsert_object_alias(req: ObjectAliasUpsertRequest, db: Session = Depends(get
     except ValueError as exc:
         raise HTTPException(400, str(exc))
     if not result:
-        raise HTTPException(404, "Khong tim thay doi tuong hoac ma bi danh khong hop le")
+        raise HTTPException(404, "Không tìm thấy đối tượng hoặc mã bí danh không hợp lệ")
     return result
 
 
@@ -293,8 +293,8 @@ def update_object_alias(alias_id: int, req: ObjectAliasUpdateRequest, db: Sessio
 @router.delete("/object-aliases/{alias_id}")
 def delete_object_alias(alias_id: int, db: Session = Depends(get_db)):
     if not admin_service.delete_object_alias(db, alias_id):
-        raise HTTPException(404, "Khong tim thay bi danh")
-    return {"message": "Da xoa bi danh", "alias_id": alias_id}
+        raise HTTPException(404, "Không tìm thấy bí danh")
+    return {"message": "Đã xóa bí danh", "alias_id": alias_id}
 
 
 # ==========================================================================
@@ -426,10 +426,10 @@ def bulk_delete_scan_history(ids: List[int] = Query(...), db: Session = Depends(
     """Xóa nhiều bản ghi lịch sử quét cùng lúc."""
     unique_ids = list(dict.fromkeys(ids))
     if len(unique_ids) > MAX_BULK_SCAN_HISTORY_DELETE:
-        raise HTTPException(400, f"Chi duoc xoa toi da {MAX_BULK_SCAN_HISTORY_DELETE} ban ghi moi lan")
+        raise HTTPException(400, f"Chỉ được xóa tối đa {MAX_BULK_SCAN_HISTORY_DELETE} bản ghi mỗi lần")
     count = db.query(ScanHistory).filter(ScanHistory.id.in_(unique_ids)).delete(synchronize_session=False)
     db.commit()
-    return {"message": f"Da xoa {count} ban ghi", "count": count}
+    return {"message": f"Đã xóa {count} bản ghi", "count": count}
 
 
 @router.delete("/scan-history/{lich_su_quet_id}")

@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.data.repository
 
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.api.RetrofitClient
 import com.duc.objectlanguage.data.model.*
 
@@ -18,18 +19,18 @@ class HistoryRepository {
         return try {
             val response = api.getHistory(limit, offset, keyword, period, fromDate, toDate)
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
-            else Result.failure(Exception("Lỗi tải lịch sử"))
+            else Result.failure(Exception(RepositoryText.get(R.string.repo_history_load_error)))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được lịch sử"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_dictionary_history_load_error))
         }
     }
 
     suspend fun getHistoryDetail(scanId: Int): Result<HistoryDetail> {
         return try {
             val response = api.getHistoryDetail(scanId)
-            ApiErrorParser.bodyResult(response, "Không tìm thấy lịch sử")
+            ApiErrorParser.bodyResult(response, R.string.repo_history_not_found)
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được chi tiết lịch sử"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_history_detail_load_error))
         }
     }
 
@@ -37,10 +38,10 @@ class HistoryRepository {
         return try {
             val response = api.deleteHistory(scanId)
             response.body()?.close()
-            if (response.isSuccessful) Result.success("Đã xoá lịch sử quét")
-            else Result.failure(Exception("Xoá lịch sử thất bại"))
+            if (response.isSuccessful) Result.success(RepositoryText.get(R.string.repo_history_delete_success))
+            else Result.failure(Exception(RepositoryText.get(R.string.repo_history_delete_failed)))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không xoá được lịch sử"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_dictionary_history_delete_unavailable))
         }
     }
 
@@ -48,9 +49,9 @@ class HistoryRepository {
         return try {
             val response = api.getTranslations(objectCode)
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
-            else Result.failure(Exception("Không tìm thấy từ vựng"))
+            else Result.failure(Exception(RepositoryText.get(R.string.repo_history_vocab_not_found)))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được từ vựng"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_history_vocab_load_error))
         }
     }
 }

@@ -10,14 +10,13 @@ import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.ProfileData
 import com.duc.objectlanguage.data.model.StatsResponse
 import com.duc.objectlanguage.data.model.UserSettingsResponse
-import com.duc.objectlanguage.data.repository.CollectionRepository
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
     private val app = application as ObjectLanguageApp
     private val repo = app.repository
-    private val collectionRepo = CollectionRepository(app.tokenManager)
+    private val collectionRepo = repo.collection
 
     private val _profile = MutableLiveData<ProfileData?>()
     val profile: LiveData<ProfileData?> = _profile

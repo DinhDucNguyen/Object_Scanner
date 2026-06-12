@@ -1,8 +1,10 @@
 package com.duc.objectlanguage.data.api
 
 import com.duc.objectlanguage.BuildConfig
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.local.ApiConfig
 import com.duc.objectlanguage.data.local.TokenManager
+import com.duc.objectlanguage.data.repository.RepositoryText
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -71,7 +73,7 @@ object RetrofitClient {
     private fun validBaseUrl(): String {
         val baseUrl = ApiConfig.baseUrl
         if (baseUrl.isEmpty()) {
-            throw IllegalStateException("Dia chi server chua duoc cau hinh trong local.properties.")
+            throw IllegalStateException(RepositoryText.get(R.string.repo_api_base_url_missing))
         }
         return baseUrl
     }

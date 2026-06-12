@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.data.repository
 
+import com.duc.objectlanguage.R
 import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 import java.io.IOException
@@ -10,24 +11,24 @@ import javax.net.ssl.SSLException
 
 internal fun userFacingException(
     throwable: Throwable,
-    fallback: String = "Có lỗi xảy ra, vui lòng thử lại"
+    fallback: String = RepositoryText.get(R.string.repo_error_generic)
 ): Exception {
     if (throwable is CancellationException) throw throwable
     val message = when (throwable) {
         is UnknownHostException ->
-            "Không tìm thấy máy chủ. Kiểm tra Wi-Fi và địa chỉ backend."
+            RepositoryText.get(R.string.repo_error_unknown_host)
         is ConnectException ->
-            "Không kết nối được máy chủ. Kiểm tra backend đã chạy và điện thoại cùng mạng với laptop."
+            RepositoryText.get(R.string.repo_error_connect)
         is SocketTimeoutException ->
-            "Máy chủ phản hồi quá lâu. Vui lòng thử lại sau vài giây."
+            RepositoryText.get(R.string.repo_error_timeout)
         is SSLException ->
-            "Không kết nối được máy chủ. Kiểm tra app đang dùng đúng địa chỉ backend."
+            RepositoryText.get(R.string.repo_error_ssl)
         is IOException ->
-            "Kết nối mạng không ổn định. Vui lòng thử lại."
+            RepositoryText.get(R.string.repo_error_io)
         is HttpException -> when (throwable.code()) {
-            401 -> "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại."
-            403 -> "Bạn không có quyền thực hiện thao tác này."
-            in 500..599 -> "Máy chủ đang gặp lỗi, vui lòng thử lại sau."
+            401 -> RepositoryText.get(R.string.repo_error_session_expired)
+            403 -> RepositoryText.get(R.string.repo_error_forbidden)
+            in 500..599 -> RepositoryText.get(R.string.repo_error_server)
             else -> throwable.message().takeIf { it.isNotBlank() } ?: fallback
         }
         else -> throwable.message?.takeIf { it.isNotBlank() } ?: fallback

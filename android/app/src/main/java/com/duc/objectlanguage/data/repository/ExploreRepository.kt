@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.data.repository
 
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.api.RetrofitClient
 import com.duc.objectlanguage.data.model.*
 
@@ -11,9 +12,9 @@ class ExploreRepository {
         return try {
             val response = api.getCategories()
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
-            else Result.failure(Exception("Không tải được chủ đề (${response.code()})"))
+            else Result.failure(Exception(RepositoryText.get(R.string.repo_explore_categories_load_code, response.code())))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được chủ đề"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_explore_categories_load_error))
         }
     }
 
@@ -21,9 +22,9 @@ class ExploreRepository {
         return try {
             val response = api.getObjectsByCategory(categoryId)
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
-            else Result.failure(Exception("Không tải được từ vựng (${response.code()})"))
+            else Result.failure(Exception(RepositoryText.get(R.string.repo_explore_vocab_load_code, response.code())))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được từ vựng"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_explore_vocab_load_error))
         }
     }
 
@@ -31,9 +32,9 @@ class ExploreRepository {
         return try {
             val response = api.getObjectsByCategory()
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
-            else Result.failure(Exception("Không tải được danh sách vật thể (${response.code()})"))
+            else Result.failure(Exception(RepositoryText.get(R.string.repo_explore_objects_load_code, response.code())))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được danh sách vật thể"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_explore_objects_load_error))
         }
     }
 }

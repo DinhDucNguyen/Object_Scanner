@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.ReviewCardResponse
-import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.ui.common.localizedString
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import kotlinx.coroutines.launch
@@ -40,7 +39,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
 
     private val app = application as ObjectLanguageApp
     private val repo = app.repository
-    private val collectionRepo = CollectionRepository(app.tokenManager)
+    private val collectionRepo = repo.collection
 
     private val _cards = MutableLiveData<List<ReviewCardResponse>>()
     val cards: LiveData<List<ReviewCardResponse>> = _cards

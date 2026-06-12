@@ -173,7 +173,7 @@ interface ApiService {
 
     @Multipart
     @POST("api/lich-su-quet")
-    suspend fun saveLichSuQue(
+    suspend fun saveLichSuQuet(
         @Part("object_code") objectCode: RequestBody,
         @Part("confidence") confidence: RequestBody,
         @Part("training_source") trainingSource: RequestBody,

@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.data.repository
 
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.api.RetrofitClient
 import com.duc.objectlanguage.data.model.*
 import kotlinx.coroutines.CancellationException
@@ -23,27 +24,27 @@ class ReviewRepository {
         return try {
             val response = api.getDueReviews()
             if (response.isSuccessful) Result.success(response.body() ?: emptyList())
-            else Result.failure(Exception("Không tải được dữ liệu ôn tập"))
+            else Result.failure(Exception(RepositoryText.get(R.string.repo_review_load_due_error)))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được dữ liệu ôn tập"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_review_load_due_error))
         }
     }
 
     suspend fun submitReview(progressId: Int, quality: Int): Result<ReviewResult> {
         return try {
             val response = api.submitReview(progressId, ReviewRequest(quality))
-            ApiErrorParser.bodyResult(response, "Không gửi được kết quả ôn tập")
+            ApiErrorParser.bodyResult(response, R.string.repo_review_submit_error)
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không gửi được kết quả ôn tập"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_review_submit_error))
         }
     }
 
     suspend fun getMasteredWords(): Result<List<ReviewCardResponse>> {
         return try {
             val response = api.getMasteredWords()
-            ApiErrorParser.bodyResult(response, "Không tải được danh sách từ thành thạo")
+            ApiErrorParser.bodyResult(response, R.string.repo_review_mastered_load_error)
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được danh sách từ thành thạo"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_review_mastered_load_error))
         }
     }
 }

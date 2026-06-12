@@ -3,6 +3,7 @@ package com.duc.objectlanguage.ui.dictionary
 import android.animation.ObjectAnimator
 import androidx.core.animation.doOnEnd
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -14,6 +15,7 @@ import com.bumptech.glide.Glide
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.DictionaryHistoryItem
 import com.duc.objectlanguage.databinding.ItemDictionaryHistoryBinding
+import com.duc.objectlanguage.utils.LocaleHelper
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -43,7 +45,7 @@ class DictionaryHistoryAdapter(
             }
 
             binding.tvTranslation.text = item.ketQuaDich ?: ""
-            binding.tvTime.text = formatRelativeTime(item.lanTraCuoi)
+            binding.tvTime.text = formatRelativeTime(item.lanTraCuoi, binding.root.context)
 
             if (!item.imageUrl.isNullOrBlank()) {
                 binding.ivObjectImage.visibility = View.VISIBLE
@@ -195,13 +197,13 @@ class DictionaryHistoryAdapter(
         openedHolder?.slideOutThenDelete(onDone) ?: onDone()
     }
 
-    private fun formatRelativeTime(isoTime: String?): String {
+    private fun formatRelativeTime(isoTime: String?, context: Context): String {
         if (isoTime.isNullOrBlank()) return ""
         return try {
             val dt = parseIsoLikeTime(isoTime) ?: return ""
             val minutes = ((Date().time - dt.time) / 60000L).coerceAtLeast(0L)
             when {
-                minutes < 1 -> "vừa xong"
+                minutes < 1 -> LocaleHelper.applyLocale(context).getString(R.string.dictionary_time_just_now)
                 minutes < 60 -> "${minutes}p"
                 minutes < 1440 -> "${minutes / 60}h"
                 minutes < 10080 -> "${minutes / 1440}n"

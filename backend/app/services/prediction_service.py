@@ -62,6 +62,58 @@ class PredictionService:
             AIPrediction.vai_tro == VaiTroDuDoan.chinh,
         ).count()
 
+    def _append_training_image_note(self, image: TrainingImage, note: str) -> None:
+        current = (image.ghi_chu or "").strip()
+        if note in current:
+            return
+        image.ghi_chu = f"{current} | {note}" if current else note
+
+    def _quality_failed(self, image: TrainingImage) -> bool:
+        return bool(image.ghi_chu and image.ghi_chu.startswith("quality_fail:"))
+
+    def _approve_training_images_from_prediction(
+        self,
+        db: Session,
+        *,
+        lich_su_quet_ids: set[int],
+        obj: Object,
+        prediction_id: int,
+        admin_id: int | None,
+        reviewed_at,
+    ) -> None:
+        if not lich_su_quet_ids:
+            return
+
+        training_images = db.query(TrainingImage).filter(
+            TrainingImage.lich_su_quet_id.in_(lich_su_quet_ids),
+            TrainingImage.thoi_gian_xoa.is_(None),
+        ).all()
+        for image in training_images:
+            image.doi_tuong_id = obj.id
+            image.nhan = obj.ma_doi_tuong
+
+            if image.trang_thai == TrangThaiAnhHuanLuyen.tu_choi:
+                self._append_training_image_note(
+                    image,
+                    f"not_auto_approved:already_rejected_via_prediction:{prediction_id}",
+                )
+                continue
+
+            if self._quality_failed(image):
+                self._append_training_image_note(
+                    image,
+                    f"not_auto_approved:quality_fail_via_prediction:{prediction_id}",
+                )
+                continue
+
+            image.trang_thai = TrangThaiAnhHuanLuyen.da_duyet
+            image.nguoi_duyet_id = admin_id
+            image.thoi_gian_duyet = reviewed_at
+            self._append_training_image_note(
+                image,
+                f"approved_via_prediction:{prediction_id}",
+            )
+
     # ------------------------------------------------------------------
     # Truy vấn
     # ------------------------------------------------------------------
@@ -372,17 +424,14 @@ class PredictionService:
             rel.trang_thai = TrangThaiDuyet.da_duyet
 
         now = now_vietnam()
-        if training_lich_su_quet_ids:
-            training_images = db.query(TrainingImage).filter(
-                TrainingImage.lich_su_quet_id.in_(training_lich_su_quet_ids),
-                TrainingImage.thoi_gian_xoa.is_(None),
-            ).all()
-            for image in training_images:
-                image.doi_tuong_id = obj.id
-                image.nhan = obj.ma_doi_tuong
-                image.trang_thai = TrangThaiAnhHuanLuyen.da_duyet
-                image.nguoi_duyet_id = admin_id
-                image.thoi_gian_duyet = now
+        self._approve_training_images_from_prediction(
+            db,
+            lich_su_quet_ids=training_lich_su_quet_ids,
+            obj=obj,
+            prediction_id=prediction_id,
+            admin_id=admin_id,
+            reviewed_at=now,
+        )
 
         for uid in nguoi_dung_ids_to_enroll:
             already = db.query(LearningProgress).filter(
@@ -534,17 +583,14 @@ class PredictionService:
 
         users_enrolled = 0
         now = now_vietnam()
-        if training_lich_su_quet_ids:
-            training_images = db.query(TrainingImage).filter(
-                TrainingImage.lich_su_quet_id.in_(training_lich_su_quet_ids),
-                TrainingImage.thoi_gian_xoa.is_(None),
-            ).all()
-            for image in training_images:
-                image.doi_tuong_id = obj.id
-                image.nhan = obj.ma_doi_tuong
-                image.trang_thai = TrangThaiAnhHuanLuyen.da_duyet
-                image.nguoi_duyet_id = admin_id
-                image.thoi_gian_duyet = now
+        self._approve_training_images_from_prediction(
+            db,
+            lich_su_quet_ids=training_lich_su_quet_ids,
+            obj=obj,
+            prediction_id=prediction_id,
+            admin_id=admin_id,
+            reviewed_at=now,
+        )
 
         if review_translation:
             for uid in nguoi_dung_ids_to_enroll:
@@ -810,13 +856,13 @@ class PredictionService:
 
         details = []
         if deleted_translations:
-            details.append(f"xoa {deleted_translations} ban dich tam")
+            details.append(f"xóa {deleted_translations} bản dịch tạm")
         if deleted_object:
-            details.append("xoa doi tuong tam")
+            details.append("xóa đối tượng tạm")
         if related_rejected:
-            details.append(f"tu choi {related_rejected} prediction lien quan")
+            details.append(f"từ chối {related_rejected} prediction liên quan")
         suffix = f" ({', '.join(details)})" if details else ""
-        return RejectResponse(success=True, message=f"Da tu choi prediction #{prediction_id}{suffix}", prediction_id=prediction_id)
+        return RejectResponse(success=True, message=f"Đã từ chối prediction #{prediction_id}{suffix}", prediction_id=prediction_id)
 
     # ------------------------------------------------------------------
     # Split to new object

@@ -1,15 +1,13 @@
 package com.duc.objectlanguage.data.repository
 
 import com.duc.objectlanguage.data.api.RetrofitClient
-import com.duc.objectlanguage.data.local.TokenManager
 import com.duc.objectlanguage.data.model.*
 import com.duc.objectlanguage.data.model.Collection
 
 /**
  * Repository for collection operations with Result wrapper
- * Requires TokenManager for authentication
  */
-class CollectionRepository(private val tokenManager: TokenManager) {
+class CollectionRepository {
     
     private val api get() = RetrofitClient.collectionApi
     

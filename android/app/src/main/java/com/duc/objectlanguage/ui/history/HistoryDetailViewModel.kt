@@ -11,7 +11,6 @@ import com.duc.objectlanguage.ObjectLanguageApp
 import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.HistoryDetail
 import com.duc.objectlanguage.data.model.TranslationResponse
-import com.duc.objectlanguage.data.repository.CollectionRepository
 import com.duc.objectlanguage.utils.AudioPlayerManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -20,7 +19,7 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
 
     private val app = application as ObjectLanguageApp
     private val repo = app.repository
-    private val collectionRepo = CollectionRepository(app.tokenManager)
+    private val collectionRepo = repo.collection
     private val audioPlayer = AudioPlayerManager(application.applicationContext)
 
     private val _translations = MutableLiveData<List<TranslationResponse>>()

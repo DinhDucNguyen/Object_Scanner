@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.data.repository
 
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.api.RetrofitClient
 import com.duc.objectlanguage.data.model.*
 import kotlinx.coroutines.CancellationException
@@ -11,9 +12,9 @@ class DictionaryRepository {
     suspend fun lookupWord(word: String, fromLang: String = "en", toLang: String = "en"): Result<DictionaryResponse> {
         return try {
             val response = api.lookupWord(word, fromLang, toLang)
-            ApiErrorParser.bodyResult(response, "Không tìm thấy từ")
+            ApiErrorParser.bodyResult(response, R.string.repo_dictionary_word_not_found)
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tra được từ lúc này"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_dictionary_lookup_error))
         }
     }
 
@@ -23,24 +24,21 @@ class DictionaryRepository {
             val body = response.body()
             if (response.isSuccessful && body != null) Result.success(body)
             else {
-                val rawError = response.errorBody()?.string()
-                val message = runCatching {
-                    org.json.JSONObject(rawError ?: "").optString("detail").takeIf { it.isNotBlank() }
-                }.getOrNull() ?: rawError ?: "Không thể dịch lúc này"
+                val message = ApiErrorParser.fromResponse(response, R.string.repo_dictionary_translate_error)
                 Result.failure(Exception(message))
             }
         } catch (e: Exception) {
             if (e is CancellationException) throw e
-            Result.failure(Exception("Không thể kết nối tới server"))
+            Result.failure(Exception(RepositoryText.get(R.string.repo_dictionary_connect_error)))
         }
     }
 
     suspend fun getDictionaryHistory(limit: Int = 30): Result<List<DictionaryHistoryItem>> {
         return try {
             val response = api.getDictionaryHistory(limit)
-            ApiErrorParser.bodyResult(response, "Không tải được lịch sử")
+            ApiErrorParser.bodyResult(response, R.string.repo_dictionary_history_load_error)
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không tải được lịch sử"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_dictionary_history_load_error))
         }
     }
 
@@ -48,9 +46,9 @@ class DictionaryRepository {
         return try {
             val response = api.deleteHistoryItem(id)
             if (response.isSuccessful) Result.success(Unit)
-            else Result.failure(Exception("Lỗi xóa lịch sử"))
+            else Result.failure(Exception(RepositoryText.get(R.string.repo_dictionary_history_delete_error)))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không xoá được lịch sử"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_dictionary_history_delete_unavailable))
         }
     }
 }

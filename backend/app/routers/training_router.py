@@ -47,9 +47,9 @@ def approve_training_image(
 ):
     item = training_service.approve_training_image(db, training_image_id, admin_id=admin_id)
     if not item:
-        raise HTTPException(404, "Khong tim thay anh training")
+        raise HTTPException(404, "Không tìm thấy ảnh training")
     return {
-        "message": "Da duyet anh training",
+        "message": "Đã duyệt ảnh training",
         "lich_su_quet_id": item.lich_su_quet_id,
         "training_image_id": item.id,
     }
@@ -63,9 +63,9 @@ def unlink_training_image(
 ):
     item = training_service.reject_training_image(db, training_image_id, admin_id=admin_id)
     if not item:
-        raise HTTPException(404, "Khong tim thay anh training")
+        raise HTTPException(404, "Không tìm thấy ảnh training")
     return {
-        "message": "Da tu choi anh training",
+        "message": "Đã từ chối ảnh training",
         "lich_su_quet_id": item.lich_su_quet_id,
         "training_image_id": item.id,
     }
@@ -78,7 +78,7 @@ def unlink_all_training_images(
     admin_id: int = Depends(require_admin_nguoi_dung_id),
 ):
     count = training_service.reject_training_images_for_object(db, object_code, admin_id=admin_id)
-    return {"message": f"Da loai {count} anh khoi pool training cua '{object_code}'", "count": count}
+    return {"message": f"Đã loại {count} ảnh khỏi pool training của '{object_code}'", "count": count}
 
 
 @router.delete("/training-images/{training_image_id}")
@@ -89,8 +89,8 @@ def delete_training_image(
 ):
     item = training_service.delete_training_image(db, training_image_id, admin_id=admin_id)
     if not item:
-        raise HTTPException(404, "Khong tim thay anh training")
-    return {"message": "Da xoa anh training", "training_image_id": item.id}
+        raise HTTPException(404, "Không tìm thấy ảnh training")
+    return {"message": "Đã xóa ảnh training", "training_image_id": item.id}
 
 
 @router.post("/training-datasets")
@@ -104,7 +104,7 @@ def create_training_dataset(
     except ValueError as exc:
         raise HTTPException(400, str(exc))
     return {
-        "message": f"Da tao dataset {dataset.ma_phien_ban}",
+        "message": f"Đã tạo dataset {dataset.ma_phien_ban}",
         "id": dataset.id,
         "ma_phien_ban": dataset.ma_phien_ban,
         "tong_anh": dataset.tong_anh,
@@ -115,16 +115,16 @@ def create_training_dataset(
 @router.patch("/training-images/{training_image_id}/reassign")
 def reassign_training_image(
     training_image_id: int,
-    target_object_code: str = Query(..., description="Ma doi tuong dich"),
+    target_object_code: str = Query(..., description="Mã đối tượng đích"),
     db: Session = Depends(get_db),
 ):
     item, target_obj = training_service.reassign_training_image(db, training_image_id, target_object_code)
     if not item:
-        raise HTTPException(404, "Khong tim thay anh training")
+        raise HTTPException(404, "Không tìm thấy ảnh training")
     if not target_obj:
-        raise HTTPException(404, f"Khong tim thay doi tuong '{target_object_code}'")
+        raise HTTPException(404, f"Không tìm thấy đối tượng '{target_object_code}'")
     return {
-        "message": f"Da chuyen anh sang '{target_object_code}'",
+        "message": f"Đã chuyển ảnh sang '{target_object_code}'",
         "lich_su_quet_id": item.lich_su_quet_id,
         "training_image_id": item.id,
         "new_object_id": target_obj.id,

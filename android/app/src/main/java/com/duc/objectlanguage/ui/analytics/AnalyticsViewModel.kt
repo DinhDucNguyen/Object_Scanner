@@ -6,9 +6,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.duc.objectlanguage.ObjectLanguageApp
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.model.AnalyticsResponse
 import com.duc.objectlanguage.data.model.StatsResponse
 import com.duc.objectlanguage.data.model.StreakResponse
+import com.duc.objectlanguage.ui.common.localizedString
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -38,17 +40,17 @@ class AnalyticsViewModel(application: Application) : AndroidViewModel(applicatio
 
             repo.getStats().fold(
                 onSuccess = { _stats.value = it },
-                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: "Không tải được thống kê" }
+                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: localizedString(R.string.analytics_load_stats_error) }
             )
 
             repo.getAnalytics().fold(
                 onSuccess = { _analytics.value = it },
-                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: "Không tải được biểu đồ" }
+                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: localizedString(R.string.analytics_load_chart_error) }
             )
 
             repo.getStreak().fold(
                 onSuccess = { _streak.value = it },
-                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: "Không tải được chuỗi học" }
+                onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: localizedString(R.string.analytics_load_streak_error) }
             )
 
             _isLoading.value = false

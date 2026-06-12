@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.data.repository
 
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.api.RetrofitClient
 import com.duc.objectlanguage.data.model.*
 import kotlinx.coroutines.CancellationException
@@ -19,11 +20,11 @@ class ScanRepository {
             val body = response.body()
             if (response.isSuccessful && body != null) Result.success(body)
             else {
-                val errorStr = ApiErrorParser.fromResponse(response, "Máy chủ chưa trả thông tin lỗi")
-                Result.failure(Exception("Không tìm thấy vật thể: $errorStr (Code: ${response.code()})"))
+                val errorStr = ApiErrorParser.fromResponse(response, R.string.repo_server_no_error_detail)
+                Result.failure(Exception(RepositoryText.get(R.string.repo_scan_object_not_found, errorStr, response.code())))
             }
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không thể quét lúc này"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_scan_unavailable))
         }
     }
 
@@ -35,15 +36,15 @@ class ScanRepository {
             val responseBody = response.body()
             if (response.isSuccessful && responseBody != null) Result.success(responseBody)
             else {
-                val errorStr = ApiErrorParser.fromResponse(response, "Máy chủ chưa trả thông tin lỗi")
-                Result.failure(Exception("Không nhận diện được vật thể: $errorStr (Code: ${response.code()})"))
+                val errorStr = ApiErrorParser.fromResponse(response, R.string.repo_server_no_error_detail)
+                Result.failure(Exception(RepositoryText.get(R.string.repo_scan_object_not_recognized, errorStr, response.code())))
             }
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không thể quét lúc này"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_scan_unavailable))
         }
     }
 
-    suspend fun saveLichSuQue(
+    suspend fun saveLichSuQuet(
         objectCode: String,
         confidence: Float,
         imageBytes: ByteArray?,
@@ -57,12 +58,12 @@ class ScanRepository {
                 val body = it.toRequestBody("image/jpeg".toMediaTypeOrNull())
                 MultipartBody.Part.createFormData("image", "scan.jpg", body)
             }
-            val response = api.saveLichSuQue(codePart, confidencePart, trainingSourcePart, imagePart)
+            val response = api.saveLichSuQuet(codePart, confidencePart, trainingSourcePart, imagePart)
             val body = response.body()
             if (response.isSuccessful && body != null) Result.success(body)
-            else Result.failure(Exception("Lưu lịch sử thất bại: ${response.code()}"))
+            else Result.failure(Exception(RepositoryText.get(R.string.repo_scan_save_history_failed, response.code())))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không lưu được lịch sử quét"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_scan_save_history_unavailable))
         }
     }
 

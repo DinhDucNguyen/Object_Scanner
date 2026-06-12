@@ -15,6 +15,7 @@ class AppRepository(tokenManager: TokenManager) {
     val dictionary = DictionaryRepository()
     val profile = ProfileRepository(tokenManager)
     val streak = StreakRepository()
+    val collection = CollectionRepository()
 
     // ====== AUTH ======
 
@@ -38,8 +39,8 @@ class AppRepository(tokenManager: TokenManager) {
 
     suspend fun scanByCode(objectCode: String, confidence: Float) = scan.scanByCode(objectCode, confidence)
     suspend fun scanByImage(imageBytes: ByteArray) = scan.scanByImage(imageBytes)
-    suspend fun saveLichSuQue(objectCode: String, confidence: Float, imageBytes: ByteArray?, trainingSource: String = "yolo") =
-        scan.saveLichSuQue(objectCode, confidence, imageBytes, trainingSource)
+    suspend fun saveLichSuQuet(objectCode: String, confidence: Float, imageBytes: ByteArray?, trainingSource: String = "yolo") =
+        scan.saveLichSuQuet(objectCode, confidence, imageBytes, trainingSource)
     suspend fun getTtsAudio(word: String, lang: String = "en") = scan.getTtsAudio(word, lang)
     suspend fun getAudioByUrl(audioUrl: String) = scan.getAudioByUrl(audioUrl)
     suspend fun getExamples(word: String, lang: String = "en") = scan.getExamples(word, lang)

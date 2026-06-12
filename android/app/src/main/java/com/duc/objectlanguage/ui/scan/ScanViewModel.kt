@@ -179,7 +179,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         trainingSource: String,
     ) {
         viewModelScope.launch {
-            val result = repo.saveLichSuQue(objectCode, confidence, imageBytes, trainingSource)
+            val result = repo.saveLichSuQuet(objectCode, confidence, imageBytes, trainingSource)
             result.fold(
                 onSuccess = { response ->
                     if (response.learningAdded) {

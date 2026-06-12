@@ -1,5 +1,6 @@
 package com.duc.objectlanguage.data.repository
 
+import com.duc.objectlanguage.R
 import com.duc.objectlanguage.data.api.RetrofitClient
 
 class LearningRepository {
@@ -10,10 +11,10 @@ class LearningRepository {
         return try {
             val response = api.addToLearning(translationId)
             response.body()?.close()
-            if (response.isSuccessful) Result.success("Đã thêm vào danh sách học!")
-            else Result.failure(Exception("Lỗi ${response.code()}: ${response.message()}"))
+            if (response.isSuccessful) Result.success(RepositoryText.get(R.string.repo_learning_added))
+            else Result.failure(Exception(RepositoryText.get(R.string.repo_error_code, response.code(), response.message())))
         } catch (e: Exception) {
-            Result.failure(ApiErrorParser.userFacing(e, "Không thể kết nối máy chủ"))
+            Result.failure(ApiErrorParser.userFacing(e, R.string.repo_error_connection_server))
         }
     }
 }
