@@ -462,6 +462,10 @@
     <string name="history_filter_status_all">Tất cả</string>
     <string name="history_filter_status_approved">Đạt chuẩn</string>
     <string name="history_filter_status_pending">Đang cập nhật</string>
+    <string name="history_empty_approved_title">Chưa có từ đạt chuẩn</string>
+    <string name="history_empty_approved_subtitle">Các từ vựng sau khi được hệ thống kiểm định chất lượng sẽ hiển thị tại đây.</string>
+    <string name="history_empty_pending_title">Không có từ đang cập nhật</string>
+    <string name="history_empty_pending_subtitle">Tất cả từ vựng bạn quét hiện tại đều đã được biên soạn và chuẩn hóa đầy đủ.</string>
     <string name="history_filter_from_date">Từ ngày</string>
     <string name="history_filter_to_date">Đến ngày</string>
     <string name="history_filter_clear_dates">Bỏ lọc ngày</string>

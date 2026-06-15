@@ -141,7 +141,7 @@ class HistoryFragment : Fragment() {
 
     private fun setupDateRange() {
         binding.btnFromDate.setOnClickListener {
-            showDatePicker(selectedFromDate) { date ->
+            showDatePicker(R.string.history_filter_from_date, selectedFromDate) { date ->
                 selectedFromDate = date
                 currentPeriod = "custom"
                 updateDateButtons()
@@ -150,7 +150,7 @@ class HistoryFragment : Fragment() {
             }
         }
         binding.btnToDate.setOnClickListener {
-            showDatePicker(selectedToDate) { date ->
+            showDatePicker(R.string.history_filter_to_date, selectedToDate) { date ->
                 selectedToDate = date
                 currentPeriod = "custom"
                 updateDateButtons()
@@ -195,6 +195,9 @@ class HistoryFragment : Fragment() {
             val empty = items.isEmpty() && viewModel.isLoading.value != true
             binding.tvEmpty.visibility = if (empty) View.VISIBLE else View.GONE
             binding.recyclerView.visibility = if (empty) View.GONE else View.VISIBLE
+            if (empty) {
+                updateEmptyStateView()
+            }
             if (items.isNotEmpty()) {
                 binding.tvResultCount.text = resources.getQuantityString(
                     R.plurals.history_result_count,
@@ -293,7 +296,7 @@ class HistoryFragment : Fragment() {
         button.iconTint = ColorStateList.valueOf(if (active) android.graphics.Color.WHITE else secondary)
     }
 
-    private fun showDatePicker(currentValue: String?, onSelected: (String) -> Unit) {
+    private fun showDatePicker(titleResId: Int, currentValue: String?, onSelected: (String) -> Unit) {
         val calendar = Calendar.getInstance()
         currentValue?.let {
             runCatching {
@@ -302,24 +305,60 @@ class HistoryFragment : Fragment() {
             }
         }
 
-        DatePickerDialog(
-            requireContext(),
-            { _, year, month, dayOfMonth ->
-                val selected = Calendar.getInstance().apply {
-                    set(Calendar.YEAR, year)
-                    set(Calendar.MONTH, month)
-                    set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                onSelected(isoDateFormat.format(selected.time))
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH),
-        ).show()
+        val picker = com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker()
+            .setTitleText(getString(titleResId))
+            .setSelection(calendar.timeInMillis)
+            .build()
+
+        picker.addOnPositiveButtonClickListener { selection ->
+            val utcCalendar = Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC")).apply {
+                timeInMillis = selection
+            }
+            val localCalendar = Calendar.getInstance().apply {
+                set(Calendar.YEAR, utcCalendar.get(Calendar.YEAR))
+                set(Calendar.MONTH, utcCalendar.get(Calendar.MONTH))
+                set(Calendar.DAY_OF_MONTH, utcCalendar.get(Calendar.DAY_OF_MONTH))
+            }
+            onSelected(isoDateFormat.format(localCalendar.time))
+        }
+        picker.show(childFragmentManager, "MATERIAL_DATE_PICKER")
+    }
+
+    private fun updateEmptyStateView() {
+        if (_binding == null) return
+
+        when (currentStatusFilter) {
+            "approved" -> {
+                binding.flEmptyIconContainer.setBackgroundResource(R.drawable.bg_icon_success)
+                binding.ivEmptyIcon.setImageResource(R.drawable.ic_verified)
+                binding.ivEmptyIcon.imageTintList = android.content.res.ColorStateList.valueOf(
+                    ContextCompat.getColor(requireContext(), R.color.success)
+                )
+                binding.tvEmptyTitle.setText(R.string.history_empty_approved_title)
+                binding.tvEmptySubtitle.setText(R.string.history_empty_approved_subtitle)
+                binding.btnEmptyScan.visibility = View.GONE
+            }
+            "pending" -> {
+                binding.flEmptyIconContainer.setBackgroundResource(R.drawable.bg_icon_primary)
+                binding.ivEmptyIcon.setImageResource(R.drawable.ic_sync)
+                binding.ivEmptyIcon.imageTintList = android.content.res.ColorStateList.valueOf(
+                    ContextCompat.getColor(requireContext(), R.color.primary)
+                )
+                binding.tvEmptyTitle.setText(R.string.history_empty_pending_title)
+                binding.tvEmptySubtitle.setText(R.string.history_empty_pending_subtitle)
+                binding.btnEmptyScan.visibility = View.GONE
+            }
+            else -> {
+                binding.flEmptyIconContainer.setBackgroundResource(R.drawable.bg_icon_warning)
+                binding.ivEmptyIcon.setImageResource(R.drawable.ic_camera)
+                binding.ivEmptyIcon.imageTintList = android.content.res.ColorStateList.valueOf(
+                    ContextCompat.getColor(requireContext(), R.color.warning)
+                )
+                binding.tvEmptyTitle.setText(R.string.history_empty_title)
+                binding.tvEmptySubtitle.setText(R.string.history_empty)
+                binding.btnEmptyScan.visibility = View.VISIBLE
+            }
+        }
     }
 
     private fun openDetail(item: HistoryItem) {

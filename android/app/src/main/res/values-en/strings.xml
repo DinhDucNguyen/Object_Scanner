@@ -470,6 +470,10 @@
     <string name="history_filter_status_all">All</string>
     <string name="history_filter_status_approved">Qualified</string>
     <string name="history_filter_status_pending">Updating</string>
+    <string name="history_empty_approved_title">No qualified words</string>
+    <string name="history_empty_approved_subtitle">Vocabulary items will appear here once they are verified and standardized by the system.</string>
+    <string name="history_empty_pending_title">No words updating</string>
+    <string name="history_empty_pending_subtitle">All your scanned vocabulary has been fully compiled and verified.</string>
     <string name="history_filter_from_date">From date</string>
     <string name="history_filter_to_date">To date</string>
     <string name="history_filter_clear_dates">Clear dates</string>
