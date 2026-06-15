@@ -20,6 +20,19 @@
 
         <item name="cardViewStyle">@style/Widget.App.CardView</item>
         <item name="bottomNavigationStyle">@style/Widget.App.BottomNav</item>
+
+        <!-- Custom PopupMenu / Dropdown menu styling -->
+        <item name="popupMenuStyle">@style/Widget.App.PopupMenu</item>
+        <item name="android:popupMenuStyle">@style/Widget.App.PopupMenu</item>
+        <item name="android:textAppearanceLargePopupMenu">@style/TextAppearance.App.PopupMenu</item>
+        <item name="android:textAppearanceSmallPopupMenu">@style/TextAppearance.App.PopupMenu</item>
+        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.App.PopupMenu</item>
+        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.App.PopupMenu</item>
+    </style>
+
+    <!-- PopupMenu Widget Style -->
+    <style name="Widget.App.PopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
     </style>
 
     <!-- CardView Style -->
@@ -184,5 +197,14 @@
         <item name="chipCornerRadius">20dp</item>
         <item name="chipStrokeColor">@color/divider</item>
         <item name="chipStrokeWidth">1dp</item>
+    </style>
+
+    <!-- Dropdown / PopupMenu Text Style -->
+    <style name="TextAppearance.App.PopupMenu" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">@font/quicksand</item>
+        <item name="fontFamily">@font/quicksand</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>

@@ -39,7 +39,7 @@ class TokenManager(context: Context) {
         get() = prefs.getString("role", null)
         set(value) = prefs.edit().putString("role", value).apply()
 
-    val isAdmin: Boolean get() = role?.lowercase() in setOf("admin", "quan_tri", "quan_tri_vien")
+    val isAdmin: Boolean get() = role?.lowercase() == "admin"
 
     var isGoogleAccount: Boolean
         get() = prefs.getBoolean("is_google_account", false)

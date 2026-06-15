@@ -459,6 +459,9 @@
     <string name="history_filter_today">Hôm nay</string>
     <string name="history_filter_week">Tuần này</string>
     <string name="history_filter_month">Tháng này</string>
+    <string name="history_filter_status_all">Tất cả</string>
+    <string name="history_filter_status_approved">Đạt chuẩn</string>
+    <string name="history_filter_status_pending">Đang cập nhật</string>
     <string name="history_filter_from_date">Từ ngày</string>
     <string name="history_filter_to_date">Đến ngày</string>
     <string name="history_filter_clear_dates">Bỏ lọc ngày</string>

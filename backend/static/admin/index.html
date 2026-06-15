@@ -142,7 +142,7 @@
         </button>
         <button id="btn-export-grouped" onclick="exportTrainingGrouped()"
           class="btn btn-sm btn-success" title="Tải file JSONL gom nhóm theo object — bao gồm ảnh từ nhiều góc độ">
-          <i class="bi bi-collection me-1"></i>Export grouped
+          <i class="bi bi-collection me-1"></i>Export dataset
         </button>
       </div>
       <div id="training-stats-bar" class="d-flex align-items-center gap-3 px-3 py-2 mb-2 rounded"
@@ -456,10 +456,10 @@
           <i class="bi bi-arrow-clockwise"></i> Làm mới
         </button>
         <button class="btn btn-sm btn-outline-primary" onclick="createDatasetVersion()">
-          <i class="bi bi-bookmark-check me-1"></i>Tạo dataset
+          <i class="bi bi-bookmark-check me-1"></i>Tạo phiên bản dataset
         </button>
         <button class="btn btn-sm btn-success" onclick="exportTrainingGrouped()">
-          <i class="bi bi-collection me-1"></i>Export grouped
+          <i class="bi bi-collection me-1"></i>Export dataset
         </button>
       </div>
       <div class="td-command-row">
@@ -473,7 +473,7 @@
           <i class="bi bi-lightning-charge"></i><span>Nên train</span>
         </button>
         <button type="button" class="td-command" data-td-preset="ready" onclick="setTrainingPreset('ready', this)">
-          <i class="bi bi-box-arrow-up-right"></i><span>Sẵn sàng export</span>
+          <i class="bi bi-box-arrow-up-right"></i><span>Đủ ảnh train</span>
         </button>
         <button type="button" class="td-command" data-td-preset="known" onclick="setTrainingPreset('known', this)">
           <i class="bi bi-shield-check"></i><span>Đã có model</span>
@@ -493,17 +493,9 @@
           oninput="debouncedLoadTrainingData()">
         <select id="td-recommendation-filter" class="form-select form-select-sm" onchange="loadTrainingData()">
           <option value="">Tất cả khuyến nghị</option>
-          <option value="high_priority">Ưu tiên train</option>
-          <option value="recommended">Nên train</option>
+          <option value="train">Nên train</option>
           <option value="optional">Train thêm nếu cần</option>
           <option value="not_needed">Không cần train</option>
-        </select>
-        <select id="td-coverage-filter" class="form-select form-select-sm" onchange="loadTrainingData()">
-          <option value="">Tất cả model</option>
-          <option value="new_gemini">Đối tượng mới từ Gemini</option>
-          <option value="db_only">Có DB, chưa có model</option>
-          <option value="custom_yolo">Đã có YOLO custom</option>
-          <option value="coco_known">Đã có COCO</option>
         </select>
         <select id="td-status-filter" class="form-select form-select-sm" onchange="loadTrainingData()">
           <option value="">Tất cả trạng thái</option>
@@ -512,11 +504,9 @@
           <option value="tu_choi">Từ chối</option>
         </select>
         <select id="td-source-filter" class="form-select form-select-sm" onchange="loadTrainingData()">
-          <option value="">Tất cả nguồn</option>
-          <option value="gemini">Gemini</option>
-          <option value="yolo">YOLO</option>
-          <option value="mlkit">ML Kit</option>
-          <option value="admin">Admin</option>
+          <option value="">Tất cả nguồn ảnh</option>
+          <option value="gemini">Ảnh từ Gemini</option>
+          <option value="yolo">Ảnh từ YOLO</option>
         </select>
       </div>
       <div id="td-grid" class="td-grid"></div>

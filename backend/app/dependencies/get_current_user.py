@@ -6,6 +6,7 @@ from typing import Optional
 from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User
+from app.utils.roles import canonical_role_name
 from app.utils.security import decode_token
 
 security_scheme = HTTPBearer()
@@ -50,7 +51,7 @@ def _get_authenticated_user(db: Session, credentials: HTTPAuthorizationCredentia
 
 
 def require_admin_nguoi_dung_id(user: User = Depends(get_current_user)) -> int:
-    role_name = (user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else "").strip().lower()
+    role_name = canonical_role_name(user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else None)
     admin_roles = {role.strip().lower() for role in settings.ADMIN_ROLE_NAMES}
     is_admin = role_name in admin_roles or user.id in settings.ADMIN_USER_IDS
     if not is_admin:

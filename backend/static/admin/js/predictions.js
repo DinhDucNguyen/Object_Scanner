@@ -138,7 +138,7 @@
 
       } finally {
 
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-collection me-1"></i>Export grouped'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-collection me-1"></i>Export dataset'; }
 
       }
 

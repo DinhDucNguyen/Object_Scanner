@@ -38,7 +38,12 @@
 
     function trainingSourceLabel(source) {
 
-      return { yolo: 'YOLO', mlkit: 'ML Kit', gemini: 'Gemini', admin: 'Admin' }[source] || source || '—';
+      return {
+        yolo: 'Ảnh từ YOLO',
+        mlkit: 'Ảnh từ ML Kit',
+        gemini: 'Ảnh từ Gemini',
+        admin: 'Ảnh do admin thêm',
+      }[source] || source || '—';
 
     }
 
@@ -140,7 +145,7 @@
 
       if (ready || action === 'ready_to_train') {
 
-        return { label: 'Sẵn sàng train', cls: 'action-ready', icon: 'bi-lightning-charge' };
+        return { label: 'Đủ ảnh train', cls: 'action-ready', icon: 'bi-lightning-charge' };
 
       }
 
@@ -200,7 +205,7 @@
 
         recommendation: trainingFilterValue('td-recommendation-filter'),
 
-        model_coverage: trainingFilterValue('td-coverage-filter'),
+        model_coverage: _trainingPreset === 'known' ? 'known' : '',
 
         status: trainingFilterValue('td-status-filter'),
 
@@ -238,13 +243,9 @@
 
       const rec = document.getElementById('td-recommendation-filter');
 
-      const cov = document.getElementById('td-coverage-filter');
-
       const sta = document.getElementById('td-status-filter');
 
       if (rec) rec.value = '';
-
-      if (cov) cov.value = '';
 
       if (sta) sta.value = '';
 
@@ -253,8 +254,6 @@
       if (preset === 'review' && sta) sta.value = 'cho_duyet';
 
       if (preset === 'train' && rec) rec.value = 'train';
-
-      if (preset === 'known' && cov) cov.value = 'known';
 
       loadTrainingData();
 
@@ -266,7 +265,7 @@
 
       if (img.note && img.note.startsWith('quality_fail:')) return ''; // đã có qualityFlag hiển thị
 
-      if (img.source === 'gemini') return 'Gemini — cần admin duyệt';
+      if (img.source === 'gemini') return 'Ảnh từ Gemini — cần admin duyệt';
 
       const conf = Number(img.confidence);
 
@@ -316,7 +315,7 @@
 
       const min = r.min_images_for_training ?? 5;
 
-      const ready = r.ready_for_dataset ?? (approved >= min);
+      const ready = r.ready_for_dataset ?? (['high_priority', 'recommended'].includes(r.training_recommendation) && approved >= min);
 
       const nextAction = r.next_action || '';
 
@@ -432,7 +431,7 @@
 
           ${pending > 0 ? `<span class="td-meta-badge" style="background:#fff3cd;color:#92400e;">${pending} chờ duyệt</span>` : ''}
 
-          ${ready ? `<span class="td-meta-badge" style="background:#dcfce7;color:#166534;">Sẵn sàng export</span>` : ''}
+          ${ready ? `<span class="td-meta-badge" style="background:#dcfce7;color:#166534;">Đủ ảnh train</span>` : ''}
 
           ${missing > 0 && ['high_priority', 'recommended'].includes(r.training_recommendation) ? `<span class="td-meta-badge" style="background:#f8fafc;color:#475569;border-color:#e2e8f0;">Cần thêm ${missing} ảnh</span>` : ''}
 
@@ -462,7 +461,7 @@
 
           ${pending ? `<button class="btn btn-sm btn-warning" onclick="focusPendingTrainingImages(this)"><i class="bi bi-hourglass-split me-1"></i>Xem ${pending} ảnh chờ</button>` : ''}
 
-          ${ready ? `<button class="btn btn-sm btn-outline-primary" onclick="createDatasetVersion()"><i class="bi bi-bookmark-check me-1"></i>Tạo dataset</button>` : ''}
+          ${ready ? `<button class="btn btn-sm btn-outline-primary" onclick="createDatasetVersion()"><i class="bi bi-bookmark-check me-1"></i>Tạo phiên bản dataset</button>` : ''}
 
           ${datasetVersions.length ? `<span class="badge text-bg-light border align-self-center" style="font-size:.7rem;">Dataset: ${datasetVersions.map(escHtml).join(', ')}</span>` : ''}
 

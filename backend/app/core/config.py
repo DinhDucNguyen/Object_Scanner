@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
     CORS_ALLOW_ORIGINS: list[str] = []
-    ADMIN_ROLE_NAMES: list[str] = ["admin", "quan_tri", "quan_tri_vien"]
+    ADMIN_ROLE_NAMES: list[str] = ["admin"]
     ADMIN_USER_IDS: list[int] = []
 
     # JWT — SECRET_KEY bắt buộc phải set trong .env

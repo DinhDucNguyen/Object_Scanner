@@ -56,6 +56,8 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     private var canLoadMore = true
     private var loadJob: Job? = null
     private var searchJob: Job? = null
+    private var allItems = listOf<HistoryItem>()
+    private var statusFilter = "all"
 
     fun load(reset: Boolean = true) {
         if (reset) {
@@ -78,14 +80,18 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             )
             result.fold(
                 onSuccess = { newItems ->
-                    val current = if (reset) emptyList() else (_items.value ?: emptyList())
-                    _items.value = current + newItems
+                    val current = if (reset) emptyList() else allItems
+                    allItems = current + newItems
                     offset += newItems.size
                     canLoadMore = newItems.size == pageSize
+                    applyFilter()
                 },
                 onFailure = {
                     if (it is CancellationException) return@launch
-                    if (reset) _items.value = emptyList()
+                    if (reset) {
+                        allItems = emptyList()
+                        _items.value = emptyList()
+                    }
                     _error.value = it.message ?: localizedString(R.string.history_load_error)
                 }
             )
@@ -137,11 +143,28 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             val result = repo.deleteHistory(item.id)
             result.fold(
                 onSuccess = { message ->
-                    _items.value = (_items.value ?: emptyList()).filterNot { it.id == item.id }
+                    allItems = allItems.filterNot { it.id == item.id }
+                    applyFilter()
                     _message.value = message
                 },
                 onFailure = { if (it is CancellationException) return@launch; _error.value = it.message ?: localizedString(R.string.history_delete_error) }
             )
+        }
+    }
+
+    private fun applyFilter() {
+        val filtered = when (statusFilter) {
+            "pending" -> allItems.filter { it.status == "pending_review" }
+            "approved" -> allItems.filter { it.status == "official" || it.status == "approved" }
+            else -> allItems
+        }
+        _items.value = filtered
+    }
+
+    fun setStatusFilter(filter: String) {
+        if (statusFilter != filter) {
+            statusFilter = filter
+            applyFilter()
         }
     }
 

@@ -23,7 +23,7 @@ training_service = TrainingService()
 @router.get("/training-summary")
 def training_summary(
     model_coverage: Optional[str] = Query(default=None, description="custom_yolo | coco_known | db_only | new_gemini"),
-    recommendation: Optional[str] = Query(default=None, description="high_priority | recommended | optional | not_needed"),
+    recommendation: Optional[str] = Query(default=None, description="train | high_priority | recommended | optional | not_needed"),
     status: Optional[str] = Query(default=None, description="cho_duyet | da_duyet | tu_choi"),
     source: Optional[str] = Query(default=None, description="yolo | gemini | admin"),
     search: Optional[str] = Query(default=None),

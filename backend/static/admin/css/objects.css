@@ -411,7 +411,7 @@
 
     .td-filter-bar {
       display: grid;
-      grid-template-columns: minmax(220px, 1.5fr) repeat(4, minmax(145px, 1fr));
+      grid-template-columns: minmax(220px, 1.5fr) repeat(3, minmax(145px, 1fr));
       gap: .5rem;
       margin-bottom: 1rem;
     }

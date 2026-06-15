@@ -185,6 +185,7 @@ class TrainingService:
         rejected = int(counts.get("tu_choi") or 0)
         total = int(group.get("total_images") or 0)
         recommendation = group.get("training_recommendation")
+        train_recommended = recommendation in {"high_priority", "recommended"}
         has_dataset = bool(group.get("dataset_versions"))
 
         group["approved_count"] = approved
@@ -193,7 +194,7 @@ class TrainingService:
         group["min_images_for_training"] = MIN_APPROVED_IMAGES_FOR_TRAINING
         group["approved_ratio"] = round(approved / total, 3) if total else 0
         group["missing_approved_images"] = max(MIN_APPROVED_IMAGES_FOR_TRAINING - approved, 0)
-        group["ready_for_dataset"] = approved >= MIN_APPROVED_IMAGES_FOR_TRAINING
+        group["ready_for_dataset"] = train_recommended and approved >= MIN_APPROVED_IMAGES_FOR_TRAINING
         group["needs_review"] = pending > 0
         group["has_dataset"] = has_dataset
         group["latest_image_at"] = group["latest_image_at"].isoformat() if group.get("latest_image_at") else None
@@ -203,9 +204,9 @@ class TrainingService:
 
         if pending > 0:
             group["next_action"] = "review_pending"
-        elif recommendation in {"high_priority", "recommended"} and approved < MIN_APPROVED_IMAGES_FOR_TRAINING:
+        elif train_recommended and approved < MIN_APPROVED_IMAGES_FOR_TRAINING:
             group["next_action"] = "collect_more"
-        elif recommendation in {"high_priority", "recommended"} and approved >= MIN_APPROVED_IMAGES_FOR_TRAINING:
+        elif train_recommended and approved >= MIN_APPROVED_IMAGES_FOR_TRAINING:
             group["next_action"] = "ready_to_train"
         elif has_dataset:
             group["next_action"] = "already_exported"

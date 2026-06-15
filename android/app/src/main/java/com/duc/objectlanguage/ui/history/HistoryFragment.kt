@@ -28,6 +28,10 @@ import java.util.Locale
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.duc.objectlanguage.utils.resolveMediaUrl
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.BaseAdapter
+import androidx.appcompat.widget.ListPopupWindow
 
 class HistoryFragment : Fragment() {
 
@@ -36,6 +40,7 @@ class HistoryFragment : Fragment() {
     private val viewModel: HistoryViewModel by viewModels()
     private lateinit var adapter: HistoryAdapter
     private var currentPeriod = "all"
+    private var currentStatusFilter = "all"
     private var selectedFromDate: String? = null
     private var selectedToDate: String? = null
     private var skipNextResume = true 
@@ -127,6 +132,11 @@ class HistoryFragment : Fragment() {
             }
         }
         updateFilterChips()
+
+        binding.btnStatusFilter.setOnClickListener { view ->
+            showStatusFilterDropdown(view)
+        }
+        styleStatusFilterButton(currentStatusFilter != "all")
     }
 
     private fun setupDateRange() {
@@ -242,6 +252,7 @@ class HistoryFragment : Fragment() {
         }
     }
 
+
     private fun styleFilterChip(chip: Chip, active: Boolean) {
         val primary = ContextCompat.getColor(requireContext(), R.color.primary)
         val surfaceSoft = ContextCompat.getColor(requireContext(), R.color.surface_soft)
@@ -249,6 +260,19 @@ class HistoryFragment : Fragment() {
         chip.chipBackgroundColor = ColorStateList.valueOf(if (active) primary else surfaceSoft)
         chip.setTextColor(if (active) android.graphics.Color.WHITE else textSecondary)
         chip.chipStrokeWidth = 0f
+    }
+
+    private fun styleStatusFilterButton(active: Boolean) {
+        val textColor = if (active) {
+            android.graphics.Color.WHITE
+        } else {
+            ContextCompat.getColor(requireContext(), R.color.primary)
+        }
+        binding.btnStatusFilter.setBackgroundResource(
+            if (active) R.drawable.bg_chip_primary else R.drawable.bg_chip_surface
+        )
+        binding.tvStatusFilterText.setTextColor(textColor)
+        binding.ivStatusFilterArrow.imageTintList = ColorStateList.valueOf(textColor)
     }
 
     private fun updateDateButtons() {
@@ -345,6 +369,86 @@ class HistoryFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private data class FilterOption(
+        val status: String,
+        val text: String,
+        val iconRes: Int,
+        val isSelected: Boolean
+    )
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
+    }
+
+    private fun showStatusFilterDropdown(anchor: View) {
+        val options = listOf(
+            FilterOption("all", getString(R.string.history_filter_status_all), R.drawable.ic_history, currentStatusFilter == "all"),
+            FilterOption("approved", getString(R.string.history_filter_status_approved), R.drawable.ic_verified, currentStatusFilter == "approved"),
+            FilterOption("pending", getString(R.string.history_filter_status_pending), R.drawable.ic_sync, currentStatusFilter == "pending")
+        )
+
+        val listPopupWindow = ListPopupWindow(requireContext())
+        listPopupWindow.anchorView = anchor
+
+        val adapter = object : BaseAdapter() {
+            override fun getCount(): Int = options.size
+            override fun getItem(position: Int): FilterOption = options[position]
+            override fun getItemId(position: Int): Long = position.toLong()
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val row = convertView ?: layoutInflater.inflate(R.layout.item_dropdown_menu, parent, false)
+                val option = getItem(position)
+
+                val ivIcon = row.findViewById<ImageView>(R.id.ivIcon)
+                val tvTitle = row.findViewById<TextView>(R.id.tvTitle)
+                val ivCheck = row.findViewById<ImageView>(R.id.ivCheck)
+
+                tvTitle.text = option.text
+                ivIcon.setImageResource(option.iconRes)
+
+                val tintColor = if (option.status == "approved") {
+                    ContextCompat.getColor(requireContext(), R.color.success)
+                } else if (option.status == "pending") {
+                    ContextCompat.getColor(requireContext(), R.color.secondary)
+                } else {
+                    ContextCompat.getColor(requireContext(), R.color.text_primary)
+                }
+                ivIcon.imageTintList = ColorStateList.valueOf(tintColor)
+
+                if (option.isSelected) {
+                    ivCheck.visibility = View.VISIBLE
+                    tvTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary))
+                } else {
+                    ivCheck.visibility = View.GONE
+                    tvTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+                }
+
+                return row
+            }
+        }
+
+        listPopupWindow.setAdapter(adapter)
+        listPopupWindow.setContentWidth(dpToPx(175))
+        listPopupWindow.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.bg_popup_menu))
+        listPopupWindow.isModal = true
+
+        listPopupWindow.setOnItemClickListener { _, _, position, _ ->
+            val selected = options[position]
+            currentStatusFilter = selected.status
+
+            val textRes = when (selected.status) {
+                "all" -> R.string.history_filter_status_all
+                "approved" -> R.string.history_filter_status_approved
+                else -> R.string.history_filter_status_pending
+            }
+            binding.tvStatusFilterText.text = getString(textRes)
+            styleStatusFilterButton(selected.status != "all")
+            binding.recyclerView.scrollToPosition(0)
+            viewModel.setStatusFilter(selected.status)
+            listPopupWindow.dismiss()
+        }
+        listPopupWindow.show()
     }
 
     companion object {

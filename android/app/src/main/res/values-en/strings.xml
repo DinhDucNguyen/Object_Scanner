@@ -467,6 +467,9 @@
     <string name="history_filter_today">Today</string>
     <string name="history_filter_week">This week</string>
     <string name="history_filter_month">This month</string>
+    <string name="history_filter_status_all">All</string>
+    <string name="history_filter_status_approved">Qualified</string>
+    <string name="history_filter_status_pending">Updating</string>
     <string name="history_filter_from_date">From date</string>
     <string name="history_filter_to_date">To date</string>
     <string name="history_filter_clear_dates">Clear dates</string>

@@ -18,6 +18,7 @@ from app.models.user import User
 from app.models.profile import Profile
 from app.models.user_settings import UserSettings
 from app.repositories.user_repo import UserRepository
+from app.utils.roles import canonical_role_name
 from app.schemas.user import (
     UserCreate, UserLogin, UserSettingsUpdate,
     ForgotPasswordRequest, VerifyOtpRequest,
@@ -56,7 +57,7 @@ class UserService:
                 "username": user.ten_dang_nhap,
                 "email": user.email,
                 "status": user.trang_thai_obj.ten_trang_thai if user.trang_thai_obj else "hoat_dong",
-                "role": user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else "nguoi_dung",
+                "role": canonical_role_name(user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else "nguoi_dung"),
             },
         }
 
@@ -257,7 +258,7 @@ class UserService:
         user = self.repo.get_by_id(db, nguoi_dung_id)
         if not user:
             raise HTTPException(404, "Không tìm thấy người dùng")
-        role_name = (user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else "").strip().lower()
+        role_name = canonical_role_name(user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else None)
         admin_roles = {r.strip().lower() for r in _settings.ADMIN_ROLE_NAMES}
         if role_name in admin_roles or user.id in _settings.ADMIN_USER_IDS:
             raise HTTPException(403, "Tài khoản quản trị viên không thể tự xóa")
@@ -386,7 +387,7 @@ class UserService:
         if not user:
             raise HTTPException(404, "Không tìm thấy người dùng")
 
-        role_name = (user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else "").strip().lower()
+        role_name = canonical_role_name(user.vai_tro_obj.ten_vai_tro if user.vai_tro_obj else None)
         admin_roles = {r.strip().lower() for r in _settings.ADMIN_ROLE_NAMES}
         if role_name in admin_roles or user.id in _settings.ADMIN_USER_IDS:
             raise HTTPException(403, "Tài khoản quản trị viên không thể tự xóa")

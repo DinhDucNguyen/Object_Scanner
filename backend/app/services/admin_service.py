@@ -29,12 +29,14 @@ from app.models.translation import Translation, NguonDuLieu
 from app.models.example import ViDu
 from app.models.language import Language
 from app.models.user import User
+from app.models.role import VaiTro
 from app.models.review_log import ReviewLog
 from app.models.learning_progress import LearningProgress
 from app.services.tts_service import TTSService
 from app.services.prediction_service import PredictionService
 from app.services.streak_service import StreakService
 from app.repositories.object_repo import normalize_object_code
+from app.utils.roles import canonical_role_name
 from app.utils.timezone import now_vietnam
 from app.utils.security import hash_password
 from app.schemas.admin import (
@@ -516,7 +518,7 @@ class AdminService:
         result = []
         for u in users:
             ho_ten = u.profile.ho_ten if u.profile else None
-            vai_tro = u.vai_tro_obj.ten_vai_tro if u.vai_tro_obj else None
+            vai_tro = canonical_role_name(u.vai_tro_obj.ten_vai_tro if u.vai_tro_obj else None) or None
             trang_thai = u.trang_thai_obj.ten_trang_thai if u.trang_thai_obj else None
             result.append(UserAdminResponse(
                 id=u.id,
@@ -534,6 +536,13 @@ class AdminService:
         u = db.query(User).filter(User.id == nguoi_dung_id, User.thoi_gian_xoa.is_(None)).first()
         if not u:
             return False
+        role = db.query(VaiTro).filter(VaiTro.id == req.vai_tro_id).first()
+        if role and canonical_role_name(role.ten_vai_tro) == "admin":
+            canonical_admin_role = db.query(VaiTro).filter(VaiTro.ten_vai_tro == "admin").first()
+            if canonical_admin_role:
+                u.vai_tro_id = canonical_admin_role.id
+                db.commit()
+                return True
         u.vai_tro_id = req.vai_tro_id
         db.commit()
         return True

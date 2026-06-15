@@ -248,15 +248,56 @@
             app:tint="@color/text_secondary" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvResultCount"
+    <!-- Results Info & Status Filter Row -->
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="2dp"
-        android:textColor="@color/text_secondary"
-        android:textSize="13sp"
-        android:visibility="gone" />
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/tvResultCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/btnStatusFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bg_chip_surface"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="10dp">
+
+            <TextView
+                android:id="@+id/tvStatusFilterText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="@string/history_filter_status_all" />
+
+            <ImageView
+                android:id="@+id/ivStatusFilterArrow"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_marginStart="4dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_drop_down"
+                app:tint="@color/primary" />
+        </LinearLayout>
+    </RelativeLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
