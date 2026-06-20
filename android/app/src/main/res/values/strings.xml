@@ -384,6 +384,7 @@
     <string name="test_load_practice_error">Không tải được bài luyện: %s</string>
     <string name="review_finished_today">Hôm nay đã ôn xong.\nKhông còn từ nào cần ôn.</string>
     <string name="review_msg_good">✓ Tốt lắm!</string>
+    <string name="review_msg_hard">✓ Cần luyện tập thêm!</string>
     <string name="review_msg_again">Sẽ ôn lại sớm</string>
     <string name="review_error_format">Lỗi: %s</string>
     <string name="scan_added_to_review">Đã thêm vào ôn tập hôm nay</string>

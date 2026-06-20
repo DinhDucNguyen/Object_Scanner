@@ -169,16 +169,29 @@ class HistoryFragment : Fragment() {
         updateDateButtons()
     }
 
+    private fun updateEmptyState() {
+        val items = viewModel.items.value ?: emptyList()
+        val loading = viewModel.isLoading.value ?: false
+        val empty = items.isEmpty() && !loading
+        binding.tvEmpty.visibility = if (empty) View.VISIBLE else View.GONE
+        binding.recyclerView.visibility = if (empty) View.GONE else View.VISIBLE
+        if (empty) {
+            updateEmptyStateView()
+        }
+    }
+
     private fun setupObservers() {
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             if (loading && adapter.itemCount == 0) {
                 binding.shimmerHistory.visibility = View.VISIBLE
                 binding.shimmerHistory.startShimmer()
+                binding.tvEmpty.visibility = View.GONE
             } else {
                 binding.shimmerHistory.stopShimmer()
                 binding.shimmerHistory.visibility = View.GONE
                 if (!loading) binding.swipeRefresh.isRefreshing = false
             }
+            updateEmptyState()
         }
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.load()
@@ -192,12 +205,7 @@ class HistoryFragment : Fragment() {
             adapter.submitList(items) {
                 if (wasEmpty && items.isNotEmpty()) binding.recyclerView.scheduleLayoutAnimation()
             }
-            val empty = items.isEmpty() && viewModel.isLoading.value != true
-            binding.tvEmpty.visibility = if (empty) View.VISIBLE else View.GONE
-            binding.recyclerView.visibility = if (empty) View.GONE else View.VISIBLE
-            if (empty) {
-                updateEmptyStateView()
-            }
+            updateEmptyState()
             if (items.isNotEmpty()) {
                 binding.tvResultCount.text = resources.getQuantityString(
                     R.plurals.history_result_count,

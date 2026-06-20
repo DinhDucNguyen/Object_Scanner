@@ -17,18 +17,18 @@ class GeminiService:
         ]
         # Full identify — dùng khi confidence thấp hoặc DB miss cần sinh vocab đầy đủ.
         self.vision_full_models = [
-            "gemini-3-flash-preview",
             "gemini-3.1-flash-lite",
             "gemini-3.5-flash",
             "gemini-2.5-flash",
+            "gemini-3-flash-preview",
         ]
         # Text-only (translate, dictionary, example) — nhẹ trước, giữ 2.5 flash cuối vì hay quá tải.
         self.translate_models = [
             "gemini-3.1-flash-lite",
-            "gemini-3-flash-preview",
             "gemini-2.5-flash-lite",
             "gemini-3.5-flash",
             "gemini-2.5-flash",
+            "gemini-3-flash-preview",
         ]
         self.client: genai.Client | None = None
 

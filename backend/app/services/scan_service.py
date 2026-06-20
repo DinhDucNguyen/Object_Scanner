@@ -3,6 +3,7 @@ import uuid
 from pathlib import Path
 
 from sqlalchemy.orm import Session
+from fastapi import BackgroundTasks
 
 from app.models.ai_feedback_report import AIPrediction, NguonAI, TrangThaiDuyet, VaiTroDuDoan
 from app.models.language import Language
@@ -51,6 +52,76 @@ COCO_CLASSES = {
 YOLO_KNOWN_CLASSES = YOLO_CUSTOM_CLASSES | COCO_CLASSES
 
 
+def upload_scan_image_background(scan_history_id: int, prediction_id: int, file_path: str):
+    """Background task to upload local image to Cloudinary and update database records."""
+    import os
+    import logging
+    from app.db.session import SessionLocal
+    from app.utils.cloudinary_helper import upload_image
+    from app.models.scan_history import ScanHistory
+    from app.models.ai_feedback_report import AIPrediction
+    from app.models.training_image import TrainingImage
+
+    logger = logging.getLogger(__name__)
+    
+    if not os.path.exists(file_path):
+        logger.error(f"Background upload failed: file {file_path} does not exist")
+        return
+
+    try:
+        with open(file_path, "rb") as f:
+            image_bytes = f.read()
+
+        logger.info(f"Background uploading image for scan {scan_history_id} (size: {len(image_bytes)} bytes)")
+        cloudinary_url = upload_image(image_bytes)
+
+        if not cloudinary_url:
+            logger.error(f"Background upload to Cloudinary failed for scan {scan_history_id}")
+            return
+
+        db = SessionLocal()
+        try:
+            # 1. Update ScanHistory
+            scan = db.query(ScanHistory).filter(ScanHistory.id == scan_history_id).first()
+            if scan:
+                scan.url_anh = cloudinary_url
+
+            # 2. Update AIPrediction
+            prediction = db.query(AIPrediction).filter(AIPrediction.id == prediction_id).first()
+            if prediction:
+                try:
+                    from app.services.prediction_payload import load_prediction_payload, dump_prediction_payload
+                    payload = load_prediction_payload(prediction.mo_ta, prediction.nhan_du_doan)
+                    if isinstance(payload, dict):
+                        payload["scan_image_url"] = cloudinary_url
+                        prediction.mo_ta = dump_prediction_payload(payload, prediction.nhan_du_doan)
+                except Exception as e:
+                    logger.error(f"Error updating prediction payload in background: {e}")
+
+            # 3. Update TrainingImage
+            training_img = db.query(TrainingImage).filter(TrainingImage.lich_su_quet_id == scan_history_id).first()
+            if training_img:
+                training_img.url_anh = cloudinary_url
+
+            db.commit()
+            logger.info(f"Background upload and database update successful for scan {scan_history_id}")
+        except Exception as db_err:
+            db.rollback()
+            logger.error(f"Database update failed in background task for scan {scan_history_id}: {db_err}")
+        finally:
+            db.close()
+
+        # Delete the local file
+        try:
+            os.remove(file_path)
+            logger.info(f"Deleted local temporary file {file_path}")
+        except Exception as delete_err:
+            logger.warning(f"Could not delete local file {file_path}: {delete_err}")
+
+    except Exception as e:
+        logger.error(f"Unhandled error in background upload task: {e}")
+
+
 class ScanService:
     def __init__(self):
         self.obj_repo = ObjectRepository()
@@ -92,6 +163,7 @@ class ScanService:
         image_bytes: bytes,
         nguoi_dung_id: int | None = None,
         base_url: str | None = None,
+        background_tasks: BackgroundTasks | None = None,
     ) -> ScanResponse:
         # Bước 1: quick scan — model nhẹ, quota cao
         quick = self.gemini.identify_object_quick(image_bytes)
@@ -155,6 +227,7 @@ class ScanService:
                 source_prediction=existing_pending,
                 image_bytes=image_bytes,
                 base_url=base_url,
+                background_tasks=background_tasks,
             )
             source_translations = source_payload.get("translations") or translations_raw
             return ScanResponse(
@@ -180,7 +253,9 @@ class ScanService:
             gemini_result=gemini_result,
             image_bytes=image_bytes,
             base_url=base_url,
+            background_tasks=background_tasks,
         )
+
 
         return ScanResponse(
             source="gemini_pending_review",
@@ -232,9 +307,11 @@ class ScanService:
         gemini_result: dict,
         image_bytes: bytes,
         base_url: str | None,
+        background_tasks: BackgroundTasks | None = None,
     ) -> tuple[ScanHistory, AIPrediction]:
         _, quality_reason, quality_score = check_image_quality(image_bytes)
-        image_url = self._save_scan_image(image_bytes, base_url)
+        local_paths = []
+        image_url = self._save_scan_image_optimized(image_bytes, base_url, background_tasks, local_paths)
         scan = ScanHistory(
             nguoi_dung_id=nguoi_dung_id,
             doi_tuong_id=obj.id if obj else None,
@@ -275,7 +352,17 @@ class ScanService:
             diem_chat_luong=quality_score,
         )
         db.commit()
+
+        if local_paths and background_tasks:
+            background_tasks.add_task(
+                upload_scan_image_background,
+                scan.id,
+                prediction.id,
+                local_paths[0],
+            )
+
         return scan, prediction
+
 
     def _find_pending_review_prediction(self, db: Session, object_code: str) -> AIPrediction | None:
         predictions = (
@@ -304,9 +391,11 @@ class ScanService:
         source_prediction: AIPrediction,
         image_bytes: bytes,
         base_url: str | None,
+        background_tasks: BackgroundTasks | None = None,
     ) -> tuple[ScanHistory, AIPrediction, dict]:
         _, quality_reason, quality_score = check_image_quality(image_bytes)
-        image_url = self._save_scan_image(image_bytes, base_url)
+        local_paths = []
+        image_url = self._save_scan_image_optimized(image_bytes, base_url, background_tasks, local_paths)
         source_payload = self._prediction_payload(source_prediction)
         scan = ScanHistory(
             nguoi_dung_id=nguoi_dung_id,
@@ -354,7 +443,17 @@ class ScanService:
             diem_chat_luong=quality_score,
         )
         db.commit()
+
+        if local_paths and background_tasks:
+            background_tasks.add_task(
+                upload_scan_image_background,
+                scan.id,
+                prediction.id,
+                local_paths[0],
+            )
+
         return scan, prediction, source_payload
+
 
     def _prediction_payload(self, prediction: AIPrediction) -> dict:
         return load_prediction_payload(prediction.mo_ta, prediction.nhan_du_doan)
@@ -369,6 +468,31 @@ class ScanService:
         filepath = UPLOAD_DIR / filename
         filepath.write_bytes(image_bytes)
         return f"{base_url}/uploads/scans/{filename}"
+
+    def _save_scan_image_optimized(
+        self,
+        image_bytes: bytes,
+        base_url: str | None,
+        background_tasks: BackgroundTasks | None = None,
+        out_local_path: list[str] | None = None,
+    ) -> str | None:
+        """Saves image. If background_tasks is present and Cloudinary is configured, 
+        saves locally and populates out_local_path to be uploaded later. 
+        Otherwise, uploads synchronously to Cloudinary or saves locally."""
+        from app.core.config import settings
+        
+        # If we want background upload
+        if settings.CLOUDINARY_CLOUD_NAME and background_tasks and out_local_path is not None:
+            UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+            filename = f"{uuid.uuid4().hex}.jpg"
+            filepath = UPLOAD_DIR / filename
+            filepath.write_bytes(image_bytes)
+            out_local_path.append(str(filepath))
+            return f"{base_url}/uploads/scans/{filename}" if base_url else f"/uploads/scans/{filename}"
+            
+        # Fallback to synchronous logic
+        return self._save_scan_image(image_bytes, base_url)
+
 
     def _pending_translation_dtos(
         self,

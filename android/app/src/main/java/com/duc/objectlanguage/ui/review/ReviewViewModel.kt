@@ -171,10 +171,10 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             result.fold(
                 onSuccess = {
                     _sessionSummary.value = (_sessionSummary.value ?: ReviewSessionSummary()).record(quality)
-                    _message.value = if (quality >= 3) {
-                        localizedString(R.string.review_msg_good)
-                    } else {
-                        localizedString(R.string.review_msg_again)
+                    _message.value = when {
+                        quality >= 4 -> localizedString(R.string.review_msg_good)
+                        quality == 3 -> localizedString(R.string.review_msg_hard)
+                        else -> localizedString(R.string.review_msg_again)
                     }
                     val nextIdx = idx + 1
                     if (nextIdx < cardList.size) {

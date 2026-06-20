@@ -392,6 +392,7 @@
     <string name="test_load_practice_error">Could not load practice: %s</string>
     <string name="review_finished_today">All done for today!\nNo more words to review.</string>
     <string name="review_msg_good">✓ Great job!</string>
+    <string name="review_msg_hard">✓ Need more practice!</string>
     <string name="review_msg_again">Will review again soon</string>
     <string name="review_error_format">Error: %s</string>
     <string name="scan_added_to_review">Added to today\'s review</string>

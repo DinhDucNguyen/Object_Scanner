@@ -1,5 +1,5 @@
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Path, Query, Request
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Path, Query, Request, BackgroundTasks
 # pyrefly: ignore [missing-import]
 from fastapi.responses import StreamingResponse, Response
 # pyrefly: ignore [missing-import]
@@ -45,6 +45,7 @@ def scan_object(
 @limiter.limit("10/minute")
 async def scan_image(
     request: Request,
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     nguoi_dung_id: Optional[int] = Depends(get_optional_nguoi_dung_id),
@@ -65,6 +66,7 @@ async def scan_image(
         compressed_bytes,
         nguoi_dung_id,
         str(request.base_url).rstrip("/"),
+        background_tasks,
     )
 
 
