@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.services.history_service import HistoryFeedbackService
 from app.dependencies.get_current_user import get_current_nguoi_dung_id
-from app.schemas.common import LichSuQuetResponse
+from app.schemas.common import LichSuQuetResponse, HistoryPaginatedResponse
 from app.utils.upload import read_upload_bytes
 
 router = APIRouter(prefix="/api", tags=["History"])

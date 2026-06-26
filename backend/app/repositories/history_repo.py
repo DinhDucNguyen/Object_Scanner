@@ -11,12 +11,10 @@ from app.utils.timezone import now_vietnam
 
 
 class HistoryRepository:
-    def get_recent_scans(
+    def _build_recent_scans_query(
         self,
         db: Session,
         nguoi_dung_id: int,
-        limit: int = 50,
-        offset: int = 0,
         keyword: str | None = None,
         period: str | None = None,
         from_date: Date | None = None,
@@ -50,7 +48,20 @@ class HistoryRepository:
                 ))
                 .distinct()
             )
+        return query
 
+    def get_recent_scans(
+        self,
+        db: Session,
+        nguoi_dung_id: int,
+        limit: int = 50,
+        offset: int = 0,
+        keyword: str | None = None,
+        period: str | None = None,
+        from_date: Date | None = None,
+        to_date: Date | None = None,
+    ):
+        query = self._build_recent_scans_query(db, nguoi_dung_id, keyword, period, from_date, to_date)
         return (
             query
             .order_by(ScanHistory.thoi_gian.desc())
@@ -58,6 +69,18 @@ class HistoryRepository:
             .limit(limit)
             .all()
         )
+
+    def count_recent_scans(
+        self,
+        db: Session,
+        nguoi_dung_id: int,
+        keyword: str | None = None,
+        period: str | None = None,
+        from_date: Date | None = None,
+        to_date: Date | None = None,
+    ) -> int:
+        query = self._build_recent_scans_query(db, nguoi_dung_id, keyword, period, from_date, to_date)
+        return query.count()
 
     def get_by_id_for_user(self, db: Session, lich_su_quet_id: int, nguoi_dung_id: int):
         return db.query(ScanHistory).filter(

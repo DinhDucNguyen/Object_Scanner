@@ -218,11 +218,14 @@ class HistoryFragment : Fragment() {
                 if (wasEmpty && items.isNotEmpty()) binding.recyclerView.scheduleLayoutAnimation()
             }
             updateEmptyState()
-            if (items.isNotEmpty()) {
+        }
+
+        viewModel.totalCount.observe(viewLifecycleOwner) { total ->
+            if (total > 0) {
                 binding.tvResultCount.text = resources.getQuantityString(
                     R.plurals.history_result_count,
-                    items.size,
-                    items.size,
+                    total,
+                    total,
                 )
                 binding.tvResultCount.visibility = View.VISIBLE
             } else {

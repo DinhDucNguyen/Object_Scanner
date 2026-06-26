@@ -60,6 +60,9 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     private var statusFilter = "all"
     private var excludePending = false
 
+    private val _totalCount = MutableLiveData<Int>()
+    val totalCount: LiveData<Int> = _totalCount
+
     fun load(reset: Boolean = true) {
         if (reset) {
             // Cancel any in-flight load so rapid filter/scroll changes don't stack up
@@ -80,7 +83,11 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                 toDate = toDate,
             )
             result.fold(
-                onSuccess = { newItems ->
+                onSuccess = { response ->
+                    val newItems = response.items
+                    if (reset) {
+                        _totalCount.value = response.total
+                    }
                     val current = if (reset) emptyList() else allItems
                     allItems = current + newItems
                     offset += newItems.size
@@ -92,6 +99,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                     if (reset) {
                         allItems = emptyList()
                         _items.value = emptyList()
+                        _totalCount.value = 0
                     }
                     _error.value = it.message ?: localizedString(R.string.history_load_error)
                 }

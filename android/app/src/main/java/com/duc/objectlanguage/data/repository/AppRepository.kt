@@ -72,9 +72,9 @@ class AppRepository(tokenManager: TokenManager) {
         limit: Int = 50,
         offset: Int = 0,
         keyword: String? = null,
-        period: String? = "all",
+        period: String = "all",
         fromDate: String? = null,
-        toDate: String? = null,
+        toDate: String? = null
     ) = history.getHistory(limit, offset, keyword, period, fromDate, toDate)
     suspend fun getHistoryDetail(scanId: Int) = history.getHistoryDetail(scanId)
     suspend fun deleteHistory(scanId: Int) = history.deleteHistory(scanId)

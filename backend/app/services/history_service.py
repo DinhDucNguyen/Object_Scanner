@@ -40,7 +40,13 @@ class HistoryFeedbackService:
         scans = self.hist_repo.get_recent_scans(
             db, nguoi_dung_id, limit, offset, keyword, period, from_date, to_date
         )
-        return [self._scan_to_history_item(db, scan) for scan in scans]
+        total_count = self.hist_repo.count_recent_scans(
+            db, nguoi_dung_id, keyword, period, from_date, to_date
+        )
+        return {
+            "total": total_count,
+            "items": [self._scan_to_history_item(db, scan) for scan in scans]
+        }
 
     def get_history_detail(self, db: Session, nguoi_dung_id: int, lich_su_quet_id: int):
         scan = self.hist_repo.get_by_id_for_user(db, lich_su_quet_id, nguoi_dung_id)

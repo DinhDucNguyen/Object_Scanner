@@ -162,6 +162,11 @@ data class StatsResponse(
 
 // ====== HISTORY ======
 
+data class HistoryPaginatedResponse(
+    val total: Int,
+    val items: List<HistoryItem>
+)
+
 data class HistoryItem(
     val id: Int,
     @SerializedName("object_code") val objectCode: String?,

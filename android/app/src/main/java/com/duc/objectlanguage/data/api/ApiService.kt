@@ -115,10 +115,10 @@ interface ApiService {
         @Query("limit") limit: Int = 50,
         @Query("offset") offset: Int = 0,
         @Query("keyword") keyword: String? = null,
-        @Query("period") period: String? = "all",
+        @Query("period") period: String = "all",
         @Query("from_date") fromDate: String? = null,
         @Query("to_date") toDate: String? = null
-    ): Response<List<HistoryItem>>
+    ): Response<HistoryPaginatedResponse>
 
     @GET("api/history/{scanId}")
     suspend fun getHistoryDetail(@Path("scanId") scanId: Int): Response<HistoryDetail>

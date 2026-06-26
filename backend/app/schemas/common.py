@@ -231,3 +231,7 @@ class CategoryResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class HistoryPaginatedResponse(BaseModel):
+    total: int
+    items: List[LichSuQuetResponse]

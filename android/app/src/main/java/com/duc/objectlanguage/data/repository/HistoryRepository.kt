@@ -12,13 +12,13 @@ class HistoryRepository {
         limit: Int = 50,
         offset: Int = 0,
         keyword: String? = null,
-        period: String? = "all",
+        period: String = "all",
         fromDate: String? = null,
-        toDate: String? = null,
-    ): Result<List<HistoryItem>> {
+        toDate: String? = null
+    ): Result<HistoryPaginatedResponse> {
         return try {
             val response = api.getHistory(limit, offset, keyword, period, fromDate, toDate)
-            if (response.isSuccessful) Result.success(response.body() ?: emptyList())
+            if (response.isSuccessful) Result.success(response.body() ?: HistoryPaginatedResponse(0, emptyList()))
             else Result.failure(Exception(RepositoryText.get(R.string.repo_history_load_error)))
         } catch (e: Exception) {
             Result.failure(ApiErrorParser.userFacing(e, R.string.repo_dictionary_history_load_error))
