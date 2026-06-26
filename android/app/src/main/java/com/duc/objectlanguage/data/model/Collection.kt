@@ -62,3 +62,8 @@ data class UpdateCollectionPrivacyRequest(
 data class AddToCollectionRequest(
     @SerializedName("translation_id") val translationId: Int
 )
+
+data class AddToCollectionResponse(
+    val message: String,
+    @SerializedName("already_exists") val alreadyExists: Boolean = false
+)

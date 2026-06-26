@@ -43,10 +43,14 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.cardDashboardSearch.setOnClickListener {
+        binding.layoutSearchDictionary.setOnClickListener {
             openDictionary()
         }
-        binding.cardDashboardSearch.addScaleFeedback()
+        binding.layoutSearchScan.setOnClickListener {
+            openScan()
+        }
+        binding.layoutSearchDictionary.addScaleFeedback()
+        binding.layoutSearchScan.addScaleFeedback()
         binding.btnScanNow.addScaleFeedback()
         binding.btnFirstUseScan.addScaleFeedback()
         binding.ivDashboardAvatar.addScaleFeedback()

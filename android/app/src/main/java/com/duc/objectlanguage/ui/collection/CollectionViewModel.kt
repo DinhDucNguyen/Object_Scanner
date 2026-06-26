@@ -223,8 +223,12 @@ class CollectionViewModel(application: Application) : AndroidViewModel(applicati
             val result = repo.addToCollection(collectionId, translationId)
             
             result.fold(
-                onSuccess = {
-                    _successMessage.value = localizedString(R.string.collection_added)
+                onSuccess = { resp ->
+                    _successMessage.value = if (resp.alreadyExists) {
+                        localizedString(R.string.collection_already_added)
+                    } else {
+                        localizedString(R.string.collection_added)
+                    }
                     loadCollectionDetail(collectionId)
                 },
                 onFailure = { e ->

@@ -76,11 +76,12 @@ class CollectionRepository {
     }
     
     /**
-     * Add item to collection
+     * Add item to collection.
+     * Returns Result<AddToCollectionResponse> where alreadyExists=true means the word was already in the collection.
      */
-    suspend fun addToCollection(collectionId: Int, translationId: Int): Result<Unit> = try {
-        api.addToCollection(collectionId, AddToCollectionRequest(translationId))
-        Result.success(Unit)
+    suspend fun addToCollection(collectionId: Int, translationId: Int): Result<AddToCollectionResponse> = try {
+        val response = api.addToCollection(collectionId, AddToCollectionRequest(translationId))
+        Result.success(response)
     } catch (e: Exception) {
         Result.failure(userFacingException(e))
     }

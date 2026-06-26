@@ -45,6 +45,38 @@ class TrainingService:
             for group in self.training_summary(db, only_approved=True)
         ]
 
+    def export_and_snapshot(
+        self,
+        db: Session,
+        ghi_chu: str | None = None,
+    ) -> tuple[list[dict], TrainingDatasetVersion]:
+        """Export flat JSONL records và đồng thời tạo dataset version snapshot.
+
+        Returns:
+            (records, dataset_version) — records là danh sách dict JSONL,
+            dataset_version là object TrainingDatasetVersion vừa tạo.
+        """
+        version_name = self._auto_version_name(db)
+        dataset = self.create_dataset_version(db, ma_phien_ban=version_name, ghi_chu=ghi_chu)
+        records = self.export_training_data(db)
+        return records, dataset
+
+    def export_and_snapshot_grouped(
+        self,
+        db: Session,
+        ghi_chu: str | None = None,
+    ) -> tuple[list[dict], TrainingDatasetVersion]:
+        """Export grouped JSONL records và đồng thời tạo dataset version snapshot.
+
+        Returns:
+            (records, dataset_version) — records là danh sách dict gom nhóm,
+            dataset_version là object TrainingDatasetVersion vừa tạo.
+        """
+        version_name = self._auto_version_name(db)
+        dataset = self.create_dataset_version(db, ma_phien_ban=version_name, ghi_chu=ghi_chu)
+        records = self.export_training_data_grouped(db)
+        return records, dataset
+
     def training_summary(
         self,
         db: Session,
@@ -421,6 +453,22 @@ class TrainingService:
         db.commit()
         db.refresh(item)
         return item, obj
+
+    def _auto_version_name(self, db: Session) -> str:
+        """Sinh tên phiên bản tự động dạng v{YYYYMMDD}_{seq:03d}.
+
+        Mỗi ngày bắt đầu từ 001, tăng dần nếu export nhiều lần trong ngày.
+        Ví dụ: v20260624_001, v20260624_002, ...
+        """
+        today = now_vietnam().strftime("%Y%m%d")
+        prefix = f"v{today}_"
+        existing_count = (
+            db.query(TrainingDatasetVersion)
+            .filter(TrainingDatasetVersion.ma_phien_ban.like(f"{prefix}%"))
+            .count()
+        )
+        seq = existing_count + 1
+        return f"{prefix}{seq:03d}"
 
     def create_dataset_version(
         self,

@@ -136,14 +136,6 @@
         <button class="btn btn-sm btn-outline-secondary" onclick="loadPredictions()">
           <i class="bi bi-arrow-clockwise"></i> Làm mới
         </button>
-        <button id="btn-export-training" onclick="exportTrainingData()"
-          class="btn btn-sm btn-outline-success" title="Tải file JSONL — mỗi dòng là 1 prediction đã duyệt">
-          <i class="bi bi-download me-1"></i>Export flat
-        </button>
-        <button id="btn-export-grouped" onclick="exportTrainingGrouped()"
-          class="btn btn-sm btn-success" title="Tải file JSONL gom nhóm theo object — bao gồm ảnh từ nhiều góc độ">
-          <i class="bi bi-collection me-1"></i>Export dataset
-        </button>
       </div>
       <div id="training-stats-bar" class="d-flex align-items-center gap-3 px-3 py-2 mb-2 rounded"
         style="background:#f0fdf4;border:1px solid #bbf7d0;font-size:.82rem;">
@@ -455,10 +447,7 @@
         <button class="btn btn-sm btn-outline-secondary" onclick="loadTrainingData()">
           <i class="bi bi-arrow-clockwise"></i> Làm mới
         </button>
-        <button class="btn btn-sm btn-outline-primary" onclick="createDatasetVersion()">
-          <i class="bi bi-bookmark-check me-1"></i>Tạo phiên bản dataset
-        </button>
-        <button class="btn btn-sm btn-success" onclick="exportTrainingGrouped()">
+        <button class="btn btn-sm btn-success" onclick="exportTrainingGrouped()" title="Xu?t JSONL gom nh�m theo object v� t? d?ng t?o phi�n b?n dataset m?i">
           <i class="bi bi-collection me-1"></i>Export dataset
         </button>
       </div>
@@ -642,6 +631,54 @@
   <script src="./js/object-media.js?v=20260605"></script>
   <script src="./js/user-stats.js?v=20260605"></script>
   <script src="./js/startup.js?v=20260605"></script>
+
+  <!-- Export Dataset Modal -->
+  <div class="modal fade" id="export-dataset-modal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content export-modal-card">
+
+        <!-- Header gradient -->
+        <div class="export-modal-header">
+          <div class="export-modal-icon">
+            <i class="bi bi-collection-fill"></i>
+          </div>
+          <div>
+            <div class="export-modal-title">Export Dataset</div>
+            <div class="export-modal-subtitle" id="export-modal-version-hint">
+              Phien ban se duoc tu dong dat ten theo ngay
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body px-4 py-3">
+          <label class="export-modal-label">
+            <i class="bi bi-pencil-square me-1"></i>Ghi chu phien ban
+            <span class="export-modal-optional">tuy chon</span>
+          </label>
+          <textarea id="export-modal-note" class="export-modal-textarea"
+            rows="4"
+            placeholder="Vi du: them 30 anh meo, sua nhan kitchen_knife, bo anh kem chat luong..."></textarea>
+          <div class="export-modal-hint">
+            <i class="bi bi-info-circle me-1"></i>
+            Ten phien ban tu dong tao dang <code>v{YYYYMMDD}_{seq}</code>. Ghi chu giup ban truy vet thay doi giua cac lan export.
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer export-modal-footer">
+          <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x me-1"></i>Huy
+          </button>
+          <button class="btn btn-sm export-modal-btn-confirm" id="export-modal-confirm">
+            <i class="bi bi-download me-1"></i>Xuat file JSONL
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>

@@ -52,6 +52,8 @@ class HistoryAdapter(
         }
         if (statusText != null) {
             holder.binding.tvScanStatus.text = statusText
+            val colorRes = if (item.status == "rejected") R.color.error else R.color.warning
+            holder.binding.tvScanStatus.setTextColor(ContextCompat.getColor(holder.itemView.context, colorRes))
             holder.binding.tvScanStatus.visibility = View.VISIBLE
         } else {
             holder.binding.tvScanStatus.visibility = View.GONE

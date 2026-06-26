@@ -62,26 +62,46 @@ def list_predictions(
 
 
 @router.get("/predictions/export-training")
-def export_training_data(db: Session = Depends(get_db)):
-    """Xuất dữ liệu training — predictions Gemini đã duyệt, định dạng JSONL."""
-    records = training_service.export_training_data(db)
+def export_training_data(
+    ghi_chu: Optional[str] = Query(default=None, description="Ghi chú cho phiên bản dataset (tùy chọn)"),
+    db: Session = Depends(get_db),
+):
+    """Xuất dữ liệu training — predictions Gemini đã duyệt, định dạng JSONL.
+
+    Tự động tạo dataset version snapshot (tên dạng v{YYYYMMDD}_{seq}) và trả kèm header
+    X-Dataset-Version để client biết phiên bản vừa được đóng gói.
+    """
+    records, dataset = training_service.export_and_snapshot(db, ghi_chu=ghi_chu)
     content = "\n".join(_json.dumps(r, ensure_ascii=False) for r in records)
     return Response(
         content=content,
         media_type="application/x-ndjson",
-        headers={"Content-Disposition": "attachment; filename=yolo_training_data.jsonl"},
+        headers={
+            "Content-Disposition": "attachment; filename=yolo_training_data.jsonl",
+            "X-Dataset-Version": dataset.ma_phien_ban,
+        },
     )
 
 
 @router.get("/predictions/export-training-grouped")
-def export_training_grouped(db: Session = Depends(get_db)):
-    """Xuất training data gom nhóm theo object — mỗi object có danh sách ảnh đa góc độ."""
-    records = training_service.export_training_data_grouped(db)
+def export_training_grouped(
+    ghi_chu: Optional[str] = Query(default=None, description="Ghi chú cho phiên bản dataset (tùy chọn)"),
+    db: Session = Depends(get_db),
+):
+    """Xuất training data gom nhóm theo object — mỗi object có danh sách ảnh đa góc độ.
+
+    Tự động tạo dataset version snapshot (tên dạng v{YYYYMMDD}_{seq}) và trả kèm header
+    X-Dataset-Version để client biết phiên bản vừa được đóng gói.
+    """
+    records, dataset = training_service.export_and_snapshot_grouped(db, ghi_chu=ghi_chu)
     content = "\n".join(_json.dumps(r, ensure_ascii=False) for r in records)
     return Response(
         content=content,
         media_type="application/x-ndjson",
-        headers={"Content-Disposition": "attachment; filename=yolo_training_grouped.jsonl"},
+        headers={
+            "Content-Disposition": "attachment; filename=yolo_training_grouped.jsonl",
+            "X-Dataset-Version": dataset.ma_phien_ban,
+        },
     )
 
 

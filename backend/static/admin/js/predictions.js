@@ -102,39 +102,56 @@
 
     async function exportTrainingGrouped() {
 
-      const btn = document.getElementById('btn-export-grouped');
+      // Hien modal ghi chu � cho admin confirm hoac huy
+      const modalEl = document.getElementById('export-dataset-modal');
+      const modal = new bootstrap.Modal(modalEl);
+      const textarea = document.getElementById('export-modal-note');
+      const confirmBtn = document.getElementById('export-modal-confirm');
 
-      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Đang xuất...'; }
+      textarea.value = '';
+      modal.show();
+
+      const confirmed = await new Promise(resolve => {
+        const onConfirm = () => { cleanup(); resolve(true); };
+        const onHidden = () => { cleanup(); resolve(false); };
+        function cleanup() {
+          confirmBtn.removeEventListener('click', onConfirm);
+          modalEl.removeEventListener('hidden.bs.modal', onHidden);
+        }
+        confirmBtn.addEventListener('click', onConfirm, { once: true });
+        modalEl.addEventListener('hidden.bs.modal', onHidden, { once: true });
+      });
+
+      if (!confirmed) return;
+      modal.hide();
+
+      const btn = document.querySelector('[onclick="exportTrainingGrouped()"]');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Dang xuat...'; }
 
       try {
 
-        const res = await fetch('/api/admin/predictions/export-training-grouped', {
-
+        const note = textarea.value.trim();
+        const qs = note ? '?ghi_chu=' + encodeURIComponent(note) : '';
+        const res = await fetch('/api/admin/predictions/export-training-grouped' + qs, {
           headers: { 'Authorization': 'Bearer ' + TOKEN }
-
         });
 
         if (!res.ok) throw new Error('HTTP ' + res.status);
 
+        const version = res.headers.get('X-Dataset-Version') || '';
         const blob = await res.blob();
-
-        const url = URL.createObjectURL(blob);
-
+        const dlUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
-
-        a.href = url;
-
+        a.href = dlUrl;
         a.download = 'yolo_training_grouped.jsonl';
-
         a.click();
+        URL.revokeObjectURL(dlUrl);
 
-        URL.revokeObjectURL(url);
-
-        toast('Xuất grouped data thành công', 'success');
+        toast('Da xuat dataset' + (version ? ' \u2014 phien ban ' + version : ''), 'success');
 
       } catch (e) {
 
-        toast('Xuất thất bại: ' + e.message, 'danger');
+        toast('Xuat that bai: ' + e.message, 'danger');
 
       } finally {
 

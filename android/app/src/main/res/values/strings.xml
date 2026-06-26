@@ -84,7 +84,7 @@
     <string name="dashboard_greeting_evening">Chào buổi tối, %s!</string>
     <string name="dashboard_greeting_subtitle">Sẵn sàng học từ vựng mới chưa?</string>
     <string name="dashboard_brand_name">LengoLens.</string>
-    <string name="dashboard_search_hint">Tra từ hoặc quét đồ vật…</string>
+    <string name="dashboard_search_hint">Tra từ vựng…</string>
     <string name="dashboard_mastery_label">Mức độ thành thạo</string>
     <string name="dashboard_mastery_short">Thành thạo</string>
     <string name="dashboard_mastery_hint">Cố lên, sắp giỏi rồi!</string>
@@ -452,6 +452,8 @@
     <string name="history_empty_title">Chưa quét vật thể nào</string>
     <string name="history_empty">Hãy dùng camera để quét đồ vật xung quanh bạn!</string>
     <string name="history_empty_scan_cta">Quét vật thể đầu tiên</string>
+    <string name="history_empty_search_title">Không có kết quả phù hợp</string>
+    <string name="history_empty_search_subtitle">Hãy thử thay đổi từ khóa hoặc tìm kiếm với từ khác.</string>
     <string name="history_load_error">Không tải được lịch sử</string>
     <string name="history_delete_error">Không xoá được lịch sử</string>
     <string name="history_image">Ảnh lịch sử quét</string>
@@ -581,9 +583,12 @@
     <string name="collection_name_updated">Đã đổi tên thành \"%s\"</string>
     <string name="collection_name_update_error">Không đổi được tên bộ sưu tập: %s</string>
     <string name="collection_added">Đã thêm vào bộ sưu tập</string>
+    <string name="collection_already_added">Từ này đã có trong bộ sưu tập rồi</string>
     <string name="collection_removed">Đã xóa khỏi bộ sưu tập</string>
     <string name="collection_load_error">Không tải được danh sách bộ sưu tập</string>
     <string name="collection_saved_to">Đã lưu vào \"%1$s\"</string>
+    <string name="collection_already_in">Từ này đã có trong \"%1$s\" rồi</string>
+    <string name="collection_added_to">Đã thêm vào \"%1$s\" ✓</string>
     <string name="collection_save_error">Không thể lưu từ vựng, vui lòng thử lại</string>
     <string name="collection_word_count">%1$d từ</string>
     <string name="collection_tab_mine">Của tôi</string>
@@ -605,7 +610,6 @@
     <string name="collection_community_empty_title">Chưa có bộ sưu tập công khai</string>
     <string name="collection_community_empty_subtitle">Tạo bộ sưu tập ở tab Của tôi, rồi bật Công khai để chia sẻ tại đây.</string>
     <string name="collection_community_empty_cta">Tạo bộ sưu tập để chia sẻ</string>
-    <string name="collection_added_to">Đã thêm vào \"%s\"</string>
     <string name="collection_add_to">Thêm vào \"%s\"</string>
     <string name="collection_add_source_scan">Quét vật thể mới</string>
     <string name="collection_add_source_history">Chọn từ lịch sử quét</string>

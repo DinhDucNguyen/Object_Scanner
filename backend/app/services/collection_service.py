@@ -95,10 +95,10 @@ class CollectionService:
 
         existing = self.repo.get_item(db, collection_id, data.translation_id)
         if existing:
-            return {"message": "Đã có trong bộ sưu tập"}
+            return {"message": "Đã có trong bộ sưu tập", "already_exists": True}
         self.repo.add_item(db, CollectionItem(bo_suu_tap_id=collection_id, ban_dich_id=data.translation_id))
         db.commit()
-        return {"message": "Đã thêm vào bộ sưu tập"}
+        return {"message": "Đã thêm vào bộ sưu tập", "already_exists": False}
 
     def get_public_collections(self, db: Session, nguoi_dung_id: int):
         collections = self.repo.get_public(db, nguoi_dung_id)

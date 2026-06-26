@@ -40,7 +40,7 @@ interface CollectionApiService {
     suspend fun addToCollection(
         @Path("id") collectionId: Int,
         @Body request: AddToCollectionRequest
-    )
+    ): AddToCollectionResponse
     
     @DELETE("api/collections/{collectionId}/items/{translationId}")
     suspend fun removeFromCollection(

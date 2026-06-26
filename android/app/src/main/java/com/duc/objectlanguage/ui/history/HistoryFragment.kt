@@ -43,7 +43,7 @@ class HistoryFragment : Fragment() {
     private var currentStatusFilter = "all"
     private var selectedFromDate: String? = null
     private var selectedToDate: String? = null
-    private var skipNextResume = true 
+    private var targetCollectionId: Int = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHistoryBinding.inflate(inflater, container, false)
@@ -53,6 +53,8 @@ class HistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        targetCollectionId = arguments?.getInt("targetCollectionId") ?: 0
+
         binding.btnBack.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -60,13 +62,23 @@ class HistoryFragment : Fragment() {
             findNavController().navigate(R.id.scanFragment)
         }
 
+        // Khi mở từ bộ sưu tập: ẩn bộ lọc trạng thái và tự động bỏ từ đang chờ duyệt
+        if (targetCollectionId > 0) {
+            viewModel.setExcludePending(true)
+            binding.btnStatusFilter.visibility = View.GONE
+        }
+
         setupList()
         setupFilters()
         setupDateRange()
         setupSearch()
         setupObservers()
-        viewModel.load()
-        viewModel.loadAvatarUrl()
+
+        if (viewModel.items.value == null) {
+            viewModel.load()
+            viewModel.loadAvatarUrl()
+        }
+
         animateEntrance()
     }
 
@@ -335,6 +347,20 @@ class HistoryFragment : Fragment() {
     private fun updateEmptyStateView() {
         if (_binding == null) return
 
+        val isSearching = binding.etSearchHistory.text?.toString()?.isNotBlank() == true
+
+        if (isSearching) {
+            binding.flEmptyIconContainer.setBackgroundResource(R.drawable.bg_icon_primary)
+            binding.ivEmptyIcon.setImageResource(R.drawable.ic_search)
+            binding.ivEmptyIcon.imageTintList = android.content.res.ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.primary)
+            )
+            binding.tvEmptyTitle.setText(R.string.history_empty_search_title)
+            binding.tvEmptySubtitle.setText(R.string.history_empty_search_subtitle)
+            binding.btnEmptyScan.visibility = View.GONE
+            return
+        }
+
         when (currentStatusFilter) {
             "approved" -> {
                 binding.flEmptyIconContainer.setBackgroundResource(R.drawable.bg_icon_success)
@@ -406,11 +432,7 @@ class HistoryFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (skipNextResume) {
-            skipNextResume = false
-        } else if (_binding != null) {
-            viewModel.load()
-        }
+        // Removed unconditional reload to preserve scroll state and pagination
     }
 
     override fun onDestroyView() {

@@ -65,9 +65,15 @@ class SaveToCollectionBottomSheet : BottomSheetDialogFragment() {
         lifecycleScope.launch {
             val result = repo.addToCollection(collection.id, translationId)
             if (result.isSuccess) {
+                val resp = result.getOrNull()
+                val message = if (resp?.alreadyExists == true) {
+                    getString(R.string.collection_already_in, collection.name)
+                } else {
+                    getString(R.string.collection_added_to, collection.name)
+                }
                 Snackbar.make(
                     requireActivity().findViewById(android.R.id.content),
-                    getString(R.string.collection_saved_to, collection.name),
+                    message,
                     Snackbar.LENGTH_SHORT
                 ).show()
                 dismiss()

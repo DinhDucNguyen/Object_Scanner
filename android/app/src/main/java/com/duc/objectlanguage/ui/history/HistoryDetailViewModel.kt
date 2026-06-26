@@ -119,7 +119,12 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
                     viewModelScope.launch {
                         val addResult = collectionRepo.addToCollection(collection.id, translationId)
                         _addedMsg.value = if (addResult.isSuccess) {
-                            context.getString(R.string.collection_added_to, collection.name)
+                            val resp = addResult.getOrNull()
+                            if (resp?.alreadyExists == true) {
+                                context.getString(R.string.collection_already_in, collection.name)
+                            } else {
+                                context.getString(R.string.collection_added_to, collection.name)
+                            }
                         } else {
                             context.getString(
                                 R.string.review_error_format,
@@ -137,7 +142,12 @@ class HistoryDetailViewModel(application: Application) : AndroidViewModel(applic
         viewModelScope.launch {
             val result = collectionRepo.addToCollection(collectionId, translationId)
             _addedMsg.value = if (result.isSuccess) {
-                getApplication<Application>().getString(R.string.collection_added_to, collectionName)
+                val resp = result.getOrNull()
+                if (resp?.alreadyExists == true) {
+                    getApplication<Application>().getString(R.string.collection_already_in, collectionName)
+                } else {
+                    getApplication<Application>().getString(R.string.collection_added_to, collectionName)
+                }
             } else {
                 getApplication<Application>().getString(
                     R.string.review_error_format,

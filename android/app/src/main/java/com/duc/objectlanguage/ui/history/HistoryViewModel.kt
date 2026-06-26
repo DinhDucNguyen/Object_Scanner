@@ -58,6 +58,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     private var searchJob: Job? = null
     private var allItems = listOf<HistoryItem>()
     private var statusFilter = "all"
+    private var excludePending = false
 
     fun load(reset: Boolean = true) {
         if (reset) {
@@ -106,7 +107,9 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun setKeyword(value: String) {
-        keyword = value.trim().ifEmpty { null }
+        val newKeyword = value.trim().ifEmpty { null }
+        if (keyword == newKeyword) return
+        keyword = newKeyword
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             delay(350)
@@ -153,10 +156,14 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun applyFilter() {
-        val filtered = when (statusFilter) {
+        var filtered = when (statusFilter) {
             "pending" -> allItems.filter { it.status == "pending_review" }
             "approved" -> allItems.filter { it.status == "official" || it.status == "approved" }
             else -> allItems
+        }
+        // Khi mở từ bộ sưu tập: ẩn từ đang chờ duyệt (chưa có translation hợp lệ)
+        if (excludePending) {
+            filtered = filtered.filter { it.status != "pending_review" && it.status != "cho_duyet" }
         }
         _items.value = filtered
     }
@@ -166,6 +173,11 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             statusFilter = filter
             applyFilter()
         }
+    }
+
+    fun setExcludePending(exclude: Boolean) {
+        excludePending = exclude
+        applyFilter()
     }
 
     fun clearMessage() {
