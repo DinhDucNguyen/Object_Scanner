@@ -1,4 +1,4 @@
-package com.duc.objectlanguage.ui.scan
+﻿package com.duc.objectlanguage.ui.scan
 
 import android.Manifest
 import android.app.Activity
@@ -637,7 +637,7 @@ class ScanFragment : Fragment() {
                         detectorHelper?.detectBitmap(bmp)
                     }
                 }
-                viewModel.scanWithDetection(yoloResult, imageBytes)
+                viewModel.scanWithDetection(yoloResult, imageBytes, selectedModelName)
             }
         }
         dialogBinding.btnCropAgain.setOnClickListener {
@@ -756,7 +756,7 @@ class ScanFragment : Fragment() {
             cropLauncher.launch(intent)
         } catch (e: Exception) {
             Toast.makeText(requireContext(), getString(R.string.scan_error_open_crop, e.message), Toast.LENGTH_SHORT).show()
-            viewModel.scanWithDetection(null, imageBytes)
+            viewModel.scanWithDetection(null, imageBytes, selectedModelName)
         }
     }
 
@@ -911,3 +911,4 @@ class ScanFragment : Fragment() {
         _binding = null
     }
 }
+

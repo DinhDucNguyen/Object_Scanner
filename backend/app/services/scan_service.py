@@ -1,4 +1,4 @@
-import logging
+﻿import logging
 import uuid
 from pathlib import Path
 
@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from fastapi import BackgroundTasks
 
 from app.models.ai_feedback_report import AIPrediction, NguonAI, TrangThaiDuyet, VaiTroDuDoan
+from app.models.category import Category
 from app.models.language import Language
 from app.models.object import Object
 from app.models.object_alias import ObjectAlias
@@ -183,7 +184,9 @@ class ScanService:
         # Nếu nhận diện mơ hồ → leo lên model mạnh hơn để xác nhận + lấy vocab luôn
         if confidence < 80 or not is_clear:
             logger.info("Low confidence (%d, clear=%s), escalating to full identify", confidence, is_clear)
-            gemini_result = self.gemini.identify_object(image_bytes)
+            categories_records = db.query(Category).filter(Category.thoi_gian_xoa.is_(None)).all()
+            categories_str = ", ".join([c.ten_danh_muc for c in categories_records])
+            gemini_result = self.gemini.identify_object(image_bytes, categories_str=categories_str)
             if gemini_result.get("_error"):
                 return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
             object_code = normalize_object_code(gemini_result.get("object_code", "unknown") or "unknown")
@@ -209,7 +212,9 @@ class ScanService:
 
         # DB miss và chưa có vocab → gọi full identify để sinh vocab
         if gemini_result is None:
-            gemini_result = self.gemini.identify_object(image_bytes)
+            categories_records = db.query(Category).filter(Category.thoi_gian_xoa.is_(None)).all()
+            categories_str = ", ".join([c.ten_danh_muc for c in categories_records])
+            gemini_result = self.gemini.identify_object(image_bytes, categories_str=categories_str)
             if gemini_result.get("_error"):
                 return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
 
@@ -583,3 +588,4 @@ class ScanService:
             audio_url=audio_url,
             data_source=t.nguon_du_lieu.value if isinstance(t.nguon_du_lieu, NguonDuLieu) else (str(t.nguon_du_lieu) if t.nguon_du_lieu else None),
         ), audio_updated
+

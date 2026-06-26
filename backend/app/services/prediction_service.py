@@ -1,4 +1,4 @@
-"""
+﻿"""
 Prediction Service
 ==================
 Xử lý quy trình kiểm duyệt AI predictions (approve, reject, alias, split, v.v.)
@@ -900,7 +900,9 @@ class PredictionService:
             )
 
         # Sinh vocab mới cho object_code đúng bằng Gemini (text prompt)
-        vocab_result = self.gemini.generate_vocab_for_object_code(new_code)
+        categories_records = db.query(Category).filter(Category.thoi_gian_xoa.is_(None)).all()
+        categories_str = ", ".join([c.ten_danh_muc for c in categories_records])
+        vocab_result = self.gemini.generate_vocab_for_object_code(new_code, categories_str=categories_str)
         vocab_generated = "_error" not in vocab_result
 
         if vocab_generated:
@@ -993,3 +995,4 @@ class PredictionService:
             dich_nghia = None
         if cau_vi_du:
             db.add(ViDu(ban_dich_id=translation_id, cau_vi_du=cau_vi_du, dich_nghia=dich_nghia, nguon_du_lieu="thu_cong"))
+

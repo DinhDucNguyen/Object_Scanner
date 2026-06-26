@@ -1,4 +1,4 @@
-    /* â”€â”€â”€ Code chip â”€â”€â”€ */
+﻿    /* â”€â”€â”€ Code chip â”€â”€â”€ */
     code {
       background: #f1f5f9;
       color: var(--primary);
@@ -724,7 +724,7 @@
 
     .approve-basic-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 170px;
+      grid-template-columns: repeat(2, 1fr);
       gap: .9rem;
     }
 
@@ -872,3 +872,4 @@
       background: #f0f4ff;
       margin-top: -.25rem;
     }
+

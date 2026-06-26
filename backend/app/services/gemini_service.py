@@ -1,4 +1,4 @@
-import json
+﻿import json
 import logging
 import re
 from google import genai
@@ -119,7 +119,7 @@ Return ONLY JSON."""
             logger.error("identify_object_quick error: %s", e)
             return {"_error": "api_error", "_message": str(e)}
 
-    def identify_object(self, image_bytes: bytes) -> dict:
+    def identify_object(self, image_bytes: bytes, categories_str: str = "") -> dict:
         """Bước 2: nhận diện đầy đủ — trả object + toàn bộ vocab.
         Gọi khi quick check thất bại hoặc object chưa có trong DB."""
         if not self.client:
@@ -127,29 +127,31 @@ Return ONLY JSON."""
 
         logger.debug("Calling Gemini API with image size: %d bytes", len(image_bytes))
 
-        prompt = """Analyze this image and identify the main object. Return a JSON object with this exact format:
-{
+        cat_list = categories_str if categories_str else "Con người, Phương tiện, Động vật, Phụ kiện, Nhà bếp, Thực phẩm, Nội thất, Đồ công nghệ, Đồ dùng học tập, Biển báo & đô thị"
+
+        prompt = f"""Analyze this image and identify the main object. Return a JSON object with this exact format:
+{{
     "object_code": "english_name_lowercase_no_spaces",
     "category": "one category from the list below",
     "translations": [
-        {
+        {{
             "lang_code": "en",
             "word_name": "English name",
             "phonetic": "/IPA transcription/",
             "part_of_speech": "n",
             "definition": "từ tiếng Việt: giải thích ngắn gọn bằng tiếng Việt",
             "example_sentences": [
-                {"en": "Example sentence 1 using the word.", "vi": "Câu ví dụ 1 bằng tiếng Việt."},
-                {"en": "Example sentence 2 using the word.", "vi": "Câu ví dụ 2 bằng tiếng Việt."},
-                {"en": "Example sentence 3 using the word.", "vi": "Câu ví dụ 3 bằng tiếng Việt."}
+                {{"en": "Example sentence 1 using the word.", "vi": "Câu ví dụ 1 bằng tiếng Việt."}},
+                {{"en": "Example sentence 2 using the word.", "vi": "Câu ví dụ 2 bằng tiếng Việt."}},
+                {{"en": "Example sentence 3 using the word.", "vi": "Câu ví dụ 3 bằng tiếng Việt."}}
             ]
-        }
+        }}
     ]
-}
+}}
 
 Rules:
 - object_code: lowercase English, underscores for spaces (e.g., "water_bottle")
-- category: choose EXACTLY one from this list (use the exact Vietnamese name): Con người, Phương tiện, Động vật, Phụ kiện, Thể thao, Nhà bếp, Thực phẩm, Nội thất, Điện tử, Đồ gia dụng, Đồ dùng học tập, Biển báo & đô thị
+- category: choose EXACTLY one from this list (use the exact Vietnamese name): {cat_list}
 - phonetic: IPA format with slashes (e.g., /ˈæp.əl/)
 - part_of_speech: use abbreviations ONLY — n (noun), v (verb), adj (adjective), adv (adverb), prep (preposition), conj (conjunction), pron (pronoun), interj (interjection)
 - definition: format MUST be "Vietnamese word: brief Vietnamese explanation" (e.g., "máy tính xách tay: thiết bị điện tử cầm tay dùng để làm việc")
@@ -200,12 +202,14 @@ Rules:
             logger.error("Gemini API error: %s", e, exc_info=True)
             return {"_error": "api_error", "_message": str(e)}
 
-    def generate_vocab_for_object_code(self, object_code: str) -> dict:
+    def generate_vocab_for_object_code(self, object_code: str, categories_str: str = "") -> dict:
         """Sinh dữ liệu từ vựng cho object_code bằng text prompt (không cần ảnh)."""
         if not self.client:
             return {"_error": "no_model", "_message": "Gemini not configured"}
 
         display_name = object_code.replace("_", " ")
+        cat_list = categories_str if categories_str else "Con người, Phương tiện, Động vật, Phụ kiện, Nhà bếp, Thực phẩm, Nội thất, Đồ công nghệ, Đồ dùng học tập, Biển báo & đô thị"
+
         prompt = f"""Generate vocabulary data for the object: "{display_name}"
 
 Return a JSON object with this exact format:
@@ -242,7 +246,7 @@ Return a JSON object with this exact format:
 
 Rules:
 - object_code: keep exactly as "{object_code}"
-- category: choose EXACTLY one from: Con nguoi, Phuong tien, Dong vat, Phu kien, The thao, Nha bep, Thuc pham, Noi that, Dien tu, Do gia dung, Do dung hoc tap, Bien bao & do thi
+- category: choose EXACTLY one from this list (use the exact Vietnamese name): {cat_list}
 - phonetic: IPA format with slashes (e.g., /ap.el/), null if unknown
 - part_of_speech: n/v/adj/adv only
 - example_sentences: EXACTLY 3 per language
@@ -412,3 +416,4 @@ Return ONLY valid JSON, no markdown or extra text."""
         result["object_code"] = object_code
         result["translations"] = translations
         return result
+

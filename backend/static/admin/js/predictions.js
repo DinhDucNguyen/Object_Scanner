@@ -1,4 +1,4 @@
-    // ============================================================
+﻿    // ============================================================
 
     // Predictions
 
@@ -102,7 +102,7 @@
 
     async function exportTrainingGrouped() {
 
-      // Hien modal ghi chu � cho admin confirm hoac huy
+      // Hien modal ghi chu � cho admin confirm hoac huy
       const modalEl = document.getElementById('export-dataset-modal');
       const modal = new bootstrap.Modal(modalEl);
       const textarea = document.getElementById('export-modal-note');
@@ -410,9 +410,10 @@
 
         if (vp) {
 
-          html += `<p class="fw-bold mb-2" style="font-size:.85rem;">
-
-        <i class="bi bi-book text-primary me-1"></i>Vocab Payload — <code style="font-size:.82rem;">${vp.object_code}</code></p>`;
+          html += `<p class="fw-bold mb-2 d-flex align-items-center" style="font-size:.85rem;">
+        <i class="bi bi-book text-primary me-1"></i>Vocab Payload - <code class="ms-1 me-2" style="font-size:.82rem;">${vp.object_code}</code>
+        <span class="badge" style="background:#e0f2fe;color:#0369a1;"><i class="bi bi-folder2-open me-1"></i>${vp.category || 'Chưa phân loại'}</span>
+      </p>`;
 
           (vp.translations || []).forEach(t => {
 
@@ -921,64 +922,46 @@
 
     async function showApproveForm(id) {
 
-      const p = await apiJSON(`/predictions/${id}`).catch(() => null);
-
+      const [p, cats] = await Promise.all([
+        apiJSON(`/predictions/${id}`).catch(() => null),
+        apiJSON('/categories').catch(() => [])
+      ]);
       const vp = p?.vocab_payload;
-
       const firstTrans = vp?.translations?.[0] || {};
-
       const exampleEditors = renderApproveExampleEditors(firstTrans.example_sentences || []);
 
-
+      const catOptions = cats.map(c => `<option value="${c.id}" ${vp?.category === c.ten_danh_muc ? 'selected' : ''}>${c.ten_danh_muc}</option>`).join('');
 
       document.getElementById('pm-body').innerHTML = `
-
     <div class="approve-note">
-
       <i class="bi bi-pencil-square"></i>
-
       <span>Chỉnh sửa trước khi duyệt. <strong>Để trống = giữ nguyên giá trị Gemini.</strong></span>
-
     </div>
 
-
-
     <div class="approve-card">
-
       <p class="approve-card-title">Thông tin cơ bản</p>
-
       <div class="approve-basic-grid mb-3">
-
         <div>
-
           <label class="form-label mb-1">Từ vựng</label>
-
           <input id="ov-word" class="form-control form-control-sm" placeholder="vd: Eraser" value="${escHtml(firstTrans.word_name || '')}">
-
         </div>
-
         <div>
-
           <label class="form-label mb-1">Phiên âm (IPA)</label>
-
-          <input id="ov-phonetic" class="form-control form-control-sm" placeholder="vd: /ɪˈreɪ.zər/" value="${escHtml(firstTrans.phonetic || '')}">
-
+          <input id="ov-phonetic" class="form-control form-control-sm" placeholder="vd: /ˈɪ.zər/" value="${escHtml(firstTrans.phonetic || '')}">
         </div>
-
         <div>
-
           <label class="form-label mb-1">Loại từ</label>
-
           <input id="ov-pos" class="form-control form-control-sm" placeholder="n / v / adj" value="${escHtml(firstTrans.part_of_speech || '')}">
-
         </div>
-
+        <div>
+          <label class="form-label mb-1">Danh mục</label>
+          <select id="ov-cat" class="form-select form-select-sm">
+            <option value="">-- Mặc định (Theo Gemini) --</option>
+            ${catOptions}
+          </select>
+        </div>
       </div>
-
-
-
       <div>
-
         <label class="form-label mb-1">Định nghĩa</label>
 
         <textarea id="ov-def" class="form-control form-control-sm" style="resize:none;line-height:1.55;" placeholder="Nhập định nghĩa...">${escHtml(firstTrans.definition || '')}</textarea>
@@ -1051,17 +1034,14 @@
 
 
 
+      const catVal = document.getElementById('ov-cat')?.value;
       const overrides = {};
-
       if (word) overrides.override_word_name = word;
-
       if (phonetic) overrides.override_phonetic = phonetic;
-
       if (pos) overrides.override_part_of_speech = pos;
-
       if (def) overrides.override_definition = def;
-
       if (examples.length) overrides.override_example_sentences = examples;
+      if (catVal) overrides.category_id = parseInt(catVal);
 
 
 
@@ -1160,3 +1140,7 @@
       } catch (_) { }
 
     }
+
+
+
+
