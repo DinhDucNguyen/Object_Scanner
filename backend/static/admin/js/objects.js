@@ -43,6 +43,8 @@
                 ${aliases.map(a => `<span class="alias-chip cell-ellipsis" title="${escHtml(a.ma_bi_danh || '')}">${escHtml(a.ma_bi_danh || '')}</span>`).join('')}
                 ${(o.aliases || []).length > aliases.length ? `<span class="alias-chip">+${(o.aliases || []).length - aliases.length}</span>` : ''}
               </div>` : '';
+            window._objReg = window._objReg || {};
+            window._objReg[o.id] = o;
             return `
           <tr data-has-image="${o.has_image ? '1' : '0'}">
             <td class="stt-cell">${pageData.start + idx + 1}</td>
@@ -61,16 +63,7 @@
               <div class="btn-actions object-actions">
                 <button class="btn-act" style="position:relative;" onclick="openObjMediaModal(${objectCodeArg})" title="${!o.has_image ? 'Thêm ảnh đại diện' : 'Quản lý ảnh'}"><i class="bi bi-image"></i>${!o.has_image ? '<span style="position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:#f59e0b;display:block;"></span>' : ''}</button>
                 <button class="btn-act" onclick='openEditObjModal(${JSON.stringify(o)})' title="Sửa"><i class="bi bi-pencil"></i></button>
-                <div class="dropdown action-menu">
-                  <button class="btn-act dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác">
-                    <i class="bi bi-three-dots"></i>
-                  </button>
-                  <ul class="dropdown-menu dropdown-menu-end">
-                    <li><button type="button" class="dropdown-item" onclick='openObjectAliasModal(${JSON.stringify(o)})'><i class="bi bi-link-45deg"></i>Tên gọi khác</button></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><button type="button" class="dropdown-item text-danger" onclick="deleteObj(${o.id})"><i class="bi bi-trash3"></i>Xoá đối tượng</button></li>
-                  </ul>
-                </div>
+                <button class="btn-act" type="button" title="Thao tác khác" onclick="showObjMenu(event,${o.id})"><i class="bi bi-three-dots"></i></button>
               </div>
             </td>
           </tr>`;
@@ -397,3 +390,57 @@
       objectOnlyNoImage = false;
       reloadPagedTable('objects');
     }
+
+    // Custom popup menu - render ra body để tránh bị clip bởi table overflow
+    let _objMenuEl = null;
+    let _objMenuBtn = null;
+    function showObjMenu(event, objId) {
+      event.stopPropagation();
+      const btn = event.currentTarget;
+      // Nếu menu đang mở và nhấn cùng 1 nút → đóng lại (toggle)
+      if (_objMenuEl) {
+        _objMenuEl.remove();
+        _objMenuEl = null;
+        const wasBtn = _objMenuBtn;
+        _objMenuBtn = null;
+        if (wasBtn === btn) return;
+      }
+      const o = (window._objReg || {})[objId];
+      if (!o) return;
+      _objMenuBtn = btn;
+      const rect = btn.getBoundingClientRect();
+      const menu = document.createElement('div');
+      menu.id = '_objMenu';
+      menu.style.cssText = 'position:fixed;z-index:9999;background:#fff;border:1px solid #dbe3ea;border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.12);min-width:190px;padding:4px 0;font-size:.82rem';
+      const aliasBtn = document.createElement('button');
+      aliasBtn.className = 'obj-popup-item';
+      aliasBtn.innerHTML = '<i class="bi bi-link-45deg"></i> Tên gọi khác';
+      aliasBtn.onclick = () => { menu.remove(); _objMenuEl = null; _objMenuBtn = null; openObjectAliasModal(o); };
+      const sep = document.createElement('div');
+      sep.style.cssText = 'height:1px;background:#f1f5f9;margin:4px 0';
+      const delBtn = document.createElement('button');
+      delBtn.className = 'obj-popup-item text-danger';
+      delBtn.innerHTML = '<i class="bi bi-trash3"></i> Xoá đối tượng';
+      delBtn.onclick = () => { menu.remove(); _objMenuEl = null; _objMenuBtn = null; deleteObj(o.id); };
+      menu.appendChild(aliasBtn);
+      menu.appendChild(sep);
+      menu.appendChild(delBtn);
+      let top = rect.bottom + 4;
+      let left = rect.right - 190;
+      if (left < 8) left = 8;
+      menu.style.top = top + 'px';
+      menu.style.left = left + 'px';
+      document.body.appendChild(menu);
+      _objMenuEl = menu;
+      setTimeout(() => {
+        document.addEventListener('click', function close(e) {
+          if (!menu.contains(e.target)) {
+            menu.remove();
+            _objMenuEl = null;
+            _objMenuBtn = null;
+            document.removeEventListener('click', close);
+          }
+        });
+      }, 10);
+    }
+

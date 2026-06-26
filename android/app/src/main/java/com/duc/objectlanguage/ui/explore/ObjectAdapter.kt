@@ -40,6 +40,13 @@ class ObjectAdapter(
                     .error(R.drawable.ic_image_placeholder)
                     .into(binding.objectImage)
             }
+
+            if (item.isTemporaryImage) {
+                binding.labelTemporary.visibility = android.view.View.VISIBLE
+            } else {
+                binding.labelTemporary.visibility = android.view.View.GONE
+            }
+
             binding.root.setOnClickListener { onClick(item) }
         }
     }

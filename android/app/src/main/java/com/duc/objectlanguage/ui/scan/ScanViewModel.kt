@@ -1,4 +1,4 @@
-﻿package com.duc.objectlanguage.ui.scan
+package com.duc.objectlanguage.ui.scan
 
 import android.app.Application
 import android.graphics.BitmapFactory
@@ -287,7 +287,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
         try {
             val bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
                 ?: return imageBytes
-            val maxSize = 800
+            val maxSize = 1600
             val ratio = maxSize.toFloat() / maxOf(bitmap.width, bitmap.height)
             
             val resized = if (ratio < 1.0f) {
@@ -297,7 +297,7 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
             } else bitmap
             
             val stream = java.io.ByteArrayOutputStream()
-            resized.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, stream)
+            resized.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, stream)
             val compressed = stream.toByteArray()
             if (resized !== bitmap) resized.recycle()
             bitmap.recycle()

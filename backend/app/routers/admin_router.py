@@ -360,21 +360,27 @@ def list_users(
 
 
 @router.put("/users/{nguoi_dung_id}/role")
-def update_user_role(nguoi_dung_id: int, req: UserRoleUpdate, db: Session = Depends(get_db)):
+def update_user_role(nguoi_dung_id: int, req: UserRoleUpdate, db: Session = Depends(get_db), admin_id: int = Depends(require_admin_nguoi_dung_id)):
+    if nguoi_dung_id == admin_id:
+        raise HTTPException(400, "Bạn không thể tự thay đổi vai trò của chính mình!")
     if not admin_service.update_user_role(db, nguoi_dung_id, req):
         raise HTTPException(404, "Không tìm thấy người dùng")
     return {"message": "Đã cập nhật vai trò"}
 
 
 @router.put("/users/{nguoi_dung_id}/status")
-def update_user_status(nguoi_dung_id: int, req: UserStatusUpdate, db: Session = Depends(get_db)):
+def update_user_status(nguoi_dung_id: int, req: UserStatusUpdate, db: Session = Depends(get_db), admin_id: int = Depends(require_admin_nguoi_dung_id)):
+    if nguoi_dung_id == admin_id:
+        raise HTTPException(400, "Bạn không thể tự khóa hoặc mở khóa tài khoản của chính mình!")
     if not admin_service.update_user_status(db, nguoi_dung_id, req):
         raise HTTPException(404, "Không tìm thấy người dùng")
     return {"message": "Đã cập nhật trạng thái"}
 
 
 @router.delete("/users/{nguoi_dung_id}")
-def delete_user(nguoi_dung_id: int, db: Session = Depends(get_db)):
+def delete_user(nguoi_dung_id: int, db: Session = Depends(get_db), admin_id: int = Depends(require_admin_nguoi_dung_id)):
+    if nguoi_dung_id == admin_id:
+        raise HTTPException(400, "Bạn không thể tự xoá tài khoản của chính mình!")
     if not admin_service.delete_user(db, nguoi_dung_id):
         raise HTTPException(404, "Không tìm thấy người dùng")
     return {"message": "Đã xoá người dùng"}

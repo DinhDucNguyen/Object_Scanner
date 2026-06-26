@@ -1,4 +1,4 @@
-﻿package com.duc.objectlanguage.ui.scan
+package com.duc.objectlanguage.ui.scan
 
 import android.Manifest
 import android.app.Activity
@@ -108,7 +108,7 @@ class ScanFragment : Fragment() {
                     restartCameraIfPermitted()
                     return@launch
                 }
-                showPreviewDialog(imageBytes, bitmap)
+                showPreviewDialog(imageBytes, previewBitmap = bitmap)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 Toast.makeText(requireContext(), getString(R.string.scan_error_read_image_detail, e.message), Toast.LENGTH_LONG).show()
@@ -128,7 +128,7 @@ class ScanFragment : Fragment() {
                 val croppedBytes = requireContext().contentResolver.openInputStream(croppedUri)?.use { it.readBytes() }
                 if (croppedBytes != null) {
                     val croppedBitmap = BitmapFactory.decodeByteArray(croppedBytes, 0, croppedBytes.size)
-                    showPreviewDialog(croppedBytes, croppedBitmap)
+                    showPreviewDialog(croppedBytes, previewBitmap = croppedBitmap)
                 }
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), getString(R.string.scan_error_read_cropped_image, e.message), Toast.LENGTH_SHORT).show()
@@ -546,16 +546,19 @@ class ScanFragment : Fragment() {
                             bitmap.recycle()
                         }
                         
+                        // Nén ảnh gốc (toàn cảnh) dùng cho tính năng Cắt lại (Re-crop)
+                        val originalJpegBytes = bitmapToJpegBytes(rotatedBitmap, quality = 85)
+                        
                         val framedBitmap = cropBitmapToPreviewAspect(rotatedBitmap)
                         if (framedBitmap !== rotatedBitmap) {
                             rotatedBitmap.recycle()
                         }
 
-                        // Convert sang JPEG bytes
+                        // Convert sang JPEG bytes cho ảnh preview/mặc định
                         val jpegBytes = bitmapToJpegBytes(framedBitmap)
                         
                         // YOLO runs after the user confirms the preview.
-                        showPreviewDialog(jpegBytes, framedBitmap)
+                        showPreviewDialog(jpegBytes, originalJpegBytes, framedBitmap)
                     } catch (e: Exception) {
                         image.close()
                         Toast.makeText(requireContext(), getString(R.string.scan_error_process_image, e.message), Toast.LENGTH_LONG).show()
@@ -613,7 +616,7 @@ class ScanFragment : Fragment() {
         return stream.toByteArray()
     }
 
-    private fun showPreviewDialog(imageBytes: ByteArray, previewBitmap: Bitmap? = null) {
+    private fun showPreviewDialog(imageBytes: ByteArray, originalJpegBytes: ByteArray? = null, previewBitmap: Bitmap? = null) {
         val bitmap = previewBitmap ?: BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
         lastScannedBitmap = bitmap
 
@@ -642,7 +645,7 @@ class ScanFragment : Fragment() {
         }
         dialogBinding.btnCropAgain.setOnClickListener {
             dialog.dismiss()
-            launchCrop(imageBytes)
+            launchCrop(originalJpegBytes ?: imageBytes)
         }
         dialogBinding.btnRetakePreview.setOnClickListener {
             dialog.dismiss()

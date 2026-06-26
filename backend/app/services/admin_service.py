@@ -76,7 +76,9 @@ class AdminService:
     # ------------------------------------------------------------------
 
     def get_dashboard_stats(self, db: Session) -> DashboardStats:
-        from sqlalchemy import exists
+        from sqlalchemy import exists, func, desc, cast, Date
+        from datetime import timedelta
+        
         has_media_subq = exists().where(
             (ObjectMedia.doi_tuong_id == Object.id) &
             ObjectMedia.thoi_gian_xoa.is_(None)
@@ -91,6 +93,46 @@ class AdminService:
                 AIPrediction.trang_thai == status,
                 AIPrediction.vai_tro == VaiTroDuDoan.chinh,
             ).count()
+            
+        # 1. Top objects
+        from app.schemas.admin import TopObjectStat, RecentUser, CategoryStat, RecentScanStat
+        top_objects_query = db.query(
+            ScanHistory.doi_tuong_id,
+            Object.ma_doi_tuong,
+            func.count(ScanHistory.id).label("count")
+        ).join(Object, ScanHistory.doi_tuong_id == Object.id)\
+         .filter(ScanHistory.doi_tuong_id.isnot(None))\
+         .group_by(ScanHistory.doi_tuong_id, Object.ma_doi_tuong)\
+         .order_by(desc("count"))\
+         .limit(5).all()
+        top_objects = [TopObjectStat(doi_tuong_id=r[0], ma_doi_tuong=r[1], count=r[2]) for r in top_objects_query]
+
+        # 2. Recent users
+        recent_users_query = db.query(User).filter(User.thoi_gian_xoa.is_(None)).order_by(desc(User.ngay_tao)).limit(5).all()
+        recent_users = [RecentUser(id=u.id, ten_dang_nhap=u.ten_dang_nhap, ngay_tao=u.ngay_tao) for u in recent_users_query]
+
+        # 3. Category stats
+        category_stats_query = db.query(
+            Object.danh_muc_id,
+            Category.ten_danh_muc,
+            func.count(Object.id).label("count")
+        ).outerjoin(Category, Object.danh_muc_id == Category.id)\
+         .filter(Object.thoi_gian_xoa.is_(None))\
+         .group_by(Object.danh_muc_id, Category.ten_danh_muc)\
+         .all()
+        category_stats = [CategoryStat(danh_muc_id=r[0], category_name=r[1] or 'Không xác định', count=r[2]) for r in category_stats_query]
+
+        # 4. Recent scans (last 14 days)
+        now_date = dt.now()
+        fourteen_days_ago = now_date - timedelta(days=14)
+        recent_scans_query = db.query(
+            cast(ScanHistory.thoi_gian, Date).label('date'),
+            func.count(ScanHistory.id).label('count')
+        ).filter(ScanHistory.thoi_gian >= fourteen_days_ago)\
+         .group_by(cast(ScanHistory.thoi_gian, Date))\
+         .order_by(cast(ScanHistory.thoi_gian, Date))\
+         .all()
+        recent_scans = [RecentScanStat(date=r[0].isoformat(), count=r[1]) for r in recent_scans_query]
 
         return DashboardStats(
             total_users=db.query(User).filter(User.thoi_gian_xoa.is_(None)).count(),
@@ -101,6 +143,10 @@ class AdminService:
             approved_predictions=_visible_count(TrangThaiDuyet.da_duyet),
             rejected_predictions=_visible_count(TrangThaiDuyet.tu_choi),
             objects_without_images=objects_without_images,
+            top_objects=top_objects,
+            recent_users=recent_users,
+            category_stats=category_stats,
+            recent_scans=recent_scans
         )
 
     # ------------------------------------------------------------------

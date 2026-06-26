@@ -58,11 +58,24 @@ class DataService:
     def get_all_objects(self, db: Session, category_id: Optional[int] = None):
         objects = self.obj_repo.get_all(db, category_id)
         result = []
+        from app.models.scan_history import ScanHistory
         for obj in objects:
             primary_translation = next(
                 (t for t in obj.translations if getattr(t, "thoi_gian_xoa", None) is None),
                 None,
             )
+            
+            image_url = pick_primary_object_image(obj)
+            is_temporary_image = False
+            if not image_url:
+                latest_scan = db.query(ScanHistory).filter(
+                    ScanHistory.doi_tuong_id == obj.id,
+                    ScanHistory.url_anh.isnot(None)
+                ).order_by(ScanHistory.thoi_gian.desc()).first()
+                if latest_scan:
+                    image_url = latest_scan.url_anh
+                    is_temporary_image = True
+
             result.append({
                 "id": obj.id,
                 "object_code": obj.ma_doi_tuong,
@@ -73,7 +86,8 @@ class DataService:
                 "phonetic": primary_translation.phien_am if primary_translation else None,
                 "definition": primary_translation.dinh_nghia if primary_translation else None,
                 "translation_id": primary_translation.id if primary_translation else None,
-                "image_url": pick_primary_object_image(obj),
+                "image_url": image_url,
+                "is_temporary_image": is_temporary_image,
             })
         return result
 

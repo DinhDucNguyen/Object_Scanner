@@ -357,6 +357,25 @@ class UserStatsAdminResponse(BaseModel):
 # Dashboard
 # ---------------------------------------------------------------------------
 
+class TopObjectStat(BaseModel):
+    doi_tuong_id: Optional[int]
+    ma_doi_tuong: str
+    count: int
+
+class RecentUser(BaseModel):
+    id: int
+    ten_dang_nhap: str
+    ngay_tao: datetime
+
+class CategoryStat(BaseModel):
+    danh_muc_id: Optional[int]
+    category_name: str
+    count: int
+
+class RecentScanStat(BaseModel):
+    date: str
+    count: int
+
 class DashboardStats(BaseModel):
     total_users: int = 0
     total_objects: int = 0
@@ -366,3 +385,7 @@ class DashboardStats(BaseModel):
     approved_predictions: int = 0
     rejected_predictions: int = 0
     objects_without_images: int = 0
+    top_objects: List[TopObjectStat] = []
+    recent_users: List[RecentUser] = []
+    category_stats: List[CategoryStat] = []
+    recent_scans: List[RecentScanStat] = []

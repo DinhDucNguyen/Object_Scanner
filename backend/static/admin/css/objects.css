@@ -1,4 +1,4 @@
-﻿    /* â”€â”€â”€ Code chip â”€â”€â”€ */
+    /* â”€â”€â”€ Code chip â”€â”€â”€ */
     code {
       background: #f1f5f9;
       color: var(--primary);
@@ -551,8 +551,18 @@
     #section-users .table { min-width: 1110px; }
 
     #section-users .panel,
-    #section-users .table-responsive {
-      overflow: visible;
+    #section-users .table-responsive,
+    #section-objects .panel,
+    #section-objects .table-responsive,
+    #section-predictions .panel,
+    #section-predictions .table-responsive,
+    #section-translations .panel,
+    #section-translations .table-responsive,
+    #section-scan-history .panel,
+    #section-scan-history .table-responsive,
+    #section-categories .panel,
+    #section-categories .table-responsive {
+      overflow: visible !important;
     }
 
     #section-users .btn-actions {
@@ -589,6 +599,42 @@
       align-items: center;
       justify-content: center;
       gap: .3rem;
+    }
+
+    .obj-popup-item {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      width: 100%;
+      padding: .42rem 1rem;
+      background: none;
+      border: none;
+      text-align: left;
+      font-size: .82rem;
+      font-weight: 500;
+      color: #0f172a;
+      cursor: pointer;
+      transition: background .12s ease;
+      white-space: nowrap;
+    }
+
+    .obj-popup-item:hover {
+      background: #f8fafc;
+    }
+
+    .obj-popup-item.text-danger {
+      color: #dc2626;
+    }
+
+    .obj-popup-item i {
+      width: 16px;
+      text-align: center;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    .obj-popup-item.text-danger i {
+      color: #dc2626;
     }
 
 .object-note {

@@ -4,7 +4,7 @@
       border-radius: var(--radius-lg);
       box-shadow: var(--card-shadow);
       border: 1px solid var(--border);
-      overflow: hidden;
+      overflow: visible;
       animation: adminPanelIn .2s cubic-bezier(.2, .8, .2, 1) both;
       transition: box-shadow .18s ease, border-color .18s ease;
     }
@@ -24,6 +24,7 @@
       font-weight: 700;
       color: var(--text-2);
       background: #fafbfc;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
 
     .table {

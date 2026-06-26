@@ -1,43 +1,59 @@
     // ============================================================
     // Categories
     // ============================================================
-    async function loadCategories() {
+        async function loadCategories() {
       const tbody = document.getElementById('cat-body');
       if (tbody) tbody.innerHTML = loadingRow(4);
       try {
         categories = await apiJSON('/categories');
-        const filterEl = document.getElementById('obj-cat-filter');
-        if (filterEl) {
-          const cur = filterEl.value;
-          filterEl.innerHTML = '<option value="">Tất cả danh mục</option>' +
-            categories.map(c => `<option value="${c.id}" ${String(c.id) === cur ? 'selected' : ''}>${c.ten_danh_muc}</option>`).join('');
-        }
-        const tbody = document.getElementById('cat-body');
-        if (!tbody) return;
-        const pageData = getPagedRows('categories', categories);
-        renderTablePagination('categories', pageData);
-        const countEl = document.querySelector('#section-categories .result-count');
-        if (countEl) countEl.textContent = categories.length ? `${categories.length} danh mục` : '';
-        tbody.innerHTML = categories.length
-          ? pageData.rows.map((c, idx) => {
-            const parentName = categories.find(x => x.id === c.danh_muc_cha)?.ten_danh_muc;
-            return `<tr>
-            <td class="stt-cell">${pageData.start + idx + 1}</td>
-            <td class="text-muted">${c.id}</td>
-            <td class="fw-semibold">${c.ten_danh_muc || '—'}</td>
-            <td>${parentName ? `<span class="badge badge-neutral">${parentName}</span>` : '<span class="text-muted">—</span>'}</td>
-            <td class="text-muted" style="font-size:.82rem;">${c.mo_ta || '—'}</td>
-            <td><span class="badge badge-neutral">${c.object_count ?? 0}</span></td>
-            <td>
-              <div class="btn-actions">
-                <button class="btn-act" onclick='openEditCatModal(${JSON.stringify(c)})' title="Sửa"><i class="bi bi-pencil"></i></button>
-                <button class="btn-act del" onclick="deleteCat(${c.id})" title="Xoá"><i class="bi bi-trash3"></i></button>
-              </div>
-            </td>
-          </tr>`;
-          }).join('')
-          : emptyRow(7, 'bi-folder-x', 'Chưa có danh mục nào');
+        renderCategories();
       } catch (e) { toast('Lỗi tải danh mục: ' + e.message, 'danger'); }
+    }
+
+    function renderCategories() {
+      const filterEl = document.getElementById('obj-cat-filter');
+      if (filterEl) {
+        const cur = filterEl.value;
+        filterEl.innerHTML = '<option value="">Tất cả danh mục</option>' +
+          categories.map(c => `<option value="${c.id}" ${String(c.id) === cur ? 'selected' : ''}>${c.ten_danh_muc}</option>`).join('');
+      }
+      const tbody = document.getElementById('cat-body');
+      if (!tbody) return;
+      
+      let filtered = [...categories];
+      const q = document.getElementById('cat-search')?.value.trim().toLowerCase();
+      if (q) {
+        filtered = filtered.filter(c => 
+          (c.ten_danh_muc && c.ten_danh_muc.toLowerCase().includes(q)) || 
+          String(c.id) === q ||
+          (c.mo_ta && c.mo_ta.toLowerCase().includes(q))
+        );
+      }
+      
+      if (q) tablePages['categories'] = 1; // Reset to page 1 when searching
+      const pageData = getPagedRows('categories', filtered);
+      renderTablePagination('categories', pageData);
+      const countEl = document.querySelector('#section-categories .result-count');
+      if (countEl) countEl.textContent = filtered.length ? `${filtered.length} danh mục` : '';
+      tbody.innerHTML = filtered.length
+        ? pageData.rows.map((c, idx) => {
+          const parentName = categories.find(x => x.id === c.danh_muc_cha)?.ten_danh_muc;
+          return `<tr>
+          <td class="stt-cell">${pageData.start + idx + 1}</td>
+          <td class="text-muted">${c.id}</td>
+          <td class="fw-semibold">${c.ten_danh_muc || '—'}</td>
+          <td>${parentName ? `<span class="badge badge-neutral">${parentName}</span>` : '<span class="text-muted">—</span>'}</td>
+          <td class="text-muted" style="font-size:.82rem;">${c.mo_ta || '—'}</td>
+          <td><span class="badge badge-neutral">${c.object_count ?? 0}</span></td>
+          <td>
+            <div class="btn-actions">
+              <button class="btn-act" onclick='openEditCatModal(${JSON.stringify(c)})' title="Sửa"><i class="bi bi-pencil"></i></button>
+              <button class="btn-act del" onclick="deleteCat(${c.id})" title="Xoá"><i class="bi bi-trash3"></i></button>
+            </div>
+          </td>
+        </tr>`;
+        }).join('')
+        : emptyRow(7, 'bi-folder-x', 'Không tìm thấy danh mục nào');
     }
 
     function catOptions(selectedId) {

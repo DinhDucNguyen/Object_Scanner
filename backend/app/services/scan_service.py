@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import uuid
 from pathlib import Path
 
@@ -214,7 +214,8 @@ class ScanService:
         if gemini_result is None:
             categories_records = db.query(Category).filter(Category.thoi_gian_xoa.is_(None)).all()
             categories_str = ", ".join([c.ten_danh_muc for c in categories_records])
-            gemini_result = self.gemini.identify_object(image_bytes, categories_str=categories_str)
+            # We already trust the object_code here (confidence >= 80), so use text-only generation to save time!
+            gemini_result = self.gemini.generate_vocab_for_object_code(object_code, categories_str=categories_str)
             if gemini_result.get("_error"):
                 return ScanResponse(source="gemini_failed", object_id=0, object_code="unknown", translations=[])
 

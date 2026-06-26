@@ -51,6 +51,9 @@
 
             const roleArg = escHtml(JSON.stringify(u.vai_tro || ''));
 
+            window._userReg = window._userReg || {};
+            window._userReg[u.id] = u;
+
             return `<tr>
 
             <td class="stt-cell">${pageData.start + idx + 1}</td>
@@ -87,27 +90,7 @@
 
                 <button class="btn-act" onclick="openUserRoleModal(${u.id}, ${roleArg})" title="Đổi vai trò"><i class="bi bi-person-gear"></i></button>
 
-                <div class="dropdown action-menu">
-
-                  <button class="btn-act dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Thao tác khác">
-
-                    <i class="bi bi-three-dots"></i>
-
-                  </button>
-
-                  <ul class="dropdown-menu dropdown-menu-end">
-
-                    <li><button type="button" class="dropdown-item" onclick="openResetPasswordModal(${u.id}, ${usernameArg})"><i class="bi bi-key"></i>Đặt lại mật khẩu</button></li>
-
-                    <li><button type="button" class="dropdown-item" onclick="toggleUserStatus(${u.id}, ${isActive})"><i class="bi ${isActive ? 'bi-lock' : 'bi-unlock'}"></i>${isActive ? 'Khoá tài khoản' : 'Mở khoá'}</button></li>
-
-                    <li><hr class="dropdown-divider"></li>
-
-                    <li><button type="button" class="dropdown-item text-danger" onclick="deleteUser(${u.id}, ${usernameArg})"><i class="bi bi-trash3"></i>Xoá tài khoản</button></li>
-
-                  </ul>
-
-                </div>
+                <button class="btn-act" type="button" title="Thao tác khác" onclick="showUserMenu(event,${u.id})"><i class="bi bi-three-dots"></i></button>
 
               </div>
 
@@ -275,4 +258,67 @@
 
       new bootstrap.Modal(document.getElementById('form-modal')).show();
 
+    }
+    // Custom popup menu cho Users - render ra body
+    let _userMenuEl = null;
+    let _userMenuBtn = null;
+    function showUserMenu(event, userId) {
+      event.stopPropagation();
+      const btn = event.currentTarget;
+      if (_userMenuEl) {
+        _userMenuEl.remove();
+        _userMenuEl = null;
+        const wasBtn = _userMenuBtn;
+        _userMenuBtn = null;
+        if (wasBtn === btn) return;
+      }
+      const u = (window._userReg || {})[userId];
+      if (!u) return;
+      _userMenuBtn = btn;
+      const isActive = (u.trang_thai || '').toLowerCase().includes('hoat') || u.trang_thai === 'active';
+      const username = u.ten_dang_nhap || '';
+      const rect = btn.getBoundingClientRect();
+      const menu = document.createElement('div');
+      menu.id = '_userMenu';
+      menu.style.cssText = 'position:fixed;z-index:9999;background:#fff;border:1px solid #dbe3ea;border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.12);min-width:190px;padding:4px 0;font-size:.82rem';
+      const close = () => { menu.remove(); _userMenuEl = null; _userMenuBtn = null; };
+      // Đặt lại mật khẩu
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'obj-popup-item';
+      resetBtn.innerHTML = '<i class="bi bi-key"></i> Đặt lại mật khẩu';
+      resetBtn.onclick = () => { close(); openResetPasswordModal(u.id, username); };
+      // Khoá / Mở khoá
+      const lockBtn = document.createElement('button');
+      lockBtn.className = 'obj-popup-item';
+      lockBtn.innerHTML = `<i class="bi ${isActive ? 'bi-lock' : 'bi-unlock'}"></i> ${isActive ? 'Khoá tài khoản' : 'Mở khoá'}`;
+      lockBtn.onclick = () => { close(); toggleUserStatus(u.id, isActive); };
+      // Divider
+      const sep = document.createElement('div');
+      sep.style.cssText = 'height:1px;background:#f1f5f9;margin:4px 0';
+      // Xoá
+      const delBtn = document.createElement('button');
+      delBtn.className = 'obj-popup-item text-danger';
+      delBtn.innerHTML = '<i class="bi bi-trash3"></i> Xoá tài khoản';
+      delBtn.onclick = () => { close(); deleteUser(u.id, username); };
+      menu.appendChild(resetBtn);
+      menu.appendChild(lockBtn);
+      menu.appendChild(sep);
+      menu.appendChild(delBtn);
+      let top = rect.bottom + 4;
+      let left = rect.right - 190;
+      if (left < 8) left = 8;
+      menu.style.top = top + 'px';
+      menu.style.left = left + 'px';
+      document.body.appendChild(menu);
+      _userMenuEl = menu;
+      setTimeout(() => {
+        document.addEventListener('click', function closeOnOut(e) {
+          if (!menu.contains(e.target)) {
+            menu.remove();
+            _userMenuEl = null;
+            _userMenuBtn = null;
+            document.removeEventListener('click', closeOnOut);
+          }
+        });
+      }, 10);
     }

@@ -87,7 +87,7 @@ class TrainingImageService:
 
         # Auto-approve: nguồn yolo/coco + object có DB + confidence cao + ảnh đạt chất lượng
         now = now_vietnam()
-        is_known_source = source == NguonAnhHuanLuyen.yolo
+        is_known_source = source in (NguonAnhHuanLuyen.yolo, NguonAnhHuanLuyen.gemini)
         high_confidence = (do_tin_cay or 0) >= AUTO_APPROVE_CONFIDENCE_THRESHOLD
         # Dùng prefix "quality_fail:" để phân biệt ghi_chu chất lượng vs ghi_chu từ nguồn khác
         quality_failed = ghi_chu and ghi_chu.startswith("quality_fail:")

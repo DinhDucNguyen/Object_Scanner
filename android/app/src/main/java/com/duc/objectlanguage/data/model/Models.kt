@@ -282,7 +282,8 @@ data class ObjectData(
     val phonetic: String?,
     val definition: String?,
     @SerializedName("translation_id") val translationId: Int?,
-    @SerializedName("image_url") val imageUrl: String?
+    @SerializedName("image_url") val imageUrl: String?,
+    @SerializedName("is_temporary_image") val isTemporaryImage: Boolean = false
 )
 
 // ====== PROFILE ======

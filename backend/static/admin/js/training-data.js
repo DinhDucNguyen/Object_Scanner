@@ -265,7 +265,7 @@
 
       if (img.note && img.note.startsWith('quality_fail:')) return ''; // đã có qualityFlag hiển thị
 
-      if (img.source === 'gemini') return 'Ảnh từ Gemini — cần admin duyệt';
+      if (img.source === 'gemini') return '';
 
       const conf = Number(img.confidence);
 

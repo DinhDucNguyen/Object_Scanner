@@ -1,4 +1,4 @@
-﻿import json
+import json
 import logging
 import re
 from google import genai
@@ -17,8 +17,8 @@ class GeminiService:
         ]
         # Full identify — dùng khi confidence thấp hoặc DB miss cần sinh vocab đầy đủ.
         self.vision_full_models = [
-            "gemini-3.1-flash-lite",
             "gemini-3.5-flash",
+            "gemini-3.1-flash-lite",
             "gemini-2.5-flash",
             "gemini-3-flash-preview",
         ]
